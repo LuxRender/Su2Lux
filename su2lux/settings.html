@@ -1,0 +1,211 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+<title>tab test</title>
+
+<script type="text/javascript" src="jquery.js"></script>          
+<script type="text/javascript">
+$(document).ready(function() {
+$(".collapse").hide();
+$("#settings_panel select,:text").change(function() {
+	window.location = 'skp:param_generate@' + this.id+'='+this.value;
+});
+
+$("#presets select").change(function() {
+alert("select preset");
+window.location = 'skp:preset@' + this.value;
+});
+
+$(":checkbox").change(function() {
+if ($(this).attr("checked")) {
+$(this).next(".collapse").show();
+              } else {
+$(this).next(".collapse").hide();
+              }			  
+window.location = 'skp:param_generate@' + this.id+'='+this.checked;
+			  
+});
+
+$("#settings_panel p.header").click(function(){
+$(this).next("div#collapse").slideToggle(300).siblings("div#collapse").hide();
+});
+
+
+
+});
+ </script>
+ 
+<style type="text/css">
+.header {
+	padding: 5px 10px;
+	cursor: pointer;
+	position: relative;
+	background-color:#d77f00;
+	margin:1px;
+}
+
+#collapse {
+	display:none;
+}
+   
+</style>
+ 
+</head>
+<body>
+<div id="presets">
+Presets:<select id="preset">
+<option value='custom'>Custom</option><!--show it if change settings-->
+<option value='0'>0 Preview - Global Illumination</option>
+<option value='0b'>0b Preview - Direct Lighting</option>
+<!--#TODO: add other presets in @settings_dialog.add_action_callback("preset") in su2lux.rb
+
+					['1', '1 Final - MLT/Bidir Path Tracing (interior) (recommended)'],
+					['2', '2 Final - MLT/Path Tracing (exterior)'],
+					['5', '5 Progressive - Bidir Path Tracing (interior)'],
+					['6', '6 Progressive - Path Tracing (exterior)'],
+					['8', '8 Bucket - Bidir Path Tracing (interior)'],
+					['1', '9 Bucket - Path Tracing (exterior)'],
+					['B', 'B Anim - Distributed/GI low Q'],
+					['C', 'C Anim - Distributed/GI medium Q'],
+					['D', 'D Anim - Distributed/GI high Q'],
+					['E', 'E Anim - Distributed/GI very high Q'],
+					['1', '1 Final - MLT/Bidir Path Tracing (interior) (recommended)']]
+-->
+</select>
+</div>
+
+
+<div id="settings_panel">
+<p class="header">Camera</p>
+	<div id="collapse">
+	Type:	<select id="camera_type">
+			<option value="perspective">perspective</option>
+			<option value="orthographic">orthographic</option>
+			<option value="environment">environment</option>
+			</select>
+	fov:
+		<input type='text' id="fov" size="10"  />
+	<br/>
+	<input type="checkbox" id="near_far_clipping">near_far_clipping
+		<div class="collapse">
+		start:<input type='text' id="hither" size="10"/>
+		end:<input type='text' id="yon" size="10"/>
+		</div>
+		<br/>
+	<input type="checkbox" id="dof_bokeh">DOF & Bokeh
+	<input type="checkbox" id="architectural" value="true">Architectural (Lens Shift) & Aspect Ratio
+	<input type="checkbox" id="motion_blur" value="true">Motion Blur
+</div>
+
+
+<p class="header">Environment</p>
+<div id="collapse">
+	<label for="environment_light_type">
+		<span class="label">Environment light type:</span>
+		<select id="environment_light_type">
+		<option value="none">none</option>
+		<option value="infinite">infinite</option>
+		<option value="sunsky">sunsky</option>
+		</select>
+	</label>
+</div>
+
+<p class="header">Sampler</p>
+	<div id="collapse">
+	<label for="sampler_type">
+		<span class="label">sampler type:</span>
+		<select id="sampler_type">
+		<option value="metropolis">metropolis</option>
+		<option value="erpt">erpt</option>
+		<option value="lowdiscrepancy">lowdiscrepancy</option>
+		<option value="random">random</option>
+		</select>
+	</label>
+	</div>
+
+<p class="header">Integrator</p>
+	<div id="collapse">
+	<label for="integrator_type">
+		<span class="label">integrator type:</span>
+		<select id="integrator_type">
+		<option value="directlighting">directlighting</option>
+		<option value="path">path</option>
+		<option value="bidirectional">bidirectional</option>
+		<option value="exphotonmap">exphotonmap</option>
+		<option value="distributedpath">distributedpath</option>
+		<option value="igi">igi</option>
+		</select>
+	</label>
+	</div>
+
+<p class="header">Volume intergrator</p>
+
+	<div id="collapse">
+	<label for="volume_intergrator_type">
+		<span class="label">Volume integrator type:</span>
+		<select id="volume_integrator_type">
+		<option value="emission">emission</option>
+		<option value="single">single</option>
+		</select>
+	</label>
+	<label for="stepsize">
+		<span class="label">stepsize:</span>
+		<input type="text" id="stepsize" size="4"/>
+	</label>
+	</div>
+
+<p class="header">Filter</p>
+	<div id="collapse">
+	<label for="filter_type">
+		<span class="label">filter type:</span>
+		<select id="filter_type">
+		<option value="box">box</option>
+		<option value="gaussian">gaussian</option>
+		<option value="mitchell">mitchell</option>
+		<option value="sinc">sinc</option>
+		<option value="triangle">triangle</option>
+		</select>
+	</label>
+	<label for="sharpness">
+		<span class="label">sharpness:</span>
+		<input type="text" id="sharpness" size="4"/>
+	</label>
+	</div>
+
+<p class="header">Film</p>
+	<div id="collapse">
+	<label for="film_type">
+		<span class="label">film type:</span>
+		<select id="film_type">
+		<option value="fleximage">fleximage</option>
+		</select>
+	</label>
+		<label for="tonemap">
+		<span class="label">Tonemap:</span>
+		<select id="tonemap">
+		<option value="reinhard">reinhard</option>
+		<option value="linear">linear</option>
+		<option value="contrast">contrast</option>
+		<option value="maxwhite">maxwhite</option>
+		
+		</select>
+	</label>
+	</div>
+
+<p class="header">Accelerator</p>
+	<div id="collapse">
+		<label for="accelerator_type">
+		<span class="label">Accelerator type:</span>
+		<select id="accelerator_type">
+		<option value="none">none</option>
+		<option value="tabreckdtree">tabreckdtree</option>
+		<option value="grid">grid</option>
+		<option value="bvh">bvh</option>
+		<option value="qbvh">qbvh</option>
+		</select>
+	</label>
+	</div>
+</div><!--end settings_panel-->
+</body>
+</html>
