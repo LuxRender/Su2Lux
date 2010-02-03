@@ -84,15 +84,26 @@ def SU2LUX.export
 	entity_list=model.entities
 	out.puts 'WorldBegin'
 	SU2LUX.export_light(out)
+	file_basename = File.basename(@export_file_path, ".lxs")
+	out.puts "Include \"#{file_basename}-mat.lxm\"\n\n"
+	out.puts "Include \"#{file_basename}-geom.lxo\"\n\n"
+	out.puts 'WorldEnd'
+	SU2LUX.finish_close(out)
+
+	#Exporting all materials
+	out_mat = File.new(file_basename + "-mat.lxm", "w")
 	model.materials.each{|mat|
 		luxrender_mat=LuxrenderMaterial.new(mat)
 		p luxrender_mat.name
-		SU2LUX.export_mat(luxrender_mat,out)
+		SU2LUX.export_mat(luxrender_mat,out_mat)
 		}
-   
-	SU2LUX.export_mesh(out)
-	out.puts 'WorldEnd'
-	SU2LUX.finish_close(out)
+	SU2LUX.finish_close(out_mat)
+	
+	#Exporting geometry
+	out_geom = File.new(file_basename + "-geom.lxo", "w")
+	SU2LUX.export_mesh(out_geom)
+	SU2LUX.finish_close(out_geom)
+
 	result=SU2LUX.report_window(start_time)
 	SU2LUX.launch_luxrender if result==6
 end
@@ -195,7 +206,8 @@ AttributeBegin
 
 	"float relsize" [1.000000]
 	"float turbidity" [2.200000]
-AttributeEnd		
+AttributeEnd
+
 	eos
 	out.puts sunsky
 end
@@ -214,6 +226,7 @@ def SU2LUX.export_mat(mat,out)
 		out.puts "Texture \""+mat.name+":light:L\" \"color\" \"blackbody\"
 			\"float temperature\" [6500.000000]"
 	end
+	out.puts("\n")
 end
 
 def SU2LUX.export_mesh(out)
