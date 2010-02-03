@@ -262,16 +262,14 @@ def SU2LUX.param_cam_view( v , out)
 	case @lrs.camera_type
 		when "perspective"
 			out.print "Camera \"#{@lrs.camera_type}\"\n"
-			out.print "\"float fov\" ["+@lrs.fov+"]\n"
+			out.print "	\"float fov\" ["+@lrs.fov+"]\n"
 		when "orthographic"
 			out.print "Camera \"#{@lrs.camera_type}\"\n"
 		when "environment"
 			out.print "Camera \"#{@lrs.camera_type}\"\n"
 	end
-
-	#out.puts "Camera \""+@lrs.camera_type+"\"
 	
-	out.puts	"\"float screenwindow\" [-1.000000 1.000000 -0.750000 0.750000]"
+	out.puts	"	\"float screenwindow\" [-1.000000 1.000000 -0.750000 0.750000]"
 	#TODO  depends aspect_ratio and resolution 
 	#http://www.luxrender.net/wiki/index.php?title=Scene_file_format#Common_Camera_Parameters
 			
@@ -279,9 +277,9 @@ def SU2LUX.param_cam_view( v , out)
 	#film
 	out.print "\n"
 	out.print "Film \"fleximage\"\n"
-	out.print "\"integer xresolution\" ["+@lrs.xresolution+"]\n"
-	out.print "\"integer yresolution\" ["+@lrs.yresolution+"]\n"
-	out.print "\"integer haltspp\" ["+@lrs.haltspp+"]\n"
+	out.print "	\"integer xresolution\" [#{@lrs.xresolution}]\n"
+	out.print "	\"integer yresolution\" [#{@lrs.yresolution}]\n"
+	out.print "	\"integer haltspp\" [#{@lrs.haltspp}]\n"
 	
 	out.puts '"bool premultiplyalpha" ["false"]
    "string tonemapkernel" ["reinhard"]
@@ -314,13 +312,13 @@ def SU2LUX.export_render_settings(out)
 	
 	#pixel filter
 	out.print "\n"
-	out.print "PixelFilter \"#{@lrs.filter_type}\"\n"
-	case @lrs.filter_type
+	out.print "PixelFilter \"#{@lrs.pixelfilter_type}\"\n"
+	case @lrs.pixelfilter_type
 		when "box"
 		when "gaussian"
 		when "mitchell"
-			out.puts '"float B" [0.667000]
-				"float C" [0.166500]'
+			out.print "	\"float xwidth\" [#{@lrs.pixelfilter_mitchell_xwidth}]\n"
+			out.print "	\"float ywidth\" [#{@lrs.pixelfilter_mitchell_ywidth}]\n"
 		when "sinc"
 		when "triangle"
 	end
@@ -338,32 +336,66 @@ def SU2LUX.export_render_settings(out)
 
 	# SurfaceIntegrator "bidirectional"
 	out.print "\n"
-	out.print "SurfaceIntegrator \"#{@lrs.sintegrator_type}\"\n"
+	out.puts "SurfaceIntegrator \"#{@lrs.sintegrator_type}\"\n"
 	case @lrs.sintegrator_type
 		when "bidirectional"
-			out.puts '"integer eyedepth" [10]'
-			out.puts '"integer lightdepth" [10]'
+			if @lrs.sintegrator_showadvanced
+				out.print "   \"integer eyedepth\" [#{@lrs.sintegrator_bidir_eyedepth}]\n"
+				out.print "   \"integer lightdepth\" [#{@lrs.sintegrator_bidir_lightdepth}]\n"
+				out.print "   \"string strategy\" [\"#{@lrs.sintegrator_bidir_strategy}\"]\n"
+				out.puts '"   float eyerrthreshold" [0.000000]'
+				out.puts '"   float lightrrthreshold" [0.000000]'
+			else
+				out.print "	\"integer eyedepth\" [#{@lrs.sintegrator_bidir_bounces}]\n"
+				out.print "	\"integer lightdepth\" [#{@lrs.sintegrator_bidir_bounces}]\n"
+			end
+		when 'path'
+			if @lrs.sintegrator_showadvanced
+				out.print "	\"integer maxdepth\" [#{@lrs.sintegrator_path_maxdepth}]\n"
+				#"integer maxdepth" [10]
+				#"bool includeenvironment" ["true"]
+			else
+				 #  "integer maxdepth" [10]
+				#	"string strategy" ["auto"]
+				#	"string rrstrategy" ["efficiency"]
+				#	"bool includeenvironment" ["true"]
+			end
 		when "distributedpath"
-			out.puts '"string strategy" ["auto"]
-   "bool directsampleall" ["true"]
-   "integer directsamples" [1]
-   "bool indirectsampleall" ["false"]
-   "integer indirectsamples" [1]
-   "integer diffusereflectdepth" [3]
-   "integer diffusereflectsamples" [1]
-   "integer diffuserefractdepth" [5]
-   "integer diffuserefractsamples" [1]
-   "bool directdiffuse" ["true"]
-   "bool indirectdiffuse" ["true"]
-   "integer glossyreflectdepth" [2]
-   "integer glossyreflectsamples" [1]
-   "integer glossyrefractdepth" [5]
-   "integer glossyrefractsamples" [1]
-   "bool directglossy" ["true"]
-   "bool indirectglossy" ["true"]
-   "integer specularreflectdepth" [3]
-   "integer specularrefractdepth" [5]
-   '
+			out.puts '   "bool directsampleall" ["true"]' if @lrs.sintegrator_distributedpath_directsampleall
+			out.puts '   "bool directsampleall" ["false"]' if not @lrs.sintegrator_distributedpath_directsampleall
+			out.print "   \"integer directsamples\" [#{@lrs.sintegrator_distributedpath_directsamples}]\n"
+			out.puts '   "bool directdiffuse" ["true"]' if @lrs.sintegrator_distributedpath_directdiffuse
+			out.puts '   "bool directdiffuse" ["false"]' if not @lrs.sintegrator_distributedpath_directdiffuse
+			out.puts '   "bool directglossy" ["true"]' if @lrs.sintegrator_distributedpath_directglossy
+			out.puts '   "bool directglossy" ["false"]' if not @lrs.sintegrator_distributedpath_directglossy
+			out.puts '   "bool indirectsampleall" ["true"]' if @lrs.sintegrator_distributedpath_indirectsampleall
+			out.puts '   "bool indirectsampleall" ["false"]' if not @lrs.sintegrator_distributedpath_indirectsampleall
+			out.print "   \"integer indirectsamples\" [#{@lrs.sintegrator_distributedpath_indirectsamples}]\n"
+			out.puts '   "bool indirectdiffuse" ["true"]' if @lrs.sintegrator_distributedpath_indirectdiffuse
+			out.puts '   "bool indirectdiffuse" ["false"]' if not @lrs.sintegrator_distributedpath_indirectdiffuse
+			out.puts '   "bool indirectglossy" ["true"]' if @lrs.sintegrator_distributedpath_indirectglossy
+			out.puts '   "bool indirectglossy" ["false"]' if not @lrs.sintegrator_distributedpath_indirectglossy
+			out.print "   \"integer diffusereflectdepth\" [#{@lrs.sintegrator_distributedpath_diffusereflectdepth}]\n"
+			out.print "   \"integer diffusereflectsamples\" [#{@lrs.sintegrator_distributedpath_diffusereflectsamples}]\n"
+			out.print "   \"integer diffuserefractdepth\" [#{@lrs.sintegrator_distributedpath_diffuserefractdepth}]\n"
+			out.print "   \"integer diffuserefractsamples\" [#{@lrs.sintegrator_distributedpath_diffuserefractsamples}]\n"
+			out.print "   \"integer glossyreflectdepth\" [#{@lrs.sintegrator_distributedpath_glossyreflectdepth}]\n"
+			out.print "   \"integer glossyreflectsamples\" [#{@lrs.sintegrator_distributedpath_glossyreflectsamples}]\n"
+			out.print "   \"integer glossyrefractdepth\" [#{@lrs.sintegrator_distributedpath_glossyrefractdepth}]\n"
+			out.print "   \"integer glossyrefractsamples\" [#{@lrs.sintegrator_distributedpath_glossyrefractsamples}]\n"
+			out.print "   \"integer specularreflectdepth\" [#{@lrs.sintegrator_distributedpath_specularreflectdepth}]\n"
+			out.print "   \"integer specularrefractdepth\" [#{@lrs.sintegrator_distributedpath_specularrefractdepth}]\n"
+			out.puts '   "bool directglossy" ["true"]' if @lrs.sintegrator_distributedpath_causticsonglossy
+			out.puts '   "bool directglossy" ["false"]' if not @lrs.sintegrator_distributedpath_causticsonglossy
+			out.puts '   "bool indirectglossy" ["true"]' if @lrs.sintegrator_distributedpath_causticsondiffuse
+			out.puts '   "bool indirectglossy" ["false"]' if not @lrs.sintegrator_distributedpath_causticsondiffuse
+			out.print "   \"string strategy\" [\"#{@lrs.sintegrator_distributedpath_strategy}\"]\n"
+		when "directlighting"
+			out.print "	\"integer maxdepth\" [#{@lrs.sintegrator_dlighting_maxdepth}]"
+		when "exphotonmap"
+			p "select exphotonmap"
+		when "igi"
+			p "select igi"
 	end
 	
 	#VolumeIntegrator
@@ -384,7 +416,7 @@ def SU2LUX.export_render_settings(out)
 	case @lrs.accelerator_type
 		when "kdtree"
 		when "grid"
-			out.puts '"bool refineimmediately" ["false"]'
+			out.puts '	"bool refineimmediately" ["false"]'
 	end
 
 
@@ -732,11 +764,54 @@ class LuxrenderSettings
 	#end Environment
 
 	#Sampler
-  
+	@@sampler_showadvanced=false
+	@@sampler_type='lowdiscrepancy'
+	@@sampler_lowdisc_pixelsamples=1
+	@@sampler_lowdisc_pixelsampler='lowdiscrepancy'
+	@@sampler_metro_strength=0.6
+	@@sampler_metro_lmprob=0.4
+	@@sampler_metro_maxrejects=512
+	@@sampler_metro_usevariance=false
 	#end Sampler
   
 	#Integrator
-	@@sintegrator_type="distributedpath"
+	@@sintegrator_showadvanced=false
+	@@sintegrator_type='distributedpath'
+	@@sintegrator_distributedpath_directsampleall=true
+	@@sintegrator_distributedpath_directsamples=1
+	@@sintegrator_distributedpath_directdiffuse=true
+	@@sintegrator_distributedpath_directglossy=true
+	@@sintegrator_distributedpath_indirectsampleall=false
+	@@sintegrator_distributedpath_indirectsamples=1
+	@@sintegrator_distributedpath_indirectdiffuse=true
+	@@sintegrator_distributedpath_indirectglossy=true
+	@@sintegrator_distributedpath_diffusereflectdepth=1
+	@@sintegrator_distributedpath_diffusereflectsamples=4
+	@@sintegrator_distributedpath_diffuserefractdepth=4
+	@@sintegrator_distributedpath_diffuserefractsamples=1
+	@@sintegrator_distributedpath_glossyreflectdepth=1
+	@@sintegrator_distributedpath_glossyreflectsamples=2
+	@@sintegrator_distributedpath_glossyrefractdepth=4
+	@@sintegrator_distributedpath_glossyrefractsamples=1
+	@@sintegrator_distributedpath_specularreflectdepth=2
+	@@sintegrator_distributedpath_specularrefractdepth=4
+	@@sintegrator_distributedpath_causticsonglossy=true
+	@@sintegrator_distributedpath_causticsondiffuse=false
+	@@sintegrator_distributedpath_strategy='auto'
+	
+	@@sintegrator_dlighting_maxdepth=5
+	
+	@@sintegrator_bidir_bounces=16
+	@@sintegrator_bidir_eyedepth=16
+	@@singtegrator_bidir_lightdepth=16
+	@@sintegrator_bidir_strategy='auto'
+	
+	@@sintegrator_path_maxdepth=10
+	@@singtegrator_path_ienvironment=true
+	
+	@@singtegrator_path_strategy='auto'
+	@@sintegrator_path_rrstrategy='efficiency'
+	@@sintegrator_path_rrcontinueprob=0.65
 	#end Integrator
   
 	#Volume Integrator
@@ -744,7 +819,12 @@ class LuxrenderSettings
 	#end VolumeIntegrator
   
 	#Filter
-  
+	@@pixelfilter_showadvanced=false
+	@@pixelfilter_type='mitchell'
+	@@pixelfilter_mitchell_sharp=0.250 
+	@@pixelfilter_mitchell_xwidth=2.0 
+	@@pixelfilter_mitchell_ywidth=2.0 
+	@@pixelfilter_mitchell_optmode='slider'
 	#end Filter
   
 	#Film
@@ -761,7 +841,12 @@ class LuxrenderSettings
 	@@refineimmediately=false
 	#end Accelerator
   
-  
+	#Other
+	@@useparamkeys=false
+	
+	
+	
+	
 	#TODO rename all and put above or remove
 	@@premultuplyalpha="false"
 	@@tonamapkernel="reinhard"
@@ -792,27 +877,6 @@ class LuxrenderSettings
   @@pixel_sampler="lowdiscrepancy"
   @@pixelsamples=1
 
-  @@strategy="auto"
-  @@directsampleall=true
-  @@directsamples=1
-  @@indirectsampleall=false
-  @@indirectsamples=1
-  @@diffusereflectdepth=3
-  @@diffusereflectsamples=1
-  @@diffuserefractdepth=5
-  @@diffuserefractsamples=1
-  @@directdiffuse=true
-  @@indirectdiffuse=true
-  @@glossyreflectdepth=2
-  @@glossyreflectsamples=1
-  @@glossyrefractdepth=5
-  @@glossyrefractsamples=1
-  @@directglossy=true
-  @@indirectglossy=true
-  @@specularreflectdepth=3
-  @@specularrefractdepth=5
-
-
   @@volume_integrator_type="emission"
   @@stepsize=1
 
@@ -831,7 +895,7 @@ def initialize
 end
   
   
-#TODO: fill get and set all parameters
+#TODO - fill get and set all parameters
   
 #template 
 # def param_name
@@ -895,6 +959,14 @@ end
 #end Environment
   
 #Sampler
+def sampler_showadvanced
+	@model.get_attribute(@dict,'sampler_showadvanced',@@sampler_showadvanced)
+end
+
+def sampler_showadvanced=(value)
+	@model.set_attribute(@dict,'sampler_showadvanced',@sampler_showadvanced)
+end
+
 def sampler_type
 	@model.get_attribute(@dict,'sampler_type',@@sampler_type)
 end
@@ -902,15 +974,287 @@ end
 def sampler_type=(value)
 	@model.set_attribute(@dict,'sampler_type',value)
 end
+
+def sampler_lowdisc_pixelsamples
+	@model.get_attribute(@dict,'sampler_lowdisc_pixelsamples',@@sampler_lowdisc_pixelsamples)
+end
+
+def sampler_lowdisc_pixelsamples=(value)
+	@model.set_attribute(@dict,'sampler_lowdisc_pixelsamples',value)
+end
+
+def sampler_lowdisc_pixelsampler
+	@model.get_attribute(@dict,'sampler_lowdisc_pixelsampler',@@sampler_lowdisc_pixelsampler)
+end
+
+def sampler_lowdisc_pixelsampler=(value)
+	@model.set_attribute(@dict,'sampler_lowdisc_pixelsampler',value)
+end
+
+def sampler_metro_strength
+	@model.get_attribute(@dict,'sampler_metro_strength',@@sampler_metro_strength)
+end
+
+def sampler_metro_strength=(value)
+	@model.set_attribute(@dict,'sampler_metro_strength',value)
+end
+
+def sampler_metro_lmprob
+	@model.get_attribute(@dict,'sampler_metro_lmprob',@@sampler_metro_lmprob)
+end
+
+def sampler_metro_lmprob=(value)
+	@model.set_attribute(@dict,'sampler_metro_lmprob',value)
+end
+
+def sampler_metro_maxrejects
+	@model.get_attribute(@dict,'sampler_metro_maxrejects',@@sampler_metro_maxrejects)
+end
+
+def sampler_metro_maxrejects=(value)
+	@model.set_attribute(@dict,'sampler_metro_maxrejects',value)
+end
+
+def sampler_metro_usevariance
+	@model.get_attribute(@dict,'sampler_metro_usevariance',@@sampler_metro_usevariance)
+end
+
+def sampler_metro_usevariance=(value)
+	@model.set_attribute(@dict,'sampler_metro_usevariance',value)
+end
 #end Sampler
   
 #Integrator
+def sintegrator_showadvanced
+	@model.get_attribute(@dict,'sintegrator_showadvanced',@@sintegrator_showadvanced)
+end
+
+def sintegrator_showadvanced=(value)
+	@model.set_attribute(@dict,'sintegrator_showadvanced',value)
+end
+
 def sintegrator_type
 	@model.get_attribute(@dict,'sintegrator_type',@@sintegrator_type)
 end
 
 def sintegrator_type=(value)
 	@model.set_attribute(@dict,'sintegrator_type',value)
+end
+
+def sintegrator_dlighting_maxdepth
+	@model.get_attribute(@dict,'sintegrator_dlighting_maxdepth',@@sintegrator_dlighting_maxdepth)
+end
+
+def sintegrator_dlighting_maxdepth=(value)
+	@model.set_attribute(@dict,'sintegrator_dlighting_maxdepth',value)
+end
+
+def sintegrator_bidir_bounces
+	@model.get_attribute(@dict,'sintegrator_bidir_bounces',@@sintegrator_bidir_bounces)
+end
+
+def sintegrator_bidir_bounces=(value)
+	@model.set_attribute(@dict,'sintegrator_bidir_bounces',value)
+end
+
+def sintegrator_bidir_eyedepth
+	@model.get_attribute(@dict,'sintegrator_bidir_eyedepth',@@sintegrator_bidir_eyedepth)
+end
+
+def sintegrator_bidir_eyedepth=(value)
+	@model.set_attribute(@dict,'sintegrator_bidir_eyedepth',value)
+end
+
+def singtegrator_bidir_lightdepth
+	@model.get_attribute(@dict,'singtegrator_bidir_lightdepth',@@singtegrator_bidir_lightdepth)
+end
+
+def singtegrator_bidir_lightdepth=(value)
+	@model.set_attribute(@dict,'singtegrator_bidir_lightdepth',value)
+end
+
+def sintegrator_bidir_maxdepth
+	@model.get_attribute(@dict,'sintegrator_bidir_maxdepth',@@sintegrator_bidir_maxdepth)
+end
+
+def sintegrator_bidir_maxdepth=(value)
+	@model.set_attribute(@dict,'sintegrator_bidir_maxdepth',value)
+end
+
+def sintegrator_bidir_strategy
+	@model.get_attribute(@dict,'sintegrator_bidir_strategy',@@sintegrator_bidir_strategy)
+end
+
+def sintegrator_bidir_strategy=(value)
+	@model.set_attribute(@dict,'sintegrator_bidir_strategy',value)
+end
+
+def sintegrator_distributedpath_causticsonglossy
+	@model.get_attribute(@dict,'sintegrator_distributedpath_causticsonglossy',@@sintegrator_distributedpath_causticsonglossy)
+end
+
+def sintegrator_distributedpath_causticsonglossy=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_causticsonglossy',value)
+end
+
+def sintegrator_distributedpath_directsampleall
+	@model.get_attribute(@dict,'sintegrator_distributedpath_directsampleall',@@sintegrator_distributedpath_directsampleall)
+end
+
+def sintegrator_distributedpath_directsampleall=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_directsampleall',value)
+end
+
+def sintegrator_distributedpath_directsamples
+	@model.get_attribute(@dict,'sintegrator_distributedpath_directsamples',@@sintegrator_distributedpath_directsamples)
+end
+
+def sintegrator_distributedpath_directsamples=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_directsamples',value)
+end
+
+def sintegrator_distributedpath_directdiffuse
+	@model.get_attribute(@dict,'sintegrator_distributedpath_directdiffuse',@@sintegrator_distributedpath_directdiffuse)
+end
+
+def sintegrator_distributedpath_directdiffuse=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_directdiffuse',value)
+end
+
+def sintegrator_distributedpath_directglossy
+	@model.get_attribute(@dict,'sintegrator_distributedpath_directglossy',@@sintegrator_distributedpath_directglossy)
+end
+
+def sintegrator_distributedpath_directglossy=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_directglossy',value)
+end
+
+def sintegrator_distributedpath_indirectsampleall
+	@model.get_attribute(@dict,'sintegrator_distributedpath_indirectsampleall',@@sintegrator_distributedpath_indirectsampleall)
+end
+
+def sintegrator_distributedpath_indirectsampleall=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_indirectsampleall',value)
+end
+
+def sintegrator_distributedpath_indirectsamples
+	@model.get_attribute(@dict,'sintegrator_distributedpath_indirectsamples',@@sintegrator_distributedpath_indirectsamples)
+end
+
+def sintegrator_distributedpath_indirectsamples=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_indirectsamples',value)
+end
+
+def sintegrator_distributedpath_indirectdiffuse
+	@model.get_attribute(@dict,'sintegrator_distributedpath_indirectdiffuse',@@sintegrator_distributedpath_indirectdiffuse)
+end
+
+def sintegrator_distributedpath_indirectdiffuse=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_indirectdiffuse',value)
+end
+
+def sintegrator_distributedpath_indirectglossy
+	@model.get_attribute(@dict,'sintegrator_distributedpath_indirectglossy',@@sintegrator_distributedpath_indirectglossy)
+end
+
+def sintegrator_distributedpath_indirectglossy=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_indirectglossy',value)
+end
+
+def sintegrator_distributedpath_diffusereflectdepth
+	@model.get_attribute(@dict,'sintegrator_distributedpath_diffusereflectdepth',@@sintegrator_distributedpath_diffusereflectdepth)
+end
+
+def sintegrator_distributedpath_diffusereflectdepth=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_diffusereflectdepth',value)
+end
+
+def sintegrator_distributedpath_diffusereflectsamples
+	@model.get_attribute(@dict,'sintegrator_distributedpath_diffusereflectsamples',@@sintegrator_distributedpath_diffusereflectsamples)
+end
+
+def sintegrator_distributedpath_diffusereflectsamples=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_diffusereflectsamples',value)
+end
+
+def sintegrator_distributedpath_diffuserefractdepth
+	@model.get_attribute(@dict,'sintegrator_distributedpath_diffuserefractdepth',@@sintegrator_distributedpath_diffuserefractdepth)
+end
+
+def sintegrator_distributedpath_diffuserefractdepth=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_diffuserefractdepth',value)
+end
+
+def sintegrator_distributedpath_diffuserefractsamples
+	@model.get_attribute(@dict,'sintegrator_distributedpath_diffuserefractsamples',@@sintegrator_distributedpath_diffuserefractsamples)
+end
+
+def sintegrator_distributedpath_diffuserefractsamples=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_diffuserefractsamples',value)
+end
+
+def sintegrator_distributedpath_glossyreflectdepth
+	@model.get_attribute(@dict,'sintegrator_distributedpath_glossyreflectdepth',@@sintegrator_distributedpath_glossyreflectdepth)
+end
+
+def sintegrator_distributedpath_glossyreflectdepth=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_glossyreflectdepth',value)
+end
+
+def sintegrator_distributedpath_glossyreflectsamples
+	@model.get_attribute(@dict,'sintegrator_distributedpath_glossyreflectsamples',@@sintegrator_distributedpath_glossyreflectsamples)
+end
+
+def sintegrator_distributedpath_glossyreflectsamples=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_glossyreflectsamples',value)
+end
+
+def sintegrator_distributedpath_glossyrefractdepth
+	@model.get_attribute(@dict,'sintegrator_distributedpath_glossyrefractdepth',@@sintegrator_distributedpath_glossyrefractdepth)
+end
+
+def sintegrator_distributedpath_glossyrefractdepth=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_glossyrefractdepth',value)
+end
+
+def sintegrator_distributedpath_glossyrefractsamples
+	@model.get_attribute(@dict,'sintegrator_distributedpath_glossyrefractsamples',@@sintegrator_distributedpath_glossyrefractsamples)
+end
+
+def sintegrator_distributedpath_glossyrefractsamples=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_glossyrefractsamples',value)
+end
+
+def sintegrator_distributedpath_specularreflectdepth
+	@model.get_attribute(@dict,'sintegrator_distributedpath_specularreflectdepth',@@sintegrator_distributedpath_specularreflectdepth)
+end
+
+def sintegrator_distributedpath_specularreflectdepth=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_specularreflectdepth',value)
+end
+
+def sintegrator_distributedpath_specularrefractdepth
+	@model.get_attribute(@dict,'sintegrator_distributedpath_specularrefractdepth',@@sintegrator_distributedpath_specularrefractdepth)
+end
+
+def sintegrator_distributedpath_specularrefractdepth=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_specularrefractdepth',value)
+end
+
+def sintegrator_distributedpath_causticsondiffuse
+	@model.get_attribute(@dict,'sintegrator_distributedpath_causticsondiffuse',@@sintegrator_distributedpath_causticsondiffuse)
+end
+
+def sintegrator_distributedpath_causticsondiffuse=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_causticsondiffuse',value)
+end
+
+def sintegrator_distributedpath_strategy
+	@model.get_attribute(@dict,'sintegrator_distributedpath_strategy',@@sintegrator_distributedpath_strategy)
+end
+
+def sintegrator_distributedpath_strategy=(value)
+	@model.set_attribute(@dict,'sintegrator_distributedpath_strategy',value)
 end
 #end Integrator
   
@@ -925,12 +1269,52 @@ end
 #end VolumeIntegrator
   
 #Filter
-def filter_type
-	@model.get_attribute(@dict,'filter_type',@@filter_type)
+def pixelfilter_showadvanced
+	@model.get_attribute(@dict,'pixelfilter_showadvanced',@@pixelfilter_showadvanced)
 end
 
-def filter_type=(value)
-	@model.set_attribute(@dict,'filter_type',value)
+def pixelfilter_showadvanced=(value)
+	@model.set_attribute(@dict,'pixelfilter_showadvanced',value)
+end
+
+def pixelfilter_type
+	@model.get_attribute(@dict,'pixelfilter_type',@@pixelfilter_type)
+end
+
+def pixelfilter_type=(value)
+	@model.set_attribute(@dict,'pixelfilter_type',value)
+end
+
+def pixelfilter_mitchell_sharp
+	@model.get_attribute(@dict,'pixelfilter_mitchell_sharp',@@pixelfilter_mitchell_sharp)
+end
+
+def pixelfilter_mitchell_sharp=(value)
+	@model.set_attribute(@dict,'pixelfilter_mitchell_sharp',@@pixelfilter_mitchell_sharp)
+end
+
+def pixelfilter_mitchell_xwidth
+	@model.get_attribute(@dict,'pixelfilter_mitchell_xwidth',@@pixelfilter_mitchell_xwidth)
+end
+
+def pixelfilter_mitchell_xwidth=(value)
+	@model.set_attribute(@dict,'pixelfilter_mitchell_xwidth',value)
+end
+
+def pixelfilter_mitchell_ywidth
+	@model.get_attribute(@dict,'pixelfilter_mitchell_ywidth',@@pixelfilter_mitchell_ywidth)
+end
+
+def pixelfilter_mitchell_ywidth=(value)
+	@model.set_attribute(@dict,'pixelfilter_mitchell_ywidth',value)
+end
+
+def pixelfilter_mitchell_optmode
+	@model.get_attribute(@dict,'pixelfilter_mitchell_optmode',@@pixelfilter_mitchell_optmode)
+end
+
+def pixelfilter_mitchell_optmode=(value)
+	@model.set_attribute(@dict,'pixelfilter_mitchell_optmode',value)
 end
 #end Filter
   
@@ -960,7 +1344,7 @@ def film_displayinterval=(value)
 end
 
 def haltspp
-	@model.get_attribute(@dict,'haltspp',@@haltspp.to_s)
+	@model.get_attribute(@dict,'haltspp',@@haltspp)
 end
 
 def haltspp=(value)
@@ -968,7 +1352,7 @@ def haltspp=(value)
 end
 
 def halttime
-	@model.get_attribute(@dict,'halttime',@@halttime.to_s)
+	@model.get_attribute(@dict,'halttime',@@halttime)
 end
 
 def halttime=(value)
@@ -985,6 +1369,16 @@ def accelerator_type=(value)
 	@model.set_attribute(@dict,'accelerator_type',value)
 end
 #end Accelerator
+  
+#Other
+def useparamkeys
+	@model.get_attribute(@dict,'useparamkeys',@@useparamkeys)
+end
+
+def useparamkeys=(value)
+	@model.set_attribute(@dict,'useparamkeys',value)
+end
+#end Other
   
 end #end class LuxrenderSettings
 
@@ -1027,9 +1421,15 @@ def initialize
 				#end Environment
 				
 				#Sampler
-				when "sintegrator_type"
-					@lrs.sintegrator_type=value	
+				when "sampler_type"
+					@lrs.sampler_type=value	
 				#end Sampler
+				
+				#Integerator
+				when "sintegrator_type"
+					p 'set integrator '+value
+					@lrs.sintegrator_type=value
+				#end Integrator
 				
 				#Accelerator
 				when "accelerator_type"
@@ -1044,18 +1444,20 @@ def initialize
 	case p
 		when '0' #<option value='0'>0 Preview - Global Illumination</option> in settings.html
 			p "set preset 0 Preview - Global Illumination"
-			@lrs.film_displayinterval='4'
+			@lrs.film_displayinterval=4
 			@lrs.haltspp=0
 			@lrs.halttime=0
-		
+			
 		#TODO add "def param ... end" for other paramters in class LuxrenderSettings
 			@lrs.useparamkeys=false
 			@lrs.sampler_showadvanced=false
 			@lrs.sintegrator_showadvanced=false
 			@lrs.pixelfilter_showadvanced=false
+			
 			@lrs.sampler_type='lowdiscrepancy'
 			@lrs.sampler_lowdisc_pixelsamples=1
 			@lrs.sampler_lowdisc_pixelsampler='lowdiscrepancy'
+			
 			@lrs.sintegrator_type='distributedpath'
 			@lrs.sintegrator_distributedpath_directsampleall=true
 			@lrs.sintegrator_distributedpath_directsamples=1
@@ -1078,19 +1480,344 @@ def initialize
 			@lrs.sintegrator_distributedpath_causticsonglossy=true
 			@lrs.sintegrator_distributedpath_causticsondiffuse=false
 			@lrs.sintegrator_distributedpath_strategy='auto'
+			
 			@lrs.pixelfilter_type='mitchell'
 			@lrs.pixelfilter_mitchell_sharp=0.250 
 			@lrs.pixelfilter_mitchell_xwidth=2.0 
 			@lrs.pixelfilter_mitchell_ywidth=2.0 
 			@lrs.pixelfilter_mitchell_optmode='slider'
-		
-		#TODO: add presets from LuxBlend.py.
-		#example:
-		#'sintegrator.type': 'distributedpath'  on  @lrs.sintegrator_type='distributedpath'
 		when '0b'
-			p 'set preset 0b'
+			p 'set preset 0b Preview - Direct Lighting'
+			@lrs.film_displayinterval=4
+			@lrs.haltspp=0
+			@lrs.halttime=0
+			@lrs.useparamkeys=false
+			@lrs.sampler_showadvanced=false
+			@lrs.sintegrator_showadvanced=false
+			@lrs.pixelfilter_showadvanced=false
+			
+			@lrs.sampler_type='lowdiscrepancy'
+			@lrs.sampler_lowdisc_pixelsamples=1
+			@lrs.sampler_lowdisc_pixelsampler='lowdiscrepancy'
+			
+			@lrs.sintegrator_type='directlighting'
+			@lrs.sintegrator_dlighting_maxdepth=5
+
+			@lrs.pixelfilter_type='mitchell'
+			@lrs.pixelfilter_mitchell_sharp=0.250 
+			@lrs.pixelfilter_mitchell_xwidth=2.0 
+			@lrs.pixelfilter_mitchell_ywidth=2.0 
+			@lrs.pixelfilter_mitchell_optmode='slider'
+		when '1'
+			p 'set preset 1 Final - MLT/Bidir Path Tracing (interior) (recommended)'
+			@lrs.film_displayinterval=8
+			@lrs.haltspp=0
+			@lrs.halttime=0
+			@lrs.useparamkeys=false
+			@lrs.sampler_showadvanced=false
+			@lrs.sintegrator_showadvanced=false
+			@lrs.pixelfilter_showadvanced=false
+			
+			@lrs.sampler_type='metropolis'
+			@lrs.sampler_metro_strength=0.6
+			@lrs.sampler_metro_lmprob=0.4
+			@lrs.sampler_metro_maxrejects=512
+			@lrs.sampler_metro_usevariance=false
+			
+			@lrs.sintegrator_type='bidirectional'
+			@lrs.sintegrator_bidir_bounces=16
+			@lrs.sintegrator_bidir_eyedepth=16
+			@lrs.singtegrator_bidir_lightdepth=16
+
+			@lrs.pixelfilter_type='mitchell'
+			@lrs.pixelfilter_mitchell_sharp=0.250 
+			@lrs.pixelfilter_mitchell_xwidth=2.0 
+			@lrs.pixelfilter_mitchell_ywidth=2.0 
+			@lrs.pixelfilter_mitchell_optmode='slider'
 		when '2'
-			p 'set preset 2'
+			p 'set preset 2 Final - MLT/Path Tracing (exterior)'
+			@lrs.film_displayinterval=8
+			@lrs.haltspp=0
+			@lrs.halttime=0
+			@lrs.useparamkeys=false
+			@lrs.sampler_showadvanced=false
+			@lrs.sintegrator_showadvanced=false
+			@lrs.pixelfilter_showadvanced=false
+			
+			@lrs.sampler_type='metropolis'
+			@lrs.sampler_metro_strength=0.6
+			@lrs.sampler_metro_lmprob=0.4
+			@lrs.sampler_metro_maxrejects=512
+			@lrs.sampler_metro_usevariance=false
+			
+			@lrs.sintegrator_type='path'
+			@lrs.sintegrator_bidir_bounces=10
+			@lrs.sintegrator_bidir_maxdepth=10
+
+			@lrs.pixelfilter_type='mitchell'
+			@lrs.pixelfilter_mitchell_sharp=0.250 
+			@lrs.pixelfilter_mitchell_xwidth=2.0 
+			@lrs.pixelfilter_mitchell_ywidth=2.0 
+			@lrs.pixelfilter_mitchell_optmode='slider'
+		when '5'
+			p 'set preset 5 Progressive - Bidir Path Tracing (interior)'
+			@lrs.film_displayinterval=8
+			@lrs.haltspp=0
+			@lrs.halttime=0
+			@lrs.useparamkeys=false
+			@lrs.sampler_showadvanced=false
+			@lrs.sintegrator_showadvanced=false
+			@lrs.pixelfilter_showadvanced=false
+			
+			@lrs.sampler_type='lowdiscrepancy'
+			@lrs.sampler_lowdisc_pixelsamples=1
+			@lrs.sampler_lowdisc_pixelsampler='lowdiscrepancy'
+			
+			@lrs.sintegrator_type='bidirectional'
+			@lrs.sintegrator_bidir_bounces=16
+			@lrs.sintegrator_bidir_eyedepth=16
+			@lrs.singtegrator_bidir_lightdepth=16
+
+			@lrs.pixelfilter_type='mitchell'
+			@lrs.pixelfilter_mitchell_sharp=0.250 
+			@lrs.pixelfilter_mitchell_xwidth=2.0 
+			@lrs.pixelfilter_mitchell_ywidth=2.0 
+			@lrs.pixelfilter_mitchell_optmode='slider'
+		when '6'
+			p 'set preset 6 Progressive - Path Tracing (exterior)'
+			@lrs.film_displayinterval=8
+			@lrs.haltspp=0
+			@lrs.halttime=0
+			@lrs.useparamkeys=false
+			@lrs.sampler_showadvanced=false
+			@lrs.sintegrator_showadvanced=false
+			@lrs.pixelfilter_showadvanced=false
+			
+			@lrs.sampler_type='lowdiscrepancy'
+			@lrs.sampler_lowdisc_pixelsamples=1
+			@lrs.sampler_lowdisc_pixelsampler='lowdiscrepancy'
+			
+			@lrs.sintegrator_type='path'
+			@lrs.sintegrator_bidir_bounces=10
+			@lrs.sintegrator_bidir_maxdepth=10
+			
+			@lrs.pixelfilter_type='mitchell'
+			@lrs.pixelfilter_mitchell_sharp=0.250 
+			@lrs.pixelfilter_mitchell_xwidth=2.0 
+			@lrs.pixelfilter_mitchell_ywidth=2.0 
+			@lrs.pixelfilter_mitchell_optmode='slider'
+		when '8'
+			p 'set preset 8 Bucket - Bidir Path Tracing (interior)'
+			@lrs.film_displayinterval=8
+			@lrs.haltspp=0
+			@lrs.halttime=0
+			@lrs.useparamkeys=false
+			@lrs.sampler_showadvanced=false
+			@lrs.sintegrator_showadvanced=false
+			@lrs.pixelfilter_showadvanced=false
+			
+			@lrs.sampler_type='lowdiscrepancy'
+			@lrs.sampler_lowdisc_pixelsamples=64
+			@lrs.sampler_lowdisc_pixelsampler='hilbert'
+			
+			@lrs.sintegrator_type='bidirectional'
+			@lrs.sintegrator_bidir_bounces=8
+			@lrs.sintegrator_bidir_eyedepth=8
+			@lrs.singtegrator_bidir_lightdepth=10
+			
+			@lrs.pixelfilter_type='mitchell'
+			@lrs.pixelfilter_mitchell_sharp=0.250 
+			@lrs.pixelfilter_mitchell_xwidth=2.0 
+			@lrs.pixelfilter_mitchell_ywidth=2.0 
+			@lrs.pixelfilter_mitchell_optmode='slider'
+		when '9'
+			p 'set preset 9 Bucket - Path Tracing (exterior)'
+			@lrs.film_displayinterval=8
+			@lrs.haltspp=0
+			@lrs.halttime=0
+			@lrs.useparamkeys=false
+			@lrs.sampler_showadvanced=false
+			@lrs.sintegrator_showadvanced=false
+			@lrs.pixelfilter_showadvanced=false
+			
+			@lrs.sampler_type='lowdiscrepancy'
+			@lrs.sampler_lowdisc_pixelsamples=64
+			@lrs.sampler_lowdisc_pixelsampler='hilbert'
+			
+			@lrs.sintegrator_type='path'
+			@lrs.sintegrator_bidir_bounces=8
+			@lrs.sintegrator_bidir_maxdepth=8
+			
+			@lrs.pixelfilter_type='mitchell'
+			@lrs.pixelfilter_mitchell_sharp=0.333 
+			@lrs.pixelfilter_mitchell_xwidth=2.0 
+			@lrs.pixelfilter_mitchell_ywidth=2.0 
+			@lrs.pixelfilter_mitchell_optmode='slider'
+		when 'B'
+			p 'set preset B Anim - Distributed/GI low Q'
+			@lrs.film_displayinterval=8
+			@lrs.haltspp=1
+			@lrs.halttime=0
+			@lrs.useparamkeys=false
+			@lrs.sampler_showadvanced=false
+			@lrs.sintegrator_showadvanced=false
+			@lrs.pixelfilter_showadvanced=false
+			
+			@lrs.sampler_type='lowdiscrepancy'
+			@lrs.sampler_lowdisc_pixelsamples=16
+			@lrs.sampler_lowdisc_pixelsampler='hilbert'
+			
+			@lrs.sintegrator_type='distributedpath'
+			@lrs.sintegrator_distributedpath_causticsonglossy=true
+			@lrs.sintegrator_distributedpath_directsampleall=true
+			@lrs.sintegrator_distributedpath_directsamples=1
+			@lrs.sintegrator_distributedpath_directdiffuse=true
+			@lrs.sintegrator_distributedpath_directglossy=true
+			@lrs.sintegrator_distributedpath_indirectsampleall=false
+			@lrs.sintegrator_distributedpath_indirectsamples=1
+			@lrs.sintegrator_distributedpath_indirectdiffuse=true
+			@lrs.sintegrator_distributedpath_indirectglossy=true
+			@lrs.sintegrator_distributedpath_diffusereflectdepth=2
+			@lrs.sintegrator_distributedpath_diffusereflectsamples=1
+			@lrs.sintegrator_distributedpath_diffuserefractdepth=5
+			@lrs.sintegrator_distributedpath_diffuserefractsamples=1
+			@lrs.sintegrator_distributedpath_glossyreflectdepth=2
+			@lrs.sintegrator_distributedpath_glossyreflectsamples=1
+			@lrs.sintegrator_distributedpath_glossyrefractdepth=5
+			@lrs.sintegrator_distributedpath_glossyrefractsamples=1
+			@lrs.sintegrator_distributedpath_specularreflectdepth=2
+			@lrs.sintegrator_distributedpath_specularrefractdepth=5
+			@lrs.sintegrator_distributedpath_causticsondiffuse=false
+			@lrs.sintegrator_distributedpath_strategy='auto'
+			
+			@lrs.pixelfilter_type='mitchell'
+			@lrs.pixelfilter_mitchell_sharp=0.333 
+			@lrs.pixelfilter_mitchell_xwidth=2.0 
+			@lrs.pixelfilter_mitchell_ywidth=2.0 
+			@lrs.pixelfilter_mitchell_optmode='slider'
+		when 'C'
+			p 'set preset C Anim - Distributed/GI medium Q'
+			@lrs.film_displayinterval=8
+			@lrs.haltspp=1
+			@lrs.halttime=0
+			@lrs.useparamkeys=false
+			@lrs.sampler_showadvanced=false
+			@lrs.sintegrator_showadvanced=false
+			@lrs.pixelfilter_showadvanced=false
+			
+			@lrs.sampler_type='lowdiscrepancy'
+			@lrs.sampler_lowdisc_pixelsamples=64
+			@lrs.sampler_lowdisc_pixelsampler='hilbert'
+			
+			@lrs.sintegrator_distributedpath_causticsonglossy=true
+			@lrs.sintegrator_distributedpath_diffuserefractdepth=5
+			@lrs.sintegrator_distributedpath_indirectglossy=true
+			@lrs.sintegrator_distributedpath_directsamples=1
+			@lrs.sintegrator_distributedpath_diffuserefractsamples=1
+			@lrs.sintegrator_distributedpath_glossyreflectdepth=2
+			@lrs.sintegrator_distributedpath_causticsondiffuse=false
+			@lrs.sintegrator_distributedpath_directsampleall=true
+			@lrs.sintegrator_distributedpath_indirectdiffuse=true
+			@lrs.sintegrator_distributedpath_specularreflectdepth=3
+			@lrs.sintegrator_distributedpath_diffusereflectsamples=1
+			@lrs.sintegrator_distributedpath_glossyreflectsamples=1
+			@lrs.sintegrator_distributedpath_glossyrefractdepth=5
+			@lrs.sintegrator_distributedpath_diffusereflectdepth=2
+			@lrs.sintegrator_distributedpath_indirectsamples=1
+			@lrs.sintegrator_distributedpath_indirectsampleall=false
+			@lrs.sintegrator_distributedpath_glossyrefractsamples=1
+			@lrs.sintegrator_distributedpath_directdiffuse=true
+			@lrs.sintegrator_distributedpath_directglossy=true
+			@lrs.sintegrator_distributedpath_strategy='auto'
+			@lrs.sintegrator_distributedpath_specularrefractdepth=5
+			
+			@lrs.pixelfilter_type='mitchell'
+			@lrs.pixelfilter_mitchell_sharp=0.333 
+			@lrs.pixelfilter_mitchell_xwidth=2.0 
+			@lrs.pixelfilter_mitchell_ywidth=2.0 
+			@lrs.pixelfilter_mitchell_optmode='slider'
+		when 'D'
+			p 'set preset D Anim - Distributed/GI high Q'
+			@lrs.film_displayinterval=8
+			@lrs.haltspp=1
+			@lrs.halttime=0
+			@lrs.useparamkeys=false
+			@lrs.sampler_showadvanced=false
+			@lrs.sintegrator_showadvanced=false
+			@lrs.pixelfilter_showadvanced=false
+			
+			@lrs.sampler_type='lowdiscrepancy'
+			@lrs.sampler_lowdisc_pixelsamples=256
+			@lrs.sampler_lowdisc_pixelsampler='hilbert'
+			
+			@lrs.sintegrator_distributedpath_causticsonglossy=true
+			@lrs.sintegrator_distributedpath_diffuserefractdepth=5
+			@lrs.sintegrator_distributedpath_indirectglossy=true
+			@lrs.sintegrator_distributedpath_directsamples=1
+			@lrs.sintegrator_distributedpath_diffuserefractsamples=1
+			@lrs.sintegrator_distributedpath_glossyreflectdepth=2
+			@lrs.sintegrator_distributedpath_causticsondiffuse=false
+			@lrs.sintegrator_distributedpath_directsampleall=true
+			@lrs.sintegrator_distributedpath_indirectdiffuse=true
+			@lrs.sintegrator_distributedpath_specularreflectdepth=3
+			@lrs.sintegrator_distributedpath_diffusereflectsamples=1
+			@lrs.sintegrator_distributedpath_glossyreflectsamples=1
+			@lrs.sintegrator_distributedpath_glossyrefractdepth=5
+			@lrs.sintegrator_distributedpath_diffusereflectdepth=2
+			@lrs.sintegrator_distributedpath_indirectsamples=1
+			@lrs.sintegrator_distributedpath_indirectsampleall=false
+			@lrs.sintegrator_distributedpath_glossyrefractsamples=1
+			@lrs.sintegrator_distributedpath_directdiffuse=true
+			@lrs.sintegrator_distributedpath_directglossy=true
+			@lrs.sintegrator_distributedpath_strategy='auto'
+			@lrs.sintegrator_distributedpath_specularrefractdepth=5
+			
+			@lrs.pixelfilter_type='mitchell'
+			@lrs.pixelfilter_mitchell_sharp=0.333 
+			@lrs.pixelfilter_mitchell_xwidth=2.0 
+			@lrs.pixelfilter_mitchell_ywidth=2.0 
+			@lrs.pixelfilter_mitchell_optmode='slider'
+		when 'E'
+			p 'set preset E Anim - Distributed/GI very high Q'
+			@lrs.film_displayinterval=8
+			@lrs.haltspp=1
+			@lrs.halttime=0
+			@lrs.useparamkeys=false
+			@lrs.sampler_showadvanced=false
+			@lrs.sintegrator_showadvanced=false
+			@lrs.pixelfilter_showadvanced=false
+			
+			@lrs.sampler_type='lowdiscrepancy'
+			@lrs.sampler_lowdisc_pixelsamples=512
+			@lrs.sampler_lowdisc_pixelsampler='hilbert'
+			
+			@lrs.sintegrator_distributedpath_causticsonglossy=true
+			@lrs.sintegrator_distributedpath_diffuserefractdepth=5
+			@lrs.sintegrator_distributedpath_indirectglossy=true
+			@lrs.sintegrator_distributedpath_directsamples=1
+			@lrs.sintegrator_distributedpath_diffuserefractsamples=1
+			@lrs.sintegrator_distributedpath_glossyreflectdepth=2
+			@lrs.sintegrator_distributedpath_causticsondiffuse=false
+			@lrs.sintegrator_distributedpath_directsampleall=true
+			@lrs.sintegrator_distributedpath_indirectdiffuse=true
+			@lrs.sintegrator_distributedpath_specularreflectdepth=3
+			@lrs.sintegrator_distributedpath_diffusereflectsamples=1
+			@lrs.sintegrator_distributedpath_glossyreflectsamples=1
+			@lrs.sintegrator_distributedpath_glossyrefractdepth=5
+			@lrs.sintegrator_distributedpath_diffusereflectdepth=2
+			@lrs.sintegrator_distributedpath_indirectsamples=1
+			@lrs.sintegrator_distributedpath_indirectsampleall=false
+			@lrs.sintegrator_distributedpath_glossyrefractsamples=1
+			@lrs.sintegrator_distributedpath_directdiffuse=true
+			@lrs.sintegrator_distributedpath_directglossy=true
+			@lrs.sintegrator_distributedpath_strategy='auto'
+			@lrs.sintegrator_distributedpath_specularrefractdepth=5
+			
+			@lrs.pixelfilter_type='mitchell'
+			@lrs.pixelfilter_mitchell_sharp=0.333 
+			@lrs.pixelfilter_mitchell_xwidth=2.0 
+			@lrs.pixelfilter_mitchell_ywidth=2.0 
+			@lrs.pixelfilter_mitchell_optmode='slider'
 	end
 	}
 end
@@ -1115,6 +1842,7 @@ end
 def setValue(id,value)
 	new_value=value.to_s
 	cmd="$('##{id}').val('#{new_value}');" #syntax jquery
+	p cmd
 	@settings_dialog.execute_script(cmd)
   end
 end #end class LuxrenderSettingsEditor

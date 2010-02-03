@@ -6,6 +6,7 @@
 
 <script type="text/javascript" src="jquery.js"></script>          
 <script type="text/javascript">
+<!--TODO add spinner plugin for number input field -->
 $(document).ready(function() {
 $(".collapse").hide();
 $("#settings_panel select,:text").change(function() {
@@ -13,7 +14,7 @@ $("#settings_panel select,:text").change(function() {
 });
 
 $("#presets select").change(function() {
-alert("select preset");
+//alert("select preset");
 window.location = 'skp:preset@' + this.value;
 });
 
@@ -37,6 +38,10 @@ $(this).next("div#collapse").slideToggle(300).siblings("div#collapse").hide();
  </script>
  
 <style type="text/css">
+body {
+	overflow: hidden;
+}
+
 .header {
 	padding: 5px 10px;
 	cursor: pointer;
@@ -58,20 +63,16 @@ Presets:<select id="preset">
 <option value='custom'>Custom</option><!--show it if change settings-->
 <option value='0'>0 Preview - Global Illumination</option>
 <option value='0b'>0b Preview - Direct Lighting</option>
-<!--#TODO: add other presets in @settings_dialog.add_action_callback("preset") in su2lux.rb
+<option value='5'>5 Progressive - Bidir Path Tracing (interior)</option>
+<option value='6'>6 Progressive - Path Tracing (exterior)</option>
+<option value='8'>8 Bucket - Bidir Path Tracing (interior)</option>
+<option value='9'>9 Bucket - Path Tracing (exterior)</option>
+<option value='B'>B Anim - Distributed/GI low Q</option>
+<option value='C'>C Anim - Distributed/GI medium Q</option>
+<option value='D'>D Anim - Distributed/GI high Q</option>
+<option value='E'>E Anim - Distributed/GI very high Q</option>
 
-					['1', '1 Final - MLT/Bidir Path Tracing (interior) (recommended)'],
-					['2', '2 Final - MLT/Path Tracing (exterior)'],
-					['5', '5 Progressive - Bidir Path Tracing (interior)'],
-					['6', '6 Progressive - Path Tracing (exterior)'],
-					['8', '8 Bucket - Bidir Path Tracing (interior)'],
-					['1', '9 Bucket - Path Tracing (exterior)'],
-					['B', 'B Anim - Distributed/GI low Q'],
-					['C', 'C Anim - Distributed/GI medium Q'],
-					['D', 'D Anim - Distributed/GI high Q'],
-					['E', 'E Anim - Distributed/GI very high Q'],
-					['1', '1 Final - MLT/Bidir Path Tracing (interior) (recommended)']]
--->
+<!--#TODO: after select preset refresh all values-->
 </select>
 </div>
 
@@ -126,9 +127,9 @@ Presets:<select id="preset">
 
 <p class="header">Integrator</p>
 	<div id="collapse">
-	<label for="integrator_type">
+	<label for="sintegrator_type">
 		<span class="label">integrator type:</span>
-		<select id="integrator_type">
+		<select id="sintegrator_type">
 		<option value="directlighting">directlighting</option>
 		<option value="path">path</option>
 		<option value="bidirectional">bidirectional</option>
@@ -206,6 +207,19 @@ Presets:<select id="preset">
 		</select>
 	</label>
 	</div>
+	
+<!-- TODO Add section "System" -->
+<p class="header">System</p>
+	<div id="collapse">
+	Priority:	<select id="priority">
+			<option value="low">low</option>
+			<option value="belownormal">belownormal</option>
+			<option value="normal">normal</option>
+			<option value="abovenormal">abovenormal</option>
+			</select>
+	</div
 </div><!--end settings_panel-->
+
+<!--TODO - add button "Render" --> 
 </body>
 </html>
