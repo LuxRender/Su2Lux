@@ -29,7 +29,7 @@ require 'sketchup.rb'
 
 module SU2LUX
 
-FRONTF = "Front Face"
+FRONTF = "SU2LUX Front Face" if ! defined? FRONTF
 
 def SU2LUX.reset_variables
 	@n_pointlights=0
@@ -90,6 +90,10 @@ def SU2LUX.export
 	out.puts 'WorldEnd'
 	SU2LUX.finish_close(out)
 
+	#Exporting geometry
+	out_geom = File.new(file_basename + "-geom.lxo", "w")
+	SU2LUX.export_mesh(out_geom)
+
 	#Exporting all materials
 	out_mat = File.new(file_basename + "-mat.lxm", "w")
 	model.materials.each{|mat|
@@ -99,9 +103,6 @@ def SU2LUX.export
 		}
 	SU2LUX.finish_close(out_mat)
 	
-	#Exporting geometry
-	out_geom = File.new(file_basename + "-geom.lxo", "w")
-	SU2LUX.export_mesh(out_geom)
 	SU2LUX.finish_close(out_geom)
 
 	result=SU2LUX.report_window(start_time)
@@ -481,7 +482,11 @@ def SU2LUX.collect_faces(object, trans)
 end
 
 def SU2LUX.find_face_material(e)
-	mat=FRONTF
+	mat = Sketchup.active_model.materials[FRONTF]
+	mat = Sketchup.active_model.materials.add FRONTF if mat.nil?
+	front_color = Sketchup.active_model.rendering_options["FaceFrontColor"]
+	scale = 0.8 / 255.0
+	mat.color = Sketchup::Color.new(front_color.red * scale, front_color.green * scale, front_color.blue * scale)
 	uvHelp=nil
 	mat_dir=true
 	if e.material!=nil
