@@ -15,7 +15,8 @@
 # Name			: su2lux.rb
 # Description	: Model exporter and material editor for Luxrender http://www.luxrender.net
 # Menu Item		: Plugins\Luxrender Exporter
-# Author		: Alexander Smirnov (aka Exvion)  e-mail: exvion@gmail.com
+# Authors		: Alexander Smirnov (aka Exvion)  e-mail: exvion@gmail.com
+#					  Mimmo Briganti (aka mimhotep)
 #		   		Initialy based on SU exporters: SU2KT by Tomasz Marek, Stefan Jaensch,Tim Crandall, 
 #				SU2POV by Didier Bur and OGRE exporter by Kojack
 # Usage			: Copy script to PLUGINS folder in SketchUp folder, run SU, go to Plugins\Luxrender exporter
@@ -64,7 +65,9 @@ def SU2LUX.reset_variables
 	@status_prefix = ""   # Identifies which scene is being processed in status bar
 	@scene_export = false # True when exporting a model for each scene
 	@status_prefix=""
-	@ds = (ENV['OS'] =~ /windows/i) ? "\/" : "/" # directory separator for Windows : OS X
+	#Changed Windows separator from "\/" to "\\"
+	@os_separator = (ENV['OS'] =~ /windows/i) ? "\\" : "/" # directory separator for Windows : OS X
+	@luxrender_path = ""
 end
   
 def SU2LUX.export
@@ -74,8 +77,8 @@ def SU2LUX.export
 	entities = model.active_entities
 	selection = model.selection
 	materials = model.materials	
+	@luxrender_path=SU2LUX.get_luxrender_path
 	SU2LUX.file_export_window
-	luxrender_path=SU2LUX.get_luxrender_path
 	out = File.new(@export_file_path,"w")
 	start_time=Time.new
 	SU2LUX.export_global_settings(out)
@@ -127,30 +130,29 @@ def SU2LUX.file_export_window
 	end
 end
 
-def SU2LUX.get_luxrender_path
-	path=File.dirname(__FILE__)+@ds+"luxrender_path.txt"
-	find_luxrender=false
-	if File.exist?(path)
-		path_file=File.open(path,"r")
-		luxrender_path=path_file.read
-		path_file.close
-		if SU2LUX.luxrender_path_valid?(luxrender_path)
-			return luxrender_path
-		else
-			find_luxrender=true
-		end
-	else
-		find_luxrender=true
-	end
-	
-	if find_luxrender==true
-		luxrender_path=UI.openpanel("Locate Luxrender","","")
-		return nil if luxrender_path==nil
-		path_file=File.new(path,"w") if luxrender_path
-		path_file.write(luxrender_path) if luxrender_path
-		path_file.close if luxrender_path
-	end
+def SU2LUX.on_mac?
+	return (Object::RUBY_PLATFORM =~ /mswin/i) ? FALSE : ((Object::RUBY_PLATFORM =~ /darwin/i) ? TRUE : :other)
+end
 
+def SU2LUX.get_luxrender_filename
+	filename = "luxrender.exe"
+	filename = ".app/Contents/MacOS/luxrender" if on_mac?
+	return filename
+end
+
+def SU2LUX.get_luxrender_path
+	find_luxrender = true
+	path = ENV['LUXRENDER_ROOT']
+	if ( ! path.nil?)
+		luxrender_path = path + @os_separator + SU2LUX.get_luxrender_filename
+		if (File.exists?(luxrender_path))
+			find_luxrender = false
+		end
+	end
+	if (find_luxrender == true)
+		luxrender_path = UI.openpanel("Locate Luxrender","","")
+		return nil if luxrender_path.nil?
+	end
 	if SU2LUX.luxrender_path_valid?(luxrender_path)
 	  return luxrender_path
 	else
@@ -180,18 +182,18 @@ def SU2LUX.luxrender_path_valid?(luxrender_path)
 end
   
 def SU2LUX.launch_luxrender
-	luxrender_path=SU2LUX.get_luxrender_path
-	return if luxrender_path==nil
-	Dir.chdir(File.dirname(luxrender_path))
-	export_path="#{@export_file_path}"
-	export_path=File.join(export_path.split(@ds))
+	@luxrender_path=SU2LUX.get_luxrender_path if @luxrender_path.nil?
+	return if @luxrender_path.nil?
+	Dir.chdir(File.dirname(@luxrender_path))
+	export_path = "#{@export_file_path}"
+	export_path = File.join(export_path.split(@os_separator))
 	if (ENV['OS'] =~ /windows/i)
-	 command_line="start \"max\" \"#{luxrender_path}\" \"#{export_path}\""
+	 command_line = "start \"max\" \"#{@luxrender_path}\" \"#{export_path}\""
 	 p command_line
 	 system(command_line)
 	 else
 		Thread.new do
-			system(`#{luxrender_path} "#{export_path}"`)
+			system(`#{@luxrender_path} "#{export_path}"`)
 		end
 	end
 end
