@@ -12,17 +12,17 @@
 # Place - Suite 330, Boston, MA 02111-1307, USA, or go to
 # http://www.gnu.org/copyleft/lesser.txt.
 #-----------------------------------------------------------------------------
-# Name			: su2lux.rb
-# Description	: Model exporter and material editor for Luxrender http://www.luxrender.net
-# Menu Item		: Plugins\Luxrender Exporter
-# Authors		: Alexander Smirnov (aka Exvion)  e-mail: exvion@gmail.com
-#					  Mimmo Briganti (aka mimhotep)
-#		   		Initialy based on SU exporters: SU2KT by Tomasz Marek, Stefan Jaensch,Tim Crandall, 
-#				SU2POV by Didier Bur and OGRE exporter by Kojack
-# Usage			: Copy script to PLUGINS folder in SketchUp folder, run SU, go to Plugins\Luxrender exporter
-# Date			: 2010-02-01
-# Type			: Exporter
-# Version		: 0.1 dev
+# Name         : su2lux.rb
+# Description  : Model exporter and material editor for Luxrender http://www.luxrender.net
+# Menu Item    : Plugins\Luxrender Exporter
+# Authors      : Alexander Smirnov (aka Exvion)  e-mail: exvion@gmail.com
+#                Mimmo Briganti (aka mimhotep)
+#                Initialy based on SU exporters: SU2KT by Tomasz Marek, Stefan Jaensch,Tim Crandall, 
+#                SU2POV by Didier Bur and OGRE exporter by Kojack
+# Usage        : Copy script to PLUGINS folder in SketchUp folder, run SU, go to Plugins\Luxrender exporter
+# Date         : 2010-02-01
+# Type         : Exporter
+# Version      : 0.1 dev
 
 
 
@@ -93,12 +93,16 @@ def SU2LUX.export
 	out.puts 'WorldEnd'
 	SU2LUX.finish_close(out)
 
+	file_dirname = File.dirname(@export_file_path)
+	file_fullname = file_dirname + @os_separator + file_basename
+	
 	#Exporting geometry
-	out_geom = File.new(file_basename + "-geom.lxo", "w")
+	out_geom = File.new(file_fullname + "-geom.lxo", "w")
 	SU2LUX.export_mesh(out_geom)
+	SU2LUX.finish_close(out_geom)
 
 	#Exporting all materials
-	out_mat = File.new(file_basename + "-mat.lxm", "w")
+	out_mat = File.new(file_fullname + "-mat.lxm", "w")
 	model.materials.each{|mat|
 		luxrender_mat=LuxrenderMaterial.new(mat)
 		p luxrender_mat.name
@@ -106,8 +110,6 @@ def SU2LUX.export
 		}
 	SU2LUX.finish_close(out_mat)
 	
-	SU2LUX.finish_close(out_geom)
-
 	result=SU2LUX.report_window(start_time)
 	SU2LUX.launch_luxrender if result==6
 end
@@ -136,7 +138,7 @@ end
 
 def SU2LUX.get_luxrender_filename
 	filename = "luxrender.exe"
-	filename = ".app/Contents/MacOS/luxrender" if on_mac?
+	filename = ".app/Contents/MacOS/Luxrender" if on_mac?
 	return filename
 end
 
@@ -148,6 +150,8 @@ def SU2LUX.get_luxrender_path
 		if (File.exists?(luxrender_path))
 			find_luxrender = false
 		end
+	end
+	if (find_luxrender == true)
 	end
 	if (find_luxrender == true)
 		luxrender_path = UI.openpanel("Locate Luxrender","","")
