@@ -30,7 +30,17 @@ require 'sketchup.rb'
 
 module SU2LUX
 
-FRONTF = "SU2LUX Front Face" if ! defined? FRONTF
+if ! defined? INCLUDE_FLAG
+	FRONTF = "SU2LUX Front Face"
+	SCENE_NAME = "Untitled.lxs"
+	EXT_SCENE = ".lxs"
+	SUFFIX_MATERIAL = "-mat.lxm"
+	SUFFIX_OBJECT = "-geom.lxo"
+	SUFFIX_VOLUME = "-vol.lxv"
+	DEFAULT_FOLDER = "Luxrender_export"
+	CONFIG_FILE = "luxrender_path.txt"
+end
+INCLUDE_FLAG = 1 if ! defined? INCLUDE_FLAG
 
 def SU2LUX.reset_variables
 	@n_pointlights=0
@@ -67,6 +77,7 @@ def SU2LUX.reset_variables
 	@status_prefix=""
 	#Changed Windows separator from "\/" to "\\"
 	@os_separator = (ENV['OS'] =~ /windows/i) ? "\\" : "/" # directory separator for Windows : OS X
+#	@os_separator = on_mac? ? "/" : "\\"
 	@luxrender_path = ""
 end
   
@@ -87,9 +98,9 @@ def SU2LUX.export
 	entity_list=model.entities
 	out.puts 'WorldBegin'
 	SU2LUX.export_light(out)
-	file_basename = File.basename(@export_file_path, ".lxs")
-	out.puts "Include \"#{file_basename}-mat.lxm\"\n\n"
-	out.puts "Include \"#{file_basename}-geom.lxo\"\n\n"
+	file_basename = File.basename(@export_file_path, EXT_SCENE)
+	out.puts "Include \"" + file_basename + SUFFIX_MATERIAL + "\"\n\n"
+	out.puts "Include \"" + file_basename + SUFFIX_OBJECT + "\"\n\n"
 	out.puts 'WorldEnd'
 	SU2LUX.finish_close(out)
 
@@ -97,12 +108,12 @@ def SU2LUX.export
 	file_fullname = file_dirname + @os_separator + file_basename
 	
 	#Exporting geometry
-	out_geom = File.new(file_fullname + "-geom.lxo", "w")
+	out_geom = File.new(file_fullname + SUFFIX_OBJECT, "w")
 	SU2LUX.export_mesh(out_geom)
 	SU2LUX.finish_close(out_geom)
 
 	#Exporting all materials
-	out_mat = File.new(file_fullname + "-mat.lxm", "w")
+	out_mat = File.new(file_fullname + SUFFIX_MATERIAL, "w")
 	model.materials.each{|mat|
 		luxrender_mat=LuxrenderMaterial.new(mat)
 		p luxrender_mat.name
@@ -117,19 +128,37 @@ end
 def SU2LUX.file_export_window
 	model = Sketchup.active_model
 	model_filename = File.basename(model.path)
-	if model_filename!=""
-		export_filename = model_filename.split(".")[0]
-		export_filename += ".lxs"
+	if model_filename.empty?
+		export_filename = SCENE_NAME
 	else
-		export_filename = "Untitled.lxs"
+		dot_position = model_filename.rindex(".")
+		export_filename = model_filename.slice(0..(dot_position - 1))
+		export_filename += EXT_SCENE
 	end
 	
-	@export_file_path=UI.savepanel("Save lxs file","C:\\",export_filename)
-	return if @export_file_path==nil
-
-	if @export_file_path==@export_file_path.split(".")[0]
-		@export_file_path+=".lxs"
+#	if model.path.empty?
+	default_folder = SU2LUX.find_default_folder
+	export_folder = default_folder
+	export_folder = File.dirname(model.path) if ! model.path.empty?
+	
+	@export_file_path = UI.savepanel("Save lxs file", export_folder, export_filename)
+	#export default folder and filename instead
+	if @export_file_path.nil?
+		if ! File.exists?(default_folder + @os_separator + DEFAULT_FOLDER)
+			Dir.mkdir(default_folder + @os_separator + DEFAULT_FOLDER)
+		end
+		@export_file_path = export_folder + @os_separator + DEFAULT_FOLDER + @os_separator + export_filename
 	end
+
+	if @export_file_path == @export_file_path.chomp(EXT_SCENE)
+		@export_file_path += EXT_SCENE
+	end
+end
+
+def SU2LUX.find_default_folder
+	folder = ENV["USERPROFILE"]
+	folder = File.expand_path("~") if on_mac?
+	return folder
 end
 
 def SU2LUX.on_mac?
@@ -151,11 +180,38 @@ def SU2LUX.get_luxrender_path
 			find_luxrender = false
 		end
 	end
+	
 	if (find_luxrender == true)
+		path=File.dirname(__FILE__) + @os_separator + CONFIG_FILE
+		if File.exist?(path)
+			path_file = File.open(path, "r")
+			luxrender_path = path_file.read
+			path_file.close
+			find_luxrender = false
+		end
 	end
+	
+	mac_path = SU2LUX.search_mac_luxrender
+	if ( ! mac_path.nil?)
+		luxrender_path = mac_path + @os_separator + SU2LUX.get_luxrender_filename
+		if (SU2LUX.luxrender_path_valid?(luxrender_path))
+			path=File.dirname(__FILE__) + @os_separator + CONFIG_FILE
+			path_file = File.new(path, "w")
+			path_file.write(luxrender_path)
+			path_file.close
+			find_luxrender = false
+		end
+	end
+	
 	if (find_luxrender == true)
-		luxrender_path = UI.openpanel("Locate Luxrender","","")
+		luxrender_path = UI.openpanel("Locate Luxrender", "", "")
 		return nil if luxrender_path.nil?
+		if (luxrender_path && SU2LUX.luxrender_path_valid?(luxrender_path))
+			path=File.dirname(__FILE__) + @os_separator + CONFIG_FILE
+			path_file = File.new(path, "w")
+			path_file.write(luxrender_path)
+			path_file.close
+		end
 	end
 	if SU2LUX.luxrender_path_valid?(luxrender_path)
 	  return luxrender_path
@@ -179,21 +235,47 @@ def SU2LUX.report_window(start_time)
 	result=UI.messagebox export_text + @export_file_path +  " \n\nOpen exported model in Luxrender?",MB_YESNO
 end
 
+def SU2LUX.search_mac_luxrender
+	luxrender_folder = []
+	if on_mac?
+		start_folder = "/Applications/"
+		#start_folder = "C:\\Program Files"
+		applications = Dir.entries(start_folder)
+		applications.each { |app|
+			luxrender_folder.push app if app =~ /luxrender/i
+		}
+		if luxrender_folder.length > 1
+			paths = luxrender_folder.join("|")
+			input = UI.inputbox(["folder"], [luxrender_folder[0]], [paths], "Choose Luxrender folder")
+			luxrender_folder = input[0] if input
+		elsif luxrender_folder.length == 1
+			luxrender_folder = luxrender_folder[0]
+		else
+			return nil
+		end
+	end
+	if luxrender_folder.empty?
+		folder = nil
+	else
+		folder = start_folder + @os_separator + luxrender_folder
+	end
+	return folder
+end
   
 def SU2LUX.luxrender_path_valid?(luxrender_path)
-	(File.exist?(luxrender_path) and (File.basename(luxrender_path).upcase.include?("LUXRENDER")))
+	(! luxrender_path.nil? and File.exist?(luxrender_path) and (File.basename(luxrender_path).upcase.include?("LUXRENDER")))
 	#check if the path to Luxrender is valid
 end
   
 def SU2LUX.launch_luxrender
-	@luxrender_path=SU2LUX.get_luxrender_path if @luxrender_path.nil?
+	@luxrender_path = SU2LUX.get_luxrender_path if @luxrender_path.nil?
 	return if @luxrender_path.nil?
 	Dir.chdir(File.dirname(@luxrender_path))
 	export_path = "#{@export_file_path}"
 	export_path = File.join(export_path.split(@os_separator))
 	if (ENV['OS'] =~ /windows/i)
 	 command_line = "start \"max\" \"#{@luxrender_path}\" \"#{export_path}\""
-	 p command_line
+	 puts command_line
 	 system(command_line)
 	 else
 		Thread.new do
@@ -761,8 +843,8 @@ end
 def SU2LUX.about
 	UI.messagebox("SU2LUX version 0.1-dev 29th January 2010
 SketchUp Exporter to Luxrender
-Author: Alexander Smirnov (aka Exvion)
-E-mail: exvion@gmail.com
+Authors: Alexander Smirnov (aka Exvion); Mimmo Briganti (aka mimhotep)
+E-mail: exvion@gmail.com; 
 
 For further information please visit
 Luxrender Website & Forum - www.luxrender.net" , MB_MULTILINE , "SU2LUX - Sketchup Exporter to Luxrender")

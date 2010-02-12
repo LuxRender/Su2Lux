@@ -1,0 +1,20 @@
+#############################################################################
+#############################################################################
+
+# 2010-02-12
+#VERSION 0.1.1
+
+#ADDED: module constant SCENE_NAME
+#ADDED: module constant EXT_SCENE
+#ADDED: module constant SUFFIX_MATERIAL
+#ADDED: module constant SUFFIX_OBJECT
+#ADDED: module constant SUFFIX_VOLUME
+#ADDED: module constant DEFAULT_FOLDER
+#ADDED: module constant CONFIG_FILE
+#CHANGED: create scene name from Sketchup File. Old version eliminates all text following first '.'
+#ADDED: export scene in Sketchup current scene folder, if it was saved. Use USER home folder, otherwise.
+#CHANGED: export scene in default folder with default filename if none is specified
+#ADDED: try to find (automatically) luxrender location on Mac
+
+#############################################################################
+#############################################################################
