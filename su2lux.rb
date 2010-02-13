@@ -167,7 +167,7 @@ end
 
 def SU2LUX.get_luxrender_filename
 	filename = "luxrender.exe"
-	filename = ".app/Contents/MacOS/Luxrender" if on_mac?
+	filename = "Luxrender.app/Contents/MacOS/Luxrender" if on_mac?
 	return filename
 end
 
@@ -238,7 +238,7 @@ end
 def SU2LUX.search_mac_luxrender
 	luxrender_folder = []
 	if on_mac?
-		start_folder = "/Applications/"
+		start_folder = "/Applications"
 		#start_folder = "C:\\Program Files"
 		applications = Dir.entries(start_folder)
 		applications.each { |app|
