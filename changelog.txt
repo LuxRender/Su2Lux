@@ -1,3 +1,16 @@
+# 2010-02-21
+#VERSION 0.1.2
+
+#ADDED: module constant DEBUG to set script state
+#ADDED: module function p_debug to print debug ,essages on console
+#CHANGED: module function 'param_cam_view' renamed to 'export_camera'
+#CHENGED: new definition for @os_separator variable
+#ADDED: new 'export_film' module function
+#CHANGED: some cosmetics on exported scene file
+#ADDED: 'compute_fov' module function to export the right fov value (vertical/horizontal)
+#ADDED: 'compute_screen_window' module function
+#ADDED: temporarily render transparent materials as matte
+
 #############################################################################
 #############################################################################
 

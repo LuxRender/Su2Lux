@@ -30,7 +30,8 @@ require 'sketchup.rb'
 
 module SU2LUX
 
-if ! defined? INCLUDE_FLAG
+#if ! defined? INCLUDE_FLAG
+	DEBUG = false
 	FRONTF = "SU2LUX Front Face"
 	SCENE_NAME = "Untitled.lxs"
 	EXT_SCENE = ".lxs"
@@ -39,9 +40,23 @@ if ! defined? INCLUDE_FLAG
 	SUFFIX_VOLUME = "-vol.lxv"
 	DEFAULT_FOLDER = "Luxrender_export"
 	CONFIG_FILE = "luxrender_path.txt"
-end
-INCLUDE_FLAG = 1 if ! defined? INCLUDE_FLAG
+#end
+#INCLUDE_FLAG = 1 if ! defined? INCLUDE_FLAG
 
+#####################################################################
+###### - printing debug messages - 										######
+#####################################################################
+if (DEBUG)
+	def SU2LUX.p_debug(message)
+		p message
+	end
+else
+	def SU2LUX.p_debug(message)
+	end
+end
+
+#####################################################################
+#####################################################################
 def SU2LUX.reset_variables
 	@n_pointlights=0
 	@n_spotlights=0
@@ -76,11 +91,14 @@ def SU2LUX.reset_variables
 	@scene_export = false # True when exporting a model for each scene
 	@status_prefix=""
 	#Changed Windows separator from "\/" to "\\"
-	@os_separator = (ENV['OS'] =~ /windows/i) ? "\\" : "/" # directory separator for Windows : OS X
-#	@os_separator = on_mac? ? "/" : "\\"
+#	@os_separator = (ENV['OS'] =~ /windows/i) ? "\\" : "/" # directory separator for Windows : OS X
+	@os_separator = on_mac? ? "/" : "\\"
 	@luxrender_path = ""
+	@used_materials = []
 end
   
+#####################################################################
+#####################################################################
 def SU2LUX.export
 	#Sketchup.send_action "showRubyPanel:"
 	SU2LUX.reset_variables
@@ -88,12 +106,13 @@ def SU2LUX.export
 	entities = model.active_entities
 	selection = model.selection
 	materials = model.materials	
-	@luxrender_path=SU2LUX.get_luxrender_path
+	@luxrender_path = SU2LUX.get_luxrender_path
 	SU2LUX.file_export_window
 	out = File.new(@export_file_path,"w")
-	start_time=Time.new
+	start_time = Time.new
 	SU2LUX.export_global_settings(out)
-	SU2LUX.param_cam_view(model.active_view, out)
+	SU2LUX.export_camera(model.active_view, out)
+	SU2LUX.export_film(out)
 	SU2LUX.export_render_settings(out)
 	entity_list=model.entities
 	out.puts 'WorldBegin'
@@ -114,17 +133,15 @@ def SU2LUX.export
 
 	#Exporting all materials
 	out_mat = File.new(file_fullname + SUFFIX_MATERIAL, "w")
-	model.materials.each{|mat|
-		luxrender_mat=LuxrenderMaterial.new(mat)
-		p luxrender_mat.name
-		SU2LUX.export_mat(luxrender_mat,out_mat)
-		}
+	SU2LUX.export_used_materials(materials, out_mat)
 	SU2LUX.finish_close(out_mat)
 	
-	result=SU2LUX.report_window(start_time)
-	SU2LUX.launch_luxrender if result==6
+	result = SU2LUX.report_window(start_time)
+	SU2LUX.launch_luxrender if result == 6
 end
 
+#####################################################################
+#####################################################################
 def SU2LUX.file_export_window
 	model = Sketchup.active_model
 	model_filename = File.basename(model.path)
@@ -155,22 +172,30 @@ def SU2LUX.file_export_window
 	end
 end
 
+#####################################################################
+#####################################################################
 def SU2LUX.find_default_folder
 	folder = ENV["USERPROFILE"]
 	folder = File.expand_path("~") if on_mac?
 	return folder
 end
 
+#####################################################################
+#####################################################################
 def SU2LUX.on_mac?
 	return (Object::RUBY_PLATFORM =~ /mswin/i) ? FALSE : ((Object::RUBY_PLATFORM =~ /darwin/i) ? TRUE : :other)
 end
 
+#####################################################################
+#####################################################################
 def SU2LUX.get_luxrender_filename
 	filename = "luxrender.exe"
 	filename = "Luxrender.app/Contents/MacOS/Luxrender" if on_mac?
 	return filename
 end
 
+#####################################################################
+#####################################################################
 def SU2LUX.get_luxrender_path
 	find_luxrender = true
 	path = ENV['LUXRENDER_ROOT']
@@ -220,8 +245,10 @@ def SU2LUX.get_luxrender_path
 	end 
 end
 
+#####################################################################
+#####################################################################
 def SU2LUX.report_window(start_time)
-	p "SU2LUX.report_window"
+	SU2LUX.p_debug "SU2LUX.report_window"
 	end_time=Time.new
 	elapsed=end_time-start_time
 	time=" exported in "
@@ -235,6 +262,8 @@ def SU2LUX.report_window(start_time)
 	result=UI.messagebox export_text + @export_file_path +  " \n\nOpen exported model in Luxrender?",MB_YESNO
 end
 
+#####################################################################
+#####################################################################
 def SU2LUX.search_mac_luxrender
 	luxrender_folder = []
 	if on_mac?
@@ -262,11 +291,15 @@ def SU2LUX.search_mac_luxrender
 	return folder
 end
   
+#####################################################################
+#####################################################################
 def SU2LUX.luxrender_path_valid?(luxrender_path)
 	(! luxrender_path.nil? and File.exist?(luxrender_path) and (File.basename(luxrender_path).upcase.include?("LUXRENDER")))
 	#check if the path to Luxrender is valid
 end
   
+#####################################################################
+#####################################################################
 def SU2LUX.launch_luxrender
 	@luxrender_path = SU2LUX.get_luxrender_path if @luxrender_path.nil?
 	return if @luxrender_path.nil?
@@ -284,6 +317,8 @@ def SU2LUX.launch_luxrender
 	end
 end
 
+#####################################################################
+#####################################################################
 def SU2LUX.export_light(out)
    	sun_direction = Sketchup.active_model.shadow_info['SunDirection']
 	sunsky = <<-eos
@@ -301,23 +336,36 @@ AttributeEnd
 	out.puts sunsky
 end
 
+#####################################################################
+#####################################################################
+def SU2LUX.export_used_materials(materials, out)
+	materials.each { |mat|
+		luxrender_mat = LuxrenderMaterial.new(mat)
+		p_debug luxrender_mat.name
+		SU2LUX.export_mat(luxrender_mat, out)
+	}
+end
 
-def SU2LUX.export_mat(mat,out)
-	p "export_mat"
-	out.puts "# Material '"+mat.name+"'"
+#####################################################################
+#####################################################################
+def SU2LUX.export_mat(mat, out)
+	SU2LUX.p_debug "export_mat"
+	out.puts "# Material '" + mat.name + "'"
 	case mat.type
-		when "matte"
-		out.puts "MakeNamedMaterial \""+mat.name+"\""
-		p "mat.name "+mat.name
+		when "matte", "glass"
+		out.puts "MakeNamedMaterial \"" + mat.name + "\""
+		SU2LUX.p_debug "mat.name " + mat.name
 		out.puts  "\"string type\" [\"matte\"]"
 		out.puts  "\"color Kd\" [#{"%.6f" %(mat.color.red.to_f/255)} #{"%.6f" %(mat.color.green.to_f/255)} #{"%.6f" %(mat.color.blue.to_f/255)}]"  #"%.6f" %(user_up.y)
 		when "light"
-		out.puts "Texture \""+mat.name+":light:L\" \"color\" \"blackbody\"
+		out.puts "Texture \"" + mat.name + ":light:L\" \"color\" \"blackbody\"
 			\"float temperature\" [6500.000000]"
 	end
 	out.puts("\n")
 end
 
+#####################################################################
+#####################################################################
 def SU2LUX.export_mesh(out)
 	SU2LUX.collect_faces(Sketchup.active_model.entities, Geom::Transformation.new)
 	@current_mat_step = 1
@@ -325,65 +373,76 @@ def SU2LUX.export_mesh(out)
 	SU2LUX.export_fm_faces(out)
 end
 
-#### - Send text to status bar - ####
+#####################################################################
+###### - Send text to status bar - 										######
+#####################################################################
 def SU2LUX.status_bar(stat_text)
 	
 	statbar = Sketchup.set_status_text stat_text
 	
 end
 
+#####################################################################
+#####################################################################
 def SU2LUX.export_global_settings(out)
-
 	out.puts "# Lux Render Scene File"
-	out.puts "# Exported by SU2LUX 0.1"
+	out.puts "# Exported by SU2LUX 0.1-devel"
 	out.puts "# Global Information"
-
 end
 
   # -----------Extract the camera parameters of the current view ------------------------------------
 
-def SU2LUX.param_cam_view( v , out)
-
+#####################################################################
+#####################################################################
+def SU2LUX.export_camera(view, out)
 	@lrs=LuxrenderSettings.new
 
-	user_camera = v.camera
+	user_camera = view.camera
 	user_eye = user_camera.eye
 	#p user_eye
 	user_target=user_camera.target
 	#p user_target
 	user_up=user_camera.up
 	#p user_up;
-	out_user_target="%.6f" %(user_target.x.to_m.to_f)+" "+"%.6f" %(user_target.y.to_m.to_f)+" "+"%.6f" %(user_target.z.to_m.to_f)
+	out_user_target = "%12.6f" %(user_target.x.to_m.to_f) + " " + "%12.6f" %(user_target.y.to_m.to_f) + " " + "%12.6f" %(user_target.z.to_m.to_f)
 
-	out_user_up="%.6f" %(user_up.x)+" "+"%.6f" %(user_up.y)+" "+"%.6f" %(user_up.z)
+	out_user_up = "%12.6f" %(user_up.x) + " " + "%12.6f" %(user_up.y) + " " + "%12.6f" %(user_up.z)
 
-	out.puts "LookAt "+"%.6f" %(user_eye.x.to_m.to_f)+" "+"%.6f" %(user_eye.y.to_m.to_f)+" "+"%.6f" %(user_eye.z.to_m.to_f)+" "+out_user_target+" "+out_user_up
-	
-	
+	out.puts "LookAt"
+	out.puts "%12.6f" %(user_eye.x.to_m.to_f) + " " + "%12.6f" %(user_eye.y.to_m.to_f) + " " + "%12.6f" %(user_eye.z.to_m.to_f)
+	out.puts out_user_target
+	out.puts out_user_up
 	out.print "\n"
+
+	fov = SU2LUX.compute_fov(@lrs.xresolution, @lrs.yresolution)
 	case @lrs.camera_type
 		when "perspective"
-			out.print "Camera \"#{@lrs.camera_type}\"\n"
-			out.print "	\"float fov\" ["+@lrs.fov+"]\n"
+			out.puts "Camera \"#{@lrs.camera_type}\""
+			out.puts "	\"float fov\" [%.6f" %(fov) + "]"
 		when "orthographic"
-			out.print "Camera \"#{@lrs.camera_type}\"\n"
+			out.puts "Camera \"#{@lrs.camera_type}\""
 		when "environment"
-			out.print "Camera \"#{@lrs.camera_type}\"\n"
+			out.puts "Camera \"#{@lrs.camera_type}\""
 	end
 	
-	out.puts	"	\"float screenwindow\" [-1.000000 1.000000 -0.750000 0.750000]"
+	sw = SU2LUX.compute_screen_window
+	out.puts	"\t\"float screenwindow\" [" + "%.6f" %(sw[0]) + " " + "%.6f" %(sw[1]) + " " + "%.6f" %(sw[2]) + " " + "%.6f" %(sw[3]) +"]\n"
 	#TODO  depends aspect_ratio and resolution 
 	#http://www.luxrender.net/wiki/index.php?title=Scene_file_format#Common_Camera_Parameters
 			
-			
-	#film
 	out.print "\n"
-	out.print "Film \"fleximage\"\n"
-	out.print "	\"integer xresolution\" [#{@lrs.xresolution}]\n"
-	out.print "	\"integer yresolution\" [#{@lrs.yresolution}]\n"
-	out.print "	\"integer haltspp\" [#{@lrs.haltspp}]\n"
+end
+
+#####################################################################
+#####################################################################
+def SU2LUX.export_film(out)
+	out.puts "Film \"fleximage\""
+	out.puts "\t\"integer xresolution\" [#{@lrs.xresolution}]"
+	out.puts "\t\"integer yresolution\" [#{@lrs.yresolution}]"
+	out.puts "\t\"integer haltspp\" [#{@lrs.haltspp}]"
 	
-	out.puts '"bool premultiplyalpha" ["false"]
+	out.puts '
+	"bool premultiplyalpha" ["false"]
    "string tonemapkernel" ["reinhard"]
    "float reinhard_prescale" [1.000000]
    "float reinhard_postscale" [1.200000]
@@ -409,6 +468,43 @@ def SU2LUX.param_cam_view( v , out)
    "float gamma" [2.200000]'
 end
 
+#####################################################################
+#####################################################################
+def SU2LUX.compute_fov(xres, yres)
+	fov_vertical = @lrs.fov.to_f
+	fov_vertical_rad = fov_vertical * Math::PI / 180.0
+	# height = Float(Sketchup.active_model.active_view.vpheight)
+	# width = Float(Sketchup.active_model.active_view.vpwidth)
+	width = xres.to_f
+	height = yres.to_f
+	focal_distance = 0.5 * height / Math.tan(0.5 * fov_vertical_rad)
+
+	fov_horizontal_rad = 2.0 * Math.atan2(0.5 * width, focal_distance)
+	fov_horizontal = fov_horizontal_rad * 180.0 / Math::PI
+	if(width >= height)
+		fov = fov_vertical
+	else
+		fov = fov_horizontal
+	end
+	SU2LUX.p_debug fov_vertical
+	SU2LUX.p_debug fov_horizontal
+	return fov
+end
+
+#####################################################################
+#####################################################################
+def SU2LUX.compute_screen_window
+	ratio = @lrs.xresolution.to_f / @lrs.yresolution.to_f
+	inv_ratio = 1.0 / ratio
+	if (ratio > 1.0)
+		screen_window = [-ratio, ratio, -1.0, 1.0]
+	else
+		screen_window = [-1.0, 1.0, -inv_ratio, inv_ratio]
+	end
+end
+
+#####################################################################
+#####################################################################
 def SU2LUX.export_render_settings(out)
 	@lrs=LuxrenderSettings.new
 	
@@ -524,8 +620,10 @@ def SU2LUX.export_render_settings(out)
 
   end
 
-##### ------------ collect entities to an array -------------- ##########
 
+#####################################################################
+###### - collect entities to an array -						 		######
+#####################################################################
 def SU2LUX.collect_faces(object, trans)
 
 	if object.class == Sketchup::ComponentInstance
@@ -536,7 +634,7 @@ def SU2LUX.collect_faces(object, trans)
 		entity_list=object
 	end
 
-	p "entity count="+entity_list.count.to_s
+	SU2LUX.p_debug "entity count="+entity_list.count.to_s
 
 	text=""
 	text="Component: " + object.definition.name if object.class == Sketchup::ComponentInstance
@@ -569,6 +667,8 @@ def SU2LUX.collect_faces(object, trans)
 	end  
 end
 
+#####################################################################
+#####################################################################
 def SU2LUX.find_face_material(e)
 	mat = Sketchup.active_model.materials[FRONTF]
 	mat = Sketchup.active_model.materials.add FRONTF if mat.nil?
@@ -598,6 +698,8 @@ def SU2LUX.find_face_material(e)
 end
   
   
+#####################################################################
+#####################################################################
 def SU2LUX.get_inside(e,trans,face_me)
 	@fm_comp.push(face_me)
 	if e.material != nil
@@ -613,7 +715,8 @@ def SU2LUX.get_inside(e,trans,face_me)
 end
   
 
-################################################################
+#####################################################################
+#####################################################################
 def SU2LUX.export_faces(out)
 	@materials.each{|mat,value|
 		if (value!=nil and value!=[])
@@ -623,6 +726,8 @@ def SU2LUX.export_faces(out)
 	@materials={}
 end
 
+#####################################################################
+#####################################################################
 def SU2LUX.export_fm_faces(out)
 	@fm_materials.each{|mat,value|
 		if (value!=nil and value!=[])
@@ -633,11 +738,14 @@ def SU2LUX.export_fm_faces(out)
 end
 
 
+#####################################################################
+#####################################################################
 def SU2LUX.point_to_vector(p)
 	Geom::Vector3d.new(p.x,p.y,p.z)
 end
 
-##############################################################
+#####################################################################
+#####################################################################
 def SU2LUX.get_luxrender_console_path
 	path=SU2LUX.get_luxrender_path
 	return nil if not path
@@ -652,8 +760,10 @@ def SU2LUX.get_luxrender_console_path
 end
 
 
+#####################################################################
+#####################################################################
 def SU2LUX.export_face(out,mat,fm_mat)
-	p "export face"
+	SU2LUX.p_debug "export face"
 	meshes = []
 	polycount = 0
 	pointcount = 0
@@ -765,14 +875,14 @@ def SU2LUX.export_face(out,mat,fm_mat)
    # "float efficacy" [17.000000]
    # "float gain" [1.000000]
 	case luxrender_mat.type
-		when "matte"
-		out.puts "NamedMaterial \""+luxrender_mat.name+"\""
+		when "matte", "glass"
+			out.puts "NamedMaterial \""+luxrender_mat.name+"\""
 		when "light"
-	out.puts "LightGroup \"default\""
-	out.puts "AreaLightSource \"area\" \"texture L\" [\""+luxrender_mat.name+":light:L\"]"
-	out.puts '"float power" [100.000000]
-	"float efficacy" [17.000000]
-	"float gain" [1.000000]'
+			out.puts "LightGroup \"default\""
+			out.puts "AreaLightSource \"area\" \"texture L\" [\""+luxrender_mat.name+":light:L\"]"
+			out.puts '"float power" [100.000000]
+			"float efficacy" [17.000000]
+			"float gain" [1.000000]'
 	end
 	out.puts 'Shape "trianglemesh" "integer indices" ['
 	for mesh in meshes
@@ -820,6 +930,8 @@ end
 
   
   
+#####################################################################
+#####################################################################
 def SU2LUX.material_editor
 	if not @material_editor
 		@material_editor=LuxrenderMaterialEditor.new
@@ -827,6 +939,8 @@ def SU2LUX.material_editor
 	@material_editor.show
 end
 
+#####################################################################
+#####################################################################
 def SU2LUX.render_settings
 
 	if not @luxrender_settings
@@ -836,10 +950,14 @@ def SU2LUX.render_settings
 end
 
 
+#####################################################################
+#####################################################################
 def SU2LUX.finish_close(out)
 	out.close
 end
 
+#####################################################################
+#####################################################################
 def SU2LUX.about
 	UI.messagebox("SU2LUX version 0.1-dev 29th January 2010
 SketchUp Exporter to Luxrender
@@ -935,8 +1053,8 @@ class LuxrenderSettings
   
 	#Film
 	@@film_type="fleximage"
-	@@xresolution=800
-	@@yresolution=600
+	@@xresolution = Sketchup.active_model.active_view.vpwidth#800
+	@@yresolution = Sketchup.active_model.active_view.vpheight#600
 	@@film_displayinterval=4
 	@@haltspp=0
 	@@halttime=0
@@ -1500,7 +1618,7 @@ def initialize
 	@settings_dialog.set_file(setting_html_path)
 	@lrs=LuxrenderSettings.new
 	@settings_dialog.add_action_callback("param_generate") {|dialog, params|
-			p params
+			SU2LUX.p_debug params
 			pair=params.split("=")
 			id=pair[0]		   
 			value=pair[1]
@@ -1533,7 +1651,7 @@ def initialize
 				
 				#Integerator
 				when "sintegrator_type"
-					p 'set integrator '+value
+					SU2LUX.p_debug 'set integrator '+value
 					@lrs.sintegrator_type=value
 				#end Integrator
 				
@@ -1549,7 +1667,7 @@ def initialize
 	@settings_dialog.add_action_callback("preset") {|d,p|
 	case p
 		when '0' #<option value='0'>0 Preview - Global Illumination</option> in settings.html
-			p "set preset 0 Preview - Global Illumination"
+			SU2LUX.p_debug "set preset 0 Preview - Global Illumination"
 			@lrs.film_displayinterval=4
 			@lrs.haltspp=0
 			@lrs.halttime=0
@@ -1593,7 +1711,7 @@ def initialize
 			@lrs.pixelfilter_mitchell_ywidth=2.0 
 			@lrs.pixelfilter_mitchell_optmode='slider'
 		when '0b'
-			p 'set preset 0b Preview - Direct Lighting'
+			SU2LUX.p_debug 'set preset 0b Preview - Direct Lighting'
 			@lrs.film_displayinterval=4
 			@lrs.haltspp=0
 			@lrs.halttime=0
@@ -1615,7 +1733,7 @@ def initialize
 			@lrs.pixelfilter_mitchell_ywidth=2.0 
 			@lrs.pixelfilter_mitchell_optmode='slider'
 		when '1'
-			p 'set preset 1 Final - MLT/Bidir Path Tracing (interior) (recommended)'
+			SU2LUX.p_debug 'set preset 1 Final - MLT/Bidir Path Tracing (interior) (recommended)'
 			@lrs.film_displayinterval=8
 			@lrs.haltspp=0
 			@lrs.halttime=0
@@ -1641,7 +1759,7 @@ def initialize
 			@lrs.pixelfilter_mitchell_ywidth=2.0 
 			@lrs.pixelfilter_mitchell_optmode='slider'
 		when '2'
-			p 'set preset 2 Final - MLT/Path Tracing (exterior)'
+			SU2LUX.p_debug 'set preset 2 Final - MLT/Path Tracing (exterior)'
 			@lrs.film_displayinterval=8
 			@lrs.haltspp=0
 			@lrs.halttime=0
@@ -1666,7 +1784,7 @@ def initialize
 			@lrs.pixelfilter_mitchell_ywidth=2.0 
 			@lrs.pixelfilter_mitchell_optmode='slider'
 		when '5'
-			p 'set preset 5 Progressive - Bidir Path Tracing (interior)'
+			SU2LUX.p_debug 'set preset 5 Progressive - Bidir Path Tracing (interior)'
 			@lrs.film_displayinterval=8
 			@lrs.haltspp=0
 			@lrs.halttime=0
@@ -1690,7 +1808,7 @@ def initialize
 			@lrs.pixelfilter_mitchell_ywidth=2.0 
 			@lrs.pixelfilter_mitchell_optmode='slider'
 		when '6'
-			p 'set preset 6 Progressive - Path Tracing (exterior)'
+			SU2LUX.p_debug 'set preset 6 Progressive - Path Tracing (exterior)'
 			@lrs.film_displayinterval=8
 			@lrs.haltspp=0
 			@lrs.halttime=0
@@ -1713,7 +1831,7 @@ def initialize
 			@lrs.pixelfilter_mitchell_ywidth=2.0 
 			@lrs.pixelfilter_mitchell_optmode='slider'
 		when '8'
-			p 'set preset 8 Bucket - Bidir Path Tracing (interior)'
+			SU2LUX.p_debug 'set preset 8 Bucket - Bidir Path Tracing (interior)'
 			@lrs.film_displayinterval=8
 			@lrs.haltspp=0
 			@lrs.halttime=0
@@ -1737,7 +1855,7 @@ def initialize
 			@lrs.pixelfilter_mitchell_ywidth=2.0 
 			@lrs.pixelfilter_mitchell_optmode='slider'
 		when '9'
-			p 'set preset 9 Bucket - Path Tracing (exterior)'
+			SU2LUX.p_debug 'set preset 9 Bucket - Path Tracing (exterior)'
 			@lrs.film_displayinterval=8
 			@lrs.haltspp=0
 			@lrs.halttime=0
@@ -1760,7 +1878,7 @@ def initialize
 			@lrs.pixelfilter_mitchell_ywidth=2.0 
 			@lrs.pixelfilter_mitchell_optmode='slider'
 		when 'B'
-			p 'set preset B Anim - Distributed/GI low Q'
+			SU2LUX.p_debug 'set preset B Anim - Distributed/GI low Q'
 			@lrs.film_displayinterval=8
 			@lrs.haltspp=1
 			@lrs.halttime=0
@@ -1802,7 +1920,7 @@ def initialize
 			@lrs.pixelfilter_mitchell_ywidth=2.0 
 			@lrs.pixelfilter_mitchell_optmode='slider'
 		when 'C'
-			p 'set preset C Anim - Distributed/GI medium Q'
+			SU2LUX.p_debug 'set preset C Anim - Distributed/GI medium Q'
 			@lrs.film_displayinterval=8
 			@lrs.haltspp=1
 			@lrs.halttime=0
@@ -1843,7 +1961,7 @@ def initialize
 			@lrs.pixelfilter_mitchell_ywidth=2.0 
 			@lrs.pixelfilter_mitchell_optmode='slider'
 		when 'D'
-			p 'set preset D Anim - Distributed/GI high Q'
+			SU2LUX.p_debug 'set preset D Anim - Distributed/GI high Q'
 			@lrs.film_displayinterval=8
 			@lrs.haltspp=1
 			@lrs.halttime=0
@@ -1884,7 +2002,7 @@ def initialize
 			@lrs.pixelfilter_mitchell_ywidth=2.0 
 			@lrs.pixelfilter_mitchell_optmode='slider'
 		when 'E'
-			p 'set preset E Anim - Distributed/GI very high Q'
+			SU2LUX.p_debug 'set preset E Anim - Distributed/GI very high Q'
 			@lrs.film_displayinterval=8
 			@lrs.haltspp=1
 			@lrs.halttime=0
@@ -1948,7 +2066,7 @@ end
 def setValue(id,value)
 	new_value=value.to_s
 	cmd="$('##{id}').val('#{new_value}');" #syntax jquery
-	p cmd
+	SU2LUX.p_debug cmd
 	@settings_dialog.execute_script(cmd)
   end
 end #end class LuxrenderSettingsEditor
@@ -1964,7 +2082,7 @@ def initialize
 	
 	@material_editor_dialog.add_action_callback('param_generate') {|dialog, params|
 			#p 'param_generate'
-			p params
+			SU2LUX.p_debug params
 			# Get the data from the Webdialog.
 			parameters = string_to_hash(params)
 			# Prepare the data
@@ -1982,11 +2100,11 @@ def initialize
 	}
 	
 	@material_editor_dialog.add_action_callback('select_material'){|dialog, matname|
-	p "matname_2"+matname
+	SU2LUX.p_debug "matname_2"+matname
 	luxrender_material=self.find(matname)
-	p "type="+luxrender_material.type
+	SU2LUX.p_debug "type="+luxrender_material.type
 	cmd="$(\"#material_type option[value='"+luxrender_material.type+"']\").attr(\"selected\",\"selected\");"
-	p cmd
+	SU2LUX.p_debug cmd
 	@material_editor_dialog.execute_script(cmd)
 	}
 end
@@ -2031,7 +2149,7 @@ def refreshMaterialsList()
 	mat_list.each {|mat_name|
 	#cmd="createMapOption(\"#{id}\",\"#{mat_name}\",\"#{mat_name}\")"
 	cmd="createMapOption(\"#{id}\",\"wwwww\",\"wwww\")"
-	p cmd
+	SU2LUX.p_debug cmd
 	@material_editor_dialog.execute_script(cmd)
 }
 end
@@ -2048,7 +2166,7 @@ def setmateriallist()
 end
   
 def setmaterialtype()
-	p "set material type"
+	SU2LUX.p_debug "set material type"
 end
 end #end class LuxrenderMaterialEditor
 
