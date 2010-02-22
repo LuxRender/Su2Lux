@@ -396,6 +396,8 @@ end
 #####################################################################
 def SU2LUX.export_camera(view, out)
 	@lrs=LuxrenderSettings.new
+	@lrs.xresolution = Sketchup.active_model.active_view.vpwidth
+	@lrs.yresolution = Sketchup.active_model.active_view.vpheight
 
 	user_camera = view.camera
 	user_eye = user_camera.eye
