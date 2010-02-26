@@ -352,14 +352,21 @@ def SU2LUX.export_mat(mat, out)
 	SU2LUX.p_debug "export_mat"
 	out.puts "# Material '" + mat.name + "'"
 	case mat.type
-		when "matte", "glass"
-		out.puts "MakeNamedMaterial \"" + mat.name + "\""
-		SU2LUX.p_debug "mat.name " + mat.name
-		out.puts  "\"string type\" [\"matte\"]"
-		out.puts  "\"color Kd\" [#{"%.6f" %(mat.color.red.to_f/255)} #{"%.6f" %(mat.color.green.to_f/255)} #{"%.6f" %(mat.color.blue.to_f/255)}]"  #"%.6f" %(user_up.y)
+		when "matte"
+			out.puts "MakeNamedMaterial \"" + mat.name + "\""
+			SU2LUX.p_debug "mat.name " + mat.name
+			out.puts  "\"string type\" [\"matte\"]"
+			out.puts  "\"color Kd\" [#{"%.6f" %(mat.color.red.to_f/255)} #{"%.6f" %(mat.color.green.to_f/255)} #{"%.6f" %(mat.color.blue.to_f/255)}]"
+		when "glass"
+			out.puts "MakeNamedMaterial \"" + mat.name + "\""
+			SU2LUX.p_debug "mat.name " + mat.name
+#   "bool architectural" ["true"]
+			out.puts  "\"string type\" [\"glass\"]"
+			out.puts  "\"color Kt\" [#{"%.6f" %(mat.color.red.to_f/255)} #{"%.6f" %(mat.color.green.to_f/255)} #{"%.6f" %(mat.color.blue.to_f/255)}]"
+			out.puts "\"float index\" [1.520000]"
 		when "light"
-		out.puts "Texture \"" + mat.name + ":light:L\" \"color\" \"blackbody\"
-			\"float temperature\" [6500.000000]"
+			out.puts "Texture \"" + mat.name + ":light:L\" \"color\" \"blackbody\"
+				\"float temperature\" [6500.000000]"
 	end
 	out.puts("\n")
 end
