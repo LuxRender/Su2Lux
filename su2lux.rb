@@ -2337,6 +2337,17 @@ if( not file_loaded?(__FILE__) )
 	main_menu.add_item("Settings") { (SU2LUX.render_settings)}
 	#main_menu.add_item("Material Editor") {(SU2LUX.material_editor)}
 	main_menu.add_item("About") {(SU2LUX.about)}
+	
+	#lfrisken toolbar code - can probably join commands together with menu code
+	toolbar = UI::Toolbar.new("Luxrender")
+	cmd_render = UI::Command.new("Render"){(SU2LUX.export)}
+	cmd_render.small_icon = "su2lux\\lux_icon.png"
+	cmd_render.large_icon = "su2lux\\lux_icon.png"
+	cmd_render.tooltip = "Export and Render with LuxRender"
+	cmd_render.menu_text = "Render"
+	cmd_render.status_bar_text = "Export and Render with LuxRender"
+	toolbar = toolbar.add_item(cmd_render)#would be nicer/more consistant with toolbar.add_item!(cmd_render)
+	toolbar.show
 end
 
 
