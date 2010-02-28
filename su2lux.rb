@@ -31,7 +31,7 @@ require 'sketchup.rb'
 module SU2LUX
 
 #if ! defined? INCLUDE_FLAG
-	DEBUG = false
+	DEBUG = true
 	FRONTF = "SU2LUX Front Face"
 	SCENE_NAME = "Untitled.lxs"
 	EXT_SCENE = ".lxs"
@@ -618,16 +618,25 @@ def SU2LUX.export_render_settings(out)
 
    
 	#accelerator
-	out.print "\n"
-	out.print "Accelerator \"#{@lrs.accelerator_type}\"\n"
+	out.puts "\n"
+	out.puts "Accelerator \"#{@lrs.accelerator_type}\""
 	case @lrs.accelerator_type
-		when "kdtree"
+		when "kdtree", "tabreckdtree"
+			out.puts "\t\"integer intersectcost\" [#{@lrs.intersectcost}]"
+			out.puts "\t\"integer traversalcost\" [#{@lrs.traversalcost}]"
+			out.puts "\t\"float emptybonus\" [#{"%.6f" %(@lrs.emptybonus)}]"
+			out.puts "\t\"integer maxprims\" [#{@lrs.maxprims}]"
+			out.puts "\t\"integer maxdepth\" [#{@lrs.maxdepth}]"
 		when "grid"
-			out.puts '	"bool refineimmediately" ["false"]'
+			value = "\"false\""
+			value = "\"true\"" if @lrs.refineimmediately
+			out.puts "\t\"bool refineimmediately\" [#{value}]"
+		when "bvh"
+		when "qbvh"
+			out.puts "\t\"integer maxprimsperleaf\" [#{@lrs.maxprimsperleaf}]"
 	end
-
-
-  end
+	out.puts "\n"
+end
 
 
 #####################################################################
@@ -976,10 +985,21 @@ E-mail: exvion@gmail.com;
 For further information please visit
 Luxrender Website & Forum - www.luxrender.net" , MB_MULTILINE , "SU2LUX - Sketchup Exporter to Luxrender")
 end
-  
+
 end #end module SU2LUX
 
+# mimhotep
+#A try for a way to automatically modify editor values
+# class SU2LUX_app_observer < Sketchup::AppObserver
 
+# def onNewModel(model)
+	# @lrs = LuxrenderSettings.new
+	# @lrs.fov = 55
+	# @luxrender_settings = LuxrenderSettingsEditor.new
+	# @luxrender_settings.SendDataFromSketchup()
+# end
+
+# end
 
 class LuxrenderSettings
 	#Default settings from preset 0 Preview - Global Illumination
@@ -1069,10 +1089,24 @@ class LuxrenderSettings
 	@@halttime=0
 	#end Film
   
-	#Accelerator
-	@@accelerator_type="grid"
-	@@refineimmediately=false
+#####################################################################
+###### - Accelerator	-														######
+#####################################################################
+	@@accelerator_type = "tabreckdtree"
+	#tabreckdtree  properties
+	@@intersectcost = 80
+	@@traversalcost = 1
+	@@emptybonus = 0.5
+	@@maxprims = 1
+	@@maxdepth = -1
+	#bvh properties
+	#qbvh properties
+	@@maxprimsperleaf = 4
+	#grid properties
+	@@refineimmediately = false
 	#end Accelerator
+#####################################################################
+#####################################################################
   
 	#Other
 	@@useparamkeys=false
@@ -1113,8 +1147,8 @@ class LuxrenderSettings
   @@volume_integrator_type="emission"
   @@stepsize=1
 
-  @@accelerator_type="grid"
-  @@refineimmediately=false
+#  @@accelerator_type="grid"
+#  @@refineimmediately=false
 
 def self.new
 	@instance ||= super
@@ -1593,15 +1627,79 @@ def halttime=(value)
 end
 #end Film
 
-#Accelerator
+#####################################################################
+###### - Accelerator	-														######
+#####################################################################
 def accelerator_type
-	@model.get_attribute(@dict,'accelerator_type',@@accelerator_type)
+	@model.get_attribute(@dict, 'accelerator_type', @@accelerator_type)
 end
 
 def accelerator_type=(value)
-	@model.set_attribute(@dict,'accelerator_type',value)
+	@model.set_attribute(@dict, 'accelerator_type', value)
 end
-#end Accelerator
+
+def refineimmediately
+	@model.get_attribute(@dict, 'refineimmediately', @@refineimmediately)
+end
+
+def refineimmediately=(value)
+	@model.set_attribute(@dict, 'refineimmediately', value)
+end
+
+#tabreckdtree
+def intersectcost
+	@model.get_attribute(@dict, 'intersectcost', @@intersectcost)
+end
+
+def intersectcost=(value)
+	@model.set_attribute(@dict, 'intersectcost', value)
+end
+
+def traversalcost
+	@model.get_attribute(@dict, 'traversalcost', @@traversalcost)
+end
+
+def traversalcost=(value)
+	@model.set_attribute(@dict, 'traversalcost', value)
+end
+
+def emptybonus
+	@model.get_attribute(@dict, 'emptybonus', @@emptybonus)
+end
+
+def emptybonus=(value)
+	@model.set_attribute(@dict, 'emptybonus', value)
+end
+
+def maxprims
+	@model.get_attribute(@dict, 'maxprims', @@maxprims)
+end
+
+def maxprims=(value)
+	@model.set_attribute(@dict, 'maxprims', value)
+end
+
+def maxdepth
+	@model.get_attribute(@dict, 'maxdepth', @@maxdepth)
+end
+
+def maxdepth=(value)
+	@model.set_attribute(@dict, 'maxdepth', value)
+end
+#end tabreckdtree
+
+#qvbh
+def maxprimsperleaf
+	@model.get_attribute(@dict, 'maxprimsperleaf', @@maxprimsperleaf)
+end
+
+def maxprimsperleaf=(value)
+	@model.set_attribute(@dict, 'maxprimsperleaf', value)
+end
+#end qvbh
+#####################################################################
+###### - END Accelerator	-												######
+#####################################################################
   
 #Other
 def useparamkeys
@@ -2061,7 +2159,7 @@ def show
 end
 
 #set parameters in inputs of settings.html
-def	SendDataFromSketchup()  
+def SendDataFromSketchup()
 	setValue("fov",@lrs.fov)
 	setValue("xresolution",@lrs.xresolution)
 	setValue("yresolution",@lrs.yresolution)
@@ -2231,6 +2329,7 @@ end
 
 end #end class LuxrenderMaterial
 
+# Sketchup.add_observer(SU2LUX_app_observer.new)
 
 if( not file_loaded?(__FILE__) )
 	main_menu = UI.menu("Plugins").add_submenu("Luxrender Exporter")

@@ -1,1 +1,33 @@
-body {overflow: hidden;}
+body {
+	overflow: hidden;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	background: #444444;
+	color: #eeeeee;
+}
+
+.header {
+	padding: 5px 10px;
+	cursor: pointer;
+	position: relative;
+	background-color: #bf8040;/*#c67700; /*#d77f00;*/
+	margin: 1px;
+}
+
+#settings_panel {
+	border: 2px solid #eeeeee;
+	margin-top: 10px;
+	padding: 3px;
+}
+
+.collapse {
+	display:none;
+	padding: 6px;
+}
+   
+button {
+	margin: 4px;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	width: 8em;
+}
