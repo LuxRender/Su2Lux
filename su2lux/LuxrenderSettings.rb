@@ -166,6 +166,8 @@ class LuxrenderSettings
 #  @@accelerator_type="grid"
 #  @@refineimmediately=false
 
+  @@export_file_path = ""
+  
 def self.new
 	@instance ||= super
 end
@@ -727,4 +729,14 @@ def useparamkeys=(value)
 end
 #end Other
   
+#Export Path Settings
+def export_file_path
+  @model.get_attribute(@dict, 'export_file_path', @@export_file_path)
+end
+
+def export_file_path=(value)
+  @model.set_attribute(@dict, 'export_file_path', value)
+end
+#end Export Path Settings
+
 end #end class LuxrenderSettings

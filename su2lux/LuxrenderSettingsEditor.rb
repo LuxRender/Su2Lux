@@ -17,6 +17,8 @@
 # Authors      : Alexander Smirnov (aka Exvion)  e-mail: exvion@gmail.com
 #                Mimmo Briganti (aka mimhotep)
 
+require 'su2lux\\LuxrenderSettings.rb'
+
 class LuxrenderSettingsEditor
 
 def initialize
