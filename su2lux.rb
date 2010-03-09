@@ -27,8 +27,6 @@
 
 
 require 'sketchup.rb'
-require "su2lux\\LuxrenderSettingsEditor.rb"
-require "su2lux\\LuxrenderMaterial.rb"
 
 module SU2LUX
 
@@ -1169,7 +1167,13 @@ if( not file_loaded?(__FILE__) )
   cmd_settings.status_bar_text = "Open SU2LUX Settings Window"
   toolbar = toolbar.add_item(cmd_settings)
   
-  toolbar.show
+  toolbar.show  
+  
+  load File.join("su2lux","LuxrenderSettings.rb")
+  load File.join("su2lux","LuxrenderSettingsEditor.rb")
+  load File.join("su2lux","LuxrenderMaterial.rb")
+  load File.join("su2lux","LuxrenderMaterialEditor.rb")
+
 end
 
 
