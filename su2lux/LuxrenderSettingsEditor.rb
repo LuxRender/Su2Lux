@@ -21,7 +21,7 @@
 class LuxrenderSettingsEditor
 
 def initialize
-	#FIXME parameters width, height of the webdialog
+
 	pref_key="LuxrenderSettingsEditor"
 	@settings_dialog=UI::WebDialog.new("Luxrender Render Settings", true,pref_key,500,500, 10,10,true)
 	@settings_dialog.max_width = 500
@@ -39,6 +39,8 @@ def initialize
 					@lrs.camera_type=value
 				when "fov"
 					@lrs.fov=value
+				when "camera_scale"
+					@lrs.camera_scale=value
 				when "near_far_clipping"
 					@lrs.near_far_clipping=true if value=="true"
 					@lrs.near_far_clipping=false if value=="false"
@@ -49,6 +51,12 @@ def initialize
 				when "dof_bokeh"
 					@lrs.dof_bokeh=true if value=="true"
 					@lrs.dof_bokeh=false if value=="false"
+				when "architectural"
+					@lrs.architectural=true if value=="true"
+					@lrs.architectural=false if value=="false"
+				when "motion_blur"
+					@lrs.motion_blur=true if value=="true"
+					@lrs.motion_blur=false if value=="false"
 				#end Camera
 				
 				#Environment
@@ -64,7 +72,29 @@ def initialize
 				when "sintegrator_type"
 					SU2LUX.p_debug 'set integrator '+value
 					@lrs.sintegrator_type=value
+				when "sintegrator_dlighting_maxdepth"
+					@lrs.sintegrator_dlighting_maxdepth=value
+				when "singtegrator_path_maxdepth"
+					@lrs.sintegrator_path_maxdepth=value
+				when "sintegrator_igi_maxdepth"
+					@lrs.sintegrator_igi_maxdepth=value
 				#end Integrator
+				
+				#Volume integrator
+				when "volume_integrator_type"
+					@lrs.volume_integrator_type=value
+				when "volume_integrator_stepsize"
+					@lrs.volume_integrator_stepsize=value
+				#end Volume integrator
+				
+				#Film
+				when "xresolution"
+					SU2LUX.p_debug 'set xresolution '+value
+					@lrs.xresolution=value.to_f
+				when "yresolution"
+					SU2LUX.p_debug 'set yresolution '+value
+					@lrs.yresolution=value.to_f
+				#end Film
 				
 				#Accelerator
 				when "accelerator_type"
@@ -74,7 +104,7 @@ def initialize
 	}
 	
 	
-	#TODO: fill presets (list of presets see in file settings.html  "var presets") 
+
 	@settings_dialog.add_action_callback("preset") {|d,p|
 	case p
 		when '0' #<option value='0'>0 Preview - Global Illumination</option> in settings.html
@@ -465,13 +495,20 @@ end
 #set parameters in inputs of settings.html
 def SendDataFromSketchup()
 	setValue("fov",@lrs.fov)
+	setValue("camera_scale",@lrs.camera_scale)
 	setValue("xresolution",@lrs.xresolution)
 	setValue("yresolution",@lrs.yresolution)
 	setValue("camera_type",@lrs.camera_type)
+	setValue("hither",@lrs.hither)
+	setValue("yon",@lrs.yon)
 	setValue("accelerator_type",@lrs.accelerator_type)
 	setValue("sintegrator_type",@lrs.sintegrator_type)
+	setValue("sintegrator_dlighting_maxdepth",@lrs.sintegrator_dlighting_maxdepth)
+	setValue("sintegrator_path_maxdepth",@lrs.sintegrator_path_maxdepth)
+	setValue("sintegrator_igi_maxdepth",@lrs.sintegrator_igi_maxdepth)
 	setValue("sampler_type",@lrs.sampler_type)
-	setValue("volume_integrator_type",@lrs.volume_integrator_type)	
+	setValue("volume_integrator_type",@lrs.volume_integrator_type)
+	setValue("volume_integrator_stepsize",@lrs.volume_integrator_stepsize)
 end 
 
 def setValue(id,value)
@@ -479,5 +516,10 @@ def setValue(id,value)
 	cmd="$('##{id}').val('#{new_value}');" #syntax jquery
 	SU2LUX.p_debug cmd
 	@settings_dialog.execute_script(cmd)
-  end
+end
+
+def setCheckbox(id,value)
+	#TODO
+end
+
 end #end class LuxrenderSettingsEditor

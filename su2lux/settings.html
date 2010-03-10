@@ -6,6 +6,7 @@
 
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="su2lux.js"></script>
+
 <link href="settings.css" type="text/css" rel="stylesheet">
  
 </head>
@@ -38,18 +39,36 @@
 				<option value="orthographic">orthographic</option>
 				<option value="environment">environment</option>
 			</select>
+			<div id="view" class="perspective">
 			fov:
 			<input type='text' id="fov" size="10">
-			<br>
-			<input type="checkbox" id="near_far_clipping">near_far_clipping
+			</div>
+			
+			<div id="scale" class="orthographic">
+			scale:<input type='text' id="camera_scale" size="4">
+			</div>
+			
+			<div id="near_far_clipping_block" class="perspective orthographic environment">
+			<input type="checkbox" id="near_far_clipping">
+			near_far_clipping
 			<div class="collapse">
 				start:<input type='text' id="hither" size="10">
 				end:<input type='text' id="yon" size="10">
 			</div>
+			</div>
 			<br>
+			
+			<div id="dof_bokeh_block" class="perspective orthographic">
 			<input type="checkbox" id="dof_bokeh">DOF & Bokeh
+			</div>
+			
+			<div id="architectural_block" class="perspective orthographic">
 			<input type="checkbox" id="architectural" value="true">Architectural (Lens Shift) & Aspect Ratio
+			</div>
+			
+			<div id="motion_blur_block" class="perspective orthographic environment">
 			<input type="checkbox" id="motion_blur" value="true">Motion Blur
+			</div>
 		</div>
 
 
@@ -81,6 +100,7 @@
 		<p class="header">Integrator</p>
 		<div class="collapse">
 			<label for="sintegrator_type">
+			</label>
 				<span class="label">integrator type:</span>
 				<select id="sintegrator_type">
 					<option value="directlighting">directlighting</option>
@@ -90,7 +110,27 @@
 					<option value="distributedpath">distributedpath</option>
 					<option value="igi">igi</option>
 				</select>
-			</label>
+				<div class="collapse" id="directlighting">
+				Depth: <input type='text' id="sintegrator_dlighting_maxdepth" size="2">
+				</div>
+				
+				<div class="collapse" id="path">
+				Depth: <input type='text' id="sintegrator_path_maxdepth" size="2">
+				</div>
+				
+				<div class="collapse" id="bidirectional">
+				<p>bidirectional</p>
+				</div>
+				
+				<div class="collapse" id="exphotonmap">
+				<p>exphotonmap</p>				
+				</div>
+				<div class="collapse" id="distributedpath">
+				</div>
+				<div class="collapse" id="igi">
+				Depth: <input type='text' id="sintegrator_igi_maxdepth" size="2">
+				</div>
+				
 		</div>
 
 		<p class="header">Volume integrator</p>
@@ -104,7 +144,7 @@
 			</label>
 			<label for="stepsize">
 				<span class="label">stepsize:</span>
-				<input type="text" id="stepsize" size="4">
+				<input type="text" id="volume_integrator_stepsize" size="4">
 			</label>
 		</div>
 
@@ -134,6 +174,8 @@
 					<option value="fleximage">fleximage</option>
 				</select>
 			</label>
+			Haltspp: <input type='text' id="haltspp" size="4"/>
+			Halttime: <input type='text' id="halttime" size="4"/>
 			<label for="tonemap">
 				<span class="label">Tonemap:</span>
 				<select id="tonemap">
@@ -143,6 +185,17 @@
 					<option value="maxwhite">maxwhite</option>
 				</select>
 			</label>
+			Display interval: <input type='text' id="film_displayinterval" size="4"/>
+			Write interval: <input type='text' id="writeinterval" size="4"/>
+			Clamping: <select id="clamping">
+				<option value="lum">lum</option>
+				<option value="hue">hue</option>
+				<option value="cut">cut</option>
+			</select>
+			<input type="checkbox" id="saveexr">OpenEXR Output
+			<input type="checkbox" id="savepng">PNG Output
+			<input type="checkbox" id="savetga">TGA Output
+			Gamma: <input type='text' id="gamma" size="4"/>
 		</div>
 
 		<p class="header">Accelerator</p>
@@ -184,6 +237,9 @@
 
 		<p class="header">Output <b>(not working yet)</b></p>
 		<div class="collapse">
+			Width: <input type='text' id="xresolution" size="4"/>
+			Height: <input type='text' id="yresolution" size="4"/>
+			<br/>
 			<button type="button" id="x800">800x600</button>
 			<button type="button" id="x1024">1024x768</button>
 			<button type="button" id="x1280">1280x1024</button>

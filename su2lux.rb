@@ -466,6 +466,7 @@ def SU2LUX.export_camera(view, out)
 			out.puts "	\"float fov\" [%.6f" %(fov) + "]"
 		when "orthographic"
 			out.puts "Camera \"#{@lrs.camera_type}\""
+			out.puts "	\"float scale\" [%.6f" %(camera_scale) + "]"
 		when "environment"
 			out.puts "Camera \"#{@lrs.camera_type}\""
 	end

@@ -11,7 +11,15 @@ $(document).ready(
 				window.location = 'skp:param_generate@' + this.id+'='+this.value;
 			}
 		);
-
+		
+		$("#settings_panel #camera_type").change(
+			function()
+			{
+				$(this).nextAll().hide();
+				$(this).nextAll("." + this.value).show();
+			}
+		);
+		
 		$("#presets select").change(
 			function()
 			{
@@ -41,9 +49,21 @@ $(document).ready(
 				$(this).next("div.collapse").slideToggle(300);
 				node = $(this).next("div.collapse").children("#accelerator_type").attr("value");
 				$(this).next("div.collapse").children("#accelerator_type").siblings("#" + node).show();
+				node = $(this).next("div.collapse").children("#sintegrator_type").attr("value");
+				$(this).next("div.collapse").children("#sintegrator_type").siblings("#" + node).show();
+			}
+		);
+				
+		$("#settings_panel #sintegrator_type").change(
+			function()
+			{
+				//alert("#"+this.value);
+				nodes = $(this).nextAll().hide();
+				nodes = $(this).nextAll("#" + this.value).show();
 			}
 		);
 
+		
 		$("#settings_panel #accelerator_type").change(
 			function()
 			{
