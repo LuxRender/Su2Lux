@@ -157,19 +157,34 @@ end
 
 #####################################################################
 #####################################################################
-def SU2LUX.export_dialogue
+def SU2LUX.export_dialog
   
   SU2LUX.reset_variables
-  
-  ##### --- awful hack --- 1.0 ####
-  @lrs=LuxrenderSettings.new
-  @export_file_path = @lrs.export_file_path #shouldn't need this
-  #####################
   
   if @export_file_path != ""
     SU2LUX.export
   else
-    model = Sketchup.active_model
+    saved = SU2LUX.new_export_file_path
+	if saved
+	  SU2LUX.export
+	end
+  end
+end
+
+#### Some Dialogs (colour select, browse file path, etc..)###########
+#####################################################################
+
+def SU2LUX.new_export_file_path
+"""This function browses for a new export file path and sets it in the lxs settings
+it is currently required for the browse button in the settings panel and the button in the 
+plugin menu.
+"""
+	##### --- awful hack --- 1.0 ####
+	@lrs=LuxrenderSettings.new
+	@export_file_path = @lrs.export_file_path #shouldn't need this
+	#####################
+	
+	model = Sketchup.active_model
     model_filename = File.basename(model.path)
     if model_filename.empty?
       export_filename = SCENE_NAME
@@ -178,15 +193,14 @@ def SU2LUX.export_dialogue
       export_filename = model_filename.slice(0..(dot_position - 1))
       export_filename += EXT_SCENE
     end
-    
   #	if model.path.empty?
     default_folder = SU2LUX.find_default_folder
     export_folder = default_folder
     export_folder = File.dirname(model.path) if ! model.path.empty?
-    
-    user_input = UI.savepanel("Save lxs file", export_folder, export_filename)
-    
-    #check whether user has pressed cancel
+	
+	user_input = UI.savepanel("Save lxs file", export_folder, export_filename)
+	
+	#check whether user has pressed cancel
     if user_input
       #store file path for quick exports
       @export_file_path = user_input
@@ -203,9 +217,9 @@ def SU2LUX.export_dialogue
         
         @luxrender_path = SU2LUX.get_luxrender_path
       end
-      SU2LUX.export
-    end
-  end
+	  return true #user has selected a path
+	end
+	return false #user has not selected a path
 end
 
 #####################################################################
@@ -1044,7 +1058,7 @@ if( not file_loaded?(__FILE__) )
   SU2LUX.initialize_variables
   
 	main_menu = UI.menu("Plugins").add_submenu("Luxrender Exporter")
-	main_menu.add_item("Render") { (SU2LUX.export_dialogue)}
+	main_menu.add_item("Render") { (SU2LUX.export_dialog)}
 	main_menu.add_item("Settings") { (SU2LUX.render_settings)}
 	#main_menu.add_item("Material Editor") {(SU2LUX.material_editor)}
 	main_menu.add_item("About") {(SU2LUX.about)}
@@ -1052,7 +1066,7 @@ if( not file_loaded?(__FILE__) )
   #lfrisken toolbar code - can probably join commands together with menu code
   toolbar = UI::Toolbar.new("Luxrender")
   
-  cmd_render = UI::Command.new("Render"){(SU2LUX.export_dialogue)}
+  cmd_render = UI::Command.new("Render"){(SU2LUX.export_dialog)}
   cmd_render.small_icon = "su2lux\\lux_icon.png"
   cmd_render.large_icon = "su2lux\\lux_icon.png"
   cmd_render.tooltip = "Export and Render with LuxRender"

@@ -72,5 +72,12 @@ $(document).ready(
 				nodes = $(this).nextAll("#" + this.value).show();
 			}
 		);
+		
+		$(":button").click(
+			function()
+			{
+				window.location = 'skp:open_dialog@new_export_file_path'
+			}
+		)
 	}
 );

@@ -101,7 +101,7 @@ def initialize
 					@lrs.accelerator_type=value
 				#end Accelerator
 			end	
-	}
+	} #end action callback param_generatate
 	
 	
 
@@ -483,8 +483,14 @@ def initialize
 			@lrs.pixelfilter_mitchell_xwidth=2.0 
 			@lrs.pixelfilter_mitchell_ywidth=2.0 
 			@lrs.pixelfilter_mitchell_optmode='slider'
-	end
-	}
+	end #end case
+	} #end action callback preset
+	@settings_dialog.add_action_callback("open_dialog") {|dialog, params|
+  case params.to_s
+		when "new_export_file_path"
+			SU2LUX.new_export_file_path
+	end #end case
+	} #end action callback open_dialog
 end
 
 
