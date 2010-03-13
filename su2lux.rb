@@ -1080,22 +1080,41 @@ For further information please visit
 Luxrender Website & Forum - www.luxrender.net" , MB_MULTILINE , "SU2LUX - Sketchup Exporter to Luxrender")
 end
 
+def SU2LUX.get_editor(type)
+	case type
+	when "settings"
+		editor = @luxrender_settings
+	when "material"
+		editor = @material_editor
+	end
+	return editor
+end
+
 end #end module SU2LUX
 
-# mimhotep
-#A try for a way to automatically modify editor values
-# class SU2LUX_app_observer < Sketchup::AppObserver
+class SU2LUX_view_observer < Sketchup::ViewObserver
 
-# def onNewModel(model)
-	# @lrs = LuxrenderSettings.new
-	# @lrs.fov = 55
-	# @luxrender_settings = LuxrenderSettingsEditor.new
-	# @luxrender_settings.SendDataFromSketchup()
-# end
+include SU2LUX
 
-# end
+def onViewChanged(view)
+	@lrs = LuxrenderSettings.new
+	@lrs.fov = Sketchup.active_model.active_view.camera.fov
+	luxrender_settings = SU2LUX.get_editor("settings")
+	fov = format("%.2f", @lrs.fov)
+	luxrender_settings.setValue("fov", fov) if luxrender_settings
+end
 
-# Sketchup.add_observer(SU2LUX_app_observer.new)
+end
+
+class SU2LUX_app_observer < Sketchup::AppObserver
+	def onNewModel(model)
+		model.active_view.add_observer(SU2LUX_view_observer.new)
+	end
+
+	def onOpenModel(model)
+		model.active_view.add_observer(SU2LUX_view_observer.new)
+	end
+end
 
 if( not file_loaded?(__FILE__) )
   SU2LUX.initialize_variables
@@ -1133,6 +1152,9 @@ if( not file_loaded?(__FILE__) )
   load File.join("su2lux","LuxrenderMaterial.rb")
   load File.join("su2lux","LuxrenderMaterialEditor.rb")
 
+	#observers
+	Sketchup.add_observer(SU2LUX_app_observer.new)
+	Sketchup.active_model.active_view.add_observer(SU2LUX_view_observer.new)
 end
 
 

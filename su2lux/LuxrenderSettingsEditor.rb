@@ -38,7 +38,8 @@ def initialize
 				when "camera_type"
 					@lrs.camera_type=value
 				when "fov"
-					@lrs.fov=value
+					@lrs.fov = value.to_f
+					Sketchup.active_model.active_view.camera.fov = @lrs.fov
 				when "camera_scale"
 					@lrs.camera_scale=value
 				when "near_far_clipping"
