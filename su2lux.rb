@@ -124,7 +124,6 @@ def SU2LUX.export
 	selection = model.selection
 	materials = model.materials	
 	out = File.new(@export_file_path,"w")
-	start_time = Time.new
 	SU2LUX.export_global_settings(out)
 	SU2LUX.export_camera(model.active_view, out)
 	SU2LUX.export_film(out)
@@ -150,26 +149,65 @@ def SU2LUX.export
 	out_mat = File.new(file_fullname + SUFFIX_MATERIAL, "w")
 	SU2LUX.export_used_materials(materials, out_mat)
 	SU2LUX.finish_close(out_mat)
-	
-	result = SU2LUX.report_window(start_time)
-	SU2LUX.launch_luxrender if result == 6
 end
 
 #####################################################################
 #####################################################################
-def SU2LUX.export_dialog
-  
+def SU2LUX.export_dialog(render=true)
+	"""The argument: 'render' is a boolean which indicates
+	whether or not to render the lxs after it has been exported
+	"""
+	##### --- awful hack --- 1.0 ####
+	@lrs=LuxrenderSettings.new
+	@export_file_path = @lrs.export_file_path #shouldn't need this
+	#####################
+
   SU2LUX.reset_variables
   
-  if @export_file_path != ""
+  #check whether file path has already been chosen
+  if @export_file_path != "" 
+    start_time = Time.new
     SU2LUX.export
-  else
+	
+	#launch appropriate report window and render (according to variable: render)
+	if render == true
+	  result = SU2LUX.report_window(start_time, ask_render=true)
+	  SU2LUX.launch_luxrender if result == 6
+	else if render == false
+	  SU2LUX.report_window(start_time, ask_render=false)
+	  end
+	end
+	
+  #choose a new name for export file path
+  else 
     saved = SU2LUX.new_export_file_path
 	if saved
+	  start_time = Time.new
 	  SU2LUX.export
+	  
+	  #launch appropriate report window and render (according to variable: render)
+	  if render == true
+	    result = SU2LUX.report_window(start_time, ask_render=true)
+		SU2LUX.launch_luxrender if result == 6
+	  else if render == false
+	    SU2LUX.report_window(start_time, ask_render=false)
+	    end
+	  end
 	end
   end
-end
+end #end export_dialog
+
+def SU2LUX.export_copy
+
+	@lrs=LuxrenderSettings.new
+	#temporary file path for exporting copy
+	old_export_file_path = @lrs.export_file_path 
+	
+	SU2LUX.new_export_file_path
+	SU2LUX.export_dialog(render=false) #don't bother rendering
+	
+	@lrs.export_file_path = old_export_file_path
+end	
 
 #### Some Dialogs (colour select, browse file path, etc..)###########
 #####################################################################
@@ -297,7 +335,7 @@ end
 
 #####################################################################
 #####################################################################
-def SU2LUX.report_window(start_time)
+def SU2LUX.report_window(start_time, ask_render=true)
 	SU2LUX.p_debug "SU2LUX.report_window"
 	end_time=Time.new
 	elapsed=end_time-start_time
@@ -309,7 +347,12 @@ def SU2LUX.report_window(start_time)
 	SU2LUX.status_bar(time+" Triangles = #{@count_tri}")
 	export_text="Model & Lights saved in file:\n"
 	#export_text="Selection saved in file:\n" if @selected==true
-	result=UI.messagebox export_text + @export_file_path +  " \n\nOpen exported model in Luxrender?",MB_YESNO
+	if ask_render
+		result=UI.messagebox(export_text + @export_file_path +  " \n\nOpen exported model in Luxrender?",MB_YESNO)
+	else
+		result=UI.messagebox(export_text + @export_file_path,MB_OK)
+	end
+	return result
 end
 
 #####################################################################
@@ -1059,6 +1102,7 @@ if( not file_loaded?(__FILE__) )
   
 	main_menu = UI.menu("Plugins").add_submenu("Luxrender Exporter")
 	main_menu.add_item("Render") { (SU2LUX.export_dialog)}
+	main_menu.add_item("Export Copy") {(SU2LUX.export_copy)}
 	main_menu.add_item("Settings") { (SU2LUX.render_settings)}
 	#main_menu.add_item("Material Editor") {(SU2LUX.material_editor)}
 	main_menu.add_item("About") {(SU2LUX.about)}
