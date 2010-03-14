@@ -1044,7 +1044,7 @@ end
   
 #####################################################################
 #####################################################################
-def SU2LUX.material_editor
+def SU2LUX.show_material_editor
 	if not @material_editor
 		@material_editor=LuxrenderMaterialEditor.new
 	end
@@ -1053,12 +1053,12 @@ end
 
 #####################################################################
 #####################################################################
-def SU2LUX.render_settings
+def SU2LUX.show_settings_editor
 
-	if not @luxrender_settings
-		@luxrender_settings=LuxrenderSettingsEditor.new
+	if not @settings_editor
+		@settings_editor=LuxrenderSettingsEditor.new
 	end
-	@luxrender_settings.show
+	@settings_editor.show
 end
 
 
@@ -1083,7 +1083,7 @@ end
 def SU2LUX.get_editor(type)
 	case type
 	when "settings"
-		editor = @luxrender_settings
+		editor = @settings_editor
 	when "material"
 		editor = @material_editor
 	end
@@ -1122,11 +1122,10 @@ if( not file_loaded?(__FILE__) )
 	main_menu = UI.menu("Plugins").add_submenu("Luxrender Exporter")
 	main_menu.add_item("Render") { (SU2LUX.export_dialog)}
 	main_menu.add_item("Export Copy") {(SU2LUX.export_copy)}
-	main_menu.add_item("Settings") { (SU2LUX.render_settings)}
-	#main_menu.add_item("Material Editor") {(SU2LUX.material_editor)}
+	main_menu.add_item("Settings") { (SU2LUX.show_settings_editor)}
+	#main_menu.add_item("Material Editor") {(SU2LUX.show_material_editor)}
 	main_menu.add_item("About") {(SU2LUX.about)}
   
-  #lfrisken toolbar code - can probably join commands together with menu code
   toolbar = UI::Toolbar.new("Luxrender")
   
   cmd_render = UI::Command.new("Render"){(SU2LUX.export_dialog)}
@@ -1137,7 +1136,7 @@ if( not file_loaded?(__FILE__) )
   cmd_render.status_bar_text = "Export and Render with LuxRender"
   toolbar = toolbar.add_item(cmd_render)#would be nicer/more consistant with toolbar.add_item!(cmd_render)
   
-  cmd_settings = UI::Command.new("Settings"){(SU2LUX.render_settings)}
+  cmd_settings = UI::Command.new("Settings"){(SU2LUX.show_settings_editor)}
   cmd_settings.small_icon = "su2lux\\lux_icon_settings.png"
   cmd_settings.large_icon = "su2lux\\lux_icon_settings.png"
   cmd_settings.tooltip = "Open SU2LUX Settings Window"
