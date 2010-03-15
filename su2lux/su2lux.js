@@ -73,11 +73,59 @@ $(document).ready(
 			}
 		);
 		
-		$(":button").click(
+		$("#export_file_path_browse").click(
 			function()
 			{
 				window.location = 'skp:open_dialog@new_export_file_path'
 			}
 		)
+		
+		$("#current_view").click(
+			function()
+			{	
+				window.location = 'skp:get_view_size';
+			}
+		);
+		
+		$("#flip_dim").click(
+			function()
+			{	
+				width = $("#xresolution").val();
+				height = $("#yresolution").val();
+				$("#xresolution").val(parseInt(height));
+				$("#yresolution").val(parseInt(width));
+				window.location = 'skp:set_image_size@' + height + 'x' + width;
+			}
+		);
+		
+		$("#x800, #x1024, #x1280, #x1440, #x1080, #x1920").click(
+			function()
+			{	
+				window.location = 'skp:set_image_size@' + this.value;
+			}
+		);
+
+		$("#multiply_by_2, #divide_by_2").click(
+			function()
+			{	
+				width = $("#xresolution").val();
+				height = $("#yresolution").val();
+				switch(this.id)
+				{
+					case 'multiply_by_2':
+						width *= 2;
+						height *= 2;
+						break;
+					case 'divide_by_2':
+						width /= 2;
+						height /= 2;
+						break;
+				}
+				$("#xresolution").val(parseInt(width));
+				$("#yresolution").val(parseInt(height));
+				window.location = 'skp:scale_view@' + width + 'x' + height;
+			}
+		);
+		
 	}
 );

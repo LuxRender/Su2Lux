@@ -23,8 +23,8 @@ class LuxrenderSettingsEditor
 def initialize
 
 	pref_key="LuxrenderSettingsEditor"
-	@settings_dialog=UI::WebDialog.new("Luxrender Render Settings", true,pref_key,500,500, 10,10,true)
-	@settings_dialog.max_width = 500
+	@settings_dialog=UI::WebDialog.new("Luxrender Render Settings", true,pref_key,520,500, 10,10,true)
+	@settings_dialog.max_width = 520
 	setting_html_path = Sketchup.find_support_file "settings.html" ,"Plugins/su2lux"
 	@settings_dialog.set_file(setting_html_path)
 	@lrs=LuxrenderSettings.new
@@ -92,9 +92,11 @@ def initialize
 				when "xresolution"
 					SU2LUX.p_debug 'set xresolution '+value
 					@lrs.xresolution=value.to_f
+					change_aspect_ratio(@lrs.xresolution.to_f / @lrs.yresolution.to_f)
 				when "yresolution"
 					SU2LUX.p_debug 'set yresolution '+value
 					@lrs.yresolution=value.to_f
+					change_aspect_ratio(@lrs.xresolution.to_f / @lrs.yresolution.to_f)
 				#end Film
 				
 				#Accelerator
@@ -104,6 +106,36 @@ def initialize
 			end	
 	} #end action callback param_generatate
 	
+	@settings_dialog.add_action_callback("get_view_size") { |dialog, params|
+		width = (Sketchup.active_model.active_view.vpwidth)
+		height = (Sketchup.active_model.active_view.vpheight)
+		setValue("xresolution", width)
+		setValue("yresolution", height)
+		@lrs.xresolution = width
+		@lrs.yresolution = height
+		change_aspect_ratio(0.0)
+	}
+
+	@settings_dialog.add_action_callback("set_image_size") { |dialog, params|
+		values = params.split('x')
+		width = values[0].to_i
+		height = values[1].to_i
+		setValue("xresolution", width)
+		setValue("yresolution", height)
+		@lrs.xresolution = width
+		@lrs.yresolution= height
+		change_aspect_ratio(width.to_f / height.to_f)
+	}
+	
+	@settings_dialog.add_action_callback("scale_view") { |dialog, params|
+		values = params.split('x')
+		width = values[0].to_i
+		height = values[1].to_i
+		setValue("xresolution", width)
+		setValue("yresolution", height)
+		@lrs.xresolution = width
+		@lrs.yresolution = height
+	}
 	
 
 	@settings_dialog.add_action_callback("preset") {|d,p|
@@ -523,6 +555,22 @@ def setValue(id,value)
 	cmd="$('##{id}').val('#{new_value}');" #syntax jquery
 	SU2LUX.p_debug cmd
 	@settings_dialog.execute_script(cmd)
+end
+
+def change_aspect_ratio(aspect_ratio)
+	current_camera = Sketchup.active_model.active_view.camera
+	current_ratio = current_camera.aspect_ratio
+	current_ratio = 1.0 if current_ratio == 0.0
+	
+	new_ratio = aspect_ratio
+	
+	if(current_ratio != new_ratio)
+		current_camera.aspect_ratio = new_ratio
+		new_ratio = 1.0 if new_ratio == 0.0
+		scale = current_ratio / new_ratio.to_f
+		fov = current_camera.fov
+		current_camera.focal_length = current_camera.focal_length * scale
+	end
 end
 
 def setCheckbox(id,value)

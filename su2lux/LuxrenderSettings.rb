@@ -154,8 +154,8 @@ def initialize
 	
 	@@settings.each do |key, value|
 		singleton_class.module_eval do
-		define_method(key) { @model.get_attribute(@dict,key,value) }
-		define_method("#{key}=") { |new_value| @model.set_attribute(@dict,key,new_value) }
+			define_method(key) { @model.get_attribute(@dict,key,value) }
+			define_method("#{key}=") { |new_value| @model.set_attribute(@dict,key,new_value) }
 		end
 	end
 end

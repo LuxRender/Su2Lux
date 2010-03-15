@@ -142,7 +142,7 @@
 					<option value="single">single</option>
 				</select>
 			</label>
-			<label for="stepsize">
+			<label for="volume_integrator_stepsize">
 				<span class="label">stepsize:</span>
 				<input type="text" id="volume_integrator_stepsize" size="4">
 			</label>
@@ -174,8 +174,8 @@
 					<option value="fleximage">fleximage</option>
 				</select>
 			</label>
-			Haltspp: <input type='text' id="haltspp" size="4"/>
-			Halttime: <input type='text' id="halttime" size="4"/>
+			Haltspp: <input type='text' id="haltspp" size="4">
+			Halttime: <input type='text' id="halttime" size="4">
 			<label for="tonemap">
 				<span class="label">Tonemap:</span>
 				<select id="tonemap">
@@ -185,8 +185,8 @@
 					<option value="maxwhite">maxwhite</option>
 				</select>
 			</label>
-			Display interval: <input type='text' id="film_displayinterval" size="4"/>
-			Write interval: <input type='text' id="writeinterval" size="4"/>
+			Display interval: <input type='text' id="film_displayinterval" size="4">
+			Write interval: <input type='text' id="writeinterval" size="4">
 			Clamping: <select id="clamping">
 				<option value="lum">lum</option>
 				<option value="hue">hue</option>
@@ -195,7 +195,7 @@
 			<input type="checkbox" id="saveexr">OpenEXR Output
 			<input type="checkbox" id="savepng">PNG Output
 			<input type="checkbox" id="savetga">TGA Output
-			Gamma: <input type='text' id="gamma" size="4"/>
+			Gamma: <input type='text' id="gamma" size="4">
 		</div>
 
 		<p class="header">Accelerator</p>
@@ -237,19 +237,27 @@
 
 		<p class="header">Output <b>(not working yet)</b></p>
 		<div class="collapse">
-			Width: <input type='text' id="xresolution" size="4"/>
-			Height: <input type='text' id="yresolution" size="4"/>
-			<br />
-			<button type="button" id="x800">800x600</button>
-			<button type="button" id="x1024">1024x768</button>
-			<button type="button" id="x1280">1280x1024</button>
-			<br />
-			<button type="button" id="x1440">1440x900</button>
-			<button type="button" id="x1080">1920x1080</button>
-			<button type="button" id="x1920">1920x1200</button>
-			<br />
+			<label for="xresolution">Width&nbsp;</label>
+			<input type="text" id="xresolution" size="5">
+			<input type="button" id="multiply_by_2" value ="Double">
+			<input type="button" id="x800" value ="800x600">
+			<input type="button" id="x1024" value="1024x768">
+			<input type="button" id="x1280" value="1280x1024">
+			<br>
+			<label for="yresolution">Height</label>
+			<input type="text" id="yresolution" size="5">
+			<input type="button" id="divide_by_2" value ="Half">
+			<input type="button" id="x1440" value="1440x900">
+			<input type="button" id="x1080" value="1920x1080">
+			<input type="button" id="x1920" value="1920x1200">
+			<br>
+			<input type="button" id="current_view" value="Current view">
+			<input type="button" id="flip_dim" value="Flip dimensions">
+			<br>
+			<br>
+			<br>
 			Export File Path: <input name="export_file_path" id="export_file_path" type="text" size="20">
-			<button type="button" id="export_file_path_browse">Browse</button>
+			<input type="button" id="export_file_path_browse" value="Browse">
 		</div>
 
 	</div><!--end settings_panel-->

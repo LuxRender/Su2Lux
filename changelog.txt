@@ -1,8 +1,43 @@
 #############################################################################
 #############################################################################
 
-# 2010-03-13
-#VERSION 0.1.3.2
+# 2010-003-15
+#VERSION 0.0.12
+
+#ADDED: Settings editor: Working output section. Made the 'change resolution' buttons work.
+			The change in resolution shows some transparent bar on Sketchup view to define what the rendered region will be.
+
+#############################################################################
+#############################################################################
+
+# 2010-003-14
+#VERSION 0.0.11.1
+
+#CHANGED: Made some naming changes to make code clearer
+				- @luxrender_settings => @settings_editor (variable)
+				- render_settings => show_settings_editor (method)
+
+#############################################################################
+#############################################################################
+
+# 2010-003-13
+#VERSION 0.0.11
+
+#ADDED: Settings editor: Changes in fov values are reflected in Sketchup view and viceversa
+
+#############################################################################
+#############################################################################
+
+# 2010-003-13
+#VERSION 0.0.10
+
+#ADDED: menu item to export a scene without starting the render process
+
+#############################################################################
+#############################################################################
+
+# 2010-003-13
+#VERSION 0.0.9
 
 #ADDED: settings panel now has button to change file export path
 #ADDED: toolbar with icons
@@ -10,8 +45,53 @@
 #############################################################################
 #############################################################################
 
-# 2010-02-13
-#VERSION 0.1.3.1
+# 2010-003-10
+#VERSION 0.0.8
+
+#CHANGED: Rewrite full class LuxrenderSettings
+#ADDED: Add some parameters for Settings Editor 
+
+#############################################################################
+#############################################################################
+
+# 2010-003-09
+#VERSION 0.0.7.1
+
+#CHANGED: Remove class LuxrenderMaterialEditor from su2lux.rb 
+
+#############################################################################
+#############################################################################
+
+# 2010-003-01
+#VERSION 0.0.7
+
+#ADDED: Output section in settings editor with standard resolutions
+
+#############################################################################
+#############################################################################
+
+# 2010-03-01
+#VERSION 0.0.6
+
+#CHANGED: every class has its own file
+					class LuxrenderSettings => su2lux/LuxrenderSettings.rb
+					class LuxrenderSettingsEditor => su2lux/LuxrenderSettingsEditor.rb
+					class LuxrenderMaterial => su2lux/LuxrenderMaterial.rb
+					class LuxrenderMaterialEditor => su2lux/LuxrenderMaterialEditor.rb
+
+#############################################################################
+#############################################################################
+
+# 2010-02-28
+#VERSION 0.0.5
+
+#ADDED: toolbar with render button and .png luxrender logo
+
+#############################################################################
+#############################################################################
+
+# 2010-02-27
+#VERSION 0.0.4
 
 #CHANGED: settings panel has now w3c compliant code
 #CHANGED: cosmetic changes to the style of the setting panel
@@ -21,7 +101,7 @@
 #############################################################################
 
 # 2010-02-26
-#VERSION 0.1.3
+#VERSION 0.0.3
 
 #ADDED: Exporting Sketchup transparent materials as glass
 
@@ -29,7 +109,7 @@
 #############################################################################
 
 # 2010-02-21
-#VERSION 0.1.2
+#VERSION 0.0.2
 
 #ADDED: module constant DEBUG to set script state
 #ADDED: module function p_debug to print debug ,essages on console
@@ -45,7 +125,7 @@
 #############################################################################
 
 # 2010-02-13
-#VERSION 0.1.1
+#VERSION 0.0.1
 
 #ADDED: module constant SCENE_NAME
 #ADDED: module constant EXT_SCENE

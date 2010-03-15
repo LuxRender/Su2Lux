@@ -496,8 +496,6 @@ end
 #####################################################################
 def SU2LUX.export_camera(view, out)
 	@lrs=LuxrenderSettings.new
-	@lrs.xresolution = Sketchup.active_model.active_view.vpwidth
-	@lrs.yresolution = Sketchup.active_model.active_view.vpheight
 
 	user_camera = view.camera
 	user_eye = user_camera.eye
@@ -574,23 +572,26 @@ end
 #####################################################################
 #####################################################################
 def SU2LUX.compute_fov(xres, yres)
+	camera = Sketchup.active_model.active_view.camera
 	fov_vertical = @lrs.fov.to_f
-	fov_vertical_rad = fov_vertical * Math::PI / 180.0
-	# height = Float(Sketchup.active_model.active_view.vpheight)
-	# width = Float(Sketchup.active_model.active_view.vpwidth)
 	width = xres.to_f
 	height = yres.to_f
-	focal_distance = 0.5 * height / Math.tan(0.5 * fov_vertical_rad)
-
-	fov_horizontal_rad = 2.0 * Math.atan2(0.5 * width, focal_distance)
-	fov_horizontal = fov_horizontal_rad * 180.0 / Math::PI
 	if(width >= height)
 		fov = fov_vertical
 	else
+		focal_distance = 0.5 * height / Math.tan(0.5 * fov_vertical.degrees)
+		fov_horizontal = (2.0 * Math.atan2(0.5 * width, focal_distance)).radians
 		fov = fov_horizontal
 	end
-	SU2LUX.p_debug fov_vertical
-	SU2LUX.p_debug fov_horizontal
+
+	if (camera.aspect_ratio != 0.0)
+		focal_length = camera.focal_length
+		image_width = 2 * focal_length * Math::tan(0.5 * fov.degrees)
+		aspect_ratio_inverse = height /width
+		image_width = image_width * aspect_ratio_inverse
+		fov = 2.0 * Math.atan2(0.5 * image_width, focal_length)
+		fov = fov.radians
+	end
 	return fov
 end
 
@@ -1082,10 +1083,10 @@ end
 
 def SU2LUX.get_editor(type)
 	case type
-	when "settings"
-		editor = @settings_editor
-	when "material"
-		editor = @material_editor
+		when "settings"
+			editor = @settings_editor
+		when "material"
+			editor = @material_editor
 	end
 	return editor
 end
@@ -1099,9 +1100,9 @@ include SU2LUX
 def onViewChanged(view)
 	@lrs = LuxrenderSettings.new
 	@lrs.fov = Sketchup.active_model.active_view.camera.fov
-	luxrender_settings = SU2LUX.get_editor("settings")
+	settings_editor = SU2LUX.get_editor("settings")
 	fov = format("%.2f", @lrs.fov)
-	luxrender_settings.setValue("fov", fov) if luxrender_settings
+	settings_editor.setValue("fov", fov) if settings_editor
 end
 
 end
@@ -1109,6 +1110,15 @@ end
 class SU2LUX_app_observer < Sketchup::AppObserver
 	def onNewModel(model)
 		model.active_view.add_observer(SU2LUX_view_observer.new)
+		
+		@lrs = LuxrenderSettings.new
+		@lrs.xresolution = Sketchup.active_model.active_view.vpwidth
+		@lrs.yresolution = Sketchup.active_model.active_view.vpheight
+		settings_editor = SU2LUX.get_editor("settings")
+		if settings_editor
+			settings_editor.setValue("xresolution", @lrs.xresolution)
+			settings_editor.setValue("yresolution", @lrs.yresolution)
+		end
 	end
 
 	def onOpenModel(model)
@@ -1117,39 +1127,39 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 end
 
 if( not file_loaded?(__FILE__) )
-  SU2LUX.initialize_variables
-  
+	SU2LUX.initialize_variables
+
 	main_menu = UI.menu("Plugins").add_submenu("Luxrender Exporter")
 	main_menu.add_item("Render") { (SU2LUX.export_dialog)}
 	main_menu.add_item("Export Copy") {(SU2LUX.export_copy)}
 	main_menu.add_item("Settings") { (SU2LUX.show_settings_editor)}
 	#main_menu.add_item("Material Editor") {(SU2LUX.show_material_editor)}
 	main_menu.add_item("About") {(SU2LUX.about)}
-  
-  toolbar = UI::Toolbar.new("Luxrender")
-  
-  cmd_render = UI::Command.new("Render"){(SU2LUX.export_dialog)}
-  cmd_render.small_icon = "su2lux\\lux_icon.png"
-  cmd_render.large_icon = "su2lux\\lux_icon.png"
-  cmd_render.tooltip = "Export and Render with LuxRender"
-  cmd_render.menu_text = "Render"
-  cmd_render.status_bar_text = "Export and Render with LuxRender"
-  toolbar = toolbar.add_item(cmd_render)#would be nicer/more consistant with toolbar.add_item!(cmd_render)
-  
-  cmd_settings = UI::Command.new("Settings"){(SU2LUX.show_settings_editor)}
-  cmd_settings.small_icon = "su2lux\\lux_icon_settings.png"
-  cmd_settings.large_icon = "su2lux\\lux_icon_settings.png"
-  cmd_settings.tooltip = "Open SU2LUX Settings Window"
-  cmd_settings.menu_text = "Settings"
-  cmd_settings.status_bar_text = "Open SU2LUX Settings Window"
-  toolbar = toolbar.add_item(cmd_settings)
-  
-  toolbar.show  
-  
-  load File.join("su2lux","LuxrenderSettings.rb")
-  load File.join("su2lux","LuxrenderSettingsEditor.rb")
-  load File.join("su2lux","LuxrenderMaterial.rb")
-  load File.join("su2lux","LuxrenderMaterialEditor.rb")
+
+	toolbar = UI::Toolbar.new("Luxrender")
+
+	cmd_render = UI::Command.new("Render"){(SU2LUX.export_dialog)}
+	cmd_render.small_icon = "su2lux\\lux_icon.png"
+	cmd_render.large_icon = "su2lux\\lux_icon.png"
+	cmd_render.tooltip = "Export and Render with LuxRender"
+	cmd_render.menu_text = "Render"
+	cmd_render.status_bar_text = "Export and Render with LuxRender"
+	toolbar = toolbar.add_item(cmd_render)#would be nicer/more consistant with toolbar.add_item!(cmd_render)
+
+	cmd_settings = UI::Command.new("Settings"){(SU2LUX.show_settings_editor)}
+	cmd_settings.small_icon = "su2lux\\lux_icon_settings.png"
+	cmd_settings.large_icon = "su2lux\\lux_icon_settings.png"
+	cmd_settings.tooltip = "Open SU2LUX Settings Window"
+	cmd_settings.menu_text = "Settings"
+	cmd_settings.status_bar_text = "Open SU2LUX Settings Window"
+	toolbar = toolbar.add_item(cmd_settings)
+
+	toolbar.show  
+
+	load File.join("su2lux","LuxrenderSettings.rb")
+	load File.join("su2lux","LuxrenderSettingsEditor.rb")
+	load File.join("su2lux","LuxrenderMaterial.rb")
+	load File.join("su2lux","LuxrenderMaterialEditor.rb")
 
 	#observers
 	Sketchup.add_observer(SU2LUX_app_observer.new)
