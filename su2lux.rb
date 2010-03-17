@@ -123,6 +123,7 @@ def SU2LUX.export
 	entities = model.active_entities
 	selection = model.selection
 	materials = model.materials	
+	
 	out = File.new(@export_file_path,"w")
 	SU2LUX.export_global_settings(out)
 	SU2LUX.export_camera(model.active_view, out)
@@ -131,6 +132,7 @@ def SU2LUX.export
 	entity_list=model.entities
 	out.puts 'WorldBegin'
 	SU2LUX.export_light(out)
+	
 	file_basename = File.basename(@export_file_path, EXT_SCENE)
 	out.puts "Include \"" + file_basename + SUFFIX_MATERIAL + "\"\n\n"
 	out.puts "Include \"" + file_basename + SUFFIX_OBJECT + "\"\n\n"
@@ -410,76 +412,20 @@ def SU2LUX.launch_luxrender
 	end
 end
 
-#####################################################################
-#####################################################################
-def SU2LUX.export_light(out)
-   	sun_direction = Sketchup.active_model.shadow_info['SunDirection']
-	sunsky = <<-eos
-AttributeBegin
-	LightGroup "default"
-	LightSource "sunsky"
-	"float gain" [1.000000]
-	"vector sundir" [#{sun_direction.x} #{sun_direction.y} #{sun_direction.z}]
-
-	"float relsize" [1.000000]
-	"float turbidity" [2.200000]
-AttributeEnd
-
-	eos
-	out.puts sunsky
-end
 
 #####################################################################
 #####################################################################
-def SU2LUX.export_used_materials(materials, out)
-	materials.each { |mat|
-		luxrender_mat = LuxrenderMaterial.new(mat)
-		p_debug luxrender_mat.name
-		SU2LUX.export_mat(luxrender_mat, out)
-	}
-end
+def SU2LUX.get_luxrender_console_path
+	path=SU2LUX.get_luxrender_path
+	return nil if not path
+	root=File.dirname(path)
+	c_path=File.join(root,"luxconsole.exe")
 
-#####################################################################
-#####################################################################
-def SU2LUX.export_mat(mat, out)
-	SU2LUX.p_debug "export_mat"
-	out.puts "# Material '" + mat.name + "'"
-	case mat.type
-		when "matte"
-			out.puts "MakeNamedMaterial \"" + mat.name + "\""
-			SU2LUX.p_debug "mat.name " + mat.name
-			out.puts  "\"string type\" [\"matte\"]"
-			out.puts  "\"color Kd\" [#{"%.6f" %(mat.color.red.to_f/255)} #{"%.6f" %(mat.color.green.to_f/255)} #{"%.6f" %(mat.color.blue.to_f/255)}]"
-		when "glass"
-			out.puts "MakeNamedMaterial \"" + mat.name + "\""
-			SU2LUX.p_debug "mat.name " + mat.name
-#   "bool architectural" ["true"]
-			out.puts  "\"string type\" [\"glass\"]"
-			out.puts  "\"color Kt\" [#{"%.6f" %(mat.color.red.to_f/255)} #{"%.6f" %(mat.color.green.to_f/255)} #{"%.6f" %(mat.color.blue.to_f/255)}]"
-			out.puts "\"float index\" [1.520000]"
-		when "light"
-			out.puts "Texture \"" + mat.name + ":light:L\" \"color\" \"blackbody\"
-				\"float temperature\" [6500.000000]"
+	if FileTest.exist?(c_path)
+		return c_path
+	else		
+		return nil
 	end
-	out.puts("\n")
-end
-
-#####################################################################
-#####################################################################
-def SU2LUX.export_mesh(out)
-	SU2LUX.collect_faces(Sketchup.active_model.entities, Geom::Transformation.new)
-	@current_mat_step = 1
-	SU2LUX.export_faces(out)
-	SU2LUX.export_fm_faces(out)
-end
-
-#####################################################################
-###### - Send text to status bar - 										######
-#####################################################################
-def SU2LUX.status_bar(stat_text)
-	
-	statbar = Sketchup.set_status_text stat_text
-	
 end
 
 #####################################################################
@@ -536,41 +482,6 @@ end
 
 #####################################################################
 #####################################################################
-def SU2LUX.export_film(out)
-	out.puts "Film \"fleximage\""
-	out.puts "\t\"integer xresolution\" [#{@lrs.xresolution}]"
-	out.puts "\t\"integer yresolution\" [#{@lrs.yresolution}]"
-	out.puts "\t\"integer haltspp\" [#{@lrs.haltspp}]"
-	
-	out.puts '
-	"bool premultiplyalpha" ["false"]
-   "string tonemapkernel" ["reinhard"]
-   "float reinhard_prescale" [1.000000]
-   "float reinhard_postscale" [1.200000]
-   "float reinhard_burn" [6.000000]
-   "integer displayinterval" [4]
-   "integer writeinterval" [10]
-   "string ldr_clamp_method" ["lum"]
-   "bool write_exr" ["false"]
-   "bool write_png" ["true"]
-   "string write_png_channels" ["RGB"]
-   "bool write_png_16bit" ["false"]
-   "bool write_png_gamutclamp" ["true"]
-   "bool write_tga" ["false"]
-   "string filename" ["exported_image"]
-   "bool write_resume_flm" ["false"]
-   "bool restart_resume_flm" ["true"]
-   "integer reject_warmup" [128]
-   "bool debug" ["true"]
-   "float colorspace_white" [0.314275 0.329411]
-   "float colorspace_red" [0.630000 0.340000]
-   "float colorspace_green" [0.310000 0.595000]
-   "float colorspace_blue" [0.155000 0.070000]
-   "float gamma" [2.200000]'
-end
-
-#####################################################################
-#####################################################################
 def SU2LUX.compute_fov(xres, yres)
 	camera = Sketchup.active_model.active_view.camera
 	fov_vertical = camera.fov
@@ -609,6 +520,39 @@ end
 
 #####################################################################
 #####################################################################
+def SU2LUX.export_film(out)
+	out.puts "Film \"fleximage\""
+	out.puts "\t\"integer xresolution\" [#{@lrs.xresolution}]"
+	out.puts "\t\"integer yresolution\" [#{@lrs.yresolution}]"
+	out.puts "\t\"integer haltspp\" [#{@lrs.haltspp}]"
+	
+	out.puts '
+	"bool premultiplyalpha" ["false"]
+   "string tonemapkernel" ["reinhard"]
+   "float reinhard_prescale" [1.000000]
+   "float reinhard_postscale" [1.200000]
+   "float reinhard_burn" [6.000000]
+   "integer displayinterval" [4]
+   "integer writeinterval" [10]
+   "string ldr_clamp_method" ["lum"]
+   "bool write_exr" ["false"]
+   "bool write_png" ["true"]
+   "string write_png_channels" ["RGB"]
+   "bool write_png_16bit" ["false"]
+   "bool write_png_gamutclamp" ["true"]
+   "bool write_tga" ["false"]
+   "string filename" ["exported_image"]
+   "bool write_resume_flm" ["false"]
+   "bool restart_resume_flm" ["true"]
+   "integer reject_warmup" [128]
+   "bool debug" ["true"]
+   "float colorspace_white" [0.314275 0.329411]
+   "float colorspace_red" [0.630000 0.340000]
+   "float colorspace_green" [0.310000 0.595000]
+   "float colorspace_blue" [0.155000 0.070000]
+   "float gamma" [2.200000]'
+end
+
 def SU2LUX.export_render_settings(out)
 	@lrs=LuxrenderSettings.new
 	
@@ -733,6 +677,33 @@ def SU2LUX.export_render_settings(out)
 	out.puts "\n"
 end
 
+#####################################################################
+#####################################################################
+def SU2LUX.export_light(out)
+   	sun_direction = Sketchup.active_model.shadow_info['SunDirection']
+	sunsky = <<-eos
+AttributeBegin
+	LightGroup "default"
+	LightSource "sunsky"
+	"float gain" [1.000000]
+	"vector sundir" [#{sun_direction.x} #{sun_direction.y} #{sun_direction.z}]
+
+	"float relsize" [1.000000]
+	"float turbidity" [2.200000]
+AttributeEnd
+
+	eos
+	out.puts sunsky
+end
+
+#####################################################################
+#####################################################################
+def SU2LUX.export_mesh(out)
+	SU2LUX.collect_faces(Sketchup.active_model.entities, Geom::Transformation.new)
+	@current_mat_step = 1
+	SU2LUX.export_faces(out)
+	SU2LUX.export_fm_faces(out)
+end
 
 #####################################################################
 ###### - collect entities to an array -						 		######
@@ -856,22 +827,6 @@ end
 def SU2LUX.point_to_vector(p)
 	Geom::Vector3d.new(p.x,p.y,p.z)
 end
-
-#####################################################################
-#####################################################################
-def SU2LUX.get_luxrender_console_path
-	path=SU2LUX.get_luxrender_path
-	return nil if not path
-	root=File.dirname(path)
-	c_path=File.join(root,"luxconsole.exe")
-
-	if FileTest.exist?(c_path)
-		return c_path
-	else		
-		return nil
-	end
-end
-
 
 #####################################################################
 #####################################################################
@@ -1041,7 +996,55 @@ def SU2LUX.export_face(out,mat,fm_mat)
 	#Exporting Material
 end
 
-  
+
+
+#####################################################################
+#####################################################################
+def SU2LUX.export_used_materials(materials, out)
+	materials.each { |mat|
+		luxrender_mat = LuxrenderMaterial.new(mat)
+		p_debug luxrender_mat.name
+		SU2LUX.export_mat(luxrender_mat, out)
+	}
+end
+
+#####################################################################
+#####################################################################
+def SU2LUX.export_mat(mat, out)
+	SU2LUX.p_debug "export_mat"
+	out.puts "# Material '" + mat.name + "'"
+	case mat.type
+		when "matte"
+			out.puts "MakeNamedMaterial \"" + mat.name + "\""
+			SU2LUX.p_debug "mat.name " + mat.name
+			out.puts  "\"string type\" [\"matte\"]"
+			out.puts  "\"color Kd\" [#{"%.6f" %(mat.color.red.to_f/255)} #{"%.6f" %(mat.color.green.to_f/255)} #{"%.6f" %(mat.color.blue.to_f/255)}]"
+		when "glass"
+			out.puts "MakeNamedMaterial \"" + mat.name + "\""
+			SU2LUX.p_debug "mat.name " + mat.name
+#   "bool architectural" ["true"]
+			out.puts  "\"string type\" [\"glass\"]"
+			out.puts  "\"color Kt\" [#{"%.6f" %(mat.color.red.to_f/255)} #{"%.6f" %(mat.color.green.to_f/255)} #{"%.6f" %(mat.color.blue.to_f/255)}]"
+			out.puts "\"float index\" [1.520000]"
+		when "light"
+			out.puts "Texture \"" + mat.name + ":light:L\" \"color\" \"blackbody\"
+				\"float temperature\" [6500.000000]"
+	end
+	out.puts("\n")
+end
+
+
+
+#####################################################################
+###### - Send text to status bar - 										######
+#####################################################################
+def SU2LUX.status_bar(stat_text)
+	
+	statbar = Sketchup.set_status_text stat_text
+	
+end
+
+
   
 #####################################################################
 #####################################################################
