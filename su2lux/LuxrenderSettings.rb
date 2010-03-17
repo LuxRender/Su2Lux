@@ -27,7 +27,7 @@ class LuxrenderSettings
 ###### - Camera	-														######
 #####################################################################
 	'camera_type'=>'perspective',
-	'fov'=>35,
+	'fov'=>35, # not currently in use
 	'camera_scale'=>7.31,
 	'near_far_clipping'=>false,
 	'dof_bokeh'=>false,

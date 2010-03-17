@@ -573,7 +573,7 @@ end
 #####################################################################
 def SU2LUX.compute_fov(xres, yres)
 	camera = Sketchup.active_model.active_view.camera
-	fov_vertical = @lrs.fov.to_f
+	fov_vertical = camera.fov
 	width = xres.to_f
 	height = yres.to_f
 	if(width >= height)
@@ -1098,10 +1098,9 @@ class SU2LUX_view_observer < Sketchup::ViewObserver
 include SU2LUX
 
 def onViewChanged(view)
-	@lrs = LuxrenderSettings.new
-	@lrs.fov = Sketchup.active_model.active_view.camera.fov
+	fov = Sketchup.active_model.active_view.camera.fov
 	settings_editor = SU2LUX.get_editor("settings")
-	fov = format("%.2f", @lrs.fov)
+	fov = format("%.2f", fov)
 	settings_editor.setValue("fov", fov) if settings_editor
 end
 
