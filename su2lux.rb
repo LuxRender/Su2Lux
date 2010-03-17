@@ -32,7 +32,7 @@ module SU2LUX
 
 #if ! defined? INCLUDE_FLAG
 	DEBUG = true
-	FRONTF = "SU2LUX Front Face"
+	#FRONTF = "SU2LUX Front Face"
 	SCENE_NAME = "Untitled.lxs"
 	EXT_SCENE = ".lxs"
 	SUFFIX_MATERIAL = "-mat.lxm"
@@ -105,8 +105,6 @@ def SU2LUX.reset_variables
 	@animation=false
 	@export_full_frame=false
 	@frame=0
-	@parent_mat=[]
-	@fm_comp=[]
 	@status_prefix = ""   # Identifies which scene is being processed in status bar
 	@scene_export = false # True when exporting a model for each scene
 	@status_prefix=""
@@ -699,105 +697,17 @@ end
 #####################################################################
 #####################################################################
 def SU2LUX.export_mesh(out)
-	SU2LUX.collect_faces(Sketchup.active_model.entities, Geom::Transformation.new)
+	mc=MeshCollector.new
+	mc.collect_faces(Sketchup.active_model.entities, Geom::Transformation.new)
+	@materials=mc.materials
+	@fm_materials=mc.fm_materials
+	@count_faces=mc.count_faces
 	@current_mat_step = 1
 	SU2LUX.export_faces(out)
 	SU2LUX.export_fm_faces(out)
 end
 
-#####################################################################
-###### - collect entities to an array -						 		######
-#####################################################################
-def SU2LUX.collect_faces(object, trans)
 
-	if object.class == Sketchup::ComponentInstance
-		entity_list=object.definition.entities
-	elsif object.class == Sketchup::Group
-		entity_list=object.entities
-	else
-		entity_list=object
-	end
-
-	SU2LUX.p_debug "entity count="+entity_list.count.to_s
-
-	text=""
-	text="Component: " + object.definition.name if object.class == Sketchup::ComponentInstance
-	text="Group" if object.class == Sketchup::Group
-	
-	SU2LUX.status_bar("Collecting Faces - Level #{@parent_mat.size} - #{text}")
-
-	for e in entity_list
-	  
-		if (e.class == Sketchup::Group and e.layer.visible?)
-			SU2LUX.get_inside(e,trans,false) #e,trans,false - not FM component
-		end
-		if (e.class == Sketchup::ComponentInstance and e.layer.visible? and e.visible?)
-			SU2LUX.get_inside(e,trans,e.definition.behavior.always_face_camera?) # e,trans, fm_component?
-		end
-		if (e.class == Sketchup::Face and e.layer.visible? and e.visible?)
-			
-			face_properties=SU2LUX.find_face_material(e)
-			mat=face_properties[0]
-			uvHelp=face_properties[1]
-			mat_dir=face_properties[2]
-
-			if @fm_comp.last==true
-				(@fm_materials[mat] ||= []) << [e,trans,uvHelp,mat_dir]
-			else
-				(@materials[mat] ||= []) << [e,trans,uvHelp,mat_dir] if (@animation==false or (@animation and @export_full_frame))
-			end
-			@count_faces+=1
-		end
-	end  
-end
-
-#####################################################################
-#####################################################################
-def SU2LUX.find_face_material(e)
-	mat = Sketchup.active_model.materials[FRONTF]
-	mat = Sketchup.active_model.materials.add FRONTF if mat.nil?
-	front_color = Sketchup.active_model.rendering_options["FaceFrontColor"]
-	scale = 0.8 / 255.0
-	mat.color = Sketchup::Color.new(front_color.red * scale, front_color.green * scale, front_color.blue * scale)
-	uvHelp=nil
-	mat_dir=true
-	if e.material!=nil
-		mat=e.material
-	else
-		if e.back_material!=nil
-			mat=e.back_material
-			mat_dir=false
-		else
-			mat=@parent_mat.last if @parent_mat.last!=nil
-		end
-	end
-
-	# if (mat.respond_to?(:texture) and mat.texture !=nil)
-		# ret=SU2KT.store_textured_entities(e,mat,mat_dir)
-		# mat=ret[0]
-		# uvHelp=ret[1]
-	# end
-
-	return [mat,uvHelp,mat_dir]
-end
-  
-  
-#####################################################################
-#####################################################################
-def SU2LUX.get_inside(e,trans,face_me)
-	@fm_comp.push(face_me)
-	if e.material != nil
-		mat = e.material
-		@parent_mat.push(e.material)
-		#SU2KT.store_textured_entities(e,mat,true) if (mat.respond_to?(:texture) and mat.texture!=nil)
-	else
-		@parent_mat.push(@parent_mat.last)
-	end
-	SU2LUX.collect_faces(e, trans*e.transformation)
-	@parent_mat.pop
-	@fm_comp.pop
-end
-  
 
 #####################################################################
 #####################################################################
@@ -831,7 +741,6 @@ end
 #####################################################################
 #####################################################################
 def SU2LUX.export_face(out,mat,fm_mat)
-	SU2LUX.p_debug "export face"
 	meshes = []
 	polycount = 0
 	pointcount = 0
@@ -845,7 +754,7 @@ def SU2LUX.export_face(out,mat,fm_mat)
 	else
 		export=@materials[mat]
 	end
-	
+
 	has_texture = false
 	if mat.respond_to?(:name)
 		matname = mat.display_name.gsub(/[<>]/,'*')
@@ -856,7 +765,7 @@ def SU2LUX.export_face(out,mat,fm_mat)
 	 end
 	
 	matname="FM_"+matname if fm_mat
-
+	
 	#if mat
 	 #  matname = mat.display_name
 	  # p "matname="+matname
@@ -1162,6 +1071,7 @@ if( not file_loaded?(__FILE__) )
 	load File.join("su2lux","LuxrenderSettingsEditor.rb")
 	load File.join("su2lux","LuxrenderMaterial.rb")
 	load File.join("su2lux","LuxrenderMaterialEditor.rb")
+	load File.join("su2lux","MeshCollector.rb")
 
 	#observers
 	Sketchup.add_observer(SU2LUX_app_observer.new)
