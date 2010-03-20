@@ -160,35 +160,33 @@ def SU2LUX.export_dialog(render=true)
   SU2LUX.reset_variables
   
   #check whether file path has already been chosen
-  if @export_file_path != "" 
+  if @export_file_path != ""
     start_time = Time.new
     SU2LUX.export
-	
 	#launch appropriate report window and render (according to variable: render)
-	if render == true
-	  result = SU2LUX.report_window(start_time, ask_render=true)
-	  SU2LUX.launch_luxrender if result == 6
-	else if render == false
-	  SU2LUX.report_window(start_time, ask_render=false)
-	  end
-	end
-	
+    if render == true
+      result = SU2LUX.report_window(start_time, ask_render=true)
+      SU2LUX.launch_luxrender if result == 6
+    else if render == false
+      SU2LUX.report_window(start_time, ask_render=false)
+      end
+    end
   #choose a new name for export file path
   else 
     saved = SU2LUX.new_export_file_path
-	if saved
-	  start_time = Time.new
-	  SU2LUX.export
+    if saved
+      start_time = Time.new
+      SU2LUX.export
 	  
 	  #launch appropriate report window and render (according to variable: render)
-	  if render == true
-	    result = SU2LUX.report_window(start_time, ask_render=true)
-		SU2LUX.launch_luxrender if result == 6
-	  else if render == false
-	    SU2LUX.report_window(start_time, ask_render=false)
-	    end
-	  end
-	end
+      if render == true
+        result = SU2LUX.report_window(start_time, ask_render=true)
+        SU2LUX.launch_luxrender if result == 6
+      else if render == false
+        SU2LUX.report_window(start_time, ask_render=false)
+        end
+      end
+    end
   end
 end #end export_dialog
 

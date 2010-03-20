@@ -532,28 +532,69 @@ end
 
 #set parameters in inputs of settings.html
 def SendDataFromSketchup()
-	setValue("fov",@lrs.fov)
-	setValue("camera_scale",@lrs.camera_scale)
-	setValue("xresolution",@lrs.xresolution)
-	setValue("yresolution",@lrs.yresolution)
-	setValue("camera_type",@lrs.camera_type)
-	setValue("hither",@lrs.hither)
-	setValue("yon",@lrs.yon)
-	setValue("accelerator_type",@lrs.accelerator_type)
-	setValue("sintegrator_type",@lrs.sintegrator_type)
-	setValue("sintegrator_dlighting_maxdepth",@lrs.sintegrator_dlighting_maxdepth)
-	setValue("sintegrator_path_maxdepth",@lrs.sintegrator_path_maxdepth)
-	setValue("sintegrator_igi_maxdepth",@lrs.sintegrator_igi_maxdepth)
-	setValue("sampler_type",@lrs.sampler_type)
-	setValue("volume_integrator_type",@lrs.volume_integrator_type)
-	setValue("volume_integrator_stepsize",@lrs.volume_integrator_stepsize)
+	updateSettingValue("fov")
+	updateSettingValue("camera_scale")
+  updateSettingValue("near_far_clipping")
+	updateSettingValue("xresolution")
+	updateSettingValue("yresolution")
+	updateSettingValue("camera_type")
+	updateSettingValue("hither")
+	updateSettingValue("yon")
+	updateSettingValue("accelerator_type")
+	updateSettingValue("sintegrator_type")
+	updateSettingValue("sintegrator_dlighting_maxdepth")
+	updateSettingValue("sintegrator_path_maxdepth")
+	updateSettingValue("sintegrator_igi_maxdepth")
+	updateSettingValue("sampler_type")
+	updateSettingValue("volume_integrator_type")
+	updateSettingValue("volume_integrator_stepsize")
+  updateSettingValue("export_file_path")
 end 
 
-def setValue(id,value)
+def is_a_checkbox?(id)#much better to use objects for settings?!
+  @lrs=LuxrenderSettings.new
+  if @lrs[id] == true or @lrs[id] == false
+    return id
+  end
+end
+
+def setValue(id,value) #extend to encompass different types (textbox, anchor, slider)
 	new_value=value.to_s
-	cmd="$('##{id}').val('#{new_value}');" #syntax jquery
-	SU2LUX.p_debug cmd
-	@settings_dialog.execute_script(cmd)
+  case id
+    
+  #### -- export_file_path slash change -- ####
+  when "export_file_path"
+    new_value.gsub!(/\\/, '\/') #bug with sketchup not allowing \ characters
+    cmd="$('##{id}').text('#{new_value}');" #different asignment method
+    SU2LUX.p_debug cmd
+    @settings_dialog.execute_script(cmd)
+  ############################
+
+  
+  ########  -- checkboxes -- ##########
+  when is_a_checkbox?(id)
+    cmd="$('##{id}').attr('checked', #{value});" #different asignment method
+    SU2LUX.p_debug cmd
+    @settings_dialog.execute_script(cmd)
+    cmd="checkbox_expander('#{id}');"
+    SU2LUX.p_debug cmd
+    @settings_dialog.execute_script(cmd)
+  #############################
+  
+  
+  ######### -- other -- #############
+  else
+    cmd="$('##{id}').val('#{new_value}');" #syntax jquery
+    SU2LUX.p_debug cmd
+    @settings_dialog.execute_script(cmd)
+  end
+  #############################
+  
+end
+
+def updateSettingValue(id)
+  @lrs=LuxrenderSettings.new
+  setValue(id, @lrs[id])
 end
 
 def change_aspect_ratio(aspect_ratio)

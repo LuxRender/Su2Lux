@@ -1,4 +1,15 @@
 <!--TODO add spinner plugin for number input field -->
+function checkbox_expander(id)
+{
+	if ($("#" + id).attr("checked"))
+	{
+		$("#" + id).next(".collapse").show();
+	}
+	else if ($("#" + id).attr("checked") == false)
+	{
+		$("#" + id).next(".collapse").hide();
+	}
+}
 $(document).ready(
 	function()
 	{
@@ -28,20 +39,14 @@ $(document).ready(
 			}
 		);
 
-		$(":checkbox").change(
+		$(":checkbox").click(
 			function()
 			{
-				if ($(this).attr("checked"))
-				{
-					$(this).next(".collapse").show();
-				}
-				else
-				{
-					$(this).next(".collapse").hide();
-				}
-				window.location = 'skp:param_generate@' + this.id + '=' + this.checked;
+				window.location = 'skp:param_generate@' + this.id + '=' + $(this).attr('checked');
+				checkbox_expander(this.id)
 			}
 		);
+		
 
 		$("#settings_panel p.header").click(
 			function()

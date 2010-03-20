@@ -49,7 +49,7 @@
 			</div>
 			
 			<div id="near_far_clipping_block" class="perspective orthographic environment">
-			<input type="checkbox" id="near_far_clipping">
+			<input type="checkbox" id="near_far_clipping" onchange="$(this).next('.collapse').show();">
 			near_far_clipping
 			<div class="collapse">
 				start:<input type='text' id="hither" size="10">
@@ -235,7 +235,7 @@
 			</select>
 		</div>
 
-		<p class="header">Output <b>(not working yet)</b></p>
+		<p class="header">Output</p>
 		<div class="collapse">
 			<label for="xresolution">Width&nbsp;</label>
 			<input type="text" id="xresolution" size="5">
@@ -256,7 +256,7 @@
 			<br>
 			<br>
 			<br>
-			Export File Path: <input name="export_file_path" id="export_file_path" type="text" size="20">
+            <b>Export File Path: </b><a id="export_file_path"></a>
 			<input type="button" id="export_file_path_browse" value="Browse">
 		</div>
 
@@ -266,3 +266,12 @@
  
 </body>
 </html>
+
+
+
+
+
+
+
+
+
