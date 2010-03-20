@@ -16,6 +16,7 @@
 #
 # Authors      : Alexander Smirnov (aka Exvion)  e-mail: exvion@gmail.com
 #                Mimmo Briganti (aka mimhotep)
+#                 Luke Frisken (aka lfrisken)
 
 class LuxrenderSettings
 
