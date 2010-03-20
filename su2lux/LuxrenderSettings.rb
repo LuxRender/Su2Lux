@@ -146,7 +146,8 @@ class LuxrenderSettings
 	'export_file_path'=>""
 }
 
-def ui_refreshable?(id)
+
+def LuxrenderSettings::ui_refreshable?(id)
   ui_refreshable_settings = [
     'export_file_path'
   ]
@@ -154,8 +155,8 @@ def ui_refreshable?(id)
     return id
   else
     return "not_ui_refreshable"
+  end
 end
-
 
 def initialize
 	singleton_class = (class << self; self; end)
@@ -174,11 +175,11 @@ def initialize
       ######## -- get any attribute -- #######
       define_method(key) { @model.get_attribute(@dict,key,value) }
       ############################
-      
+
       case key
         
         ###### -- set ui_refreshable -- #######
-      when ui_refreshable?(key)
+      when LuxrenderSettings::ui_refreshable?(key)
         define_method("#{key}=") do |new_value|
           settings_editor = SU2LUX.get_editor("settings")
           @model.set_attribute(@dict,key,new_value)
@@ -191,10 +192,10 @@ def initialize
       else
         define_method("#{key}=") { |new_value| @model.set_attribute(@dict,key,new_value) }
         ###########################
-        
       end #end case
     end #end settings.each
 	end #end module_eval
 end #end initialize
+
 
 end #end class LuxrenderSettings
