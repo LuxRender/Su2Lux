@@ -502,6 +502,22 @@ def export_face(out,mat,fm_mat)
 		end
 	end
 	out.puts ']'
+	
+	i=0
+	#Exporting normals
+	out.puts '"normal N" ['
+	for mesh in meshes
+		Sketchup.set_status_text("Material being exported: " + matname + mat_step + "...[" + current_step.to_s + "/" + total_step.to_s + "]" + " - Normals " + " #{rest}") if rest%500==0
+		rest -= 1
+		mat_dir_tmp = mat_dir[i]
+		for p in (1..mesh.count_points)
+			norm = mesh.normal_at(p)
+			norm.reverse! if mat_dir_tmp==false
+				out.print " #{"%.4f" %(norm.x)} #{"%.4f" %(norm.y)} #{"%.4f" %(norm.z)}\n"
+		end
+		i += 1
+	end
+	out.puts ']'
 	out.puts 'AttributeEnd'
 	#Exporting Material
 end
