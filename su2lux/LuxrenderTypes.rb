@@ -157,7 +157,7 @@ class LuxSelection
   #usefull for value in lightgroup and lightsource and many others
   attr_reader :id, :choices, :name
   attr_accessor :selection, :children
-  def initialize(id, name=id, choices=[],default_choice=0)
+  def initialize(id, choices=[], name=id, default_choice=0)
     @id = id
 	@name = name
     @choices = choices
@@ -237,11 +237,11 @@ class LuxSelection
 end #end LuxSelection
 
 class LuxChoice
-  attr_reader :id
+  attr_reader :id, :name
   attr_accessor :children
   def initialize(id, children=[], name=id)
     @id = id
-    @name
+    @name = name
     if children.is_a?(Array) == false #allow simple creation of choice with one child
       children = [children]
     end
@@ -262,7 +262,7 @@ class LuxChoice
   
   def html
     #### OPTION ####
-    html_str = "<option value=\"#{@id}\">#{@id}</option>"
+    html_str = "<option value=\"#{@id}\">#{@name}</option>"
     
     return html_str
   end
@@ -303,10 +303,10 @@ class HTML_block_main < HTML_block
 
 <html>
 <head>
-<title>tab test</title>
+<title>testing</title>
 
 <script type="text/javascript" src="jquery.js"></script>
-<script type="text/javascript" src="su2lux.js"></script>
+<script type="text/javascript" src="su2lux_test.js"></script>
 
 <link href="settings.css" type="text/css" rel="stylesheet">
 
@@ -364,7 +364,7 @@ class HTML_block_panel < HTML_block
   def html
     #### DIV ####
     html_str = "\n"
-    html_str << "<p <div id=\"#{@id}\">"
+    html_str << "<div id=\"#{@id}\">"
     
     #### ELEMENTS ####
     for e in @elements
@@ -373,7 +373,7 @@ class HTML_block_panel < HTML_block
     
     #### END DIV ####
     html_str << "\n"
-    html_str << "<p </div>"
+    html_str << "</div>"
     
     return html_str
   end
@@ -402,30 +402,3 @@ end
 ######## -- Material Specific -- ########
 
 ####### -- experimentation area -- #######
-
-prop1 = LuxFloat.new('xwidth', 2)
-prop2 = LuxFloat.new('ywidth', 2)
-prop3 = LuxBool.new('fun_b', true, 'fun?')
-
-sel_menu = LuxSelection.new('Selection')  
-sel_menu.create_choice!("luke_panel", [prop3])
-sel_menu.create_choice!('mitchell', [prop1, prop2])
-
-sel_menu.select!('mitchell')
-
-obj = LuxObject.new('PixelFilter', sel_menu)
-
-web_page = HTML_block_main.new("SettingsPage")
-web_page.create_panel!(
-  "settings_panel",
-  HTML_block_collapse.new("test_collapse", sel_menu)
-  )
-
-print """
-HTML GENERATION: 
-#{web_page.html}
-
-LXS GENERATION:
-
-#{obj.export}
-"""
