@@ -82,11 +82,12 @@ class LuxrenderSettings
 	
 	'sintegrator_dlighting_maxdepth'=>5,
 	
+	'sintegrator_bidir_maxdepth'=>10,
 	'sintegrator_bidir_bounces'=>16,
 	'sintegrator_bidir_eyedepth'=>16,
 	'singtegrator_bidir_lightdepth'=>16,
 	'sintegrator_bidir_strategy'=>'auto',
-	
+
 	'sintegrator_path_maxdepth'=>10,
 	'singtegrator_path_ienvironment'=>true,
 

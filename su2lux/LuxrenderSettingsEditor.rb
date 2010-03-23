@@ -406,6 +406,7 @@ def initialize
 			@lrs.sampler_lowdisc_pixelsamples=64
 			@lrs.sampler_lowdisc_pixelsampler='hilbert'
 			
+			@lrs.sintegrator_type='distributedpath'
 			@lrs.sintegrator_distributedpath_causticsonglossy=true
 			@lrs.sintegrator_distributedpath_diffuserefractdepth=5
 			@lrs.sintegrator_distributedpath_indirectglossy=true
@@ -447,6 +448,7 @@ def initialize
 			@lrs.sampler_lowdisc_pixelsamples=256
 			@lrs.sampler_lowdisc_pixelsampler='hilbert'
 			
+			@lrs.sintegrator_type='distributedpath'
 			@lrs.sintegrator_distributedpath_causticsonglossy=true
 			@lrs.sintegrator_distributedpath_diffuserefractdepth=5
 			@lrs.sintegrator_distributedpath_indirectglossy=true
@@ -488,6 +490,7 @@ def initialize
 			@lrs.sampler_lowdisc_pixelsamples=512
 			@lrs.sampler_lowdisc_pixelsampler='hilbert'
 			
+			@lrs.sintegrator_type='distributedpath'
 			@lrs.sintegrator_distributedpath_causticsonglossy=true
 			@lrs.sintegrator_distributedpath_diffuserefractdepth=5
 			@lrs.sintegrator_distributedpath_indirectglossy=true
@@ -516,7 +519,10 @@ def initialize
 			@lrs.pixelfilter_mitchell_ywidth=2.0 
 			@lrs.pixelfilter_mitchell_optmode='slider'
 	end #end case
+	self.sendDataFromSketchup()
 	} #end action callback preset
+	
+	
 	@settings_dialog.add_action_callback("open_dialog") {|dialog, params|
   case params.to_s
 		when "new_export_file_path"
@@ -527,14 +533,14 @@ end
 
 
 def show
-	@settings_dialog.show{SendDataFromSketchup()}
+	@settings_dialog.show{sendDataFromSketchup()}
 end
 
 #set parameters in inputs of settings.html
-def SendDataFromSketchup()
+def sendDataFromSketchup()
 	updateSettingValue("fov")
 	updateSettingValue("camera_scale")
-  updateSettingValue("near_far_clipping")
+	updateSettingValue("near_far_clipping")
 	updateSettingValue("xresolution")
 	updateSettingValue("yresolution")
 	updateSettingValue("camera_type")
