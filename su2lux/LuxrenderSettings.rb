@@ -57,7 +57,7 @@ class LuxrenderSettings
   
 	#Integrator
 	'sintegrator_showadvanced'=>false,
-	'sintegrator_type'=>'distributedpath',
+	'sintegrator_type'=>'bidirectional',
 	'sintegrator_distributedpath_directsampleall'=>true,
 	'sintegrator_distributedpath_directsamples'=>1,
 	'sintegrator_distributedpath_directdiffuse'=>true,
@@ -129,16 +129,17 @@ class LuxrenderSettings
 #####################################################################
 	'accelerator_type'=> "tabreckdtree",
 	#tabreckdtree  properties
-	'intersectcost'=> 80,
-	'traversalcost'=> 1,
-	'emptybonus'=> 0.5,
-	'maxprims'=> 1,
-	'maxdepth'=> -1,
+	'intersection_cost'=> 80,
+	'traversal_cost'=> 1,
+	'empty_bonus'=> 0.5,
+	'max_prims'=> 1,
+	'max_depth'=> -1,
 	#bvh properties
 	#qbvh properties
-	'maxprimsperleaf'=> 4,
+	'max_prims_per_leaf'=> 4,
+	'skip_factor'=> 1,
 	#grid properties
-	'refineimmediately'=> false,
+	'refine_immediately'=> false,
 	#end Accelerator
 #####################################################################
 #####################################################################

@@ -106,7 +106,7 @@ $(document).ready(
 		$("#x800, #x1024, #x1280, #x1440, #x1080, #x1920").click(
 			function()
 			{	
-				window.location = 'skp:set_image_size@' + this.value;
+				window.location = 'skp:set_image_size@' + this.value + 'xtrue';
 			}
 		);
 
@@ -128,7 +128,7 @@ $(document).ready(
 				}
 				$("#xresolution").val(parseInt(width));
 				$("#yresolution").val(parseInt(height));
-				window.location = 'skp:scale_view@' + width + 'x' + height;
+				window.location = 'skp:scale_view@' + width + 'x' + height + 'xfalse';
 			}
 		);
 		

@@ -101,6 +101,27 @@ def initialize
 				#Accelerator
 				when "accelerator_type"
 					@lrs.accelerator_type=value
+				#tabrec
+				when "intersection_cost"
+					@lrs.intersection_cost=value
+				when "traversal_cost"
+					@lrs.traversal_cost=value
+				when "empty_bonus"
+					@lrs.empty_bonus=value
+				when "max_prims"
+					@lrs.max_prims=value
+				when "max_depth"
+					@lrs.max_depth=value
+
+				#grid
+				when "refine_immediately"
+					@lrs.refine_immediately=value
+
+				#qbvh
+				when "max_prims_per_leaf"
+					@lrs.max_prims_per_leaf=value
+				when "skip_factor"
+					@lrs.skip_factor=value
 				#end Accelerator
 			end	
 	} #end action callback param_generatate
@@ -123,18 +144,19 @@ def initialize
 		setValue("yresolution", height)
 		@lrs.xresolution = width
 		@lrs.yresolution= height
-		change_aspect_ratio(width.to_f / height.to_f)
+		change_aspect = values[2]
+		change_aspect_ratio(width.to_f / height.to_f) if change_aspect == "true"
 	}
 	
-	@settings_dialog.add_action_callback("scale_view") { |dialog, params|
-		values = params.split('x')
-		width = values[0].to_i
-		height = values[1].to_i
-		setValue("xresolution", width)
-		setValue("yresolution", height)
-		@lrs.xresolution = width
-		@lrs.yresolution = height
-	}
+	# @settings_dialog.add_action_callback("scale_view") { |dialog, params|
+		# values = params.split('x')
+		# width = values[0].to_i
+		# height = values[1].to_i
+		# setValue("xresolution", width)
+		# setValue("yresolution", height)
+		# @lrs.xresolution = width
+		# @lrs.yresolution = height
+	# }
 	
 
 	@settings_dialog.add_action_callback("preset") {|d,p|
@@ -554,7 +576,18 @@ def sendDataFromSketchup()
 	updateSettingValue("sampler_type")
 	updateSettingValue("volume_integrator_type")
 	updateSettingValue("volume_integrator_stepsize")
-  updateSettingValue("export_file_path")
+	updateSettingValue("export_file_path")
+	
+	updateSettingValue("intersection_cost")
+	updateSettingValue("traversal_cost")
+	updateSettingValue("empty_bonus")
+	updateSettingValue("max_prims")
+	updateSettingValue("max_depth")
+
+	updateSettingValue("refine_immediately")
+
+	updateSettingValue("max_prims_per_leaf")
+	updateSettingValue("skip_factor")
 end 
 
 def is_a_checkbox?(id)#much better to use objects for settings?!

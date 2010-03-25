@@ -200,26 +200,44 @@
 
 		<p class="header">Accelerator</p>
 		<div class="collapse">
-			<label for="accelerator_type">
-			</label>
-				<span class="label">Accelerator type:</span>
-				<select id="accelerator_type">
-					<option value="none">none</option>
-					<option value="tabreckdtree">tabreckdtree</option>
-					<option value="grid">grid</option>
-					<option value="bvh">bvh</option>
-					<option value="qbvh">qbvh</option>
-				</select>
+			<label for="accelerator_type">Accelerator type:</label>
+			<!--<span class="label">Accelerator type:</span>-->
+			<select id="accelerator_type">
+				<option value="none">none</option>
+				<option value="tabreckdtree">tabreckdtree</option>
+				<option value="grid">grid</option>
+				<option value="bvh">bvh</option>
+				<option value="qbvh">qbvh</option>
+			</select>
 			<div class="collapse" id="tabreckdtree">
-			<p>tabreckdtree</p>
+				<label for="intersection_cost">Intersection cost:</label>
+				<input type='text' id="intersection_cost" size="4">
+				<br>
+				<label for="traversal_cost">Traversal cost:</label>
+				<input type='text' id="traversal_cost" size="4">
+				<br>
+				<label for="empty_bonus">Empty bonus:</label>
+				<input type='text' id="empty_bonus" size="4">
+				<br>
+				<label for="max_prims">Max primitives per volume:</label>
+				<input type='text' id="max_prims" size="4">
+				<br>
+				<label for="max_depth">Max tree depth:</label>
+				<input type='text' id="max_depth" size="4">
 			</div>
 			<div class="collapse" id="grid">
-			<p>grid</p>
+			<label for="refine_immediately">refine immediately</label>
+				<input type="checkbox" id="refine_immediately">
 			</div>
 			<div class="collapse" id="bvh">
 			</div>
 			<div class="collapse" id="qbvh">
-			<p>qbvh</p>
+				<label for="max_prims_per_leaf">Max primitives per leaf:</label>
+				<input type='text' id="max_prims_per_leaf" size="4">
+<!--				<label for="full_sweep_threshold">Sweep threshold:</label>
+				<input type='text' id="full_sweep_threshold" size="4"> -->
+				<label for="skip_factor">Skip factor:</label>
+				<input type='text' id="skip_factor" size="4">
 			</div>
 		</div>
 		
@@ -266,12 +284,3 @@
  
 </body>
 </html>
-
-
-
-
-
-
-
-
-

@@ -257,18 +257,19 @@ def export_render_settings(out)
 	out.puts "Accelerator \"#{@lrs.accelerator_type}\""
 	case @lrs.accelerator_type
 		when "kdtree", "tabreckdtree"
-			out.puts "\t\"integer intersectcost\" [#{@lrs.intersectcost}]"
-			out.puts "\t\"integer traversalcost\" [#{@lrs.traversalcost}]"
-			out.puts "\t\"float emptybonus\" [#{"%.6f" %(@lrs.emptybonus)}]"
-			out.puts "\t\"integer maxprims\" [#{@lrs.maxprims}]"
-			out.puts "\t\"integer maxdepth\" [#{@lrs.maxdepth}]"
+			out.puts "\t\"integer intersectcost\" [#{@lrs.intersection_cost}]"
+			out.puts "\t\"integer traversalcost\" [#{@lrs.traversal_cost}]"
+			out.puts "\t\"float emptybonus\" [#{"%.6f" %(@lrs.empty_bonus)}]"
+			out.puts "\t\"integer maxprims\" [#{@lrs.max_prims}]"
+			out.puts "\t\"integer maxdepth\" [#{@lrs.max_depth}]"
 		when "grid"
 			value = "\"false\""
-			value = "\"true\"" if @lrs.refineimmediately
+			value = "\"true\"" if @lrs.refine_immediately
 			out.puts "\t\"bool refineimmediately\" [#{value}]"
 		when "bvh"
 		when "qbvh"
-			out.puts "\t\"integer maxprimsperleaf\" [#{@lrs.maxprimsperleaf}]"
+			out.puts "\t\"integer maxprimsperleaf\" [#{@lrs.max_prims_per_leaf}]"
+			out.puts "\t\"integer skipfactor\" [#{@lrs.skip_factor}]"
 	end
 	out.puts "\n"
 end
