@@ -128,7 +128,7 @@ $(document).ready(
 				}
 				$("#xresolution").val(parseInt(width));
 				$("#yresolution").val(parseInt(height));
-				window.location = 'skp:scale_view@' + width + 'x' + height + 'xfalse';
+				window.location = 'skp:set_image_size@' + width + 'x' + height + 'xfalse';
 			}
 		);
 		
