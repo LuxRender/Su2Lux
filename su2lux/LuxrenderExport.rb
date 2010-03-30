@@ -56,14 +56,14 @@ def export_camera(view, out)
 	out.puts out_user_up
 	out.print "\n"
 
-	fov = compute_fov(@lrs.xresolution, @lrs.yresolution)
 	case @lrs.camera_type
 		when "perspective"
+			fov = compute_fov(@lrs.xresolution, @lrs.yresolution)
 			out.puts "Camera \"#{@lrs.camera_type}\""
 			out.puts "	\"float fov\" [%.6f" %(fov) + "]"
 		when "orthographic"
 			out.puts "Camera \"#{@lrs.camera_type}\""
-			out.puts "	\"float scale\" [%.6f" %(camera_scale) + "]"
+			out.puts "	\"float scale\" [%.6f" %(@lrs.camera_scale) + "]"
 		when "environment"
 			out.puts "Camera \"#{@lrs.camera_type}\""
 	end

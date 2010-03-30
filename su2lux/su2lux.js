@@ -28,6 +28,7 @@ $(document).ready(
 			{
 				$(this).nextAll().hide();
 				$(this).nextAll("." + this.value).show();
+				window.location = 'skp:camera_change@' + this.value
 			}
 		);
 		
@@ -56,6 +57,7 @@ $(document).ready(
 				$(this).next("div.collapse").children("#accelerator_type").siblings("#" + node).show();
 				node = $(this).next("div.collapse").children("#sintegrator_type").attr("value");
 				$(this).next("div.collapse").children("#sintegrator_type").siblings("#" + node).show();
+				node = $(this).next("div.collapse").children("#camera_type").change();
 			}
 		);
 				

@@ -28,7 +28,8 @@ class LuxrenderSettings
 ###### - Camera	-														######
 #####################################################################
 	'camera_type'=>'perspective',
-	'fov'=>35, # not currently in use
+	'fov'=> format("%.2f", Sketchup.active_model.active_view.camera.fov),#35, # not currently in use
+	'focal_length'=> format("%.2f", Sketchup.active_model.active_view.camera.focal_length),
 	'camera_scale'=>7.31,
 	'near_far_clipping'=>false,
 	'dof_bokeh'=>false,

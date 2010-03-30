@@ -39,6 +39,8 @@ def initialize
 					@lrs.camera_type=value
 				when "fov"
 					Sketchup.active_model.active_view.camera.fov = value.to_f
+				when "focal_length"
+					Sketchup.active_model.active_view.camera.focal_length = value.to_f
 				when "camera_scale"
 					@lrs.camera_scale=value
 				when "near_far_clipping"
@@ -148,6 +150,10 @@ def initialize
 		change_aspect_ratio(width.to_f / height.to_f) if change_aspect == "true"
 	}
 	
+	@settings_dialog.add_action_callback("camera_change") { |dialog, params|
+		perspective_camera = (params == "perspective")
+		Sketchup.active_model.active_view.camera.perspective = perspective_camera if params != "environment"
+	}
 	# @settings_dialog.add_action_callback("scale_view") { |dialog, params|
 		# values = params.split('x')
 		# width = values[0].to_i
@@ -561,10 +567,18 @@ end
 #set parameters in inputs of settings.html
 def sendDataFromSketchup()
 	updateSettingValue("fov")
+	updateSettingValue("focal_length")
 	updateSettingValue("camera_scale")
 	updateSettingValue("near_far_clipping")
+	@lrs.xresolution = Sketchup.active_model.active_view.vpwidth
 	updateSettingValue("xresolution")
+	@lrs.yresolution = Sketchup.active_model.active_view.vpheight
 	updateSettingValue("yresolution")
+	if Sketchup.active_model.active_view.camera.perspective?
+		@lrs.camera_type = 'perspective'
+	else
+		@lrs.camera_type = 'orthographic'
+	end
 	updateSettingValue("camera_type")
 	updateSettingValue("hither")
 	updateSettingValue("yon")
@@ -622,11 +636,16 @@ def setValue(id,value) #extend to encompass different types (textbox, anchor, sl
   
   
   ######### -- other -- #############
-  else
-    cmd="$('##{id}').val('#{new_value}');" #syntax jquery
-    SU2LUX.p_debug cmd
-    @settings_dialog.execute_script(cmd)
-  end
+	else
+		cmd="$('##{id}').val('#{new_value}');" #syntax jquery
+		SU2LUX.p_debug cmd
+		@settings_dialog.execute_script(cmd)
+		#Horror coding?
+		if(id == "camera_type")
+			cmd="$('##{id}').change();" #syntax jquery
+			@settings_dialog.execute_script(cmd)
+		end
+	end
   #############################
   
 end
@@ -647,8 +666,10 @@ def change_aspect_ratio(aspect_ratio)
 		current_camera.aspect_ratio = new_ratio
 		new_ratio = 1.0 if new_ratio == 0.0
 		scale = current_ratio / new_ratio.to_f
-		fov = current_camera.fov
-		current_camera.focal_length = current_camera.focal_length * scale
+		if current_camera.perspective?
+			fov = current_camera.fov
+			current_camera.focal_length = current_camera.focal_length * scale
+		end
 	end
 end
 
