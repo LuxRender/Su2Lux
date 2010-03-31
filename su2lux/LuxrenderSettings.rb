@@ -118,8 +118,8 @@ class LuxrenderSettings
 ###### - Film	-												######
 #####################################################################
 	'film_type'=>"fleximage",
-	'xresolution'=> Sketchup.active_model.active_view.vpwidth,#800
-	'yresolution'=> Sketchup.active_model.active_view.vpheight,#600
+	'xresolution'=> nil, #Sketchup.active_model.active_view.vpwidth,#800
+	'yresolution'=> nil, #Sketchup.active_model.active_view.vpheight,#600
 	'film_displayinterval'=>4,
 	'haltspp'=>0,
 	'halttime'=>0,
@@ -168,36 +168,34 @@ def initialize
 	@view=@model.active_view
 	@dict="luxrender_settings"
 	singleton_class.module_eval do
-    
-    define_method("[]") do |key| 
-      value = @@settings[key]
-      return @model.get_attribute(@dict,key,value)
-    end
-    
-    @@settings.each do |key, value|
-      
-      ######## -- get any attribute -- #######
-      define_method(key) { @model.get_attribute(@dict,key,value) }
-      ############################
 
-      case key
+		define_method("[]") do |key| 
+			value = @@settings[key]
+			return @model.get_attribute(@dict,key,value)
+		end
+    
+		@@settings.each do |key, value|
+      
+			######## -- get any attribute -- #######
+			define_method(key) { @model.get_attribute(@dict,key,value) }
+			############################
+
+			case key
         
-        ###### -- set ui_refreshable -- #######
-      when LuxrenderSettings::ui_refreshable?(key)
-        define_method("#{key}=") do |new_value|
-          settings_editor = SU2LUX.get_editor("settings")
-          @model.set_attribute(@dict,key,new_value)
-          settings_editor.updateSettingValue(key)
-        end
-        ###########################
-      
-      
-        ######## -- set other -- ##########
-      else
-        define_method("#{key}=") { |new_value| @model.set_attribute(@dict,key,new_value) }
-        ###########################
-      end #end case
-    end #end settings.each
+				###### -- set ui_refreshable -- #######
+				when LuxrenderSettings::ui_refreshable?(key)
+					define_method("#{key}=") do |new_value|
+					settings_editor = SU2LUX.get_editor("settings")
+					@model.set_attribute(@dict,key,new_value)
+					settings_editor.updateSettingValue(key) if settings_editor
+				end
+				###########################
+				######## -- set other -- ##########
+				else
+					define_method("#{key}=") { |new_value| @model.set_attribute(@dict,key,new_value) }
+				###########################
+			end #end case
+		end #end settings.each
 	end #end module_eval
 end #end initialize
 

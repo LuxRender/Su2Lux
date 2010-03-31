@@ -34,6 +34,9 @@ def reset
 	@count_tri = 0
 	@model_textures={}
 	@textures_prefix = "TX_"
+	@lrs=LuxrenderSettings.new
+	@lrs.xresolution = Sketchup.active_model.active_view.vpwidth unless @lrs.xresolution
+	@lrs.yresolution = Sketchup.active_model.active_view.vpheight unless @lrs.yresolution
 end
 	
 #####################################################################
@@ -75,13 +78,18 @@ def export_camera(view, out)
 			out.puts "	\"float fov\" [%.6f" %(fov) + "]"
 		when "orthographic"
 			out.puts "Camera \"#{@lrs.camera_type}\""
-			out.puts "	\"float scale\" [%.6f" %(@lrs.camera_scale) + "]"
+			# No more scale parameter exporting due to Lux complainig for it
+			# out.puts "	\"float scale\" [%.6f" %(@lrs.camera_scale) + "]"
 		when "environment"
 			out.puts "Camera \"#{@lrs.camera_type}\""
 	end
 	
 	sw = compute_screen_window
 	out.puts	"\t\"float screenwindow\" [" + "%.6f" %(sw[0]) + " " + "%.6f" %(sw[1]) + " " + "%.6f" %(sw[2]) + " " + "%.6f" %(sw[3]) +"]\n"
+	
+	# out.puts "	\"float hither\" [%.6f" %(@lrs.hither) + "]"
+	# out.puts "	\"float yon\" [%.6f" %(@lrs.yon) + "]"
+	
 	#TODO  depends aspect_ratio and resolution 
 	#http://www.luxrender.net/wiki/index.php?title=Scene_file_format#Common_Camera_Parameters
 			

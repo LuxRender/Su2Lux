@@ -570,9 +570,9 @@ def sendDataFromSketchup()
 	updateSettingValue("focal_length")
 	updateSettingValue("camera_scale")
 	updateSettingValue("near_far_clipping")
-	@lrs.xresolution = Sketchup.active_model.active_view.vpwidth
+	@lrs.xresolution = Sketchup.active_model.active_view.vpwidth unless @lrs.xresolution
 	updateSettingValue("xresolution")
-	@lrs.yresolution = Sketchup.active_model.active_view.vpheight
+	@lrs.yresolution = Sketchup.active_model.active_view.vpheight unless @lrs.yresolution
 	updateSettingValue("yresolution")
 	if Sketchup.active_model.active_view.camera.perspective?
 		@lrs.camera_type = 'perspective'

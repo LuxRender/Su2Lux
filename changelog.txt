@@ -1,6 +1,16 @@
 #############################################################################
 #############################################################################
 
+# 2010-003-31
+#VERSION 0.0.13
+
+#FIXED: BUG FIX initialize method of LuxrenderSettings class causing an error due to export
+#FIXED: Camera type interactivity works now if settings editor is hidden
+#CHANGED: no more exporting of scale parameter for orthographic camera
+
+#############################################################################
+#############################################################################
+
 # 2010-003-15
 #VERSION 0.0.12
 
