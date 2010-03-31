@@ -114,8 +114,8 @@ def SU2LUX.export
 	entities = model.active_entities
 	selection = model.selection
 	materials = model.materials
-	
-	le=LuxrenderExport.new
+
+	le=LuxrenderExport.new(@export_file_path,@os_separator)
 	le.reset
 	out = File.new(@export_file_path,"w")
 	le.export_global_settings(out)
@@ -143,7 +143,9 @@ def SU2LUX.export
 	#Exporting all materials
 	out_mat = File.new(file_fullname + SUFFIX_MATERIAL, "w")
 	le.export_used_materials(materials, out_mat)
+	le.export_textures(out_mat)
 	out_mat.close
+	le.write_textures
 end
 
 #####################################################################
@@ -482,6 +484,7 @@ class SU2LUX_view_observer < Sketchup::ViewObserver
 include SU2LUX
 
 def onViewChanged(view)
+
 	settings_editor = SU2LUX.get_editor("settings")
 	if (settings_editor)
 		@lrs = LuxrenderSettings.new
@@ -500,7 +503,6 @@ def onViewChanged(view)
 		end
 	end
 end
-
 end
 
 class SU2LUX_app_observer < Sketchup::AppObserver

@@ -2,6 +2,7 @@ class LuxrenderExport
 
 	EXT_SCENE = ".lxs"
 	DEBUG = true
+	FRONTF = "SU2LUX Front Face"
 #####################################################################
 ###### - printing debug messages - 										######
 #####################################################################
@@ -14,6 +15,15 @@ else
 	end
 end
 
+def initialize (export_file_path,os_separator)
+@export_file_path=export_file_path
+@os_separator=os_separator
+@model_name=File.basename(@export_file_path)
+@model_name=@model_name.split(".")[0]
+
+@path_textures=File.dirname(@export_file_path)
+end
+
 def reset
 	@materials = {}
 	@fm_materials = {}
@@ -22,6 +32,8 @@ def reset
 	@exp_default_uvs = false
 	@scale = 0.0254
 	@count_tri = 0
+	@model_textures={}
+	@textures_prefix = "TX_"
 end
 	
 #####################################################################
@@ -296,10 +308,12 @@ end
 #####################################################################
 #####################################################################
 def export_mesh(out)
-	mc=MeshCollector.new
+	mc=MeshCollector.new(@model_name,@os_separator)
 	mc.collect_faces(Sketchup.active_model.entities, Geom::Transformation.new)
 	@materials=mc.materials
 	@fm_materials=mc.fm_materials
+	@model_textures=mc.model_textures
+	@texturewriter=mc.texturewriter
 	@count_faces=mc.count_faces
 	@current_mat_step = 1
 	p 'export faces'
@@ -356,18 +370,19 @@ def export_face(out,mat,fm_mat)
 	else
 		export=@materials[mat]
 	end
-
+	
 	has_texture = false
 	if mat.respond_to?(:name)
 		matname = mat.display_name.gsub(/[<>]/,'*')
-		# has_texture = true if mat.texture!=nil
+		p 'matname: '+matname
+		has_texture = true if mat.texture!=nil
 	else
 		matname = "Default"
-		# has_texture=true if matname!=FRONTF
+		has_texture=true if matname!=FRONTF
 	 end
 	
 	matname="FM_"+matname if fm_mat
-	
+
 	#if mat
 	 #  matname = mat.display_name
 	  # p "matname="+matname
@@ -445,6 +460,9 @@ def export_face(out,mat,fm_mat)
 	out.puts 'AttributeBegin'
 	i=0
 	
+	if mat.class==String
+	out.puts "NamedMaterial \""+mat+"\""
+	else
 	luxrender_mat=LuxrenderMaterial.new(mat)
 	#Exporting faces indices
 	#light
@@ -453,16 +471,18 @@ def export_face(out,mat,fm_mat)
    # "float power" [100.000000]
    # "float efficacy" [17.000000]
    # "float gain" [1.000000]
-	case luxrender_mat.type
-		when "matte", "glass"
-			out.puts "NamedMaterial \""+luxrender_mat.name+"\""
-		when "light"
-			out.puts "LightGroup \"default\""
-			out.puts "AreaLightSource \"area\" \"texture L\" [\""+luxrender_mat.name+":light:L\"]"
-			out.puts '"float power" [100.000000]
-			"float efficacy" [17.000000]
-			"float gain" [1.000000]'
+		case luxrender_mat.type
+			when "matte", "glass"
+				out.puts "NamedMaterial \""+luxrender_mat.name+"\""
+			when "light"
+				out.puts "LightGroup \"default\""
+				out.puts "AreaLightSource \"area\" \"texture L\" [\""+luxrender_mat.name+":light:L\"]"
+				out.puts '"float power" [100.000000]
+				"float efficacy" [17.000000]
+				"float gain" [1.000000]'
+		end
 	end
+	
 	out.puts 'Shape "trianglemesh" "integer indices" ['
 	for mesh in meshes
 	  	mirrored_tmp = mirrored[i]
@@ -514,11 +534,51 @@ def export_face(out,mat,fm_mat)
 		for p in (1..mesh.count_points)
 			norm = mesh.normal_at(p)
 			norm.reverse! if mat_dir_tmp==false
-				out.print " #{"%.4f" %(norm.x)} #{"%.4f" %(norm.y)} #{"%.4f" %(norm.z)}\n"
+				out.print "#{"%.4f" %(norm.x)} #{"%.4f" %(norm.y)} #{"%.4f" %(norm.z)}\n"
 		end
 		i += 1
 	end
 	out.puts ']'
+	
+	@exp_default_uvs=true
+	no_texture_uvs=(!has_texture and @exp_default_uvs==true)
+	if has_texture or no_texture_uvs
+		current_step += 1
+		i = 0
+		#Exporting uv-coordinates
+		out.puts '"float uv" ['
+		for mesh in meshes
+			#SU2KT.status_bar("Material being exported: " + matname + mat_step + "...[" + current_step.to_s + "/" + total_step.to_s + "]" + " - UVs " + " #{rest}") if rest%500==0
+			rest -= 1
+
+			dir=(no_texture_uvs) ? true : mat_dir[i]
+
+			for p in (1 .. mesh.count_points)
+
+				if default_mat[i] and @model_textures[matname]!=nil
+					mat_texture=(@model_textures[matname][5]).texture
+					texsize = Geom::Point3d.new(mat_texture.width, mat_texture.height, 1)
+				else
+					texsize = Geom::Point3d.new(1,1,1)
+				end
+
+				textsize=Geom::Point3d.new(20,20,20) if no_texture_uvs
+
+				if distorted_uv[i]!=nil
+					uvHelp=distorted_uv[i]
+					#UV-Photomatch-Bugfix Stefan Jaensch 2009-08-25 (transformation applied)
+					uv=uvHelp.get_front_UVQ(mesh.point_at(p).transform!(trans_inverse)) if mat_dir[i]==true
+					uv=uvHelp.get_back_UVQ(mesh.point_at(p).transform!(trans_inverse)) if mat_dir[i]==false
+				else
+					uv = [mesh.uv_at(p,dir).x/texsize.x, mesh.uv_at(p,dir).y/texsize.y, mesh.uv_at(p,dir).z/texsize.z]
+				end
+					out.print "#{"%.4f" %(uv.x)} #{"%.4f" %(-uv.y+1)}\n"
+			end
+			i += 1
+		end
+		out.puts ']'
+	end
+	
 	out.puts 'AttributeEnd'
 	#Exporting Material
 end
@@ -535,6 +595,19 @@ def export_used_materials(materials, out)
 	}
 end
 
+def export_textures(out)
+	@model_textures.each { |key,value|
+	export_texture(key,value[4],out)
+	}
+end
+
+
+def export_texture(texture_name,texture_path,out)
+	out.puts "\Texture \""+texture_name+"\" \"color\" \"imagemap\" \"string filename\" [\""+texture_path+ "\"]"
+	out.puts "MakeNamedMaterial \"" + texture_name + "\""
+	out.puts "\"string type\" [\"matte\"]"
+	out.puts "\"texture Kd\" [\""+texture_name+"\"]"
+end
 #####################################################################
 #####################################################################
 def export_mat(mat, out)
@@ -559,5 +632,52 @@ def export_mat(mat, out)
 	end
 	out.puts("\n")
 end
+
+def write_textures
+	@copy_textures=true #TODO add in settings export
+	
+	if (@copy_textures == true and @model_textures!={})
+
+		if FileTest.exist? (@path_textures+@os_separator+@textures_prefix+@model_name)
+		else
+			Dir.mkdir(@path_textures+@os_separator+@textures_prefix+@model_name)
+		end
+
+		tw=@texturewriter
+		p @texturewriter
+		number=@model_textures.length
+		count=1
+		@model_textures.each do |key, value|
+			Sketchup.set_status_text("Exporting texture "+count.to_s+"/"+number.to_s)
+			if value[1].class== Sketchup::Face
+				p value[1]
+				return_val = tw.write value[1], value[2], (@path_textures+@os_separator+value[4])
+				p 'path: '+@path_textures+@os_separator+value[4]
+				p return_val
+				p 'write texture1'
+			else
+				tw.write value[1], (@path_textures+@os_separator+value[4])
+				p 'write texture2'
+			end
+			count+=1
+		end
+
+		status='ok' #TODO
+
+		if status
+		stext = "SU2LUX: " + (count-1).to_s + " textures and model"
+		else
+			stext = "An error occured when exporting textures. Model"
+		end
+		@texturewriter=nil
+		@model_textures=nil
+	else
+		stext = "Model"
+	end
+
+	return stext
+
+end
+
 
 end
