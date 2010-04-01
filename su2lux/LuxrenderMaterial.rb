@@ -42,7 +42,7 @@ def name
 end
   
 def type
-	t=@mat.get_attribute(@@dict,'type',@@type)  #check if the type has been set
+	t=@mat.get_attribute(@@dict,'type')  #check if the type has been set
 	
 	if not t
 	  if @mat.alpha<1.0
