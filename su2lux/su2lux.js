@@ -85,7 +85,6 @@ $(document).ready(
 		// $("#settings_panel #environment_light_type").change(
 			// function()
 			// {
-				lert("#"+this.value);
 				// nodes = $(this).next("div.collapse").hide();
 				// nodes = $(this).nextAll("#" + this.value).show();
 			// }
