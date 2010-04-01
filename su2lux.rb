@@ -486,14 +486,15 @@ include SU2LUX
 def onViewChanged(view)
 
 	settings_editor = SU2LUX.get_editor("settings")
-	@lrs = LuxrenderSettings.new
+#	@lrs = LuxrenderSettings.new
 	if Sketchup.active_model.active_view.camera.perspective?
-		@lrs.camera_type = 'perspective'
+#		@lrs.camera_type = 'perspective'
+		camera_type = 'perspective'
 	else
-		@lrs.camera_type = 'orthographic'
+		#@lrs.camera_type = 'orthographic'
+		camera_type = 'orthographic'
 	end
 	if (settings_editor)
-		@lrs = LuxrenderSettings.new
 		if (Sketchup.active_model.active_view.camera.perspective?)
 			fov = Sketchup.active_model.active_view.camera.fov
 			fov = format("%.2f", fov)
@@ -502,7 +503,8 @@ def onViewChanged(view)
 			focal_length = format("%.2f", focal_length)
 			settings_editor.setValue("focal_length", focal_length)
 		end
-		settings_editor.setValue("camera_type", @lrs.camera_type)
+#		settings_editor.setValue("camera_type", @lrs.camera_type)
+		settings_editor.setValue("camera_type", camera_type)
 	end
 end
 end

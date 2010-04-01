@@ -58,6 +58,8 @@ $(document).ready(
 				node = $(this).next("div.collapse").children("#sintegrator_type").attr("value");
 				$(this).next("div.collapse").children("#sintegrator_type").siblings("#" + node).show();
 				node = $(this).next("div.collapse").children("#camera_type").change();
+				// node = $(this).next("div.collapse").children("#environment_light_type").attr("value");
+				// $(this).next("div.collapse").children("#environment_light_type").siblings("#" + node).show();
 			}
 		);
 				
@@ -79,6 +81,15 @@ $(document).ready(
 				nodes = $(this).nextAll("#" + this.value).show();
 			}
 		);
+		
+		// $("#settings_panel #environment_light_type").change(
+			// function()
+			// {
+				lert("#"+this.value);
+				// nodes = $(this).next("div.collapse").hide();
+				// nodes = $(this).nextAll("#" + this.value).show();
+			// }
+		// );
 		
 		$("#export_file_path_browse").click(
 			function()

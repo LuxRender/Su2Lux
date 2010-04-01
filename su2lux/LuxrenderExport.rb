@@ -71,17 +71,26 @@ def export_camera(view, out)
 	out.puts out_user_up
 	out.print "\n"
 
+	if Sketchup.active_model.active_view.camera.perspective?
+		camera_type = 'perspective'
+	else
+		camera_type = 'orthographic'
+	end
+	if @lrs.camera_type != "environment" && @lrs.camera_type != camera_type
+		@lrs.camera_type = camera_type
+	end
+	out.puts "Camera \"#{@lrs.camera_type}\""
 	case @lrs.camera_type
 		when "perspective"
 			fov = compute_fov(@lrs.xresolution, @lrs.yresolution)
-			out.puts "Camera \"#{@lrs.camera_type}\""
+			# out.puts "Camera \"#{@lrs.camera_type}\""
 			out.puts "	\"float fov\" [%.6f" %(fov) + "]"
 		when "orthographic"
-			out.puts "Camera \"#{@lrs.camera_type}\""
+			# out.puts "Camera \"#{@lrs.camera_type}\""
 			# No more scale parameter exporting due to Lux complainig for it
 			# out.puts "	\"float scale\" [%.6f" %(@lrs.camera_scale) + "]"
 		when "environment"
-			out.puts "Camera \"#{@lrs.camera_type}\""
+			# out.puts "Camera \"#{@lrs.camera_type}\""
 	end
 	
 	sw = compute_screen_window

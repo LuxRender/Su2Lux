@@ -52,12 +52,12 @@
 			</div>
 			
 			<div id="near_far_clipping_block" class="perspective orthographic environment">
-			<input type="checkbox" id="near_far_clipping" onchange="$(this).next('.collapse').show();">
-			near_far_clipping
-			<div class="collapse">
-				start:<input type='text' id="hither" size="10">
-				end:<input type='text' id="yon" size="10">
-			</div>
+				<input type="checkbox" id="near_far_clipping" onchange="$(this).next('.collapse').show();">
+				near_far_clipping
+				<div class="collapse">
+					start:<input type='text' id="hither" size="10">
+					end:<input type='text' id="yon" size="10">
+				</div>
 			</div>
 			<br>
 			
@@ -77,14 +77,24 @@
 
 		<p class="header">Environment</p>
 		<div class="collapse">
-			<label for="environment_light_type">
-				<span class="label">Environment light type:</span>
-				<select id="environment_light_type">
-					<option value="none">none</option>
-					<option value="infinite">infinite</option>
-					<option value="sunsky">sunsky</option>
-				</select>
-			</label>
+			<label for="environment_light_type">Environment light type:</label>
+			<select id="environment_light_type">
+				<option value="none">none</option>
+				<option value="infinite">infinite</option>
+				<option value="sunsky">sunsky</option>
+			</select>
+<!--			<div id="env_rotation_block" class="sunsky infinite">
+				<label for="env_rotate_x">Rotate X:</label>
+				<input type='text' id="env_rotate_x" size="4">
+				<label for="env_rotate_y">Rotate Y:</label>
+				<input type='text' id="env_rotate_y" size="4">
+				<label for="env_rotate_z">Rotate Z:</label>
+				<input type='text' id="env_rotate_z" size="4">
+			</div> -->
+			<div class="collapse" id="sunsky">
+			</div>
+			<div class="collapse" id="infinite">
+			</div>
 		</div>
 
 		<p class="header">Sampler</p>
