@@ -482,7 +482,9 @@ end #end module SU2LUX
 class SU2LUX_view_observer < Sketchup::ViewObserver
 
 include SU2LUX
-
+def initialize
+  @old_time = Time.new
+end
 def onViewChanged(view)
 
 	settings_editor = SU2LUX.get_editor("settings")
@@ -495,16 +497,17 @@ def onViewChanged(view)
 		camera_type = 'orthographic'
 	end
 	if settings_editor and settings_editor.visible?
-		if (Sketchup.active_model.active_view.camera.perspective?)
+		if (Sketchup.active_model.active_view.camera.perspective?) and (Time.new - @old_time) > 0.5
 			fov = Sketchup.active_model.active_view.camera.fov
 			fov = format("%.2f", fov)
 			settings_editor.setValue("fov", fov)
 			focal_length = Sketchup.active_model.active_view.camera.focal_length
 			focal_length = format("%.2f", focal_length)
 			settings_editor.setValue("focal_length", focal_length)
+      @old_time = Time.new
 		end
 #		settings_editor.setValue("camera_type", @lrs.camera_type)
-		settings_editor.setValue("camera_type", camera_type)
+      settings_editor.setValue("camera_type", camera_type)
 	end
 end
 end

@@ -35,12 +35,27 @@ def initialize
 			value=pair[1]
 			case id
 				#Camera
+        
+        # PROBLEM ZONE! #
+        #I think there is a fundemental problem here, because
+        #javascript thinks it has to return a value every time
+        #we change that same variable in ruby. Probably due
+        #to the way that javascript registers changes.
+        #This is similar to the problem with the subsections
+        #in the html not showing up until we change the selection box.
+        #This behavior is probably also slowing the whole thing down
+        #considerably when trying to update things live
 				when "camera_type"
-					@lrs.camera_type=value
+          if value == "environment"
+            @lrs.camera_type=value
+          else
+            Sketchup.active_model.active_view.camera.perspective = value
+          end
 				when "fov"
-					Sketchup.active_model.active_view.camera.fov = value.to_f
+					Sketchup.active_model.active_view.camera.fov = value.to_f 
 				when "focal_length"
 					Sketchup.active_model.active_view.camera.focal_length = value.to_f
+        #############
 				when "camera_scale"
 					@lrs.camera_scale=value
 				when "near_far_clipping"
