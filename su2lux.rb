@@ -494,7 +494,7 @@ def onViewChanged(view)
 		#@lrs.camera_type = 'orthographic'
 		camera_type = 'orthographic'
 	end
-	if (settings_editor)
+	if settings_editor and settings_editor.visible?
 		if (Sketchup.active_model.active_view.camera.perspective?)
 			fov = Sketchup.active_model.active_view.camera.fov
 			fov = format("%.2f", fov)

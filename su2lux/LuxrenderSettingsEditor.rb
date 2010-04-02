@@ -564,6 +564,10 @@ def show
 	@settings_dialog.show{sendDataFromSketchup()}
 end
 
+def visible?
+  @settings_dialog.visible?
+end
+
 #set parameters in inputs of settings.html
 def sendDataFromSketchup()
 	updateSettingValue("fov")
