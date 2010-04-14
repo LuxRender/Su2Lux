@@ -78,7 +78,7 @@ class MyTool
     
       #@curr_ip.draw(view)if @ip.display?
       #@drawn = true
-    view.invalidate
+    #view.invalidate
   end
   def mouse_moved?
     moved = (@curr_ip != @old_ip)
@@ -118,16 +118,16 @@ class MyTool
       pt1 - side1_half - side2_half, pt1 - side1_half + side2_half, pt1 - side1_half + side2_half + normal, pt1 - side1_half - side2_half + normal  #side 4
       ]
     pts1 = [
-      pt1 + side2_half - side1_half, pt1 + side2_half + side1_half, pt1 + side2_half + side1_half + normal, pt1 + side2_half - side1_half + normal, #side 1
+     pts[0], pts[1], pts[2], pts[3] #side 1
       ]
     pts2 = [
-      pt1 - side2_half - side1_half, pt1 - side2_half + side1_half, pt1 - side2_half + side1_half + normal, pt1 - side2_half - side1_half + normal, #side 2
+      pts[4], pts[5], pts[6], pts[7]#side 2
       ]
     pts3 = [
-      pt1 + side1_half - side2_half, pt1 + side1_half + side2_half, pt1 + side1_half + side2_half + normal, pt1 + side1_half - side2_half + normal, #side 3
+      pts[8], pts[9], pts[10], pts[11] #side 3
       ]
     pts4 = [
-      pt1 - side1_half - side2_half, pt1 - side1_half + side2_half, pt1 - side1_half + side2_half + normal, pt1 - side1_half - side2_half + normal  #side 4
+       pts[14], pts[13], pts[12], pts[15] 
       ]
     pts5 = [pt1 - side1_half - side2_half, pt1 - side1_half + side2_half, pt1 + side1_half + side2_half, pt1 +side1_half - side2_half]
     pts6 = []
@@ -147,7 +147,20 @@ class MyTool
     ents = grp.entities
    
     sides = draw_cube(@ip.position, @curr_ip.position, view)
-    sides.each {|side| ents.add_face(side)}
+    sides.each do |side|
+      ents.add_face(side)
+    end
+    
+    #little hack to reverse face (still can't figure out what went wrong in the first place!)
+    c = 1
+    ents.each do |e| 
+      if e.class == Sketchup::Face
+        if c == 2
+          e.reverse!
+        end
+        c += 1
+      end
+    end
     puts "created LuxCube object"
     
     end_commit()
