@@ -48,8 +48,8 @@ film.add_element!(film_type)
 
 #film.add_element!(LuxInt.new('xresolution', Sketchup.active_model.active_view.vpwidth))
 #film.add_element!(LuxInt.new('yresolution', Sketchup.active_model.active_view.vpheight))
-xres = LuxInt.new('xresolution', Sketchup.active_model.active_view.vpwidth)
-yres = LuxInt.new('yresolution', Sketchup.active_model.active_view.vpheight)
+xres = LuxInt.new('xresolution', Sketchup.active_model.active_view.vpwidth/2)
+yres = LuxInt.new('yresolution', Sketchup.active_model.active_view.vpheight/2)
 
 film.add_element!(xres)
 film.add_element!(yres)
