@@ -14,7 +14,7 @@ body {
 	margin: 1px;
 }
 
-#settings_panel {
+.panel {
 	border: 2px solid #eeeeee;
 	margin-top: 10px;
 	padding: 3px;

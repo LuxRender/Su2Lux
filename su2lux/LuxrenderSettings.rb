@@ -27,7 +27,7 @@ class LuxrenderSettings
 #####################################################################
 ###### - Camera	-														######
 #####################################################################
-	'camera_type'=>'perspective',
+	'camera_type'=>(Sketchup.active_model.active_view.camera.perspective? ? 'perspective' : 'orthographic'),
 	'fov'=> format("%.2f", Sketchup.active_model.active_view.camera.fov),#35, # not currently in use
 	'focal_length'=> format("%.2f", Sketchup.active_model.active_view.camera.focal_length),
 	'camera_scale'=>7.31,
@@ -153,7 +153,6 @@ class LuxrenderSettings
 
 def LuxrenderSettings::ui_refreshable?(id)
   ui_refreshable_settings = [
-    'export_file_path'
   ]
   if ui_refreshable_settings.include?(id)
     return id

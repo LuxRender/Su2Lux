@@ -1,3 +1,5 @@
+require "su2lux\\LuxrenderAttributeDictionaries.rb"
+
 class LuxrenderExport
 
 	EXT_SCENE = ".lxs"
@@ -53,7 +55,8 @@ end
 #####################################################################
 def export_camera(view, out)
 	@lrs=LuxrenderSettings.new
-
+  @lrsd = AttributeDic.spawn($lrsd_name)
+  
 	user_camera = view.camera
 	user_eye = user_camera.eye
 	#p user_eye
@@ -79,10 +82,10 @@ def export_camera(view, out)
 	if @lrs.camera_type != "environment" && @lrs.camera_type != camera_type
 		@lrs.camera_type = camera_type
 	end
-	out.puts "Camera \"#{@lrs.camera_type}\""
-	case @lrs.camera_type
+	out.puts "Camera \"#{@lrsd["camera->camera_type"].value.id}\""
+	case @lrsd["camera->camera_type"].value.id
 		when "perspective"
-			fov = compute_fov(@lrs.xresolution, @lrs.yresolution)
+			fov = compute_fov(@lrsd["film->xresolution"].value, @lrsd["film->yresolution"].value)
 			# out.puts "Camera \"#{@lrs.camera_type}\""
 			out.puts "	\"float fov\" [%.6f" %(fov) + "]"
 		when "orthographic"
@@ -134,7 +137,9 @@ end
 #####################################################################
 #####################################################################
 def compute_screen_window
-	ratio = @lrs.xresolution.to_f / @lrs.yresolution.to_f
+  @lrsd = AttributeDic.spawn($lrsd_name) unless @lrsd
+  
+	ratio = @lrsd["film->xresolution"].value.to_i.to_f / @lrsd["film->yresolution"].value.to_i.to_f 
 	inv_ratio = 1.0 / ratio
 	if (ratio > 1.0)
 		screen_window = [-ratio, ratio, -1.0, 1.0]
@@ -145,161 +150,15 @@ end
 
 #####################################################################
 #####################################################################
-def export_film(out)
-	out.puts "Film \"fleximage\""
-	out.puts "\t\"integer xresolution\" [#{@lrs.xresolution}]"
-	out.puts "\t\"integer yresolution\" [#{@lrs.yresolution}]"
-	out.puts "\t\"integer haltspp\" [#{@lrs.haltspp}]"
-	
-	out.puts '
-	"bool premultiplyalpha" ["false"]
-   "string tonemapkernel" ["reinhard"]
-   "float reinhard_prescale" [1.000000]
-   "float reinhard_postscale" [1.200000]
-   "float reinhard_burn" [6.000000]
-   "integer displayinterval" [4]
-   "integer writeinterval" [10]
-   "string ldr_clamp_method" ["lum"]
-   "bool write_exr" ["false"]
-   "bool write_png" ["true"]
-   "string write_png_channels" ["RGB"]
-   "bool write_png_16bit" ["false"]
-   "bool write_png_gamutclamp" ["true"]
-   "bool write_tga" ["false"]
-   "string filename" ["exported_image"]
-   "bool write_resume_flm" ["false"]
-   "bool restart_resume_flm" ["true"]
-   "integer reject_warmup" [128]
-   "bool debug" ["true"]
-   "float colorspace_white" [0.314275 0.329411]
-   "float colorspace_red" [0.630000 0.340000]
-   "float colorspace_green" [0.310000 0.595000]
-   "float colorspace_blue" [0.155000 0.070000]
-   "float gamma" [2.200000]'
-end
 
 def export_render_settings(out)
-	@lrs=LuxrenderSettings.new
-	
-	#pixel filter
-	out.print "\n"
-	out.print "PixelFilter \"#{@lrs.pixelfilter_type}\"\n"
-	case @lrs.pixelfilter_type
-		when "box"
-		when "gaussian"
-		when "mitchell"
-			out.print "	\"float xwidth\" [#{@lrs.pixelfilter_mitchell_xwidth}]\n"
-			out.print "	\"float ywidth\" [#{@lrs.pixelfilter_mitchell_ywidth}]\n"
-		when "sinc"
-		when "triangle"
-	end
-
-	#sampler
-	out.print "\n"
-	out.print "Sampler \"#{@lrs.sampler_type}\"\n"
-	case @lrs.sampler_type
-		when "metropolis"
-			out.puts '"float largemutationprob" [0.400000]'
-		when "lowdiscrepancy"
-			out.puts '"string pixelsampler" ["lowdiscrepancy"]
-			"integer pixelsamples" [1]'
-	end
-
-	# SurfaceIntegrator "bidirectional"
-	out.print "\n"
-	out.puts "SurfaceIntegrator \"#{@lrs.sintegrator_type}\"\n"
-	case @lrs.sintegrator_type
-		when "bidirectional"
-			if @lrs.sintegrator_showadvanced
-				out.print "   \"integer eyedepth\" [#{@lrs.sintegrator_bidir_eyedepth}]\n"
-				out.print "   \"integer lightdepth\" [#{@lrs.sintegrator_bidir_lightdepth}]\n"
-				out.print "   \"string strategy\" [\"#{@lrs.sintegrator_bidir_strategy}\"]\n"
-				out.puts '"   float eyerrthreshold" [0.000000]'
-				out.puts '"   float lightrrthreshold" [0.000000]'
-			else
-				out.print "	\"integer eyedepth\" [#{@lrs.sintegrator_bidir_bounces}]\n"
-				out.print "	\"integer lightdepth\" [#{@lrs.sintegrator_bidir_bounces}]\n"
-			end
-		when 'path'
-			if @lrs.sintegrator_showadvanced
-				out.print "	\"integer maxdepth\" [#{@lrs.sintegrator_path_maxdepth}]\n"
-				#"integer maxdepth" [10]
-				#"bool includeenvironment" ["true"]
-			else
-				 #  "integer maxdepth" [10]
-				#	"string strategy" ["auto"]
-				#	"string rrstrategy" ["efficiency"]
-				#	"bool includeenvironment" ["true"]
-			end
-		when "distributedpath"
-			out.puts '   "bool directsampleall" ["true"]' if @lrs.sintegrator_distributedpath_directsampleall
-			out.puts '   "bool directsampleall" ["false"]' if not @lrs.sintegrator_distributedpath_directsampleall
-			out.print "   \"integer directsamples\" [#{@lrs.sintegrator_distributedpath_directsamples}]\n"
-			out.puts '   "bool directdiffuse" ["true"]' if @lrs.sintegrator_distributedpath_directdiffuse
-			out.puts '   "bool directdiffuse" ["false"]' if not @lrs.sintegrator_distributedpath_directdiffuse
-			out.puts '   "bool directglossy" ["true"]' if @lrs.sintegrator_distributedpath_directglossy
-			out.puts '   "bool directglossy" ["false"]' if not @lrs.sintegrator_distributedpath_directglossy
-			out.puts '   "bool indirectsampleall" ["true"]' if @lrs.sintegrator_distributedpath_indirectsampleall
-			out.puts '   "bool indirectsampleall" ["false"]' if not @lrs.sintegrator_distributedpath_indirectsampleall
-			out.print "   \"integer indirectsamples\" [#{@lrs.sintegrator_distributedpath_indirectsamples}]\n"
-			out.puts '   "bool indirectdiffuse" ["true"]' if @lrs.sintegrator_distributedpath_indirectdiffuse
-			out.puts '   "bool indirectdiffuse" ["false"]' if not @lrs.sintegrator_distributedpath_indirectdiffuse
-			out.puts '   "bool indirectglossy" ["true"]' if @lrs.sintegrator_distributedpath_indirectglossy
-			out.puts '   "bool indirectglossy" ["false"]' if not @lrs.sintegrator_distributedpath_indirectglossy
-			out.print "   \"integer diffusereflectdepth\" [#{@lrs.sintegrator_distributedpath_diffusereflectdepth}]\n"
-			out.print "   \"integer diffusereflectsamples\" [#{@lrs.sintegrator_distributedpath_diffusereflectsamples}]\n"
-			out.print "   \"integer diffuserefractdepth\" [#{@lrs.sintegrator_distributedpath_diffuserefractdepth}]\n"
-			out.print "   \"integer diffuserefractsamples\" [#{@lrs.sintegrator_distributedpath_diffuserefractsamples}]\n"
-			out.print "   \"integer glossyreflectdepth\" [#{@lrs.sintegrator_distributedpath_glossyreflectdepth}]\n"
-			out.print "   \"integer glossyreflectsamples\" [#{@lrs.sintegrator_distributedpath_glossyreflectsamples}]\n"
-			out.print "   \"integer glossyrefractdepth\" [#{@lrs.sintegrator_distributedpath_glossyrefractdepth}]\n"
-			out.print "   \"integer glossyrefractsamples\" [#{@lrs.sintegrator_distributedpath_glossyrefractsamples}]\n"
-			out.print "   \"integer specularreflectdepth\" [#{@lrs.sintegrator_distributedpath_specularreflectdepth}]\n"
-			out.print "   \"integer specularrefractdepth\" [#{@lrs.sintegrator_distributedpath_specularrefractdepth}]\n"
-			out.puts '   "bool directglossy" ["true"]' if @lrs.sintegrator_distributedpath_causticsonglossy
-			out.puts '   "bool directglossy" ["false"]' if not @lrs.sintegrator_distributedpath_causticsonglossy
-			out.puts '   "bool indirectglossy" ["true"]' if @lrs.sintegrator_distributedpath_causticsondiffuse
-			out.puts '   "bool indirectglossy" ["false"]' if not @lrs.sintegrator_distributedpath_causticsondiffuse
-			out.print "   \"string strategy\" [\"#{@lrs.sintegrator_distributedpath_strategy}\"]\n"
-		when "directlighting"
-			out.print "	\"integer maxdepth\" [#{@lrs.sintegrator_dlighting_maxdepth}]"
-		when "exphotonmap"
-			p "select exphotonmap"
-		when "igi"
-			p "select igi"
-	end
-	
-	#VolumeIntegrator
-	out.print "\n"
-	out.print "VolumeIntegrator \"#{@lrs.volume_integrator_type}\"\n"
-	#VolumeIntegrator
-	case @lrs.volume_integrator_type
-		when "single"  
-			out.puts '"float stepsize" [1.000000]'
-		when "emission"
-			out.puts '"float stepsize" [1.000000]'
-	end
-
-   
-	#accelerator
-	out.puts "\n"
-	out.puts "Accelerator \"#{@lrs.accelerator_type}\""
-	case @lrs.accelerator_type
-		when "kdtree", "tabreckdtree"
-			out.puts "\t\"integer intersectcost\" [#{@lrs.intersection_cost}]"
-			out.puts "\t\"integer traversalcost\" [#{@lrs.traversal_cost}]"
-			out.puts "\t\"float emptybonus\" [#{"%.6f" %(@lrs.empty_bonus)}]"
-			out.puts "\t\"integer maxprims\" [#{@lrs.max_prims}]"
-			out.puts "\t\"integer maxdepth\" [#{@lrs.max_depth}]"
-		when "grid"
-			value = "\"false\""
-			value = "\"true\"" if @lrs.refine_immediately
-			out.puts "\t\"bool refineimmediately\" [#{value}]"
-		when "bvh"
-		when "qbvh"
-			out.puts "\t\"integer maxprimsperleaf\" [#{@lrs.max_prims_per_leaf}]"
-			out.puts "\t\"integer skipfactor\" [#{@lrs.skip_factor}]"
-	end
+  @properties = AttributeDic.spawn("test_settings")
+	@properties.each_root do |p|
+    if p.id != "camera" #camera not yet implemented
+      out.puts p.export + "\n"
+      #explore(p)
+    end
+  end
 	out.puts "\n"
 end
 

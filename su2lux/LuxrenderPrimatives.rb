@@ -2,6 +2,12 @@ model = Sketchup.active_model
 entities = model.entities
 selection = model.selection
 
+class LuxSphere
+  def initialize(position, radius, zmin=-radius, zmax=radius, phimax=360)
+  end
+end
+
+
 
 class MyTool
   def initialize

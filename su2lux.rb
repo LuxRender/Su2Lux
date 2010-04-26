@@ -29,7 +29,6 @@
 require 'sketchup.rb'
 
 module SU2LUX
-
 #if ! defined? INCLUDE_FLAG
 	DEBUG = true
 	#FRONTF = "SU2LUX Front Face"
@@ -54,6 +53,8 @@ else
 	def SU2LUX.p_debug(message)
 	end
 end
+
+
 
 #####################################################################
 #####################################################################
@@ -108,6 +109,9 @@ end
 #####################################################################
 #####################################################################
 def SU2LUX.export
+  @lrad = AttributeDic.spawn("test_attributes") unless @lrad
+  
+  export_file_path = @lrad["export_file_path"].value
 	#Sketchup.send_action "showRubyPanel:"
 	SU2LUX.reset_variables
 	model = Sketchup.active_model
@@ -115,24 +119,23 @@ def SU2LUX.export
 	selection = model.selection
 	materials = model.materials
 
-	le=LuxrenderExport.new(@export_file_path,@os_separator)
+	le=LuxrenderExport.new(export_file_path,@os_separator)
 	le.reset
-	out = File.new(@export_file_path,"w")
+	out = File.new(@lrad["export_file_path"].value,"w")
 	le.export_global_settings(out)
 	le.export_camera(model.active_view, out)
-	le.export_film(out)
 	le.export_render_settings(out)
 	entity_list=model.entities
 	out.puts 'WorldBegin'
 	le.export_light(out)
 	
-	file_basename = File.basename(@export_file_path, EXT_SCENE)
+	file_basename = File.basename(export_file_path, EXT_SCENE)
 	out.puts "Include \"" + file_basename + SUFFIX_MATERIAL + "\"\n\n"
 	out.puts "Include \"" + file_basename + SUFFIX_OBJECT + "\"\n\n"
 	out.puts 'WorldEnd'
 	out.close
 	
-	file_dirname = File.dirname(@export_file_path)
+	file_dirname = File.dirname(export_file_path)
 	file_fullname = file_dirname + @os_separator + file_basename
 	
 	#Exporting geometry
@@ -156,13 +159,12 @@ def SU2LUX.export_dialog(render=true)
 	"""
 	##### --- awful hack --- 1.0 ####
 	@lrs=LuxrenderSettings.new
-	@export_file_path = @lrs.export_file_path #shouldn't need this
+  @lrad = AttributeDic.spawn("test_attributes")
 	#####################
 
   SU2LUX.reset_variables
-  
   #check whether file path has already been chosen
-  if @export_file_path != ""
+  if @lrad["export_file_path"].value != ""
     start_time = Time.new
     SU2LUX.export
 	#launch appropriate report window and render (according to variable: render)
@@ -193,15 +195,15 @@ def SU2LUX.export_dialog(render=true)
 end #end export_dialog
 
 def SU2LUX.export_copy
-
-	@lrs=LuxrenderSettings.new
+  @lrad = AttributeDic.spawn("test_attributes")
 	#temporary file path for exporting copy
-	old_export_file_path = @lrs.export_file_path 
+	old_export_file_path = @lrad["export_file_path"].value
 	
 	SU2LUX.new_export_file_path
 	SU2LUX.export_dialog(render=false) #don't bother rendering
-	
-	@lrs.export_file_path = old_export_file_path
+	@lrad["export_file_path"].value = old_export_file_path
+  settings = SU2LUX.get_editor("settings")
+  settings.updateSettingValue(@lrad["export_file_path"])
 end	
 
 #### Some Dialogs (colour select, browse file path, etc..)###########
@@ -212,11 +214,8 @@ def SU2LUX.new_export_file_path
 it is currently required for the browse button in the settings panel and the button in the 
 plugin menu.
 """
-	##### --- awful hack --- 1.0 ####
-	@lrs=LuxrenderSettings.new
-	@export_file_path = @lrs.export_file_path #shouldn't need this
-	#####################
-	
+  @lrad = AttributeDic.spawn("test_attributes") unless @lrad
+  
 	model = Sketchup.active_model
     model_filename = File.basename(model.path)
     if model_filename.empty?
@@ -236,19 +235,15 @@ plugin menu.
 	#check whether user has pressed cancel
     if user_input
       #store file path for quick exports
-      @export_file_path = user_input
-      
-      @lrs.export_file_path = @export_file_path
-      #would be nice to store export_file_path in luxrender preferences (attatch to skp)
-      
-      if @export_file_path == @export_file_path.chomp(EXT_SCENE)
-        @export_file_path += EXT_SCENE
-        
-        #### --- awful hack --- 1.0 #####
-        @lrs.export_file_path = @export_file_path
-        #####################
-        
+      new_xfp = user_input
+      if new_xfp == new_xfp.chomp(EXT_SCENE)
+        new_xfp += EXT_SCENE
         @luxrender_path = SU2LUX.get_luxrender_path
+      end
+      @lrad["export_file_path"].value = new_xfp
+      settings = SU2LUX.get_editor("settings")
+      if settings.visible?
+        settings.updateSettingValue(@lrad["export_file_path"])
       end
 	  return true #user has selected a path
 	end
@@ -331,6 +326,9 @@ end
 #####################################################################
 #####################################################################
 def SU2LUX.report_window(start_time, ask_render=true)
+  @lrad = AttributeDic.spawn("test_attributes") unless @lrad
+  export_file_path = @lrad["export_file_path"].value
+  
 	SU2LUX.p_debug "SU2LUX.report_window"
 	end_time=Time.new
 	elapsed=end_time-start_time
@@ -343,9 +341,9 @@ def SU2LUX.report_window(start_time, ask_render=true)
 	export_text="Model & Lights saved in file:\n"
 	#export_text="Selection saved in file:\n" if @selected==true
 	if ask_render
-		result=UI.messagebox(export_text + @export_file_path +  " \n\nOpen exported model in Luxrender?",MB_YESNO)
+		result=UI.messagebox(export_text + export_file_path +  " \n\nOpen exported model in Luxrender?",MB_YESNO)
 	else
-		result=UI.messagebox(export_text + @export_file_path,MB_OK)
+		result=UI.messagebox(export_text + export_file_path,MB_OK)
 	end
 	return result
 end
@@ -389,10 +387,12 @@ end
 #####################################################################
 #####################################################################
 def SU2LUX.launch_luxrender
+  @lrad = AttributeDic.spawn("test_attributes") unless @lrad
+  export_file_path = @lrad["export_file_path"].value
 	@luxrender_path = SU2LUX.get_luxrender_path if @luxrender_path.nil?
 	return if @luxrender_path.nil?
 	Dir.chdir(File.dirname(@luxrender_path))
-	export_path = "#{@export_file_path}"
+	export_path = "#{export_file_path}"
 	export_path = File.join(export_path.split(@os_separator))
 	if (ENV['OS'] =~ /windows/i)
 	 command_line = "start \"max\" \"#{@luxrender_path}\" \"#{export_path}\""
@@ -543,13 +543,14 @@ if( not file_loaded?(__FILE__) )
 	load File.join("su2lux","MeshCollector.rb")
 	load File.join("su2lux","LuxrenderExport.rb")
 	load File.join("su2lux", "LuxrenderToolbar.rb")
-  load File.join("su2lux", "LuxrenderPrimatives.rb")
+	load File.join("su2lux", "LuxrenderPrimatives.rb")
+	load File.join("su2lux", "LuxrenderTypes_settings.rb")
   
   create_toolbar()
   
 	#observers
 	Sketchup.add_observer(SU2LUX_app_observer.new)
-	Sketchup.active_model.active_view.add_observer(SU2LUX_view_observer.new)
+	#Sketchup.active_model.active_view.add_observer(SU2LUX_view_observer.new)
 end
 
 
