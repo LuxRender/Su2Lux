@@ -470,6 +470,7 @@ end
 def SU2LUX.get_editor(type)
 	case type
 		when "settings"
+      @settings_editor=LuxrenderSettingsEditor.new if not @settings_editor
 			editor = @settings_editor
 		when "material"
 			editor = @material_editor
@@ -512,24 +513,42 @@ def onViewChanged(view)
 end
 end
 
+class SU2LUX_model_observer < Sketchup::ModelObserver
+  def onTransactionRedo(model)
+    settings_editor = SU2LUX.get_editor("settings")
+    if settings_editor.visible?
+      settings_editor.updateAllSettings()
+    end
+  end
+  
+  def onTransactionUndo(model)
+    settings_editor = SU2LUX.get_editor("settings")
+    if settings_editor.visible?
+      settings_editor.updateAllSettings()
+    end
+  end
+end
+
+
 class SU2LUX_app_observer < Sketchup::AppObserver
 	def onNewModel(model)
-		model.active_view.add_observer(SU2LUX_view_observer.new)
+		#model.active_view.add_observer(SU2LUX_view_observer.new)
 		
-		@lrs = LuxrenderSettings.new
-		@lrs.xresolution = Sketchup.active_model.active_view.vpwidth
-		@lrs.yresolution = Sketchup.active_model.active_view.vpheight
-		settings_editor = SU2LUX.get_editor("settings")
+		#@lrs = LuxrenderSettings.new
+		#@lrs.xresolution = Sketchup.active_model.active_view.vpwidth
+		#@lrs.yresolution = Sketchup.active_model.active_view.vpheight
+		#settings_editor = SU2LUX.get_editor("settings")
 		# @lrs.camera_scale = nil
 		if settings_editor
-			settings_editor.setValue("xresolution", @lrs.xresolution)
-			settings_editor.setValue("yresolution", @lrs.yresolution)
+			#settings_editor.setValue("xresolution", @lrs.xresolution)
+			#settings_editor.setValue("yresolution", @lrs.yresolution)
 			# settings_editor.setValue("camera_scale", @lrs.camera_scale)
 		end
 	end
 
 	def onOpenModel(model)
-		model.active_view.add_observer(SU2LUX_view_observer.new)
+    #Sketchup.add_observer(SU2LUX_model_observer.new)
+		#model.active_view.add_observer(SU2LUX_view_observer.new)
 	end
 end
 
@@ -550,6 +569,7 @@ if( not file_loaded?(__FILE__) )
   
 	#observers
 	Sketchup.add_observer(SU2LUX_app_observer.new)
+  Sketchup.active_model.add_observer(SU2LUX_model_observer.new)
 	#Sketchup.active_model.active_view.add_observer(SU2LUX_view_observer.new)
 end
 
