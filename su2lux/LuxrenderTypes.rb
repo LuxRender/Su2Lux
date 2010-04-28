@@ -452,7 +452,7 @@ class LuxSelection
     #puts self.attribute_key
     #### LABEL ####
     html_str << "\n"
-    html_str << "<span class=\"label\">type:</span>"
+    html_str << "<span class=\"label\">#{@name}:</span>"
     
     #### SELECT ####
     html_str << "\n"

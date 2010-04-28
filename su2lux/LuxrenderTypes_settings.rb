@@ -17,7 +17,7 @@ export_file_path = Attribute.new('export_file_path', 'rb_file_path', '')
 def camera_settings()
 camera = LuxObject.new('camera', [], 'Camera')#name, because exporting requires capitals
 
-camera_type = LuxSelection.new('camera_type')
+camera_type = LuxSelection.new('camera_type', [], 'Camera Type')
   camera_type.create_choice!('perspective', LuxFloat.new('fov', 35))
   camera_type.create_choice!('orthographic', LuxFloat.new('scale', 7.31))
   camera_type.create_choice!('environment')
@@ -41,7 +41,7 @@ end
 def film_settings()
 film = LuxObject.new("film", [], 'Film')
 
-film_type = LuxSelection.new('film_type')
+film_type = LuxSelection.new('film_type', [], 'Film Type')
   film_type.create_choice!('fleximage')
 
 film.add_element!(film_type)
@@ -67,10 +67,10 @@ end
 def sampler_settings()
 sampler = LuxObject.new('sampler', [], 'Sampler')
 
-sampler_type = LuxSelection.new('sampler_type')
+sampler_type = LuxSelection.new('sampler_type', [], 'Sampler Type')
 # lowdicrepancy & random #
   pixelsamples = LuxInt.new('pixelsamples', 4)
-  pixelsamplerselection = LuxSelection.new('pixelsamplerselection')
+  pixelsamplerselection = LuxSelection.new('pixelsamplerselection', [], 'Pixel Sampler Type')
     pixelsamplerselection.create_choice!('linear')
     pixelsamplerselection.create_choice!('tile')
     pixelsamplerselection.create_choice!('random')
@@ -99,7 +99,7 @@ end
 def surfaceintegrator_settings()
 surfint = LuxObject.new('surfaceintegrator', [], 'SurfaceIntegrator')
 
-int_type = LuxSelection.new('integrator_type')
+int_type = LuxSelection.new('integrator_type', [], 'Integrator Type')
   bidir = LuxChoice.new('bidirectional')
     bidir.add_child!(LuxInt.new('eyedepth', 8))
     bidir.add_child!(LuxInt.new('lightdepth', 8))
@@ -130,7 +130,7 @@ end
 def accelerator_settings()
 accel = LuxObject.new('accelerator', [], 'Accelerator')
 
-accel_type = LuxSelection.new('accelerator_type')
+accel_type = LuxSelection.new('accelerator_type', [], 'Accelerator Type')
   tabreckdtree = LuxChoice.new('tabreckdtree')
     tabreckdtree.add_child!(LuxInt.new('intersectcost', 80))
     tabreckdtree.add_child!(LuxInt.new('traversalcost', 1))
