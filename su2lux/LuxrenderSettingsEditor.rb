@@ -34,7 +34,11 @@ def initialize
 	@settings_dialog.add_action_callback("change_setting") {|dialog, params|
 			SU2LUX.p_debug params
 			pair=params.split("=")
-			id=js_to_rb_path(pair[0])		   
+			id=js_to_rb_path(pair[0]) #not using the path thing, 
+			#because not required for ruby (it 
+			#accepts either format, and only the 
+			#js_path works for displaying with 
+			#javascript  
 			value=js_to_rb_path(pair[1])
       
       if AttributeDic::is_path?(value)

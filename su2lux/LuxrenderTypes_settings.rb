@@ -1,6 +1,6 @@
-require "su2lux\\LuxrenderTypes.rb"
-require "su2lux\\LuxrenderHTMLTypes.rb"
-require "su2lux\\LuxrenderAttributeDictionaries.rb"
+require "su2lux/LuxrenderTypes.rb"
+require "su2lux/LuxrenderHTMLTypes.rb"
+require "su2lux/LuxrenderAttributeDictionaries.rb"
 
 #5pm
 #7 rows back in the middle

@@ -1,4 +1,4 @@
-require "su2lux\\LuxrenderAttributeDictionaries.rb"
+require "su2lux/LuxrenderAttributeDictionaries.rb"
 
 class LuxrenderExport
 

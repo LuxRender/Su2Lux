@@ -41,9 +41,7 @@ function init_collapse()
 
 function add_preset(id, name)
 {
-	$("#presets_panel .select_collapse").each(function(){
-		$(this).append("<option value=" + id + ">" + name + "</option>");
-	});
+	$("#preset_select").append("<option value=" + id + ">" + name + "</option>");
 }
 
 function remove_preset()
@@ -57,6 +55,7 @@ $(document).ready(
 	function()
 	{
 		add_preset('yummy', 'yummy');
+		add_preset('noo', 'funny');
 
 		//$(".header").next("div.collapse").show();
 		
