@@ -39,12 +39,24 @@ function init_collapse()
 	}); //show all collapsed boxes
 }
 
+function add_preset(id, name)
+{
+	$("#presets_panel .select_collapse").each(function(){
+		$(this).append("<option value=" + id + ">" + name + "</option>");
+	});
+}
+
+function remove_preset()
+{	
+}
+
 jQuery.fn.fadeToggle = function(speed, easing, callback) {
    return this.animate({opacity: 'toggle'}, speed, easing, callback);
 }; 
 $(document).ready(
 	function()
 	{
+		add_preset('yummy', 'yummy');
 
 		//$(".header").next("div.collapse").show();
 		
@@ -72,7 +84,6 @@ $(document).ready(
 				change_setting(this.id, $(this).attr('checked'));
 			}
 		);
-		
 
 		$("p.header").click(
 			function()

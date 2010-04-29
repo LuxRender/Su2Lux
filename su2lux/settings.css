@@ -1,4 +1,6 @@
 body {
+	padding: 0;
+	margin-top: 0;
 	overflow: hidden;
 	font-family: Verdana, Arial, Helvetica, sans-serif;
 	font-size: 12px;

@@ -46,10 +46,15 @@ film_type = LuxSelection.new('film_type', [], 'Film Type')
 
 film.add_element!(film_type)
 
-#film.add_element!(LuxInt.new('xresolution', Sketchup.active_model.active_view.vpwidth))
-#film.add_element!(LuxInt.new('yresolution', Sketchup.active_model.active_view.vpheight))
-xres = LuxInt.new('xresolution', Sketchup.active_model.active_view.vpwidth/2)
-yres = LuxInt.new('yresolution', Sketchup.active_model.active_view.vpheight/2)
+#probably not the best way to do this!
+xres = LuxInt.new('xresolution', Sketchup.active_model.active_view.vpwidth/2) do |this, env|
+  env.update_aspect_ratio()
+end
+
+yres = LuxInt.new('yresolution', Sketchup.active_model.active_view.vpheight/2) do |this, env|
+  env.update_aspect_ratio()
+end
+
 
 film.add_element!(xres)
 film.add_element!(yres)
@@ -166,6 +171,27 @@ accelerator_settings()
 #@lrsd.each_value {|value| print value.export + "\n"}
 
 ############## -- HTML SETTINGS EDITOR -- ###################
+presets_panel = HTML_block_panel.new("presets_panel")
+  preset_select = LuxSelection.new("preset_select", [], "Select Preset")
+  preset_table = HTML_outer_custom_element.new() do |this|
+    html_str = "\n"
+    html_str += "<table style=\"position:relative; margin-left:auto; margin-right:auto\">"
+    
+    html_str += "\n"
+    html_str += "<tr>"
+    for e in this.elements
+      html_str += e.html
+    end
+    html_str += "\n"
+    html_str += "</tr>"
+    html_str += "\n"
+    html_str += "</table>"
+    html_str
+  end
+  preset_table.add_element!(preset_select)
+
+presets_panel.add_element!(preset_table)
+  
 settings_panel = HTML_block_panel.new("settings_panel")
 
   camera_collapse = HTML_block_collapse.new("Camera")
@@ -269,6 +295,7 @@ system_panel.add_element!(system_settings_collapse)
 
 
 settings_html_main = HTML_block_main.new("SettingsPage")
+settings_html_main.add_element!(presets_panel)
 settings_html_main.add_element!(settings_panel)
 settings_html_main.add_element!(system_panel)
 

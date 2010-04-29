@@ -26,7 +26,7 @@ class HTML_block_main < HTML_block
   end
   def html
     #### TOP ####
-    html_str  = <<-eos 
+    html_str  = <<-eos
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 
 <html>
@@ -41,16 +41,16 @@ class HTML_block_main < HTML_block
 </head>
 <body>
     eos
-    
+
     #### ELEMENTS ####
     for e in @elements
-      html_str << "\n" + e.html
+      html_str += e.html
     end
-    
+
     #### BOTTOM ####
-    html_str << "\n" + "</body>"
-    html_str << "\n" + "</html>"
-    
+    html_str += "\n" + "</body>"
+    html_str += "\n" + "</html>"
+
     return html_str
   end
 end #end HTML_block_main
@@ -68,27 +68,27 @@ class HTML_block_collapse < HTML_block
     @collapsed = true
   end
   def html
-    
+
 
     #### HEADER ####
     html_str = "\n"
     html_str << "<p class=\"header\">#{@name}</p>"
-    
+
       #### COLLAPSE DIV ####
       html_str << "\n"
       html_str << "<div class=\"collapse\">"
-      
+
         #### TABLE ####
         html_str << "\n"
         html_str << "<table style=\"position:relative; margin-left:auto; margin-right:auto\">"
-        
+
           #### PROPERTIES ####
           for e in @elements
             if e.class != HTML_table #a bit of a hack to get buttons on the end
               #### TABLE ROW ####
               html_str << "\n"
               html_str << "<tr>"
-                
+
                 #### CHILD HTML ####
                 html_str << "\n" + e.html
               #### END TABLE ROW ####
@@ -97,34 +97,34 @@ class HTML_block_collapse < HTML_block
               html_str << "\n"
             end
           end
-          
+
         #### END TABLE ####
         html_str << "\n"
         html_str << "</table>"
-        
+
         for e in @elements
           if e.class == HTML_table
             #### TABLE ####
             html_str << "\n"
             html_str << "<table style=\"position:relative; margin-left:auto; margin-right:auto\">"
-            
+
             html_str << "\n"
             html_str << "<tr>"
-              
+
             #### CHILD HTML ####
             html_str << "\n" + e.html
-            
+
             #### END TABLE ROW ####
             html_str << "\n"
             html_str << "</tr>"
             html_str << "\n"
-            
+
             #### END TABLE ####
             html_str << "\n"
             html_str << "</table>"
           end
         end
-        
+
       #### END COLLAPSE DIV ####
       html_str << "\n"
       html_str << "</div>"
@@ -146,17 +146,17 @@ class HTML_block_panel < HTML_block
   def html
     #### DIV ####
     html_str = "\n"
-    html_str << "<div id=\"#{@id}\" class=\"panel\">"
-    
+    html_str += "<div id=\"#{@id}\" class=\"panel\">"
+
     #### ELEMENTS ####
     for e in @elements
-      html_str << "\n" + e.html
+      html_str += "\n" + e.html
     end
-    
+
     #### END DIV ####
-    html_str << "\n"
-    html_str << "</div>"
-    
+    html_str += "\n"
+    html_str += "</div>"
+
     return html_str
   end
 end #end HTML_block_panel
@@ -183,14 +183,14 @@ class HTML_table
     @row = []
   end
   def start_row!()
-    if @row != [] 
+    if @row != []
       @table.push(@row)
       @row = []
     end
   end
   def end_row!()
-    if @row != [] 
-      @table.push(@row) 
+    if @row != []
+      @table.push(@row)
       @row = []
     end
   end
@@ -198,29 +198,29 @@ class HTML_table
     @row.push(el)
   end
   def html
-    @table.push(@row) if @row != []  
+    @table.push(@row) if @row != []
     #add last row (which hasn't been pushed yet if the user has forgotten to put an end row)
     html_str = "\n"
     html_str += "<td>"
-    
+
     html_str += "\n"
     html_str += "<table>"
-    
+
     for row in @table
       html_str += "\n"
       html_str += "<tr>"
-      
+
       for el in row
         html_str += el.html
       end
-      
+
       html_str += "\n"
       html_str += "</tr>"
     end
-    
+
     html_str += "\n"
     html_str += "</table>"
-    
+
     html_str += "\n"
     html_str += "</td>"
     return html_str
@@ -234,7 +234,7 @@ class HTML_button
     @id = id
     @name = name
     @block = block
-    
+
     @lrad = AttributeDic.spawn($lrad_name) unless @lrad
     @lrad.add_root(@id, self)
   end
@@ -268,10 +268,10 @@ def res_preset_button(x, y)
     @lrad = AttributeDic.spawn($lrad_name)
     xres = @lrsd["film->xresolution"]
     yres = @lrsd["film->yresolution"]
-    
+
     xres.value = x
     yres.value = y
-    
+
     env.updateSettingValue(@lrsd["film->xresolution"])
     env.updateSettingValue(@lrsd["film->yresolution"])
     env.change_aspect_ratio(xres.value.to_i.to_f / yres.value.to_i.to_f)
@@ -285,3 +285,22 @@ class HTML_from_file
   def html
   end
 end #end HTML_from_file
+
+
+class HTML_outer_custom_element
+  attr_reader :id, :name
+  attr_accessor :elements
+  def initialize(id="", custom_html="", name=id, &block)
+    @block = block
+    @id = id
+    @name = name
+    @custom_html=custom_html
+    @elements = []
+  end
+  def add_element!(el)
+    @elements.push(el)
+  end
+  def html
+   return @block.call(self)
+  end
+end #end HTML_custom_element

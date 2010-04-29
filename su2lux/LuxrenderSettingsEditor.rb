@@ -43,7 +43,14 @@ def initialize
         end
       end
       
-      @lrsd[id].value = value
+      obj = @lrsd[id]
+      
+      obj.value = value
+      if obj.respond_to?("call_block")
+        if obj.call_block?()
+          obj.call_block(self)
+        end
+      end
       puts value
 	} #end action callback setting_change
 	
@@ -98,7 +105,9 @@ def initialize
 			SU2LUX.new_export_file_path
 	end #end case
 	} #end action callback open_dialog
-end
+  
+  self.add_preset()
+end #end initialize
 
 
 def show
@@ -130,6 +139,16 @@ def updateSettingValue(obj)
     #SU2LUX.p_debug cmd
     @settings_dialog.execute_script(cmd)
   end
+end
+
+def add_preset()
+  @settings_dialog.execute_script("add_preset('yummy', 'yummy');")
+end
+
+def update_aspect_ratio()
+  xres = @lrsd["film->xresolution"]
+  yres = @lrsd["film->yresolution"]
+  self.change_aspect_ratio(xres.value.to_i.to_f / yres.value.to_i.to_f)
 end
 
 def change_aspect_ratio(aspect_ratio)

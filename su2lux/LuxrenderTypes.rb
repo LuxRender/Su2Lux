@@ -111,10 +111,21 @@ class LuxNumber < LuxType
 end #end LuxNumber
 
 class LuxInt < LuxNumber
-  def initialize(id, value=0, name=id, parent=nil)
+  def initialize(id, value=0, name=id, parent=nil, &block)
+    @block = block
     value = value.to_i #add check if integer or number, convert if other number.
     super(id, value, name, parent)
     @type_str = 'integer'
+  end
+  def call_block(env=nil) #experimental feature that gets called when updated in editor.
+    @block.call(self, env)
+  end
+  def call_block?()
+    return !@block.nil?
+  end
+  def value=(v)
+    super(v)
+    #self.call_block()
   end
   def value
     @lrsd = AttributeDic.spawn($lrsd_name) #unless @lrsd
@@ -471,27 +482,29 @@ class LuxSelection
     html_str << "\n"
     html_str << "</select>"
     
-    for choice in @choices
-      #puts "  choice: #{choice}"
-        #### DIV ####
-        html_str << "\n"
-        html_str << "<div id=\"#{rb_to_js_path(choice.attribute_key)}\" class=\"collapse\">"
-        
-        for child in choice.children
-          #### EMBEDDED CHILD TABLE ####
+    if not @choices.empty?
+      for choice in @choices
+        #puts "  choice: #{choice}"
+          #### DIV ####
           html_str << "\n"
-          html_str << "<table>"
-          html_str << "\n"
-          html_str << "<tr>"
-          #puts "    child: #{child.class}"
-          #### PROPERTY ####
-          html_str << "\n"
-          html_str << child.html
-          #### END EMBEDDED CHILD TABLE ####
-          html_str << "\n"
-          html_str << "</tr>"
-          html_str << "\n"
-          html_str << "</table>"
+          html_str << "<div id=\"#{rb_to_js_path(choice.attribute_key)}\" class=\"collapse\">"
+          
+          for child in choice.children
+            #### EMBEDDED CHILD TABLE ####
+            html_str << "\n"
+            html_str << "<table>"
+            html_str << "\n"
+            html_str << "<tr>"
+            #puts "    child: #{child.class}"
+            #### PROPERTY ####
+            html_str << "\n"
+            html_str << child.html
+            #### END EMBEDDED CHILD TABLE ####
+            html_str << "\n"
+            html_str << "</tr>"
+            html_str << "\n"
+            html_str << "</table>"
+          end
         end
         
         #### END DIV ####

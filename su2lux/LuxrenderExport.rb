@@ -111,6 +111,7 @@ end
 #####################################################################
 #####################################################################
 def compute_fov(xres, yres)
+  puts "xres: #{xres}, yres: #{yres}"
 	camera = Sketchup.active_model.active_view.camera
 	fov_vertical = camera.fov
 	width = xres.to_f
