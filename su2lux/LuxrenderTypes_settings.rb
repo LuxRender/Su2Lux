@@ -299,8 +299,8 @@ settings_html_main.add_element!(presets_panel)
 settings_html_main.add_element!(settings_panel)
 settings_html_main.add_element!(system_panel)
 
-File.open("C:\\Program Files\\Google\\Google SketchUp 7\\Plugins\\su2lux\\test.html", "w") {|out| out.puts settings_html_main.html}
 
+open(SU2LUX.plugin_dir + "su2lux/test.html", "w") {|out| out.puts settings_html_main.html}
 ##################################################
 
 
