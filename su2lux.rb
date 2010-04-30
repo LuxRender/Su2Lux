@@ -268,7 +268,7 @@ def SU2LUX.plugin_dir
   if not on_mac?
     return "C:/Program Files/Google/Google SketchUp #{Sketchup.version[0, 1]}/Plugins/"
   else
-    return "/Library/Application Support/Google/Google SketchUp #{Sketchup.version[0, 1]}/SketchUp/plugins/"
+    return "/Library/Application Support/Google SketchUp #{Sketchup.version[0, 1]}/SketchUp/plugins/"
   end
 end
 #####################################################################
