@@ -39,9 +39,23 @@ function init_collapse()
 	}); //show all collapsed boxes
 }
 
-function add_preset(id, name)
+function select_preset(name)
 {
-	$("#preset_select").append("<option value=" + id + ">" + name + "</option>");
+	report_id("select_preset", name);
+}
+
+function set_preset_selector(name)
+{
+	$("#preset_select").append("<option value=" + name + ">" + name + "</option>");
+}
+
+function new_preset()
+{
+	preset_name = prompt("Preset Name:", "new_preset");
+	alert("preset_name: " + preset_name);
+	$("#preset_select").append("<option value=" + preset_name + ">" + preset_name + "</option>");
+	report_id("new_preset", preset_name);
+	report_id("select_preset", preset_name);
 }
 
 function remove_preset()
@@ -54,17 +68,21 @@ jQuery.fn.fadeToggle = function(speed, easing, callback) {
 $(document).ready(
 	function()
 	{
-		add_preset('yummy', 'yummy');
-		add_preset('noo', 'funny');
-
 		//$(".header").next("div.collapse").show();
 		
 		init_collapse();
 
-		$("select, :text").change(
+		$("#settings_panel select, :text").change(
 			function()
 			{
 				change_setting(this.id, this.value);
+			}
+		);
+		
+		$("#presets_panel select, :text").change(
+			function()
+			{
+				select_preset(this.id);
 			}
 		);
 

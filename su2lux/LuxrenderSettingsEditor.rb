@@ -23,15 +23,19 @@ class LuxrenderSettingsEditor
 def initialize
   @lrsd = AttributeDic.spawn($lrsd_name)
   @lrad = AttributeDic.spawn($lrad_name)
+  
+  #preset = Attribute.new("preset")
+  #@lrad.add_root("preset", preset)
+  #self.init_presets()
+  @presets=[]
+  
   self.create_html_dialog
+  
 	pref_key="LuxrenderSettingsEditor"
 	@settings_dialog=UI::WebDialog.new("Luxrender Render Settings", true,pref_key,520,500, 10,10,true)
 	@settings_dialog.max_width = 520
 	setting_html_path = Sketchup.find_support_file "settings.html" ,"Plugins/su2lux"
 	@settings_dialog.set_file(setting_html_path)
-  
-  
-  
   
 	@settings_dialog.add_action_callback("change_setting") {|dialog, params|
 			SU2LUX.p_debug params
@@ -90,29 +94,25 @@ def initialize
 	# }
 	
 
-	@settings_dialog.add_action_callback("preset") {|d,p|
-	case p
-		when '0' #<option value='0'>0 Preview - Global Illumination</option> in settings.html
-			puts "preset selected"
-		when '0b'
-			puts "preset selected"
-		when '1'
-			puts "preset selected"
-		when '2'
-			puts "preset selected"
-	end #end case
-	self.sendDataFromSketchup()
+	@settings_dialog.add_action_callback("new_preset") {|dialog, params|
+    SU2LUX.p_debug params
+    preset_name = params
+    self.new_preset(preset_name)
+    #save_preset_file()
 	} #end action callback preset
 	
-	
+	@settings_dialog.add_action_callback("select_preset") {|dialog, params|
+    SU2LUX.p_debug params
+    preset_name = params
+    self.select_preset(preset_name)
+	} #end action callback preset
+  
 	@settings_dialog.add_action_callback("open_dialog") {|dialog, params|
   case params.to_s
 		when "new_export_file_path"
 			SU2LUX.new_export_file_path
 	end #end case
 	} #end action callback open_dialog
-  
-  self.add_preset()
 end #end initialize
 
 
@@ -147,10 +147,6 @@ def updateSettingValue(obj)
   end
 end
 
-def add_preset()
-  @settings_dialog.execute_script("add_preset('yummy', 'yummy');")
-end
-
 def update_aspect_ratio()
   xres = @lrsd["film->xresolution"]
   yres = @lrsd["film->yresolution"]
@@ -182,7 +178,6 @@ end
 def create_html_dialog
   ############## -- HTML SETTINGS EDITOR -- ###################
   presets_panel = HTML_block_panel.new("presets_panel")
-    preset_select = LuxSelection.new("preset_select", [], "Select Preset")
     preset_table = HTML_outer_custom_element.new() do |this|
       html_str = "\n"
       html_str += "<table style=\"position:relative; margin-left:auto; margin-right:auto\">"
@@ -198,7 +193,15 @@ def create_html_dialog
       html_str += "</table>"
       html_str
     end
+    
+      preset_select = LuxSelection.new("preset_select", [], "Select Preset")
     preset_table.add_element!(preset_select)
+    
+      new_preset_button = HTML_button.new("new_preset", "New") do |env, args|
+        @settings_dialog.execute_script("new_preset();") #calls js code, which then calls ruby code, providing the name of preset
+      end
+    preset_table.add_element!(new_preset_button)
+    
 
   presets_panel.add_element!(preset_table)
     
@@ -314,5 +317,81 @@ def create_html_dialog
   ##################################################
 end
 
+def save_preset_file()
+  
+end
+
+def select_preset(name)
+  if @presets.include?(name)
+    #@settings_dialog.execute_script("select_preset(#{name});") not good
+  end
+end
+
+def load_preset_file(name)
+end
+
+def each_preset_file
+  return []
+end
+
+def find_presets()
+end
+
+def new_preset(name)
+  puts "preset_name:" + name.to_s
+  @presets.push(name)
+end
+
+
+def init_presets()
+  preset = @lrad["preset"]
+  preset_names = find_presets()
+  @presets = []
+  for name in preset_names
+    @presets.push(Preset.new(name))
+  end
+  if not preset_names.empty?
+    if preset.value == ""
+      preset.value = preset_names[0]
+    end
+  end
+end
 
 end #end class LuxrenderSettingsEditor
+
+class Preset
+  def initialize(name)
+    @file_name = SU2LUX.plugin_dir + "su2lux/preset_" + name.to_s
+    in_it = false
+    for pres_name in find_presets()
+      if pres_name == name
+        in_it = true
+      end
+    end
+    if in_it == true
+      self.load
+    end
+  end
+  def save
+    File.open(@file_name, "w") do |file|
+    file.puts "#this is a presets file of  --settings--\n\n"
+    @lrsd.strdic.each_key do |key|
+      val = @lrsd.sustrdic[key]
+      if not AttributeDic.is_path?(val.to_s)
+        file.puts "#{key} = #{val}"
+      end
+    end
+    file.puts "\n\n"
+    @lrsd.strdic.each_key do |key|
+      val = @lrsd.sustrdic[key]
+      if AttributeDic.is_path?(val.to_s)
+        file.puts "#{key} = #{val}"
+      end
+    end
+  end
+  @settings_dialog.execute_script("alert('preset saved');")
+end
+def load
+  
+end
+end

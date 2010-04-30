@@ -236,4 +236,6 @@ class AttributeDic  #a binding between
   def include?(key)
     return @objdic.include?(key)
   end
+  def export_dic
+  end
 end
