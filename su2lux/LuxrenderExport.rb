@@ -36,9 +36,6 @@ def reset
 	@count_tri = 0
 	@model_textures={}
 	@textures_prefix = "TX_"
-	@lrs=LuxrenderSettings.new
-	@lrs.xresolution = Sketchup.active_model.active_view.vpwidth unless @lrs.xresolution
-	@lrs.yresolution = Sketchup.active_model.active_view.vpheight unless @lrs.yresolution
 end
 	
 #####################################################################
@@ -54,7 +51,6 @@ end
 #####################################################################
 #####################################################################
 def export_camera(view, out)
-	@lrs=LuxrenderSettings.new
   @lrsd = AttributeDic.spawn($lrsd_name)
   
 	user_camera = view.camera
@@ -79,9 +75,9 @@ def export_camera(view, out)
 	else
 		camera_type = 'orthographic'
 	end
-	if @lrs.camera_type != "environment" && @lrs.camera_type != camera_type
-		@lrs.camera_type = camera_type
-	end
+	#if @lrs.camera_type != "environment" && @lrs.camera_type != camera_type
+	#	@lrs.camera_type = camera_type
+	#end
 	out.puts "Camera \"#{@lrsd["camera->camera_type"].value.id}\""
 	case @lrsd["camera->camera_type"].value.id
 		when "perspective"
@@ -153,7 +149,7 @@ end
 #####################################################################
 
 def export_render_settings(out)
-  @properties = AttributeDic.spawn("test_settings")
+  @properties = AttributeDic.spawn($lrsd_name)
 	@properties.each_root do |p|
     if p.id != "camera" #camera not yet implemented
       out.puts p.export + "\n"

@@ -109,7 +109,7 @@ end
 #####################################################################
 #####################################################################
 def SU2LUX.export
-  @lrad = AttributeDic.spawn("test_attributes") unless @lrad
+  @lrad = AttributeDic.spawn($lrad_name) unless @lrad
   
   export_file_path = @lrad["export_file_path"].value
 	#Sketchup.send_action "showRubyPanel:"
@@ -158,8 +158,7 @@ def SU2LUX.export_dialog(render=true)
 	whether or not to render the lxs after it has been exported
 	"""
 	##### --- awful hack --- 1.0 ####
-	@lrs=LuxrenderSettings.new
-  @lrad = AttributeDic.spawn("test_attributes")
+	@lrad = AttributeDic.spawn($lrad_name)
 	#####################
 
   SU2LUX.reset_variables
@@ -195,7 +194,7 @@ def SU2LUX.export_dialog(render=true)
 end #end export_dialog
 
 def SU2LUX.export_copy
-  @lrad = AttributeDic.spawn("test_attributes")
+  @lrad = AttributeDic.spawn($lrad_name)
 	#temporary file path for exporting copy
 	old_export_file_path = @lrad["export_file_path"].value
 	
@@ -214,7 +213,7 @@ def SU2LUX.new_export_file_path
 it is currently required for the browse button in the settings panel and the button in the 
 plugin menu.
 """
-  @lrad = AttributeDic.spawn("test_attributes") unless @lrad
+  @lrad = AttributeDic.spawn($lrad_name) unless @lrad
   
 	model = Sketchup.active_model
     model_filename = File.basename(model.path)
@@ -333,7 +332,7 @@ end
 #####################################################################
 #####################################################################
 def SU2LUX.report_window(start_time, ask_render=true)
-  @lrad = AttributeDic.spawn("test_attributes") unless @lrad
+  @lrad = AttributeDic.spawn($lrad_name) unless @lrad
   export_file_path = @lrad["export_file_path"].value
   
 	SU2LUX.p_debug "SU2LUX.report_window"
@@ -394,7 +393,7 @@ end
 #####################################################################
 #####################################################################
 def SU2LUX.launch_luxrender
-  @lrad = AttributeDic.spawn("test_attributes") unless @lrad
+  @lrad = AttributeDic.spawn($lrad_name) unless @lrad
   export_file_path = @lrad["export_file_path"].value
 	@luxrender_path = SU2LUX.get_luxrender_path if @luxrender_path.nil?
 	return if @luxrender_path.nil?
@@ -496,12 +495,9 @@ end
 def onViewChanged(view)
 
 	settings_editor = SU2LUX.get_editor("settings")
-#	@lrs = LuxrenderSettings.new
 	if Sketchup.active_model.active_view.camera.perspective?
-#		@lrs.camera_type = 'perspective'
 		camera_type = 'perspective'
 	else
-		#@lrs.camera_type = 'orthographic'
 		camera_type = 'orthographic'
 	end
 	if settings_editor and settings_editor.visible?
@@ -541,7 +537,6 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 	def onNewModel(model)
 		#model.active_view.add_observer(SU2LUX_view_observer.new)
 		
-		#@lrs = LuxrenderSettings.new
 		#@lrs.xresolution = Sketchup.active_model.active_view.vpwidth
 		#@lrs.yresolution = Sketchup.active_model.active_view.vpheight
 		#settings_editor = SU2LUX.get_editor("settings")
@@ -570,7 +565,6 @@ if( not file_loaded?(__FILE__) )
 	load File.join("su2lux","LuxrenderExport.rb")
 	load File.join("su2lux", "LuxrenderToolbar.rb")
 	load File.join("su2lux", "LuxrenderPrimatives.rb")
-	load File.join("su2lux", "LuxrenderTypes_settings.rb")
   
   create_toolbar()
   

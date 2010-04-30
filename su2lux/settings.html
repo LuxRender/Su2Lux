@@ -2,298 +2,430 @@
 
 <html>
 <head>
-<title>tab test</title>
+<title>testing</title>
 
 <script type="text/javascript" src="jquery.js"></script>
-<script type="text/javascript" src="su2lux.js"></script>
+<script type="text/javascript" src="su2lux_test.js"></script>
 
 <link href="settings.css" type="text/css" rel="stylesheet">
- 
+
 </head>
 <body>
 
-	<div id="presets">
-		Presets:<select id="preset">
-			<option value='custom'>Custom</option><!--show it if change settings-->
-			<option value='0'>0 Preview - Global Illumination</option>
-			<option value='0b'>0b Preview - Direct Lighting</option>
-			<option value='1'>1 Final - MLT/Bidir Path Tracing (interior) (recommended)</option>
-			<option value='2'>2 Final - MLT/Path Tracing (exterior)</option>
-			<option value='5'>5 Progressive - Bidir Path Tracing (interior)</option>
-			<option value='6'>6 Progressive - Path Tracing (exterior)</option>
-			<option value='8'>8 Bucket - Bidir Path Tracing (interior)</option>
-			<option value='9'>9 Bucket - Path Tracing (exterior)</option>
-			<option value='B'>B Anim - Distributed/GI low Q</option>
-			<option value='C'>C Anim - Distributed/GI medium Q</option>
-			<option value='D'>D Anim - Distributed/GI high Q</option>
-		<option value='E'>E Anim - Distributed/GI very high Q</option>
-		</select>
-	</div>
+<div id="presets_panel" class="panel">
 
+<table style="position:relative; margin-left:auto; margin-right:auto">
+<tr>
+<td>
+<span class="label">Select Preset:</span>
+<select id="preset_select">
+</select>
+</td>
+</tr>
+</table>
+</div>
+<div id="settings_panel" class="panel">
 
-	<div id="settings_panel">
-		<p class="header">Camera</p>
-		<div class="collapse">
-			Type:	<select id="camera_type">
-				<option value="perspective">perspective</option>
-				<option value="orthographic">orthographic</option>
-				<option value="environment">environment</option>
-			</select>
-			<div id="view" class="perspective">
-				<label for="fov">fov:</label>
-				<input type='text' id="fov" size="10">
-				<label for="focal_length">focal length:</label>
-				<input type='text' id="focal_length" size="10">
-			</div>
-			
-			<div id="scale" class="orthographic">
-				<label for="camera_scale">scale:</label>
-				<input type='text' id="camera_scale" size="4">
-			</div>
-			
-			<div id="near_far_clipping_block" class="perspective orthographic environment">
-				<input type="checkbox" id="near_far_clipping" onchange="$(this).next('.collapse').show();">
-				near_far_clipping
-				<div class="collapse">
-					start:<input type='text' id="hither" size="10">
-					end:<input type='text' id="yon" size="10">
-				</div>
-			</div>
-			<br>
-			
-			<div id="dof_bokeh_block" class="perspective orthographic">
-			<input type="checkbox" id="dof_bokeh">DOF & Bokeh
-			</div>
-			
-			<div id="architectural_block" class="perspective orthographic">
-			<input type="checkbox" id="architectural" value="true">Architectural (Lens Shift) & Aspect Ratio
-			</div>
-			
-			<div id="motion_blur_block" class="perspective orthographic environment">
-			<input type="checkbox" id="motion_blur" value="true">Motion Blur
-			</div>
-		</div>
+<p class="header">Camera</p>
+<div class="collapse">
+<table style="position:relative; margin-left:auto; margin-right:auto">
+<tr>
 
+<td>
+<span class="label">Camera Type:</span>
+<select class="select_collapse" id="camera--camera_type">
+<option value="camera--camera_type--perspective">perspective</option>
+<option value="camera--camera_type--orthographic">orthographic</option>
+<option value="camera--camera_type--environment">environment</option>
+</select>
+<div id="camera--camera_type--perspective" class="collapse">
+<table>
+<tr>
+<td align="left">fov:</td>
+<td align="right"><input type='text' id="camera--camera_type--perspective--fov" size="2"></td>
+</tr>
+</table>
+<div id="camera--camera_type--orthographic" class="collapse">
+<table>
+<tr>
+<td align="left">scale:</td>
+<td align="right"><input type='text' id="camera--camera_type--orthographic--scale" size="2"></td>
+</tr>
+</table>
+<div id="camera--camera_type--environment" class="collapse">
+</div>
+</td>
+</tr>
 
-		<p class="header">Environment</p>
-		<div class="collapse">
-			<label for="environment_light_type">Environment light type:</label>
-			<select id="environment_light_type">
-				<option value="none">none</option>
-				<option value="infinite">infinite</option>
-				<option value="sunsky">sunsky</option>
-			</select>
-<!--			<div id="env_rotation_block" class="sunsky infinite">
-				<label for="env_rotate_x">Rotate X:</label>
-				<input type='text' id="env_rotate_x" size="4">
-				<label for="env_rotate_y">Rotate Y:</label>
-				<input type='text' id="env_rotate_y" size="4">
-				<label for="env_rotate_z">Rotate Z:</label>
-				<input type='text' id="env_rotate_z" size="4">
-			</div> -->
-			<div class="collapse" id="sunsky">
-			</div>
-			<div class="collapse" id="infinite">
-			</div>
-		</div>
+<tr>
+<td align="left">near_far_clipping:</td>
+<td align="right"><input type="checkbox" id="camera--near_far_clipping" value=""></td>
+</tr>
 
-		<p class="header">Sampler</p>
-		<div class="collapse">
-			<label for="sampler_type">
-				<span class="label">sampler type:</span>
-				<select id="sampler_type">
-					<option value="sampler->sampler_type->metropolis">metropolis</option>
-					<option value="sampler->sampler_type->erpt">erpt</option>
-					<option value="sampler->sampler_type->lowdiscrepancy">lowdiscrepancy</option>
-					<option value="sampler->sampler_type->random">random</option>
-				</select>
-			</label>
-		</div>
+<tr>
+<td align="left">dof_bokeh:</td>
+<td align="right"><input type="checkbox" id="camera--dof_bokeh" value=""></td>
+</tr>
 
-		<p class="header">Integrator</p>
-		<div class="collapse">
-			<label for="sintegrator_type">
-			</label>
-				<span class="label">integrator type:</span>
-				<select id="sintegrator_type">
-					<option value="directlighting">directlighting</option>
-					<option value="path">path</option>
-					<option value="bidirectional">bidirectional</option>
-					<option value="exphotonmap">exphotonmap</option>
-					<option value="distributedpath">distributedpath</option>
-					<option value="igi">igi</option>
-				</select>
-				<div class="collapse" id="directlighting">
-				Depth: <input type='text' id="sintegrator_dlighting_maxdepth" size="2">
-				</div>
-				
-				<div class="collapse" id="path">
-				Depth: <input type='text' id="sintegrator_path_maxdepth" size="2">
-				</div>
-				
-				<div class="collapse" id="bidirectional">
-				<p>bidirectional</p>
-				</div>
-				
-				<div class="collapse" id="exphotonmap">
-				<p>exphotonmap</p>				
-				</div>
-				<div class="collapse" id="distributedpath">
-				</div>
-				<div class="collapse" id="igi">
-				Depth: <input type='text' id="sintegrator_igi_maxdepth" size="2">
-				</div>
-				
-		</div>
+<tr>
+<td align="left">architectural:</td>
+<td align="right"><input type="checkbox" id="camera--architectural" value=""></td>
+</tr>
 
-		<p class="header">Volume integrator</p>
-		<div class="collapse">
-			<label for="volume_integrator_type">
-				<span class="label">Volume integrator type:</span>
-				<select id="volume_integrator_type">
-					<option value="emission">emission</option>
-					<option value="single">single</option>
-				</select>
-			</label>
-			<label for="volume_integrator_stepsize">
-				<span class="label">stepsize:</span>
-				<input type="text" id="volume_integrator_stepsize" size="4">
-			</label>
-		</div>
+<tr>
+<td align="left">motion_blur:</td>
+<td align="right"><input type="checkbox" id="camera--motion_blur" value=""></td>
+</tr>
 
-		<p class="header">Filter</p>
-		<div class="collapse">
-			<label for="filter_type">
-				<span class="label">filter type:</span>
-				<select id="filter_type">
-					<option value="box">box</option>
-					<option value="gaussian">gaussian</option>
-					<option value="mitchell">mitchell</option>
-					<option value="sinc">sinc</option>
-					<option value="triangle">triangle</option>
-				</select>
-			</label>
-			<label for="sharpness">
-				<span class="label">sharpness:</span>
-				<input type="text" id="sharpness" size="4">
-			</label>
-		</div>
+<tr>
+<td align="left">hither:</td>
+<td align="right"><input type='text' id="camera--hither" size="2"></td>
+</tr>
 
-		<p class="header">Film</p>
-		<div class="collapse">
-			<label for="film_type">
-				<span class="label">film type:</span>
-				<select id="film_type">
-					<option value="fleximage">fleximage</option>
-				</select>
-			</label>
-			Haltspp: <input type='text' id="haltspp" size="4">
-			Halttime: <input type='text' id="halttime" size="4">
-			<label for="tonemap">
-				<span class="label">Tonemap:</span>
-				<select id="tonemap">
-					<option value="reinhard">reinhard</option>
-					<option value="linear">linear</option>
-					<option value="contrast">contrast</option>
-					<option value="maxwhite">maxwhite</option>
-				</select>
-			</label>
-			Display interval: <input type='text' id="film_displayinterval" size="4">
-			Write interval: <input type='text' id="writeinterval" size="4">
-			Clamping: <select id="clamping">
-				<option value="lum">lum</option>
-				<option value="hue">hue</option>
-				<option value="cut">cut</option>
-			</select>
-			<input type="checkbox" id="saveexr">OpenEXR Output
-			<input type="checkbox" id="savepng">PNG Output
-			<input type="checkbox" id="savetga">TGA Output
-			Gamma: <input type='text' id="gamma" size="4">
-		</div>
+<tr>
+<td align="left">yon:</td>
+<td align="right"><input type='text' id="camera--yon" size="2"></td>
+</tr>
 
-		<p class="header">Accelerator</p>
-		<div class="collapse">
-			<label for="accelerator_type">Accelerator type:</label>
-			<!--<span class="label">Accelerator type:</span>-->
-			<select id="accelerator_type">
-				<option value="none">none</option>
-				<option value="tabreckdtree">tabreckdtree</option>
-				<option value="grid">grid</option>
-				<option value="bvh">bvh</option>
-				<option value="qbvh">qbvh</option>
-			</select>
-			<div class="collapse" id="tabreckdtree">
-				<label for="intersection_cost">Intersection cost:</label>
-				<input type='text' id="intersection_cost" size="4">
-				<br>
-				<label for="traversal_cost">Traversal cost:</label>
-				<input type='text' id="traversal_cost" size="4">
-				<br>
-				<label for="empty_bonus">Empty bonus:</label>
-				<input type='text' id="empty_bonus" size="4">
-				<br>
-				<label for="max_prims">Max primitives per volume:</label>
-				<input type='text' id="max_prims" size="4">
-				<br>
-				<label for="max_depth">Max tree depth:</label>
-				<input type='text' id="max_depth" size="4">
-			</div>
-			<div class="collapse" id="grid">
-			<label for="refine_immediately">refine immediately</label>
-				<input type="checkbox" id="refine_immediately">
-			</div>
-			<div class="collapse" id="bvh">
-			</div>
-			<div class="collapse" id="qbvh">
-				<label for="max_prims_per_leaf">Max primitives per leaf:</label>
-				<input type='text' id="max_prims_per_leaf" size="4">
-<!--				<label for="full_sweep_threshold">Sweep threshold:</label>
-				<input type='text' id="full_sweep_threshold" size="4"> -->
-				<label for="skip_factor">Skip factor:</label>
-				<input type='text' id="skip_factor" size="4">
-			</div>
-		</div>
-		
-	<!-- TODO Add section "System" -->
-		<p class="header">System</p>
-		<div class="collapse">
-			Priority:
-			<select id="priority">
-				<option value="low">low</option>
-				<option value="belownormal">belownormal</option>
-				<option value="normal">normal</option>
-				<option value="abovenormal">abovenormal</option>
-			</select>
-		</div>
+<tr>
+<td align="left">autofocus:</td>
+<td align="right"><input type="checkbox" id="camera--autofocus" value=""></td>
+</tr>
 
-		<p class="header">Output</p>
-		<div class="collapse">
-			<label for="xresolution">Width&nbsp;</label>
-			<input type="text" id="xresolution" size="5">
-			<input type="button" id="multiply_by_2" value ="Double">
-			<input type="button" id="x800" value ="800x600">
-			<input type="button" id="x1024" value="1024x768">
-			<input type="button" id="x1280" value="1280x1024">
-			<br>
-			<label for="yresolution">Height</label>
-			<input type="text" id="yresolution" size="5">
-			<input type="button" id="divide_by_2" value ="Half">
-			<input type="button" id="x1440" value="1440x900">
-			<input type="button" id="x1080" value="1920x1080">
-			<input type="button" id="x1920" value="1920x1200">
-			<br>
-			<input type="button" id="current_view" value="Current view">
-			<input type="button" id="flip_dim" value="Flip dimensions">
-			<br>
-			<br>
-			<br>
-            <b>Export File Path: </b><a id="export_file_path"></a>
-			<input type="button" id="export_file_path_browse" value="Browse">
-		</div>
+</table>
+</div>
 
-	</div><!--end settings_panel-->
+<p class="header">Film</p>
+<div class="collapse">
+<table style="position:relative; margin-left:auto; margin-right:auto">
+<tr>
 
-	<!--TODO - add button "Render" --> 
- 
+<td>
+<span class="label">Film Type:</span>
+<select class="select_collapse" id="film--film_type">
+<option value="film--film_type--fleximage">fleximage</option>
+</select>
+<div id="film--film_type--fleximage" class="collapse">
+</div>
+</td>
+</tr>
+
+<tr>
+<td align="left">xresolution:</td>
+<td align="right"><input type='text' id="film--xresolution" size="2"></td>
+</tr>
+
+<tr>
+<td align="left">yresolution:</td>
+<td align="right"><input type='text' id="film--yresolution" size="2"></td>
+</tr>
+
+<tr>
+<td align="left">displayinterval:</td>
+<td align="right"><input type='text' id="film--displayinterval" size="2"></td>
+</tr>
+
+<tr>
+<td align="left">haltspp:</td>
+<td align="right"><input type='text' id="film--haltspp" size="2"></td>
+</tr>
+
+<tr>
+<td align="left">halttime:</td>
+<td align="right"><input type='text' id="film--halttime" size="2"></td>
+</tr>
+
+</table>
+<table style="position:relative; margin-left:auto; margin-right:auto">
+<tr>
+
+<td>
+<table>
+<tr>
+<td><input type="button" id="res_double" value ="Double" style="width:100%">
+  </td>
+<td><input type="button" id="res_half" value ="Half" style="width:100%">
+  </td>
+</tr>
+</table>
+</td>
+</tr>
+
+</table>
+<table style="position:relative; margin-left:auto; margin-right:auto">
+<tr>
+
+<td>
+<table>
+<tr>
+<td><input type="button" id="res_800x600" value ="800x600" style="width:100%">
+  </td>
+<td><input type="button" id="res_1024x768" value ="1024x768" style="width:100%">
+  </td>
+</tr>
+<tr>
+<td><input type="button" id="res_1280x1024" value ="1280x1024" style="width:100%">
+  </td>
+<td><input type="button" id="res_1440x900" value ="1440x900" style="width:100%">
+  </td>
+</tr>
+</table>
+</td>
+</tr>
+
+</table>
+<table style="position:relative; margin-left:auto; margin-right:auto">
+<tr>
+
+<td>
+<table>
+<tr>
+<td><input type="button" id="get_view_size" value ="Current View" style="width:100%">
+  </td>
+</tr>
+</table>
+</td>
+</tr>
+
+</table>
+</div>
+
+<p class="header">Sampler</p>
+<div class="collapse">
+<table style="position:relative; margin-left:auto; margin-right:auto">
+<tr>
+
+<td>
+<span class="label">Sampler Type:</span>
+<select class="select_collapse" id="sampler--sampler_type">
+<option value="sampler--sampler_type--lowdiscrepancy">lowdiscrepancy</option>
+<option value="sampler--sampler_type--random">random</option>
+<option value="sampler--sampler_type--erpt">erpt</option>
+<option value="sampler--sampler_type--metropolis">metropolis</option>
+</select>
+<div id="sampler--sampler_type--lowdiscrepancy" class="collapse">
+<table>
+<tr>
+<td align="left">pixelsamples:</td>
+<td align="right"><input type='text' id="sampler--sampler_type--lowdiscrepancy--pixelsamples" size="2"></td>
+</tr>
+</table>
+<table>
+<tr>
+
+<td>
+<span class="label">Pixel Sampler Type:</span>
+<select class="select_collapse" id="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection">
+<option value="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--linear">linear</option>
+<option value="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--tile">tile</option>
+<option value="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--random">random</option>
+<option value="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--vegas">vegas</option>
+<option value="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--lowdiscrepancy">lowdiscrepancy</option>
+<option value="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--hilbert">hilbert</option>
+</select>
+<div id="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--linear" class="collapse">
+<div id="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--tile" class="collapse">
+<div id="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--random" class="collapse">
+<div id="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--vegas" class="collapse">
+<div id="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--lowdiscrepancy" class="collapse">
+<div id="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--hilbert" class="collapse">
+</div>
+</td>
+</tr>
+</table>
+<div id="sampler--sampler_type--random" class="collapse">
+<table>
+<tr>
+<td align="left">pixelsamples:</td>
+<td align="right"><input type='text' id="sampler--sampler_type--random--pixelsamples" size="2"></td>
+</tr>
+</table>
+<table>
+<tr>
+
+<td>
+<span class="label">Pixel Sampler Type:</span>
+<select class="select_collapse" id="sampler--sampler_type--random--pixelsampler--pixelsamplerselection">
+<option value="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--linear">linear</option>
+<option value="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--tile">tile</option>
+<option value="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--random">random</option>
+<option value="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--vegas">vegas</option>
+<option value="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--lowdiscrepancy">lowdiscrepancy</option>
+<option value="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--hilbert">hilbert</option>
+</select>
+<div id="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--linear" class="collapse">
+<div id="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--tile" class="collapse">
+<div id="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--random" class="collapse">
+<div id="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--vegas" class="collapse">
+<div id="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--lowdiscrepancy" class="collapse">
+<div id="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--hilbert" class="collapse">
+</div>
+</td>
+</tr>
+</table>
+<div id="sampler--sampler_type--erpt" class="collapse">
+<table>
+<tr>
+<td align="left">chainlength:</td>
+<td align="right"><input type='text' id="sampler--sampler_type--erpt--chainlength" size="2"></td>
+</tr>
+</table>
+<div id="sampler--sampler_type--metropolis" class="collapse">
+</div>
+</td>
+</tr>
+
+</table>
+</div>
+
+<p class="header">Surface Integrator</p>
+<div class="collapse">
+<table style="position:relative; margin-left:auto; margin-right:auto">
+<tr>
+
+<td>
+<span class="label">Integrator Type:</span>
+<select class="select_collapse" id="surfaceintegrator--integrator_type">
+<option value="surfaceintegrator--integrator_type--bidirectional">bidirectional</option>
+<option value="surfaceintegrator--integrator_type--directlighting">directlighting</option>
+<option value="surfaceintegrator--integrator_type--exphotonmap">exphotonmap</option>
+<option value="surfaceintegrator--integrator_type--path">path</option>
+<option value="surfaceintegrator--integrator_type--distributedpath">distributedpath</option>
+<option value="surfaceintegrator--integrator_type--igi">igi</option>
+</select>
+<div id="surfaceintegrator--integrator_type--bidirectional" class="collapse">
+<table>
+<tr>
+<td align="left">eyedepth:</td>
+<td align="right"><input type='text' id="surfaceintegrator--integrator_type--bidirectional--eyedepth" size="2"></td>
+</tr>
+</table>
+<table>
+<tr>
+<td align="left">lightdepth:</td>
+<td align="right"><input type='text' id="surfaceintegrator--integrator_type--bidirectional--lightdepth" size="2"></td>
+</tr>
+</table>
+<div id="surfaceintegrator--integrator_type--directlighting" class="collapse">
+<table>
+<tr>
+<td align="left">maxdepth:</td>
+<td align="right"><input type='text' id="surfaceintegrator--integrator_type--directlighting--maxdepth" size="2"></td>
+</tr>
+</table>
+<div id="surfaceintegrator--integrator_type--exphotonmap" class="collapse">
+<div id="surfaceintegrator--integrator_type--path" class="collapse">
+<table>
+<tr>
+<td align="left">maxdepth:</td>
+<td align="right"><input type='text' id="surfaceintegrator--integrator_type--path--maxdepth" size="2"></td>
+</tr>
+</table>
+<table>
+<tr>
+<td align="left">includeenvironment:</td>
+<td align="right"><input type="checkbox" id="surfaceintegrator--integrator_type--path--includeenvironment" value=""></td>
+</tr>
+</table>
+<div id="surfaceintegrator--integrator_type--distributedpath" class="collapse">
+<div id="surfaceintegrator--integrator_type--igi" class="collapse">
+</div>
+</td>
+</tr>
+
+</table>
+</div>
+
+<p class="header">Accelerator</p>
+<div class="collapse">
+<table style="position:relative; margin-left:auto; margin-right:auto">
+<tr>
+
+<td>
+<span class="label">Accelerator Type:</span>
+<select class="select_collapse" id="accelerator--accelerator_type">
+<option value="accelerator--accelerator_type--tabreckdtree">tabreckdtree</option>
+<option value="accelerator--accelerator_type--grid">grid</option>
+<option value="accelerator--accelerator_type--qbvh">qbvh</option>
+<option value="accelerator--accelerator_type--bvh">bvh</option>
+</select>
+<div id="accelerator--accelerator_type--tabreckdtree" class="collapse">
+<table>
+<tr>
+<td align="left">intersectcost:</td>
+<td align="right"><input type='text' id="accelerator--accelerator_type--tabreckdtree--intersectcost" size="2"></td>
+</tr>
+</table>
+<table>
+<tr>
+<td align="left">traversalcost:</td>
+<td align="right"><input type='text' id="accelerator--accelerator_type--tabreckdtree--traversalcost" size="2"></td>
+</tr>
+</table>
+<table>
+<tr>
+<td align="left">emptybonus:</td>
+<td align="right"><input type='text' id="accelerator--accelerator_type--tabreckdtree--emptybonus" size="2"></td>
+</tr>
+</table>
+<table>
+<tr>
+<td align="left">maxprims:</td>
+<td align="right"><input type='text' id="accelerator--accelerator_type--tabreckdtree--maxprims" size="2"></td>
+</tr>
+</table>
+<table>
+<tr>
+<td align="left">maxdepth:</td>
+<td align="right"><input type='text' id="accelerator--accelerator_type--tabreckdtree--maxdepth" size="2"></td>
+</tr>
+</table>
+<div id="accelerator--accelerator_type--grid" class="collapse">
+<table>
+<tr>
+<td align="left">refineimmediately:</td>
+<td align="right"><input type="checkbox" id="accelerator--accelerator_type--grid--refineimmediately" value=""></td>
+</tr>
+</table>
+<div id="accelerator--accelerator_type--qbvh" class="collapse">
+<table>
+<tr>
+<td align="left">maxprimsperleaf:</td>
+<td align="right"><input type='text' id="accelerator--accelerator_type--qbvh--maxprimsperleaf" size="2"></td>
+</tr>
+</table>
+<div id="accelerator--accelerator_type--bvh" class="collapse">
+</div>
+</td>
+</tr>
+
+</table>
+</div>
+</div>
+<div id="system_settings_panel" class="panel">
+
+<p class="header">System Settings</p>
+<div class="collapse">
+<table style="position:relative; margin-left:auto; margin-right:auto">
+</table>
+<table style="position:relative; margin-left:auto; margin-right:auto">
+<tr>
+
+<td>
+<table>
+<tr>
+<td>
+<b>Export File Path: </b><a id="export_file_path"></a>
+</td>
+<td><input type="button" id="export_file_path_button" value ="Browse" style="width:100%">
+  </td>
+</tr>
+</table>
+</td>
+</tr>
+
+</table>
+</div>
+</div>
 </body>
 </html>

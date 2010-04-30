@@ -18,185 +18,242 @@
 #                Mimmo Briganti (aka mimhotep)
 #                 Luke Frisken (aka lfrisken)
 
-class LuxrenderSettings
+
+require "su2lux/LuxrenderTypes.rb"
+require "su2lux/LuxrenderHTMLTypes.rb"
+require "su2lux/LuxrenderAttributeDictionaries.rb"
+
+#5pm
+#7 rows back in the middle
 
 
-@@settings=
-{
-#'name_option'=>'default_value'
-#####################################################################
-###### - Camera	-														######
-#####################################################################
-	'camera_type'=>(Sketchup.active_model.active_view.camera.perspective? ? 'perspective' : 'orthographic'),
-	'fov'=> format("%.2f", Sketchup.active_model.active_view.camera.fov),#35, # not currently in use
-	'focal_length'=> format("%.2f", Sketchup.active_model.active_view.camera.focal_length),
-	'camera_scale'=>7.31,
-	'near_far_clipping'=>false,
-	'dof_bokeh'=>false,
-	'architectural'=>false,
-	'motion_blur'=>false,
-	'hither'=>0.1,
-	'yon'=>100,  
-	#end Camera
-#####################################################################
-#####################################################################
+@lrsd = AttributeDic.spawn($lrsd_name)
+@lrad = AttributeDic.spawn($lrad_name)
 
-	#Environment 
-	'environment_light_type'=>'infinite',
-	#end Environment
+########## -- SU2LUX Attributes -- ###########
+export_file_path = Attribute.new('export_file_path', 'rb_file_path', '')
+@lrad.add_root("export_file_path", export_file_path)
 
-	#Sampler
-	'sampler_showadvanced'=>false,
-	'sampler_type'=>'lowdiscrepancy',
-	'sampler_lowdisc_pixelsamples'=>1,
-	'sampler_lowdisc_pixelsampler'=>'lowdiscrepancy',
-	'sampler_metro_strength'=>0.6,
-	'sampler_metro_lmprob'=>0.4,
-	'sampler_metro_maxrejects'=>512,
-	'sampler_metro_usevariance'=>false,
-	#end Sampler
-  
-	#Integrator
-	'sintegrator_showadvanced'=>false,
-	'sintegrator_type'=>'bidirectional',
-	'sintegrator_distributedpath_directsampleall'=>true,
-	'sintegrator_distributedpath_directsamples'=>1,
-	'sintegrator_distributedpath_directdiffuse'=>true,
-	'sintegrator_distributedpath_directglossy'=>true,
-	'sintegrator_distributedpath_indirectsampleall'=>false,
-	'sintegrator_distributedpath_indirectsamples'=>1,
-	'sintegrator_distributedpath_indirectdiffuse'=>true,
-	'sintegrator_distributedpath_indirectglossy'=>true,
-	'sintegrator_distributedpath_diffusereflectdepth'=>1,
-	'sintegrator_distributedpath_diffusereflectsamples'=>4,
-	'sintegrator_distributedpath_diffuserefractdepth'=>4,
-	'sintegrator_distributedpath_diffuserefractsamples'=>1,
-	'sintegrator_distributedpath_glossyreflectdepth'=>1,
-	'sintegrator_distributedpath_glossyreflectsamples'=>2,
-	'sintegrator_distributedpath_glossyrefractdepth'=>4,
-	'sintegrator_distributedpath_glossyrefractsamples'=>1,
-	'sintegrator_distributedpath_specularreflectdepth'=>2,
-	'sintegrator_distributedpath_specularrefractdepth'=>4,
-	'sintegrator_distributedpath_causticsonglossy'=>true,
-	'sintegrator_distributedpath_causticsondiffuse'=>false,
-	'sintegrator_distributedpath_strategy'=>'auto',
-	
-	'sintegrator_dlighting_maxdepth'=>5,
-	
-	'sintegrator_bidir_maxdepth'=>10,
-	'sintegrator_bidir_bounces'=>16,
-	'sintegrator_bidir_eyedepth'=>16,
-	'singtegrator_bidir_lightdepth'=>16,
-	'sintegrator_bidir_strategy'=>'auto',
+########## -- Camera Settings -- ###########
+def camera_settings()
+camera = LuxObject.new('camera', [], 'Camera')#name, because exporting requires capitals
 
-	'sintegrator_path_maxdepth'=>10,
-	'singtegrator_path_ienvironment'=>true,
+camera_type = LuxSelection.new('camera_type', [], 'Camera Type')
+  camera_type.create_choice!('perspective', LuxFloat.new('fov', 35))
+  camera_type.create_choice!('orthographic', LuxFloat.new('scale', 7.31))
+  camera_type.create_choice!('environment')
 
-	'singtegrator_path_strategy'=>'auto',
-	'sintegrator_path_rrstrategy'=>'efficiency',
-	'sintegrator_path_rrcontinueprob'=>0.65,
-	
-	'sintegrator_igi_maxdepth'=>5,
-	#end Integrator
-  
-	#Volume Integrator
-	'volume_integrator_type'=>"emission",
-	'volume_integrator_stepsize'=>1.00,
-	#end VolumeIntegrator
-  
-	#Filter
-	'pixelfilter_showadvanced'=>false,
-	'pixelfilter_type'=>'mitchell',
-	'pixelfilter_mitchell_sharp'=>0.250, 
-	'pixelfilter_mitchell_xwidth'=>2.0, 
-	'pixelfilter_mitchell_ywidth'=>2.0,
-	'pixelfilter_mitchell_optmode'=>'slider',
-	#end Filter
-  
-	#Film
-#####################################################################
-###### - Film	-												######
-#####################################################################
-	'film_type'=>"fleximage",
-	'xresolution'=> nil, #Sketchup.active_model.active_view.vpwidth,#800
-	'yresolution'=> nil, #Sketchup.active_model.active_view.vpheight,#600
-	'film_displayinterval'=>4,
-	'haltspp'=>0,
-	'halttime'=>0,
-	#end Film
-  
-#####################################################################
-###### - Accelerator	-														######
-#####################################################################
-	'accelerator_type'=> "tabreckdtree",
-	#tabreckdtree  properties
-	'intersection_cost'=> 80,
-	'traversal_cost'=> 1,
-	'empty_bonus'=> 0.5,
-	'max_prims'=> 1,
-	'max_depth'=> -1,
-	#bvh properties
-	#qbvh properties
-	'max_prims_per_leaf'=> 4,
-	'skip_factor'=> 1,
-	#grid properties
-	'refine_immediately'=> false,
-	#end Accelerator
-#####################################################################
-#####################################################################
-  
-	#Other
-	'useparamkeys'=>false,
-	'export_file_path'=>""
-}
+camera.add_element!(camera_type)
+
+camera.add_element!(LuxBool.new('near_far_clipping', false))
+camera.add_element!(LuxBool.new('dof_bokeh', false))
+camera.add_element!(LuxBool.new('architectural', false))
+camera.add_element!(LuxBool.new('motion_blur', false))
+camera.add_element!(LuxFloat.new('hither', 0.1))
+camera.add_element!(LuxFloat.new('yon', 100.0))
+camera.add_element!(LuxBool.new('autofocus', false))
+@lrsd.add_root("camera", camera)
+end
+#end camera
+############################################
 
 
-def LuxrenderSettings::ui_refreshable?(id)
-  ui_refreshable_settings = [
-  ]
-  if ui_refreshable_settings.include?(id)
-    return id
-  else
-    return "not_ui_refreshable"
-  end
+########## -- Film Settings -- #############
+def film_settings()
+film = LuxObject.new("film", [], 'Film')
+
+film_type = LuxSelection.new('film_type', [], 'Film Type')
+  film_type.create_choice!('fleximage')
+
+film.add_element!(film_type)
+
+#probably not the best way to do this!
+xres = LuxInt.new('xresolution', Sketchup.active_model.active_view.vpwidth/2) do |this, env|
+  env.update_aspect_ratio()
 end
 
-def initialize
-	singleton_class = (class << self; self; end)
-	@model=Sketchup.active_model
-	@view=@model.active_view
-	@dict="luxrender_settings"
-	singleton_class.module_eval do
-
-		define_method("[]") do |key| 
-			value = @@settings[key]
-			return @model.get_attribute(@dict,key,value)
-		end
-    
-		@@settings.each do |key, value|
-      
-			######## -- get any attribute -- #######
-			define_method(key) { @model.get_attribute(@dict,key,value) }
-			############################
-
-			case key
-        
-				###### -- set ui_refreshable -- #######
-				when LuxrenderSettings::ui_refreshable?(key)
-					define_method("#{key}=") do |new_value|
-					settings_editor = SU2LUX.get_editor("settings")
-					@model.set_attribute(@dict,key,new_value)
-					settings_editor.updateSettingValue(key) if settings_editor
-				end
-				###########################
-				######## -- set other -- ##########
-				else
-					define_method("#{key}=") { |new_value| @model.set_attribute(@dict,key,new_value) }
-				###########################
-			end #end case
-		end #end settings.each
-	end #end module_eval
-end #end initialize
+yres = LuxInt.new('yresolution', Sketchup.active_model.active_view.vpheight/2) do |this, env|
+  env.update_aspect_ratio()
+end
 
 
-end #end class LuxrenderSettings
+film.add_element!(xres)
+film.add_element!(yres)
+
+film.add_element!(LuxInt.new('displayinterval', 4))
+film.add_element!(LuxInt.new('haltspp'))
+film.add_element!(LuxInt.new('halttime'))
+
+@lrsd.add_root("film", film)
+end
+############################################
+
+
+######## -- Sampler -- #####################
+def sampler_settings()
+sampler = LuxObject.new('sampler', [], 'Sampler')
+
+sampler_type = LuxSelection.new('sampler_type', [], 'Sampler Type')
+# lowdicrepancy & random #
+  pixelsamples = LuxInt.new('pixelsamples', 4)
+  pixelsamplerselection = LuxSelection.new('pixelsamplerselection', [], 'Pixel Sampler Type')
+    pixelsamplerselection.create_choice!('linear')
+    pixelsamplerselection.create_choice!('tile')
+    pixelsamplerselection.create_choice!('random')
+    pixelsamplerselection.create_choice!('vegas')
+    pixelsamplerselection.create_choice!('lowdiscrepancy')
+    pixelsamplerselection.create_choice!('hilbert')
+    pixelsamplerselection.select!('vegas')#set as default
+  pixelsampler = LuxString.new('pixelsampler', pixelsamplerselection) #very cool!
+  sampler_type.create_choice!('lowdiscrepancy', [pixelsamples, pixelsampler])
+  sampler_type.create_choice!('random', [pixelsamples.deep_copy(), pixelsampler.deep_copy()])
+# erpt #
+  chainlength = LuxInt.new('chainlength', 100000)
+  
+  sampler_type.create_choice!('erpt', chainlength)
+# metropolis #
+  sampler_type.create_choice!('metropolis')
+
+sampler.add_element!(sampler_type)
+
+@lrsd.add_root("sampler", sampler)
+end
+############################################
+
+
+########## -- SurfaceIntegrator -- #########
+def surfaceintegrator_settings()
+surfint = LuxObject.new('surfaceintegrator', [], 'SurfaceIntegrator')
+
+int_type = LuxSelection.new('integrator_type', [], 'Integrator Type')
+  bidir = LuxChoice.new('bidirectional')
+    bidir.add_child!(LuxInt.new('eyedepth', 8))
+    bidir.add_child!(LuxInt.new('lightdepth', 8))
+  direct = LuxChoice.new('directlighting')
+    direct.add_child!(LuxFloat.new('maxdepth', 5))
+  exphoton = LuxChoice.new('exphotonmap')
+  path = LuxChoice.new('path')
+    path.add_child!(LuxInt.new('maxdepth', 16))
+    path.add_child!(LuxBool.new('includeenvironment', true))
+  distrpath = LuxChoice.new('distributedpath')
+  igi = LuxChoice.new('igi')
+int_type.add_choice!(bidir)
+int_type.add_choice!(direct)
+int_type.add_choice!(exphoton)
+int_type.add_choice!(path)
+int_type.add_choice!(distrpath)
+int_type.add_choice!(igi)
+
+surfint.add_element!(int_type)
+@lrsd.add_root("surfaceintegrator", surfint)
+end
+#####################################################
+
+
+######## -- VolumeIntegrator -- ####################
+
+########## -- Accelerator -- #######################
+def accelerator_settings()
+accel = LuxObject.new('accelerator', [], 'Accelerator')
+
+accel_type = LuxSelection.new('accelerator_type', [], 'Accelerator Type')
+  tabreckdtree = LuxChoice.new('tabreckdtree')
+    tabreckdtree.add_child!(LuxInt.new('intersectcost', 80))
+    tabreckdtree.add_child!(LuxInt.new('traversalcost', 1))
+    tabreckdtree.add_child!(LuxFloat.new('emptybonus', 0.5))
+    tabreckdtree.add_child!(LuxInt.new('maxprims', 1))
+    tabreckdtree.add_child!(LuxInt.new('maxdepth', -1))
+  grid = LuxChoice.new('grid', LuxBool.new('refineimmediately', false))
+  qbvh = LuxChoice.new('qbvh', LuxInt.new('maxprimsperleaf', 4))
+  bvh = LuxChoice.new('bvh')
+accel_type.add_choice!(tabreckdtree)
+accel_type.add_choice!(grid)
+accel_type.add_choice!(qbvh)
+accel_type.add_choice!(bvh)
+
+accel.add_element!(accel_type)
+@lrsd.add_root("accelerator", accel)
+end
+####################################################
+
+#### -- initialize settings -- ####
+surfaceintegrator_settings()
+sampler_settings()
+film_settings()
+camera_settings()
+accelerator_settings()
+## -- end initialize settings -- ##
+
+
+#@lrsd["camera"]["camera_type"].select!("environment")
+#@lrsd["sampler"]["sampler_type"]["random"]["pixelsampler"].value.select!("vegas")
+
+
+#@lrsd.each_value {|value| print value.export + "\n"}
+
+############# -- Sketchup Attributes Testing -- ###################
+
+#puts "Somethings" + @lrsd["accelerator"]["accelerator_type"]["tabreckdtree"].attribute_key
+
+#it should be very easy to set up and save presets using this method.
+def explore(obj)
+  if obj.respond_to?("each")
+    obj.each do |element|
+      if element.respond_to?("attribute_key")
+        if  element.respond_to?("value")
+          puts element.attribute_key + " = " + element.value.to_s
+        end
+        explore(element)
+      end
+    end
+  end
+  return
+end
+
+#File.open("test.lxs", "w") do |out|
+#  @lrsd.each_root do |p|
+#    out.puts p.export + "\n"
+#    #explore(p)
+#    out.puts "\n\n"
+#  end
+#end
+
+#~ File.open("D:\\preset_file_rb", "w") do |file|
+  #~ file.puts "#this is a presets file of  --settings--\n\n"
+  #~ @lrsd.strdic.each_key do |key|
+    #~ val = @lrsd.strdic[key]
+    #~ if not AttributeDic.is_path?(val.to_s)
+      #~ file.puts "#{key} = #{val}"
+    #~ end
+  #~ end
+  #~ file.puts "\n\n"
+  #~ @lrsd.strdic.each_key do |key|
+    #~ val = @lrsd.strdic[key]
+    #~ if AttributeDic.is_path?(val.to_s)
+      #~ file.puts "#{key} = #{val}"
+    #~ end
+  #~ end
+#~ end
+
+#~ File.open("D:\\preset_file_su", "w") do |file|
+  #~ file.puts "#this is a presets file of  --settings--\n\n"
+  #~ @lrsd.strdic.each_key do |key|
+    #~ val = @lrsd.sustrdic[key]
+    #~ if not AttributeDic.is_path?(val.to_s)
+      #~ file.puts "#{key} = #{val}"
+    #~ end
+  #~ end
+  #~ file.puts "\n\n"
+  #~ @lrsd.strdic.each_key do |key|
+    #~ val = @lrsd.sustrdic[key]
+    #~ if AttributeDic.is_path?(val.to_s)
+      #~ file.puts "#{key} = #{val}"
+    #~ end
+  #~ end
+#~ end
+#
+puts "files written:
+#   - preset_file_su
+#   - preset_file_rb
+#   - test.lxs
+#   - test.html"

@@ -18,18 +18,20 @@
 #                Mimmo Briganti (aka mimhotep)
 #                 Luke Frisken (aka lfrisken)
 
-
 class LuxrenderSettingsEditor
 
 def initialize
-
+  @lrsd = AttributeDic.spawn($lrsd_name)
+  @lrad = AttributeDic.spawn($lrad_name)
+  self.create_html_dialog
 	pref_key="LuxrenderSettingsEditor"
 	@settings_dialog=UI::WebDialog.new("Luxrender Render Settings", true,pref_key,520,500, 10,10,true)
 	@settings_dialog.max_width = 520
-	setting_html_path = Sketchup.find_support_file "test.html" ,"Plugins/su2lux"
+	setting_html_path = Sketchup.find_support_file "settings.html" ,"Plugins/su2lux"
 	@settings_dialog.set_file(setting_html_path)
-  @lrsd = AttributeDic.spawn($lrsd_name)
-  @lrad = AttributeDic.spawn($lrad_name)
+  
+  
+  
   
 	@settings_dialog.add_action_callback("change_setting") {|dialog, params|
 			SU2LUX.p_debug params
@@ -176,5 +178,141 @@ end
 def setCheckbox(id,value)
 	#TODO
 end
+
+def create_html_dialog
+  ############## -- HTML SETTINGS EDITOR -- ###################
+  presets_panel = HTML_block_panel.new("presets_panel")
+    preset_select = LuxSelection.new("preset_select", [], "Select Preset")
+    preset_table = HTML_outer_custom_element.new() do |this|
+      html_str = "\n"
+      html_str += "<table style=\"position:relative; margin-left:auto; margin-right:auto\">"
+      
+      html_str += "\n"
+      html_str += "<tr>"
+      for e in this.elements
+        html_str += e.html
+      end
+      html_str += "\n"
+      html_str += "</tr>"
+      html_str += "\n"
+      html_str += "</table>"
+      html_str
+    end
+    preset_table.add_element!(preset_select)
+
+  presets_panel.add_element!(preset_table)
+    
+  settings_panel = HTML_block_panel.new("settings_panel")
+
+    camera_collapse = HTML_block_collapse.new("Camera")
+      camera_collapse.add_LuxObject!(@lrsd["camera"])
+      
+    film_collapse = HTML_block_collapse.new("Film")
+      film_collapse.add_LuxObject!(@lrsd["film"])
+      
+      res_table = HTML_table.new("res_half_double")
+        res_table.start_row!()
+          res_double = HTML_button.new("res_double", "Double") do |env, args| 
+            #env is the settings editor or the material editor
+            @lrsd = AttributeDic.spawn($lrsd_name)
+            xres = @lrsd["film->xresolution"]
+            yres = @lrsd["film->yresolution"]
+            
+            xres.value = xres.value * 2
+            yres.value = yres.value * 2
+            
+            env.updateSettingValue(@lrsd["film->xresolution"])
+            env.updateSettingValue(@lrsd["film->yresolution"])
+          end
+          res_table.add_element!(res_double)
+          
+          res_half = HTML_button.new("res_half", "Half") do |env, args|
+            @lrsd = AttributeDic.spawn($lrsd_name)
+            xres = @lrsd["film->xresolution"]
+            yres = @lrsd["film->yresolution"]
+            
+            xres.value = xres.value / 2
+            yres.value = yres.value / 2
+            
+            env.updateSettingValue(@lrsd["film->xresolution"])
+            env.updateSettingValue(@lrsd["film->yresolution"])
+          end
+          res_table.add_element!(res_half)
+        res_table.end_row!()
+      film_collapse.add_element!(res_table)
+        
+      res_table = HTML_table.new("res_presets")
+        res_table.start_row!()
+          res_table.add_element!(res_preset_button(800, 600))
+          res_table.add_element!(res_preset_button(1024, 768))
+        res_table.end_row!()
+        res_table.start_row!()
+          res_table.add_element!(res_preset_button(1280, 1024))
+          res_table.add_element!(res_preset_button(1440, 900))
+        res_table.end_row!()
+      film_collapse.add_element!(res_table)
+      
+      view_size_table = HTML_table.new("view_size_table")
+        view_size_table.start_row!()
+          get_view_size_button = HTML_button.new("get_view_size", "Current View") do |env, args|
+            @lrsd = AttributeDic.spawn($lrsd_name)
+            xres = @lrsd["film->xresolution"]
+            yres = @lrsd["film->yresolution"]
+            
+            xres.value = Sketchup.active_model.active_view.vpwidth
+            yres.value = Sketchup.active_model.active_view.vpheight
+            
+            env.updateSettingValue(@lrsd["film->xresolution"])
+            env.updateSettingValue(@lrsd["film->yresolution"])
+            env.change_aspect_ratio(0.0)
+          end
+          view_size_table.add_element!(get_view_size_button)
+        view_size_table.end_row!()
+      film_collapse.add_element!(view_size_table)
+          
+          
+    sampler_collapse = HTML_block_collapse.new("Sampler")
+      sampler_collapse.add_LuxObject!(@lrsd["sampler"])
+      
+    surfaceintegrator_collapse = HTML_block_collapse.new("Surface_Integrator", [], "Surface Integrator")
+      surfaceintegrator_collapse.add_LuxObject!(@lrsd["surfaceintegrator"])
+      
+    accelerator_collapse = HTML_block_collapse.new("Accelerator")
+      accelerator_collapse.add_LuxObject!(@lrsd["accelerator"])
+      
+  settings_panel.add_element!(camera_collapse)
+  settings_panel.add_element!(film_collapse)
+  settings_panel.add_element!(sampler_collapse)
+  settings_panel.add_element!(surfaceintegrator_collapse)
+  settings_panel.add_element!(accelerator_collapse)
+
+
+  system_panel = HTML_block_panel.new("system_settings_panel")
+    system_settings_collapse = HTML_block_collapse.new("System_Settings", [], "System Settings")
+      system_table = HTML_table.new("system_table")
+      system_table.start_row!()
+        export_file_path_tag = HTML_custom_element.new("export_file_path_tag", "<b>Export File Path: </b><a id=\"export_file_path\"></a>")
+        system_table.add_element!(export_file_path_tag)
+        
+        export_file_path_button = HTML_button.new("export_file_path_button", "Browse") do |env, args|
+          SU2LUX.new_export_file_path()
+        end
+        system_table.add_element!(export_file_path_button)
+      system_table.end_row!()
+    system_settings_collapse.add_element!(system_table)
+
+  system_panel.add_element!(system_settings_collapse)
+
+
+  settings_html_main = HTML_block_main.new("SettingsPage")
+  settings_html_main.add_element!(presets_panel)
+  settings_html_main.add_element!(settings_panel)
+  settings_html_main.add_element!(system_panel)
+
+
+  open(SU2LUX.plugin_dir + "su2lux/settings.html", "w") {|out| out.puts settings_html_main.html}
+  ##################################################
+end
+
 
 end #end class LuxrenderSettingsEditor
