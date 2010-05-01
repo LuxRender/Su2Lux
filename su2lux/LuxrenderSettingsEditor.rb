@@ -32,6 +32,8 @@ def initialize
 	setting_html_path = Sketchup.find_support_file "settings.html" ,"Plugins/su2lux"
 	@settings_dialog.set_file(setting_html_path)
   
+  self.init_presets()
+  
 	@settings_dialog.add_action_callback("change_setting") {|dialog, params|
 			SU2LUX.p_debug params
 			pair=params.split("=")
@@ -96,10 +98,10 @@ def initialize
     #save_preset_file()
 	} #end action callback preset
 	
-	@settings_dialog.add_action_callback("select_preset") {|dialog, params|
-    SU2LUX.p_debug params
+	@settings_dialog.add_action_callback("su_select_preset") {|dialog, params|
+    puts "JS CALLED SELECT: " + params
     preset_name = params
-    self.select_preset(preset_name)
+    self.su_select_preset(preset_name)
 	} #end action callback preset
   
 	@settings_dialog.add_action_callback("open_dialog") {|dialog, params|
@@ -112,16 +114,22 @@ end #end initialize
 
 
 def show
-	@settings_dialog.show{updateAllSettings()}
+	@settings_dialog.show{updatePresets(); updateAllSettings()}
 end
 
 def visible?
   @settings_dialog.visible?
 end
 
+def updatePresets()
+  self.load_presets() #load presets from files
+  puts "UPDTING: " + @lrad["preset"].value
+  puts "updating"
+  self.js_select_preset(@lrad["preset"].value) #set the current preset
+end
+
 #set parameters in inputs of settings.html
 def updateAllSettings()
-  self.init_presets() #load presets from files
   @lrsd.each_obj do |obj|
     if obj.respond_to?("html_update_cmds")
       updateSettingValue(obj)
@@ -317,9 +325,10 @@ def save_preset_file()
   
 end
 
-def select_preset(name)
+def js_select_preset(name)
   if @presets.include?(name)
-    #@settings_dialog.execute_script("select_preset(#{name});") not good
+    puts "SELECTING: " + name
+    @settings_dialog.execute_script("js_select_preset('#{name}');")
   end
 end
 
@@ -330,6 +339,15 @@ def each_preset_file
   return []
 end
 
+def su_select_preset(name)
+   if @presets.include?(name)
+    @lrad["preset"].value = name
+    @presets[name].load
+    self.updateAllSettings()
+  end
+end
+
+
 def find_presets()
   ret_arr = []
   preset_dir = SU2LUX.plugin_dir + "su2lux/presets"
@@ -339,41 +357,47 @@ end
 
 def new_preset(name)
   puts "preset_name:" + name.to_s
-  pres = Preset.new(name)
-  pres.save
-  
-  @presets[name] = pres
+  if not @presets.include? name#checking whether to overwrite
+    pres = Preset.new(name)
+    pres.save
+    @presets[name] = pres
+  else#overwritng old preset
+    puts "OVERWRITING!!!!!"
+    @presets[name].save
+  end
 end
 
 def init_presets()
-  #preset = Attribute.new("preset")
-  #@lrad.add_root("preset", preset)
+  preset = Attribute.new("preset")
+  @lrad.add_root("preset", preset)
+  if preset.value == "" 
+    #only change preset to default if no other one has been previously selected and saved
+    preset.value = "default"
+  end
+end
+
+def load_presets
   #preset = @lrad["preset"]
-  
-  preset_names = find_presets()
-  @presets = {}
+  preset_names = find_presets() #find presets in the preset folder
+  @presets = {} #setup a new hash to store preset objects in.
   for name in preset_names
     puts "found: " + name
-    name = name.gsub("preset_", "")
-    @settings_dialog.execute_script("set_preset_selector('#{name}')")
+    name = name.gsub(/[.]txt/, "") #remove .txt from the end
+    @settings_dialog.execute_script("set_preset_selector('#{name}')") #add the preset to the selector in the ui
     puts "PRESET NAME: " + name
     pres = Preset.new(name)
-    pres.load
     @presets[name] = pres
   end
-  #@presets["another_preset"].load
- # if not preset_names.empty?
-    #if preset.value == ""
-      #preset.value = preset_names[0]
-    #end
-  #end
+  puts "PRESET.VALUE: " + @lrad["preset"].value
+  @presets[@lrad["preset"].value].load
 end
+
 
 end #end class LuxrenderSettingsEditor
 
 class Preset
   def initialize(name)
-    @file_name = SU2LUX.plugin_dir + "su2lux/presets/preset_" + name.to_s
+    @file_name = SU2LUX.plugin_dir + "su2lux/presets/" + name.to_s + ".txt"
     @lrsd = AttributeDic.spawn($lrsd_name)
   end
   def save

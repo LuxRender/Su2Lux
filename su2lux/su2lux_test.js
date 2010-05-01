@@ -39,9 +39,21 @@ function init_collapse()
 	}); //show all collapsed boxes
 }
 
-function select_preset(name)
+function js_select_preset(name)
 {
-	report_id("select_preset", name);
+	//report_id("su_select_preset", name);
+	//alert("Selecting:" + $("#preset_select").html()); //for some reason it only works when this is on!
+	//$("#presets_panel select").val(name);
+	setTimeout(function() { $("#presets_panel select").val(name); }, 1)//hack to fix problem with IE6
+}
+
+function update_select_preset(name)
+{
+}
+
+function su_select_preset(name)
+{
+	report_id("su_select_preset", name);
 }
 
 function set_preset_selector(name)
@@ -49,16 +61,55 @@ function set_preset_selector(name)
 	$("#preset_select").append("<option value=" + name + ">" + name + "</option>");
 }
 
+function in_array(array, value){
+	for(var i=0;i<array.length;i++)
+	{
+		if(array[i] == value)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 function new_preset()
 {
-	preset_name = prompt("Preset Name:", "new_preset");
-	$("#preset_select").append("<option value=" + preset_name + ">" + preset_name + "</option>");
-	report_id("new_preset", preset_name);
-	report_id("select_preset", preset_name);//wish this could return value to sketchup instead of call here
+	var preset_name = prompt("Preset Name:", "new_preset");
+	if (preset_name){
+		var values = jQuery.map(jQuery("#preset_select")[0].options, function(option)
+			{
+				return option.value;
+			});
+		if (in_array(values, preset_name))
+		{
+			var procede = confirm("Replace '" + preset_name + "'?");
+			if(procede)
+			{
+				report_id("new_preset", preset_name);
+				report_id("su_select_preset", preset_name);
+			}
+		}
+		else
+		{
+			$("#preset_select").append("<option value=" + preset_name + ">" + preset_name + "</option>");
+			report_id("new_preset", preset_name);
+			report_id("su_select_preset", preset_name);//wish this could return value to sketchup instead of call here
+		}
+	}
 }
 
 function remove_preset()
 {	
+}
+
+function selectop()
+{
+
+	var s = document.getElementById("preset_select");
+	setTimeout(function() { s.options[1].selected = true; }, 1);//bug in IE6 took me ages to pinpoint
+	//s.options[1].selected = true;
+	var v = s.options[s.selectedIndex].value;
+	//alert(v);
 }
 
 jQuery.fn.fadeToggle = function(speed, easing, callback) {
@@ -70,7 +121,7 @@ $(document).ready(
 		//$(".header").next("div.collapse").show();
 		
 		init_collapse();
-
+		
 		$("#settings_panel select, :text").change(
 			function()
 			{
@@ -78,10 +129,10 @@ $(document).ready(
 			}
 		);
 		
-		$("#presets_panel select, :text").change(
+		$("#presets_panel select").change(//:text").change(
 			function()
 			{
-				select_preset(this.id);
+				su_select_preset(this.value);
 			}
 		);
 
