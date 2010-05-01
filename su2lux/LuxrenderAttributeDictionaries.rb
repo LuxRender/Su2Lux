@@ -236,6 +236,48 @@ class AttributeDic  #a binding between
   def include?(key)
     return @objdic.include?(key)
   end
-  def export_dic
+  def export_dic_str
+    file_str = ""
+    arr1 = []
+    arr2 = []
+    @strdic.each_key do |key|
+      val = @sustrdic[key]
+      if not AttributeDic.is_path?(val.to_s)
+        arr1.push "#{key}=#{val}\n"
+      else
+        arr2.push "#{key}=#{val}\n" 
+      end
+    end
+    
+    arr1.each {|line| file_str += line}
+    file_str += "\n\n"
+    arr2.each {|line| file_str += line}
+    puts file_str
+    return file_str
   end
+  def import_dic_str(file_str)
+    self.clear
+    file_str.each_line do |line|
+      pair = line.split("=")
+      id = pair[0]
+      val = pair[1]
+      @sustrdic[id] = val
+    end
+  end
+  def import_dic_line(line)
+    line.chomp!
+    self.clear
+    pair = line.split("=")
+    id = pair[0]
+    val = pair[1]
+    @sustrdic[id] = val
+  end
+  def clear
+  end
+  def each_sustr
+    @strdic.each_key do |key|
+      yield @sustrdic[key]
+    end
+  end
+  
 end

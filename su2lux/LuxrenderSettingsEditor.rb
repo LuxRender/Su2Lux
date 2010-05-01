@@ -24,11 +24,6 @@ def initialize
   @lrsd = AttributeDic.spawn($lrsd_name)
   @lrad = AttributeDic.spawn($lrad_name)
   
-  #preset = Attribute.new("preset")
-  #@lrad.add_root("preset", preset)
-  #self.init_presets()
-  @presets=[]
-  
   self.create_html_dialog
   
 	pref_key="LuxrenderSettingsEditor"
@@ -126,6 +121,7 @@ end
 
 #set parameters in inputs of settings.html
 def updateAllSettings()
+  self.init_presets() #load presets from files
   @lrsd.each_obj do |obj|
     if obj.respond_to?("html_update_cmds")
       updateSettingValue(obj)
@@ -335,63 +331,67 @@ def each_preset_file
 end
 
 def find_presets()
+  ret_arr = []
+  preset_dir = SU2LUX.plugin_dir + "su2lux/presets"
+  Dir.foreach(preset_dir) {|f| ret_arr.push(f) if f != "." and f != ".."}
+  return ret_arr
 end
 
 def new_preset(name)
   puts "preset_name:" + name.to_s
-  @presets.push(name)
+  pres = Preset.new(name)
+  pres.save
+  
+  @presets[name] = pres
 end
 
-
 def init_presets()
-  preset = @lrad["preset"]
+  #preset = Attribute.new("preset")
+  #@lrad.add_root("preset", preset)
+  #preset = @lrad["preset"]
+  
   preset_names = find_presets()
-  @presets = []
+  @presets = {}
   for name in preset_names
-    @presets.push(Preset.new(name))
+    puts "found: " + name
+    name = name.gsub("preset_", "")
+    @settings_dialog.execute_script("set_preset_selector('#{name}')")
+    puts "PRESET NAME: " + name
+    pres = Preset.new(name)
+    pres.load
+    @presets[name] = pres
   end
-  if not preset_names.empty?
-    if preset.value == ""
-      preset.value = preset_names[0]
-    end
-  end
+  #@presets["another_preset"].load
+ # if not preset_names.empty?
+    #if preset.value == ""
+      #preset.value = preset_names[0]
+    #end
+  #end
 end
 
 end #end class LuxrenderSettingsEditor
 
 class Preset
   def initialize(name)
-    @file_name = SU2LUX.plugin_dir + "su2lux/preset_" + name.to_s
-    in_it = false
-    for pres_name in find_presets()
-      if pres_name == name
-        in_it = true
-      end
-    end
-    if in_it == true
-      self.load
-    end
+    @file_name = SU2LUX.plugin_dir + "su2lux/presets/preset_" + name.to_s
+    @lrsd = AttributeDic.spawn($lrsd_name)
   end
   def save
     File.open(@file_name, "w") do |file|
-    file.puts "#this is a presets file of  --settings--\n\n"
-    @lrsd.strdic.each_key do |key|
-      val = @lrsd.sustrdic[key]
-      if not AttributeDic.is_path?(val.to_s)
-        file.puts "#{key} = #{val}"
-      end
+      file.puts "#this is a presets file of  --settings--\n\n"
+      file.puts @lrsd.export_dic_str
     end
-    file.puts "\n\n"
-    @lrsd.strdic.each_key do |key|
-      val = @lrsd.sustrdic[key]
-      if AttributeDic.is_path?(val.to_s)
-        file.puts "#{key} = #{val}"
+    puts "SAVED!"
+  end
+  def load
+    File.open(@file_name, "r") do |file|
+      puts "IMPORTING"
+      file.each_line do |line|
+        if line.chomp != "" and not line.include?('#')
+          puts line.chomp
+          @lrsd.import_dic_line(line)
+        end      
       end
     end
   end
-  @settings_dialog.execute_script("alert('preset saved');")
-end
-def load
-  
-end
 end

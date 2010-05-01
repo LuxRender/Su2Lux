@@ -43,7 +43,7 @@ class MyTool
     puts "activated"
   end
   def deactivate(view)
-    view.invalidate if @drawn
+    view.invalidate #if @drawn
     model = Sketchup.active_model
     model.abort_operation if @doing_operation
     puts "deactivated"

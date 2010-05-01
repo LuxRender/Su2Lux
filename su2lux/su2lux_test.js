@@ -52,10 +52,9 @@ function set_preset_selector(name)
 function new_preset()
 {
 	preset_name = prompt("Preset Name:", "new_preset");
-	alert("preset_name: " + preset_name);
 	$("#preset_select").append("<option value=" + preset_name + ">" + preset_name + "</option>");
 	report_id("new_preset", preset_name);
-	report_id("select_preset", preset_name);
+	report_id("select_preset", preset_name);//wish this could return value to sketchup instead of call here
 }
 
 function remove_preset()
