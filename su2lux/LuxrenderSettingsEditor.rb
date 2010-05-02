@@ -315,9 +315,8 @@ def create_html_dialog
   settings_html_main.add_element!(presets_panel)
   settings_html_main.add_element!(settings_panel)
   settings_html_main.add_element!(system_panel)
-
-
-  open(SU2LUX.plugin_dir + "su2lux/settings.html", "w") {|out| out.puts settings_html_main.html}
+  
+  open(SU2LUX.find_path("settings.html"), "w") {|out| out.puts settings_html_main.html}
   ##################################################
 end
 

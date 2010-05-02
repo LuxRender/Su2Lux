@@ -270,6 +270,11 @@ def SU2LUX.plugin_dir
     return "/Library/Application Support/Google SketchUp #{Sketchup.version[0, 1]}/SketchUp/plugins/"
   end
 end
+
+def SU2LUX.file_path(name, dir="")
+  return Sketchup.find_support_file(name, "Plugins/su2lux/" + dir)
+end
+
 #####################################################################
 #####################################################################
 def SU2LUX.get_luxrender_filename
