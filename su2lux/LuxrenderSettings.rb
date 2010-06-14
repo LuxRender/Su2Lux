@@ -83,9 +83,28 @@ end
 film.add_element!(xres)
 film.add_element!(yres)
 
+
+film.add_element!(LuxFloat.new('gamma', 2.2))
+film.add_element!(LuxBool.new('premultiplyalpha', false))
+
+film.add_element!(LuxBool.new('write_exr', false))
+film.add_element!(LuxBool.new('write_png', true))
+film.add_element!(LuxBool.new('write_tga', false))
+film.add_element!(LuxString.new('filename', 'luxout', 'image filename'))
+
 film.add_element!(LuxInt.new('displayinterval', 4))
-film.add_element!(LuxInt.new('haltspp'))
-film.add_element!(LuxInt.new('halttime'))
+film.add_element!(LuxInt.new('writeinterval', 60))
+film.add_element!(LuxInt.new('haltspp', 0))
+film.add_element!(LuxInt.new('halttime', 0))
+
+tonemapkernelselection = LuxSelection.new('tonemapkernelselection', [], 'tonemap')
+  tonemapkernelselection.create_choice!('reinhard')
+  tonemapkernelselection.create_choice!('linear')
+  tonemapkernelselection.create_choice!('contrast')
+  tonemapkernelselection.create_choice!('maxwhite')
+  tonemapkernelselection.select!('reinhard')
+film.add_element!(LuxString.new('tonemapkernel', tonemapkernelselection))
+
 
 @lrsd.add_root("film", film)
 end

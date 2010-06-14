@@ -84,10 +84,11 @@ class LuxType
       cmd = ["$('##{rb_to_js_path(key)}').val(#{rb_to_js_path(val.to_s)});"]
       puts cmd
       return cmd
+    else
+      cmd = ["$('##{rb_to_js_path(key)}').val(#{rb_to_js_path(val.to_s)});"]
+      #puts cmd
+      return cmd
     end
-    cmd = ["$('##{rb_to_js_path(key)}').val(#{rb_to_js_path(val.to_s)});"]
-    #puts cmd
-    return cmd
   end
   
   def to_s
@@ -286,7 +287,9 @@ class LuxString < LuxType
   end
   def attribute_init(p)
     @parent = p
-    @init_value.attribute_init(self)
+    if @init_value.class == LuxSelection
+      @init_value.attribute_init(self)
+    end
     self.value = @init_value
     if self.value.respond_to?("attribute_key")
       #puts self.value.attribute_key
@@ -311,7 +314,11 @@ class LuxString < LuxType
   
   def value
     @lrsd = AttributeDic.spawn($lrsd_name) unless @lrsd
-    return @lrsd.obj_value(@lrsd.str_value(self))
+    if @init_value.class == LuxSelection
+      return @lrsd.obj_value(@lrsd.str_value(self))
+    else
+      return @lrsd.str_value(self).to_s
+    end
   end
 
   def export
@@ -328,6 +335,33 @@ class LuxString < LuxType
 #      return self.value
 #    end
     return self.value
+  end
+  def html 
+    #needs fixing - needs a way to convert object types
+    #into strings to recognise (use path as the string)
+    if self.value.is_a? LuxSelection
+      return self.value.html
+    else
+      #### TEXT INPUT ####
+      html_str = ""
+      html_str += "<td align=\"left\">#{@name}:</td>\n" 
+      html_str += "<td align=\"right\"><input type='text' id=\"#{rb_to_js_path(self.attribute_key)}\" size=\"#{self.value.length+2}\"></td>"
+      return html_str
+    end
+  end
+  def html_update_cmds(key=self.attribute_key, val=self.value)#will probably turn into fully fledged thing (unless other design idea pops up!)
+    if val.is_a? LuxSelection
+      key = val.attribute_key
+      val = val.value.attribute_key
+      val = "'#{val}'"
+      cmd = ["$('##{rb_to_js_path(key)}').val(#{rb_to_js_path(val.to_s)});"]
+      puts cmd
+      return cmd
+    else
+      cmd = ["$('##{rb_to_js_path(key)}').val('#{rb_to_js_path(val.to_s)}');"]
+      #puts cmd
+      return cmd
+    end
   end
 end #end LuxString
 

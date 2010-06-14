@@ -123,8 +123,43 @@
 </tr>
 
 <tr>
+<td align="left">gamma:</td>
+<td align="right"><input type='text' id="film--gamma" size="2"></td>
+</tr>
+
+<tr>
+<td align="left">premultiplyalpha:</td>
+<td align="right"><input type="checkbox" id="film--premultiplyalpha" value=""></td>
+</tr>
+
+<tr>
+<td align="left">write_exr:</td>
+<td align="right"><input type="checkbox" id="film--write_exr" value=""></td>
+</tr>
+
+<tr>
+<td align="left">write_png:</td>
+<td align="right"><input type="checkbox" id="film--write_png" value=""></td>
+</tr>
+
+<tr>
+<td align="left">write_tga:</td>
+<td align="right"><input type="checkbox" id="film--write_tga" value=""></td>
+</tr>
+
+<tr>
+<td align="left">image filename:</td>
+<td align="right"><input type='text' id="film--filename" size="8"></td>
+</tr>
+
+<tr>
 <td align="left">displayinterval:</td>
 <td align="right"><input type='text' id="film--displayinterval" size="2"></td>
+</tr>
+
+<tr>
+<td align="left">writeinterval:</td>
+<td align="right"><input type='text' id="film--writeinterval" size="2"></td>
 </tr>
 
 <tr>
@@ -135,6 +170,24 @@
 <tr>
 <td align="left">halttime:</td>
 <td align="right"><input type='text' id="film--halttime" size="2"></td>
+</tr>
+
+<tr>
+
+<td>
+<span class="label">tonemap:</span>
+<select class="select_collapse" id="film--tonemapkernel--tonemapkernelselection">
+<option value="film--tonemapkernel--tonemapkernelselection--reinhard">reinhard</option>
+<option value="film--tonemapkernel--tonemapkernelselection--linear">linear</option>
+<option value="film--tonemapkernel--tonemapkernelselection--contrast">contrast</option>
+<option value="film--tonemapkernel--tonemapkernelselection--maxwhite">maxwhite</option>
+</select>
+<div id="film--tonemapkernel--tonemapkernelselection--reinhard" class="collapse">
+<div id="film--tonemapkernel--tonemapkernelselection--linear" class="collapse">
+<div id="film--tonemapkernel--tonemapkernelselection--contrast" class="collapse">
+<div id="film--tonemapkernel--tonemapkernelselection--maxwhite" class="collapse">
+</div>
+</td>
 </tr>
 
 </table>
