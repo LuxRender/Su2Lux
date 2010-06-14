@@ -132,7 +132,7 @@ class LuxNumber < LuxType
     #### TEXT INPUT ####
     html_str = ""
     html_str += "<td align=\"left\">#{@name}:</td>\n" 
-    html_str += "<td align=\"right\"><input type='text' id=\"#{rb_to_js_path(self.attribute_key)}\" size=\"2\"></td>"
+    html_str += "<td align=\"right\"><input type='text' id=\"#{rb_to_js_path(self.attribute_key)}\" size=\"4\"></td>"
   return html_str
   end
   #type conversion

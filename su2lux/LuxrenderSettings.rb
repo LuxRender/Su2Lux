@@ -141,11 +141,16 @@ sampler_type = LuxSelection.new('sampler_type', [], 'Sampler Type')
   sampler_type.create_choice!('lowdiscrepancy', [pixelsamples, pixelsampler])
   sampler_type.create_choice!('random', [pixelsamples.deep_copy(), pixelsampler.deep_copy()])
 # erpt #
-  chainlength = LuxInt.new('chainlength', 100000)
-  
-  sampler_type.create_choice!('erpt', chainlength)
+  erpt = LuxChoice.new('erpt')
+    erpt.add_child!(LuxInt.new('initsamples', 100000))
+    erpt.add_child!(LuxInt.new('chainlength', 2000))
 # metropolis #
-  sampler_type.create_choice!('metropolis')
+  mlt = LuxChoice.new('metropolis')
+    mlt.add_child!(LuxFloat.new('largemutationprob', 0.4))
+    mlt.add_child!(LuxBool.new('usevariance', false))
+  sampler_type.add_choice!(mlt)
+  sampler_type.add_choice!(erpt)
+  
 
 sampler.add_element!(sampler_type)
 
@@ -196,17 +201,79 @@ def surfaceintegrator_settings()
 surfint = LuxObject.new('surfaceintegrator', [], 'SurfaceIntegrator')
 
 int_type = LuxSelection.new('integrator_type', [], 'Integrator Type')
+  
+  lightstrategy_selection = LuxSelection.new('lightstrategy_selection', [], 'Light Strategy')
+    lightstrategy_selection.create_choice!('auto')
+    lightstrategy_selection.create_choice!('one')
+    lightstrategy_selection.create_choice!('all')
+    lightstrategy_selection.create_choice!('importance')
+    lightstrategy_selection.create_choice!('powerimp')
+    lightstrategy_selection.create_choice!('allpowerimp')
+    lightstrategy_selection.create_choice!('logpowerimp')
+  lightstrategy = LuxString.new('lightstrategy', lightstrategy_selection)
+  
+  strategy_selection = LuxSelection.new('strategy_selection', [], 'Light Strategy') #depracated only in for distributed stuff
+    strategy_selection.create_choice!('all')
+    strategy_selection.create_choice!('one')
+    strategy_selection.create_choice!('auto')
+  strategy = LuxString.new('strategy', strategy_selection)
+  
   bidir = LuxChoice.new('bidirectional')
     bidir.add_child!(LuxInt.new('eyedepth', 8))
     bidir.add_child!(LuxInt.new('lightdepth', 8))
+    bidir.add_child!(LuxFloat.new('eyerrthreshold', 0.0))
+    bidir.add_child!(LuxFloat.new('lightrrthreshold', 0.0)) 
+    
   direct = LuxChoice.new('directlighting')
-    direct.add_child!(LuxFloat.new('maxdepth', 5))
+    direct.add_child!(lightstrategy.deep_copy())
+    direct.add_child!(LuxInt.new('maxdepth', 5))
+    
   exphoton = LuxChoice.new('exphotonmap')
+    exphoton.add_child!(lightstrategy.deep_copy())
+    
+    renderingmode_selection = LuxSelection.new('renderingmode_selection', [],  'Rendering Mode')
+      renderingmode_selection.create_choice!('directlighting')
+      renderingmode_selection.create_choice!('path')
+    exphoton.add_child!(LuxString.new('renderingmode', renderingmode_selection))
+    
+    exphoton.add_child!(LuxInt.new('causticphotons', 20000))
+    exphoton.add_child!(LuxInt.new('indirectphotons', 	200000))
+    exphoton.add_child!(LuxInt.new('directphotons', 200000))
+            #todo: more, but doesnt work for now so no point
+
   path = LuxChoice.new('path')
+    path.add_child!(lightstrategy.deep_copy())
     path.add_child!(LuxInt.new('maxdepth', 16))
     path.add_child!(LuxBool.new('includeenvironment', true))
+    
   distrpath = LuxChoice.new('distributedpath')
+    #distrpath.add_child!(lightstrategy.deep_copy()) #- anticipated setting
+    #distrpath.add_child!(LuxInt.new('diffusedepth', 3))   #-
+    #distrpath.add_child!(LuxInt.new('glossydepth', 2))    ##- 0.5 stuff I think
+    #distrpath.add_child!(LuxInt.new('speculardepth', 5)) #-
+    distrpath.add_child!(strategy.deep_copy()) 
+    distrpath.add_child!(LuxBool.new('directsampleall', true))
+    distrpath.add_child!(LuxInt.new('directsamples', 1))
+    distrpath.add_child!(LuxBool.new('indirectsampleall', true))
+    distrpath.add_child!(LuxInt.new('diffusereflectdepth', 3))
+    distrpath.add_child!(LuxInt.new('diffusereflectsamples', 1))
+    distrpath.add_child!(LuxInt.new('diffuserefractdepth', 5))
+    distrpath.add_child!(LuxInt.new('diffuserefractsamples', 1))
+    distrpath.add_child!(LuxBool.new('directdiffuse', true))
+    distrpath.add_child!(LuxBool.new('indirectdiffuse', true))
+    distrpath.add_child!(LuxInt.new('glossyreflectdepth', 2))
+    distrpath.add_child!(LuxInt.new('glossyreflectsamples', 1))
+    distrpath.add_child!(LuxInt.new('glossyrefractdepth', 5))
+    distrpath.add_child!(LuxInt.new('glossyrefractsamples', 1))
+    distrpath.add_child!(LuxBool.new('directglossy', true))
+    distrpath.add_child!(LuxBool.new('indirectglossy', true))
+    distrpath.add_child!(LuxInt.new('specularreflectdepth', 3))
+    distrpath.add_child!(LuxInt.new('specularrefractdepth', 5))
+  
   igi = LuxChoice.new('igi')
+    igi.add_child!(LuxInt.new('nsets', 4))
+    igi.add_child!(LuxInt.new('nlights', 64))
+    igi.add_child!(LuxFloat.new('mindist', 0.10000))
 int_type.add_choice!(bidir)
 int_type.add_choice!(direct)
 int_type.add_choice!(exphoton)
