@@ -54,7 +54,7 @@ def initialize
       
       obj.value = value
       if obj.respond_to?("call_block")
-        if obj.call_block?()
+        if obj.has_call_block?()
           obj.call_block(self)
         end
       end
@@ -149,6 +149,21 @@ def updateSettingValue(obj)
     #SU2LUX.p_debug cmd
     @settings_dialog.execute_script(cmd)
   end
+end
+
+def update_camera_type()
+  #todo: add block stuff to luxchoice class to enable
+  #callbacks
+end
+
+def fov_dic_2_su()
+  current_camera = Sketchup.active_model.active_view.camera
+  current_camera.fov = @lrsd["camera->camera_type->perspective->fov"].to_f
+end
+
+def fov_su_2_dic()
+  current_camera = Sketchup.active_model.active_view.camera
+  @lrsd["camera->camera_type->perspective->fov"] = current_camera.fov.to_f
 end
 
 def update_aspect_ratio()

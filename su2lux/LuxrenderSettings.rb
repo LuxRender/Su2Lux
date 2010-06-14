@@ -39,7 +39,10 @@ def camera_settings()
 camera = LuxObject.new('camera', [], 'Camera')#name, because exporting requires capitals
 
 camera_type = LuxSelection.new('camera_type', [], 'Camera Type')
-  camera_type.create_choice!('perspective', LuxFloat.new('fov', 35))
+  fov = LuxFloat.new('fov', 35) do |this, env|
+    env.fov_dic_2_su()
+  end
+  camera_type.create_choice!('perspective', fov)
   camera_type.create_choice!('orthographic', LuxFloat.new('scale', 7.31))
   camera_type.create_choice!('environment')
 

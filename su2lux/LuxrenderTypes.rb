@@ -24,10 +24,11 @@ require "su2lux/LuxrenderAttributeDictionaries.rb"
 class LuxType
   attr_reader :type_str, :id, :name
   attr_accessor :parent
-  def initialize(id, name=id, parent=nil)
+  def initialize(id, name=id, parent=nil, &block)
     @id = id
     @parent = parent
     @name = name
+    @block = block
   end
   def attribute_init(parent) #see LuxNumber for explanation
     @parent = parent
@@ -43,6 +44,21 @@ class LuxType
     else
       return @id
     end
+  end
+  
+  def call_block(env=nil) #experimental feature that gets called when updated in editor.
+    if @block
+      @block.call(self, env)
+    else
+      raise "no block to call"
+    end
+  end
+  def has_call_block?()
+    return !@block.nil?
+  end
+  def value=(v)
+    super(v)
+    #self.call_block()
   end
   
   def export#todo: add another argument with tab level or use a singleton
@@ -132,20 +148,9 @@ end #end LuxNumber
 
 class LuxInt < LuxNumber
   def initialize(id, value=0, name=id, parent=nil, &block)
-    @block = block
     value = value.to_i #add check if integer or number, convert if other number.
     super(id, value, name, parent)
     @type_str = 'integer'
-  end
-  def call_block(env=nil) #experimental feature that gets called when updated in editor.
-    @block.call(self, env)
-  end
-  def call_block?()
-    return !@block.nil?
-  end
-  def value=(v)
-    super(v)
-    #self.call_block()
   end
   def value
     @lrsd = AttributeDic.spawn($lrsd_name) #unless @lrsd

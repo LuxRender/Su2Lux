@@ -491,19 +491,37 @@ end
 
 end #end module SU2LUX
 
-class SU2LUX_view_observer < Sketchup::ViewObserver
 
+#### -- OBSERVERS -- ####
+
+def slowdown(latency, editor)
+  old_time = Time.new
+  while editor.visible?
+    new_time = Time.new
+    if (new_time - new_time) < latency
+      yield
+    end
+    old_time = new_time
+  end
+end
+
+  
+class SU2LUX_view_observer < Sketchup::ViewObserver
 include SU2LUX
 def initialize
-  @old_time = Time.new
+  latency = 1
+  @lrsd = AttributeDic.spawn($lrsd_name)
+  @lrad = AttributeDic.spawn($lrad_name)
+  @settings_editor = SU2LUX.get_editor("settings")
 end
 def onViewChanged(view)
-
-	settings_editor = SU2LUX.get_editor("settings")
+	camera_type = @lrsd["camera->camera_type"]
 	if Sketchup.active_model.active_view.camera.perspective?
-		camera_type = 'perspective'
+		camera_type.select!('perspective')
+    @settings_editor.updateSettingValue(camera_type)
 	else
-		camera_type = 'orthographic'
+		camera_type.select!('orthographic')
+    @settings_editor.updateSettingValue(camera_type)
 	end
 	if settings_editor and settings_editor.visible?
 		if (Sketchup.active_model.active_view.camera.perspective?) and (Time.new - @old_time) > 0.5
