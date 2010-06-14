@@ -26,7 +26,7 @@
 </tr>
 </table>
 </div>
-<div id="settings_panel" class="panel">
+<div id="camera_environment_panel" class="panel">
 
 <p class="header">Camera</p>
 <div class="collapse">
@@ -98,6 +98,8 @@
 
 </table>
 </div>
+</div>
+<div id="output_panel" class="panel">
 
 <p class="header">Film</p>
 <div class="collapse">
@@ -297,6 +299,8 @@
 
 </table>
 </div>
+</div>
+<div id="settings_panel" class="panel">
 
 <p class="header">Sampler</p>
 <div class="collapse">
@@ -324,20 +328,20 @@
 <td>
 <span class="label">Pixel Sampler Type:</span>
 <select class="select_collapse" id="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection">
+<option value="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--vegas">vegas</option>
 <option value="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--linear">linear</option>
 <option value="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--tile">tile</option>
 <option value="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--random">random</option>
-<option value="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--vegas">vegas</option>
 <option value="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--lowdiscrepancy">lowdiscrepancy</option>
 <option value="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--hilbert">hilbert</option>
 </select>
+<div id="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--vegas" class="collapse">
+</div>
 <div id="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--linear" class="collapse">
 </div>
 <div id="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--tile" class="collapse">
 </div>
 <div id="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--random" class="collapse">
-</div>
-<div id="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--vegas" class="collapse">
 </div>
 <div id="sampler--sampler_type--lowdiscrepancy--pixelsampler--pixelsamplerselection--lowdiscrepancy" class="collapse">
 </div>
@@ -360,20 +364,20 @@
 <td>
 <span class="label">Pixel Sampler Type:</span>
 <select class="select_collapse" id="sampler--sampler_type--random--pixelsampler--pixelsamplerselection">
+<option value="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--vegas">vegas</option>
 <option value="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--linear">linear</option>
 <option value="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--tile">tile</option>
 <option value="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--random">random</option>
-<option value="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--vegas">vegas</option>
 <option value="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--lowdiscrepancy">lowdiscrepancy</option>
 <option value="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--hilbert">hilbert</option>
 </select>
+<div id="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--vegas" class="collapse">
+</div>
 <div id="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--linear" class="collapse">
 </div>
 <div id="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--tile" class="collapse">
 </div>
 <div id="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--random" class="collapse">
-</div>
-<div id="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--vegas" class="collapse">
 </div>
 <div id="sampler--sampler_type--random--pixelsampler--pixelsamplerselection--lowdiscrepancy" class="collapse">
 </div>
@@ -462,6 +466,145 @@
 </table>
 </div>
 
+<p class="header">Pixel Filter</p>
+<div class="collapse">
+<table style="position:relative; margin-left:auto; margin-right:auto">
+<tr>
+
+<td>
+<span class="label">PixelFilter:</span>
+<select class="select_collapse" id="pixelfilter--pixelfilter_type">
+<option value="pixelfilter--pixelfilter_type--mitchell">mitchell</option>
+<option value="pixelfilter--pixelfilter_type--box">box</option>
+<option value="pixelfilter--pixelfilter_type--triangle">triangle</option>
+<option value="pixelfilter--pixelfilter_type--gaussian">gaussian</option>
+<option value="pixelfilter--pixelfilter_type--sinc">sinc</option>
+</select>
+<div id="pixelfilter--pixelfilter_type--mitchell" class="collapse">
+<table>
+<tr>
+<td align="left">xwidth:</td>
+<td align="right"><input type='text' id="pixelfilter--pixelfilter_type--mitchell--xwidth" size="2"></td>
+</tr>
+</table>
+<table>
+<tr>
+<td align="left">ywidth:</td>
+<td align="right"><input type='text' id="pixelfilter--pixelfilter_type--mitchell--ywidth" size="2"></td>
+</tr>
+</table>
+<table>
+<tr>
+<td align="left">B:</td>
+<td align="right"><input type='text' id="pixelfilter--pixelfilter_type--mitchell--B" size="2"></td>
+</tr>
+</table>
+<table>
+<tr>
+<td align="left">C:</td>
+<td align="right"><input type='text' id="pixelfilter--pixelfilter_type--mitchell--C" size="2"></td>
+</tr>
+</table>
+</div>
+<div id="pixelfilter--pixelfilter_type--box" class="collapse">
+<table>
+<tr>
+<td align="left">xwidth:</td>
+<td align="right"><input type='text' id="pixelfilter--pixelfilter_type--box--xwidth" size="2"></td>
+</tr>
+</table>
+<table>
+<tr>
+<td align="left">ywidth:</td>
+<td align="right"><input type='text' id="pixelfilter--pixelfilter_type--box--ywidth" size="2"></td>
+</tr>
+</table>
+</div>
+<div id="pixelfilter--pixelfilter_type--triangle" class="collapse">
+<table>
+<tr>
+<td align="left">xwidth:</td>
+<td align="right"><input type='text' id="pixelfilter--pixelfilter_type--triangle--xwidth" size="2"></td>
+</tr>
+</table>
+<table>
+<tr>
+<td align="left">ywidth:</td>
+<td align="right"><input type='text' id="pixelfilter--pixelfilter_type--triangle--ywidth" size="2"></td>
+</tr>
+</table>
+</div>
+<div id="pixelfilter--pixelfilter_type--gaussian" class="collapse">
+<table>
+<tr>
+<td align="left">xwidth:</td>
+<td align="right"><input type='text' id="pixelfilter--pixelfilter_type--gaussian--xwidth" size="2"></td>
+</tr>
+</table>
+<table>
+<tr>
+<td align="left">ywidth:</td>
+<td align="right"><input type='text' id="pixelfilter--pixelfilter_type--gaussian--ywidth" size="2"></td>
+</tr>
+</table>
+<table>
+<tr>
+<td align="left">alpha:</td>
+<td align="right"><input type='text' id="pixelfilter--pixelfilter_type--gaussian--alpha" size="2"></td>
+</tr>
+</table>
+</div>
+<div id="pixelfilter--pixelfilter_type--sinc" class="collapse">
+<table>
+<tr>
+<td align="left">xwidth:</td>
+<td align="right"><input type='text' id="pixelfilter--pixelfilter_type--sinc--xwidth" size="2"></td>
+</tr>
+</table>
+<table>
+<tr>
+<td align="left">ywidth:</td>
+<td align="right"><input type='text' id="pixelfilter--pixelfilter_type--sinc--ywidth" size="2"></td>
+</tr>
+</table>
+<table>
+<tr>
+<td align="left">tau:</td>
+<td align="right"><input type='text' id="pixelfilter--pixelfilter_type--sinc--tau" size="2"></td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+</table>
+</div>
+</div>
+<div id="system_settings_panel" class="panel">
+
+<p class="header">System Settings</p>
+<div class="collapse">
+<table style="position:relative; margin-left:auto; margin-right:auto">
+</table>
+<table style="position:relative; margin-left:auto; margin-right:auto">
+<tr>
+
+<td>
+<table>
+<tr>
+<td>
+<b>Export File Path: </b><a id="export_file_path"></a>
+</td>
+<td><input type="button" id="export_file_path_button" value ="Browse" style="width:100%">
+  </td>
+</tr>
+</table>
+</td>
+</tr>
+
+</table>
+</div>
+
 <p class="header">Accelerator</p>
 <div class="collapse">
 <table style="position:relative; margin-left:auto; margin-right:auto">
@@ -525,31 +668,6 @@
 </div>
 <div id="accelerator--accelerator_type--bvh" class="collapse">
 </div>
-</td>
-</tr>
-
-</table>
-</div>
-</div>
-<div id="system_settings_panel" class="panel">
-
-<p class="header">System Settings</p>
-<div class="collapse">
-<table style="position:relative; margin-left:auto; margin-right:auto">
-</table>
-<table style="position:relative; margin-left:auto; margin-right:auto">
-<tr>
-
-<td>
-<table>
-<tr>
-<td>
-<b>Export File Path: </b><a id="export_file_path"></a>
-</td>
-<td><input type="button" id="export_file_path_button" value ="Browse" style="width:100%">
-  </td>
-</tr>
-</table>
 </td>
 </tr>
 

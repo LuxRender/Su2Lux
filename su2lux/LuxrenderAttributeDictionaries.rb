@@ -252,7 +252,7 @@ class AttributeDic  #a binding between
     arr1.each {|line| file_str += line}
     file_str += "\n\n"
     arr2.each {|line| file_str += line}
-    puts file_str
+    #puts file_str
     return file_str
   end
   def import_dic_str(file_str)

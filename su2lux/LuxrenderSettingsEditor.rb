@@ -114,7 +114,7 @@ end #end initialize
 
 
 def show
-	@settings_dialog.show{updatePresets(); updateAllSettings()}
+	@settings_dialog.show{updateAllSettings(); updatePresets()}
 end
 
 def visible?
@@ -223,92 +223,106 @@ def create_html_dialog
     
 
   presets_panel.add_element!(preset_table)
+  
+  render_panel = HTML_block_panel.new("settings_panel")
     
-  settings_panel = HTML_block_panel.new("settings_panel")
-
-    camera_collapse = HTML_block_collapse.new("Camera")
-      camera_collapse.add_LuxObject!(@lrsd["camera"])
-      
-    film_collapse = HTML_block_collapse.new("Film")
-      film_collapse.add_LuxObject!(@lrsd["film"])
-      
-      res_table = HTML_table.new("res_half_double")
-        res_table.start_row!()
-          res_double = HTML_button.new("res_double", "Double") do |env, args| 
-            #env is the settings editor or the material editor
-            @lrsd = AttributeDic.spawn($lrsd_name)
-            xres = @lrsd["film->xresolution"]
-            yres = @lrsd["film->yresolution"]
-            
-            xres.value = xres.value * 2
-            yres.value = yres.value * 2
-            
-            env.updateSettingValue(@lrsd["film->xresolution"])
-            env.updateSettingValue(@lrsd["film->yresolution"])
-          end
-          res_table.add_element!(res_double)
-          
-          res_half = HTML_button.new("res_half", "Half") do |env, args|
-            @lrsd = AttributeDic.spawn($lrsd_name)
-            xres = @lrsd["film->xresolution"]
-            yres = @lrsd["film->yresolution"]
-            
-            xres.value = xres.value / 2
-            yres.value = yres.value / 2
-            
-            env.updateSettingValue(@lrsd["film->xresolution"])
-            env.updateSettingValue(@lrsd["film->yresolution"])
-          end
-          res_table.add_element!(res_half)
-        res_table.end_row!()
-      film_collapse.add_element!(res_table)
-        
-      res_table = HTML_table.new("res_presets")
-        res_table.start_row!()
-          res_table.add_element!(res_preset_button(800, 600))
-          res_table.add_element!(res_preset_button(1024, 768))
-        res_table.end_row!()
-        res_table.start_row!()
-          res_table.add_element!(res_preset_button(1280, 1024))
-          res_table.add_element!(res_preset_button(1440, 900))
-        res_table.end_row!()
-      film_collapse.add_element!(res_table)
-      
-      view_size_table = HTML_table.new("view_size_table")
-        view_size_table.start_row!()
-          get_view_size_button = HTML_button.new("get_view_size", "Current View") do |env, args|
-            @lrsd = AttributeDic.spawn($lrsd_name)
-            xres = @lrsd["film->xresolution"]
-            yres = @lrsd["film->yresolution"]
-            
-            xres.value = Sketchup.active_model.active_view.vpwidth
-            yres.value = Sketchup.active_model.active_view.vpheight
-            
-            env.updateSettingValue(@lrsd["film->xresolution"])
-            env.updateSettingValue(@lrsd["film->yresolution"])
-            env.change_aspect_ratio(0.0)
-          end
-          view_size_table.add_element!(get_view_size_button)
-        view_size_table.end_row!()
-      film_collapse.add_element!(view_size_table)
-          
-          
     sampler_collapse = HTML_block_collapse.new("Sampler")
       sampler_collapse.add_LuxObject!(@lrsd["sampler"])
+    
+    pixelfilter_collapse = HTML_block_collapse.new("Pixel_Filter", [], "Pixel Filter")
+      pixelfilter_collapse.add_LuxObject!(@lrsd["pixelfilter"])
       
     surfaceintegrator_collapse = HTML_block_collapse.new("Surface_Integrator", [], "Surface Integrator")
       surfaceintegrator_collapse.add_LuxObject!(@lrsd["surfaceintegrator"])
       
-    accelerator_collapse = HTML_block_collapse.new("Accelerator")
-      accelerator_collapse.add_LuxObject!(@lrsd["accelerator"])
+    
       
-  settings_panel.add_element!(camera_collapse)
-  settings_panel.add_element!(film_collapse)
-  settings_panel.add_element!(sampler_collapse)
-  settings_panel.add_element!(surfaceintegrator_collapse)
-  settings_panel.add_element!(accelerator_collapse)
-
-
+  render_panel.add_element!(sampler_collapse)
+  render_panel.add_element!(surfaceintegrator_collapse)
+  render_panel.add_element!(pixelfilter_collapse)
+  ######################################
+  
+  
+  ########## -- Camera/Environment Panel -- ##########
+  camera_environment_panel = HTML_block_panel.new("camera_environment_panel")
+    camera_collapse = HTML_block_collapse.new("Camera")
+      camera_collapse.add_LuxObject!(@lrsd["camera"])
+      
+  camera_environment_panel.add_element!(camera_collapse)
+  ######################################
+  
+  
+  ######### -- Output Panel -- ##############
+  output_panel = HTML_block_panel.new("output_panel")  
+  
+    film_collapse = HTML_block_collapse.new("Film")
+        film_collapse.add_LuxObject!(@lrsd["film"])
+        
+        res_table = HTML_table.new("res_half_double")
+          res_table.start_row!()
+            res_double = HTML_button.new("res_double", "Double") do |env, args| 
+              #env is the settings editor or the material editor
+              @lrsd = AttributeDic.spawn($lrsd_name)
+              xres = @lrsd["film->xresolution"]
+              yres = @lrsd["film->yresolution"]
+              
+              xres.value = xres.value * 2
+              yres.value = yres.value * 2
+              
+              env.updateSettingValue(@lrsd["film->xresolution"])
+              env.updateSettingValue(@lrsd["film->yresolution"])
+            end
+            res_table.add_element!(res_double)
+            
+            res_half = HTML_button.new("res_half", "Half") do |env, args|
+              @lrsd = AttributeDic.spawn($lrsd_name)
+              xres = @lrsd["film->xresolution"]
+              yres = @lrsd["film->yresolution"]
+              
+              xres.value = xres.value / 2
+              yres.value = yres.value / 2
+              
+              env.updateSettingValue(@lrsd["film->xresolution"])
+              env.updateSettingValue(@lrsd["film->yresolution"])
+            end
+            res_table.add_element!(res_half)
+          res_table.end_row!()
+        film_collapse.add_element!(res_table)
+          
+        res_table = HTML_table.new("res_presets")
+          res_table.start_row!()
+            res_table.add_element!(res_preset_button(800, 600))
+            res_table.add_element!(res_preset_button(1024, 768))
+          res_table.end_row!()
+          res_table.start_row!()
+            res_table.add_element!(res_preset_button(1280, 1024))
+            res_table.add_element!(res_preset_button(1440, 900))
+          res_table.end_row!()
+        film_collapse.add_element!(res_table)
+        
+        view_size_table = HTML_table.new("view_size_table")
+          view_size_table.start_row!()
+            get_view_size_button = HTML_button.new("get_view_size", "Current View") do |env, args|
+              @lrsd = AttributeDic.spawn($lrsd_name)
+              xres = @lrsd["film->xresolution"]
+              yres = @lrsd["film->yresolution"]
+              
+              xres.value = Sketchup.active_model.active_view.vpwidth
+              yres.value = Sketchup.active_model.active_view.vpheight
+              
+              env.updateSettingValue(@lrsd["film->xresolution"])
+              env.updateSettingValue(@lrsd["film->yresolution"])
+              env.change_aspect_ratio(0.0)
+            end
+            view_size_table.add_element!(get_view_size_button)
+          view_size_table.end_row!()
+        film_collapse.add_element!(view_size_table)
+        
+  output_panel.add_element!(film_collapse)
+  ##################################
+  
+  
+  ########### -- System Settings Panel -- ###########
   system_panel = HTML_block_panel.new("system_settings_panel")
     system_settings_collapse = HTML_block_collapse.new("System_Settings", [], "System Settings")
       system_table = HTML_table.new("system_table")
@@ -322,13 +336,22 @@ def create_html_dialog
         system_table.add_element!(export_file_path_button)
       system_table.end_row!()
     system_settings_collapse.add_element!(system_table)
-
+    
+    accelerator_collapse = HTML_block_collapse.new("Accelerator")
+      accelerator_collapse.add_LuxObject!(@lrsd["accelerator"])
+  
+  
   system_panel.add_element!(system_settings_collapse)
-
-
+  system_panel.add_element!(accelerator_collapse)
+ ###########################################
+ 
+ 
+ ##################################################
   settings_html_main = HTML_block_main.new("SettingsPage")
   settings_html_main.add_element!(presets_panel)
-  settings_html_main.add_element!(settings_panel)
+  settings_html_main.add_element!(camera_environment_panel)
+  settings_html_main.add_element!(output_panel)
+  settings_html_main.add_element!(render_panel)
   settings_html_main.add_element!(system_panel)
   
   open(SU2LUX.file_path("settings.html"), "w") {|out| out.puts settings_html_main.html}
@@ -365,7 +388,7 @@ end
 def find_presets()
   ret_arr = []
   preset_dir = SU2LUX.plugin_dir + "su2lux/presets"
-  Dir.foreach(preset_dir) {|f| ret_arr.push(f) if f != "." and f != ".."}
+  Dir.foreach(preset_dir) {|f| ret_arr.push(f) if f != "." and f != ".." and f.include?(".txt")}
   return ret_arr
 end
 
@@ -379,15 +402,23 @@ def new_preset(name)
     puts "OVERWRITING!!!!!"
     @presets[name].save
   end
+  @lrad["preset"].value = name
+  js_select_preset(name)
+end
+
+def remove_preset(name)
 end
 
 def init_presets()
   preset = Attribute.new("preset")
   @lrad.add_root("preset", preset)
-  if preset.value == "" 
+  @presets = {} #setup a new hash to store preset objects in.
+  new_preset("default")#can be disabled for releases if too slow?
+  @lrad["preset"].value = "default"
+  #if preset.value == "" 
     #only change preset to default if no other one has been previously selected and saved
     preset.value = "default"
-  end
+  #end
 end
 
 def load_presets
@@ -426,7 +457,7 @@ class Preset
       puts "IMPORTING"
       file.each_line do |line|
         if line.chomp != "" and not line.include?('#')
-          puts line.chomp
+          #puts line.chomp
           @lrsd.import_dic_line(line)
         end      
       end

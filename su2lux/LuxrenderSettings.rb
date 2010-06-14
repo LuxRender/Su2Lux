@@ -114,7 +114,7 @@ tonemapkernelselection = LuxSelection.new('tonemapkernelselection', [], 'tonemap
   tonemapkernelselection.add_choice!(linear)
   tonemapkernelselection.add_choice!(contrast)
   tonemapkernelselection.add_choice!(maxwhite)
-  tonemapkernelselection.select!('reinhard')
+  #tonemapkernelselection.select!('reinhard')
 film.add_element!(LuxString.new('tonemapkernel', tonemapkernelselection))
 
 
@@ -131,13 +131,12 @@ sampler_type = LuxSelection.new('sampler_type', [], 'Sampler Type')
 # lowdicrepancy & random #
   pixelsamples = LuxInt.new('pixelsamples', 4)
   pixelsamplerselection = LuxSelection.new('pixelsamplerselection', [], 'Pixel Sampler Type')
+    pixelsamplerselection.create_choice!('vegas')
     pixelsamplerselection.create_choice!('linear')
     pixelsamplerselection.create_choice!('tile')
     pixelsamplerselection.create_choice!('random')
-    pixelsamplerselection.create_choice!('vegas')
     pixelsamplerselection.create_choice!('lowdiscrepancy')
     pixelsamplerselection.create_choice!('hilbert')
-    pixelsamplerselection.select!('vegas')#set as default
   pixelsampler = LuxString.new('pixelsampler', pixelsamplerselection) #very cool!
   sampler_type.create_choice!('lowdiscrepancy', [pixelsamples, pixelsampler])
   sampler_type.create_choice!('random', [pixelsamples.deep_copy(), pixelsampler.deep_copy()])
@@ -153,6 +152,43 @@ sampler.add_element!(sampler_type)
 @lrsd.add_root("sampler", sampler)
 end
 ############################################
+
+
+####### -- PixelSampler -- #############
+def pixelfilter_settings()
+  pixelfilter= LuxObject.new('pixelfilter', [], 'PixelFilter')
+  
+  pixelfilter_type = LuxSelection.new('pixelfilter_type', [], 'PixelFilter')
+    box = LuxChoice.new('box')
+      box.add_child!(LuxFloat.new('xwidth', 0.5))
+      box.add_child!(LuxFloat.new('ywidth', 0.5))
+    triangle = LuxChoice.new('triangle')
+      triangle.add_child!(LuxFloat.new('xwidth', 2.0))
+      triangle.add_child!(LuxFloat.new('ywidth', 2.0))
+    gaussian = LuxChoice.new('gaussian')
+      gaussian.add_child!(LuxFloat.new('xwidth', 2.0))
+      gaussian.add_child!(LuxFloat.new('ywidth', 2.0))
+      gaussian.add_child!(LuxFloat.new('alpha', 2.0))
+    mitchell = LuxChoice.new('mitchell')
+      mitchell.add_child!(LuxFloat.new('xwidth', 2.0))
+      mitchell.add_child!(LuxFloat.new('ywidth', 2.0))
+      mitchell.add_child!(LuxFloat.new('B', 1.0/3.0))
+      mitchell.add_child!(LuxFloat.new('C', 1.0/3))
+    sinc = LuxChoice.new('sinc')
+      sinc.add_child!(LuxFloat.new('xwidth', 4.0))
+      sinc.add_child!(LuxFloat.new('ywidth', 4.0))
+      sinc.add_child!(LuxFloat.new('tau', 4.0))
+    pixelfilter_type.add_choice!(mitchell)
+    pixelfilter_type.add_choice!(box)
+    pixelfilter_type.add_choice!(triangle)
+    pixelfilter_type.add_choice!(gaussian)
+    pixelfilter_type.add_choice!(sinc)
+    #pixelsampler_type.select!('mitchell')#this doesn't work because selections have not yet been initialized
+  
+  pixelfilter.add_element!(pixelfilter_type)
+  @lrsd.add_root("pixelfilter", pixelfilter)
+end
+
 
 
 ########## -- SurfaceIntegrator -- #########
@@ -216,6 +252,7 @@ sampler_settings()
 film_settings()
 camera_settings()
 accelerator_settings()
+pixelfilter_settings()
 ## -- end initialize settings -- ##
 
 

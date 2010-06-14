@@ -90,7 +90,6 @@ class HTML_block_collapse < HTML_block
               html_str << "<tr>"
 
                 #### CHILD HTML ####
-                puts e.html if e.class == LuxString
                 html_str << "\n" + e.html
               #### END TABLE ROW ####
               html_str << "\n"
