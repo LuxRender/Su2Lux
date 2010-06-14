@@ -543,32 +543,32 @@ class LuxSelection
     
     if not @choices.empty?
       for choice in @choices
-        #puts "  choice: #{choice}"
-          #### DIV ####
+      #puts "  choice: #{choice}"
+        #### DIV ####
+        html_str << "\n"
+        html_str << "<div id=\"#{rb_to_js_path(choice.attribute_key)}\" class=\"collapse\">"
+        
+        for child in choice.children
+          #### EMBEDDED CHILD TABLE ####
           html_str << "\n"
-          html_str << "<div id=\"#{rb_to_js_path(choice.attribute_key)}\" class=\"collapse\">"
-          
-          for child in choice.children
-            #### EMBEDDED CHILD TABLE ####
-            html_str << "\n"
-            html_str << "<table>"
-            html_str << "\n"
-            html_str << "<tr>"
-            #puts "    child: #{child.class}"
-            #### PROPERTY ####
-            html_str << "\n"
-            html_str << child.html
-            #### END EMBEDDED CHILD TABLE ####
-            html_str << "\n"
-            html_str << "</tr>"
-            html_str << "\n"
-            html_str << "</table>"
-          end
+          html_str << "<table>"
+          html_str << "\n"
+          html_str << "<tr>"
+          #puts "    child: #{child.class}"
+          #### PROPERTY ####
+          html_str << "\n"
+          html_str << child.html
+          #### END EMBEDDED CHILD TABLE ####
+          html_str << "\n"
+          html_str << "</tr>"
+          html_str << "\n"
+          html_str << "</table>"
         end
         
         #### END DIV ####
         html_str << "\n"
         html_str << "</div>"
+      end
     end
     
     #### END TABLE  COLUMN ####
