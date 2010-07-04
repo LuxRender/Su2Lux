@@ -22,16 +22,17 @@ require "su2lux/LuxrenderAttributeDictionaries.rb"
 
 ######## -- Basic Types -- ############
 class LuxType
-  attr_reader :type_str, :id, :name
+  attr_reader :type_str, :id, :name, :dic
   attr_accessor :parent
-  def initialize(id, value, name=id, parent=nil, &block)
+  def initialize(id, val, name=id, parent=nil, &block)
     @id = id
-    @init_value = value
+    @init_value = val
     @name = name
     @parent = parent
     @block = block
   end
-  def attribute_init(parent) #see LuxNumber for explanation
+  def attribute_init(parent, dic) #see LuxNumber for explanation
+    @dic = dic
     @parent = parent
     self.value = @init_value
   end
@@ -111,16 +112,16 @@ class LuxType
 end #end LuxType
 
 class LuxNumber < LuxType
-  def initialize(id, value, name=id, parent=nil)
-    super(id, value, name, parent)
+  def initialize(id, val, name=id, parent=nil)
+    super(id, val, name, parent)
   end
-  def attribute_init(parent) 
+  def attribute_init(parent, dic) 
     """allows value to be set after parent has been found so 
     that the attribute dictionary key can be complete.
     """
-    super(parent)
+    super(parent, dic)
     if @init_value.is_a? LuxSelection
-      @init_value.attribute_init
+      @init_value.attribute_init(parent, dic)
     end
   end
  def deep_copy()
@@ -130,14 +131,6 @@ class LuxNumber < LuxType
       new_copy = self.class.new(@id,@init_value, @name)
     end
     return new_copy
-  end
-  
-  def value=(v)
-    @lrsd = AttributeDic.spawn($lrsd_name) unless @lrsd
-    #will have to think of a way to make it work for materials as well
-    @lrsd.map_object_value(self, v)
-    #puts @lrsd[self.attribute_key]
-    #puts self.attribute_key
   end
 
   def html
@@ -165,10 +158,10 @@ class LuxInt < LuxNumber
     super(id, value, name, parent)
     @type_str = 'integer'
   end
-  def value
-    @lrsd = AttributeDic.spawn($lrsd_name) #unless @lrsd
-    return @lrsd.str_value(self).to_i
-  end
+  #def value
+  #  @lrsd = AttributeDic.spawn($lrsd_name) #unless @lrsd
+  #  return @lrsd.str_value(self).to_i
+  #end
 end #end LuxInt
 
 class LuxFloat  < LuxNumber
@@ -177,10 +170,10 @@ class LuxFloat  < LuxNumber
     super(id, value, name, parent)
     @type_str = 'float'
   end
-  def value
-    lrsd = AttributeDic.spawn($lrsd_name)
-    return lrsd.str_value(self).to_f
-  end
+  #def value
+  #  lrsd = AttributeDic.spawn($lrsd_name)
+  #  return lrsd.str_value(self).to_f
+  #end
 end #end LuxFloat
 
 class LuxBool < LuxType
@@ -189,11 +182,7 @@ class LuxBool < LuxType
     super(id, value, name, parent)
     @type_str = 'bool'
   end
-  def attribute_init(parent)
-    @parent = parent
-    self.value = @init_value
-  end
-
+  
   def bool?(value)
     if value.to_s == "true" or value.to_s == "false"
       return true
@@ -203,16 +192,14 @@ class LuxBool < LuxType
   end
   def value=(v)
     if bool?(v)
-      @lrsd = AttributeDic.spawn($lrsd_name) unless @lrsd
-      @lrsd.map_object_value(self, v)
+      super(v)
     else
       raise "Value not a boolean"
     end
   end
   
   def value
-    @lrsd = AttributeDic.spawn($lrsd_name) unless @lrsd
-    value = @lrsd.str_value(self) #keeps yielding nil! singleton not working
+    value = @dic.str_value(self) #keeps yielding nil! singleton not working
     if value == "true"
       return true
     end
@@ -294,10 +281,11 @@ class LuxString < LuxType
     super(id, value, name, parent)
     @type_str = 'string'
   end
-  def attribute_init(p)
-    @parent = p
+  def attribute_init(parent, dic)
+    @parent = parent
+    @dic = dic
     if @init_value.class == LuxSelection
-      @init_value.attribute_init(self)
+      @init_value.attribute_init(self, dic)
     end
     self.value = @init_value
     if self.value.respond_to?("attribute_key")
@@ -410,7 +398,7 @@ class LuxObject < LuxContainer
     #called by the parent at the top of the pyramid.
     super(parent, dic)
     for element in @elements
-      element.attribute_init(self)
+      element.attribute_init(self, dic)
     end
   end
   def value
@@ -464,13 +452,14 @@ class LuxSelection < LuxContainer
     @init_selection = choices[default_choice]
     super(id, @init_selection, name, parent)
   end
-  def attribute_init(p)
+  def attribute_init(parent, dic)
     #only happens when the selection's parent calles attribute_init (which is in turn
     #called by the parent at the top of the pyramid.
+    @dic = dic
     @lrsd = AttributeDic.spawn($lrsd_name) unless @lrsd
-    @parent = p
+    @parent = parent
     for choice in @choices
-      choice.attribute_init(self)
+      choice.attribute_init(self, dic)
     end
     self.selection = @init_selection
     #puts "self: #{@lrsd.obj_value(self.attribute_key).class} selection: #{@lrsd.obj_value(@init_selection.attribute_key).class}"
@@ -483,8 +472,30 @@ class LuxSelection < LuxContainer
     return new_copy
   end
   def selection=(choice)
-    @lrsd = AttributeDic.spawn($lrsd_name) unless @lrsd
-    @lrsd.map_object_value(self, choice)
+    @lrsd = AttributeDic.spawn($lrsd_name)
+    @lrad = AttributeDic.spawn($lrad_name)
+    
+    p = @parent
+    c = 1
+    while p
+      puts "parent's " * (c - 1) + "parent #{p.class} dic:"
+      puts p.dic.id
+      c+=1
+      p = p.parent
+    end
+    
+    puts "lrsd:"
+    puts @lrsd.id
+    puts "lrad:"
+    puts @lrad.id
+    
+    #raise "comp"
+    
+    if not @dic.nil?
+      @dic.map_object_value(self, choice)
+    else
+      @init_selection = choice
+    end
   end
   def selection
     @lrsd = AttributeDic.spawn($lrsd_name) unless @lrsd
@@ -641,13 +652,14 @@ class LuxChoice < LuxContainer
     end
     @children = children #array
   end
-  def attribute_init(p)
+  def attribute_init(parent, dic)
     #only happens when the choice's parent calles attribute_init (which is in turn
     #called by the parent at the top of the pyramid.
     @lrsd = AttributeDic.spawn($lrsd_name) unless @lrsd
-    @parent = p
+    @dic = dic
+    @parent = parent
     for child in @children
-      child.attribute_init(self)
+      child.attribute_init(self, dic)
     end
     @lrsd.add_obj_reference(self)
   end

@@ -74,7 +74,7 @@ class AttributeDic  #a binding between
     #@@attrdics = {} unless @@attrdics
     return @@attrdic unless name #very important, settings will always
     #use the last accessed dictionary.
-    if not @@attrdics[name]
+    if not @@attrdics.include?(name)
       @@attrdics[name] = new(name)
     end
     @@attrdic = @@attrdics[name]
@@ -127,7 +127,7 @@ class AttributeDic  #a binding between
   end
   
   def add_root(key, obj)
-    obj.attribute_init(nil, @@attrdic)
+    obj.attribute_init(nil, self)
     @objtree[key] = obj
   end
   
@@ -198,7 +198,7 @@ class AttributeDic  #a binding between
     if key.respond_to?("attribute_key") and key.respond_to?("value")
       return @objdic[key.attribute_key].value
     else
-      raise "input is not a valid object"
+      raise "input is not a valid object: #{key}"
     end
   end
   def get_obj_from_obj(obj)
