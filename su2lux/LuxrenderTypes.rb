@@ -24,14 +24,32 @@ require "su2lux/LuxrenderAttributeDictionaries.rb"
 class LuxType
   attr_reader :type_str, :id, :name
   attr_accessor :parent
-  def initialize(id, name=id, parent=nil, &block)
+  def initialize(id, value, name=id, parent=nil, &block)
     @id = id
-    @parent = parent
+    @init_value = value
     @name = name
+    @parent = parent
     @block = block
   end
   def attribute_init(parent) #see LuxNumber for explanation
     @parent = parent
+    self.value = @init_value
+  end
+  
+  def value=(val)
+    if not @dic.nil?
+      @dic.map_object_value(self, val)
+    else
+      @init_value = val
+    end
+  end
+  def value()
+    if not @dic.nil?
+      val = @dic.str_value(self)
+      return cast(val, @type_str)
+    else
+      return @init_value
+    end
   end
   
   def attribute_key
@@ -55,10 +73,6 @@ class LuxType
   end
   def has_call_block?()
     return !@block.nil?
-  end
-  def value=(v)
-    super(v)
-    #self.call_block()
   end
   
   def export#todo: add another argument with tab level or use a singleton
@@ -98,18 +112,16 @@ end #end LuxType
 
 class LuxNumber < LuxType
   def initialize(id, value, name=id, parent=nil)
-    super(id, name, parent)
-    @init_value = value
+    super(id, value, name, parent)
   end
   def attribute_init(parent) 
     """allows value to be set after parent has been found so 
     that the attribute dictionary key can be complete.
     """
-    @parent = parent
+    super(parent)
     if @init_value.is_a? LuxSelection
       @init_value.attribute_init
     end
-    self.value = @init_value
   end
  def deep_copy()
     if @init_value.class == LuxSelection
@@ -174,9 +186,7 @@ end #end LuxFloat
 class LuxBool < LuxType
   attr_accessor :value
   def initialize(id, value=true, name=id, parent=nil)
-    value = value #todo: add check for boolean
-    super(id, name, parent)
-    @init_value = value
+    super(id, value, name, parent)
     @type_str = 'bool'
   end
   def attribute_init(parent)
@@ -281,8 +291,7 @@ end #end LuxColor
 class LuxString < LuxType
   attr_accessor :value
   def initialize(id, value="", name=id, parent=nil)
-    super(id, name, parent)
-    @init_value = value
+    super(id, value, name, parent)
     @type_str = 'string'
   end
   def attribute_init(p)
@@ -365,12 +374,31 @@ class LuxString < LuxType
   end
 end #end LuxString
 
+
+
+
+
+
+
+####################################################################################
+####################################################################################
+####################################################################################
+####################################################################################
 ###### -- groupings -- ######
+class LuxContainer < LuxType
+  def attribute_init(parent)
+    @parent = parent
+    @dic = AttributeDic.spawn($lrad_name)
+    self.value = @init_value#sure to be after dictionary has been assigned
+  end
+end
+
+
+
 class LuxObject
   attr_reader :id, :elements, :name
   attr_accessor :parent
   def initialize(id, elements=[], name=id, parent=nil)
-    puts name
     @id = id
     @name = name
     if elements.is_a?(Array) == false #allow simple creation of choice with one child
@@ -427,17 +455,16 @@ end #end LuxObject
 ######## -- Settings/export Secific -- #########
 # generate types with ui updating properties?
 
-class LuxSelection
+
+class LuxSelection < LuxContainer
   #usefull for value in lightgroup and lightsource and many others
   attr_reader :id, :choices, :name, :value
   attr_accessor :selection, :children, :parent
   def initialize(id, choices=[], name=id, default_choice=0, parent=nil)
-    @id = id
-    @name = name
     @choices = choices
     @default_choice = default_choice
     @init_selection = choices[default_choice]
-    @parent = parent
+    super(id, @init_selection, name, parent)
   end
   def attribute_init(p)
     #only happens when the selection's parent calles attribute_init (which is in turn
@@ -449,18 +476,6 @@ class LuxSelection
     end
     self.selection = @init_selection
     #puts "self: #{@lrsd.obj_value(self.attribute_key).class} selection: #{@lrsd.obj_value(@init_selection.attribute_key).class}"
-  end
-  def attribute_key
-    #todo: return selection id as value for attribute_key
-    if @parent
-      if @parent.respond_to?("attribute_key")
-         return @parent.attribute_key + "->" + @id.to_s
-      else
-        return @parent.id.to_s + "->" + @id.to_s
-      end
-    else
-      return @id
-    end
   end
   def deep_copy()
     new_copy = LuxSelection.new(@id, choices=[], @name, @default_choice)
@@ -618,17 +633,15 @@ class LuxSelection
   end
 end #end LuxSelection
 
-class LuxChoice
+class LuxChoice < LuxContainer
   attr_reader :id, :name
   attr_accessor :children, :parent
   def initialize(id, children=[], name=id, parent=nil)
-    @id = id
-    @name = name
+    super(id, nil, name, parent)
     if children.is_a?(Array) == false #allow simple creation of choice with one child
       children = [children]
     end
     @children = children #array
-    @parent = parent
   end
   def attribute_init(p)
     #only happens when the choice's parent calles attribute_init (which is in turn
@@ -639,17 +652,6 @@ class LuxChoice
       child.attribute_init(self)
     end
     @lrsd.add_obj_reference(self)
-  end
-  def attribute_key
-    if @parent
-      if @parent.respond_to?("attribute_key")
-         return @parent.attribute_key + "->" + @id.to_s
-      else
-        return @parent.id.to_s + "->" + @id.to_s
-      end
-    else
-      return @id
-    end
   end
   def deep_copy()
     new_copy = LuxChoice.new(@id, [], @name)
@@ -701,37 +703,11 @@ class LuxChoice
   end
 end #end LuxChoice
 
-class Attribute
+class Attribute < LuxContainer
   attr_reader :type_str, :id, :name
   def initialize(id, type_str='string', val="", name=id)
-    @id = id
-    self.value = val
-    @name = name
+    super(id, val, name, parent)
     @type_str = type_str
-    @parent = nil
-  end
-  def attribute_init(parent) #see LuxNumber for explanation
-    @parent = parent
-  end
-  def attribute_key
-    if @parent
-      if @parent.respond_to?("attribute_key")
-         return @parent.attribute_key + "->" + @id.to_s
-      else
-        return @parent.id.to_s + "->" + @id.to_s
-      end
-    else
-      return @id
-    end
-  end
-  def value=(val)
-    @lrad = AttributeDic.spawn($lrad_name) unless @lrad
-    @lrad.map_object_value(self, val)
-  end
-  def value
-    @lrad = AttributeDic.spawn($lrad_name) unless @lrad
-    val = @lrad.str_value(self)
-    return cast(val, @type_str)
   end
   def html_update_cmds(key=self.attribute_key, val=self.value)#will probably turn into fully fledged thing (unless other design idea pops up!)
     if @type_str == 'rb_file_path'
