@@ -238,8 +238,9 @@ class HTML_button
     @lrad = AttributeDic.spawn($lrad_name) unless @lrad
     @lrad.add_root(@id, self)
   end
-  def attribute_init(parent)
+  def attribute_init(parent, dic)
     self.value = @id
+    @dic = dic
   end
   def attribute_key
     return @id

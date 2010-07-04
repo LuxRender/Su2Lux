@@ -91,7 +91,7 @@ class LuxType
   
   def html_update_cmds(key=self.attribute_key, val=self.value)#will probably turn into fully fledged thing (unless other design idea pops up!)
     if val.is_a? LuxSelection
-      puts self.parent.attribute_key
+      #puts self.parent.attribute_key
       key = val.attribute_key
       val = val.value.attribute_key
       val = "'#{val}'"
@@ -386,31 +386,29 @@ end #end LuxString
 ####################################################################################
 ###### -- groupings -- ######
 class LuxContainer < LuxType
-  def attribute_init(parent)
+  def attribute_init(parent, dic)
     @parent = parent
-    @dic = AttributeDic.spawn($lrad_name)
+    @dic = dic
     self.value = @init_value#sure to be after dictionary has been assigned
   end
 end
 
 
 
-class LuxObject
+class LuxObject < LuxContainer
   attr_reader :id, :elements, :name
   attr_accessor :parent
   def initialize(id, elements=[], name=id, parent=nil)
-    @id = id
-    @name = name
+    super(id, nil, name, parent)
     if elements.is_a?(Array) == false #allow simple creation of choice with one child
       elements = [elements]
     end
     @elements = elements #array of elements
-    @parent = parent
   end
-  def attribute_init(p)
+  def attribute_init(parent, dic)
     #only happens when the object's parent calles attribute_init (which is in turn
     #called by the parent at the top of the pyramid.
-    @parent = p
+    super(parent, dic)
     for element in @elements
       element.attribute_init(self)
     end

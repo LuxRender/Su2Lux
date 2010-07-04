@@ -127,7 +127,7 @@ class AttributeDic  #a binding between
   end
   
   def add_root(key, obj)
-    obj.attribute_init(nil)
+    obj.attribute_init(nil, @@attrdic)
     @objtree[key] = obj
   end
   
