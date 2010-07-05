@@ -1,5 +1,5 @@
-$lrsd_name = 'test_settings'
-$lrad_name = 'test_attributes'
+$lrsd_name = 'luxrender_settings'
+$lrad_name = 'luxrender_attributes'
 
 
 def cast(obj, newtype)

@@ -33,10 +33,11 @@ function call_function(id)
 
 function init_collapse()
 {
-	$("#settings_panel .select_collapse").each(function(){
-				nodes = $(this).nextAll("div.collapse").hide();
-				nodes = $(this).nextAll("#" + this.value).show();
-	}); //show all collapsed boxes
+	$(".select_collapse").each(function(){
+				
+				$(this).nextAll("div.collapse").hide();
+				$(this).nextAll("#" + this.value).show();					
+	}); //show all collapsed boxes - not working at the moment
 }
 
 function js_select_preset(name)

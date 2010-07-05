@@ -158,10 +158,9 @@ class LuxInt < LuxNumber
     super(id, value, name, parent)
     @type_str = 'integer'
   end
-  #def value
-  #  @lrsd = AttributeDic.spawn($lrsd_name) #unless @lrsd
-  #  return @lrsd.str_value(self).to_i
-  #end
+  def value
+    return @dic.str_value(self).to_i
+  end
 end #end LuxInt
 
 class LuxFloat  < LuxNumber
@@ -170,10 +169,9 @@ class LuxFloat  < LuxNumber
     super(id, value, name, parent)
     @type_str = 'float'
   end
-  #def value
-  #  lrsd = AttributeDic.spawn($lrsd_name)
-  #  return lrsd.str_value(self).to_f
-  #end
+  def value
+    return @dic.str_value(self).to_f
+  end
 end #end LuxFloat
 
 class LuxBool < LuxType
@@ -302,19 +300,17 @@ class LuxString < LuxType
   end
   
   def value=(v)
-    @lrsd = AttributeDic.spawn($lrsd_name) unless @lrsd
     #will have to think of a way to make it work for materials as well
-    @lrsd.map_object_value(self, v)
+    @dic.map_object_value(self, v)
     #puts @lrsd[self.attribute_key]
     #puts self.attribute_key
   end
   
   def value
-    @lrsd = AttributeDic.spawn($lrsd_name) unless @lrsd
     if @init_value.class == LuxSelection
-      return @lrsd.obj_value(@lrsd.str_value(self))
+      return @dic.obj_value(@dic.str_value(self))
     else
-      return @lrsd.str_value(self).to_s
+      return @dic.str_value(self).to_s
     end
   end
 
@@ -456,13 +452,11 @@ class LuxSelection < LuxContainer
     #only happens when the selection's parent calles attribute_init (which is in turn
     #called by the parent at the top of the pyramid.
     @dic = dic
-    @lrsd = AttributeDic.spawn($lrsd_name) unless @lrsd
     @parent = parent
     for choice in @choices
       choice.attribute_init(self, dic)
     end
     self.selection = @init_selection
-    #puts "self: #{@lrsd.obj_value(self.attribute_key).class} selection: #{@lrsd.obj_value(@init_selection.attribute_key).class}"
   end
   def deep_copy()
     new_copy = LuxSelection.new(@id, choices=[], @name, @default_choice)
@@ -472,22 +466,22 @@ class LuxSelection < LuxContainer
     return new_copy
   end
   def selection=(choice)
-    @lrsd = AttributeDic.spawn($lrsd_name)
-    @lrad = AttributeDic.spawn($lrad_name)
+    #~ @lrsd = AttributeDic.spawn($lrsd_name)
+    #~ @lrad = AttributeDic.spawn($lrad_name)
     
-    p = @parent
-    c = 1
-    while p
-      puts "parent's " * (c - 1) + "parent #{p.class} dic:"
-      puts p.dic.id
-      c+=1
-      p = p.parent
-    end
+    #~ p = @parent
+    #~ c = 1
+    #~ while p
+      #~ puts "parent's " * (c - 1) + "parent #{p.class} dic:"
+      #~ puts p.dic.id
+      #~ c+=1
+      #~ p = p.parent
+    #~ end
     
-    puts "lrsd:"
-    puts @lrsd.id
-    puts "lrad:"
-    puts @lrad.id
+    #~ puts "lrsd:"
+    #~ puts @lrsd.id
+    #~ puts "lrad:"
+    #~ puts @lrad.id
     
     #raise "comp"
     
@@ -498,11 +492,7 @@ class LuxSelection < LuxContainer
     end
   end
   def selection
-    @lrsd = AttributeDic.spawn($lrsd_name) unless @lrsd
-    if self.id == "accelerator_type"
-      #puts "Selection: #{@lrsd.str_value(self).nil? ? "nil" : @lrsd.str_value(self)}"
-    end
-    return @lrsd.obj_value(@lrsd.str_value(self))
+    return @dic.obj_value(@dic.str_value(self))
   end
   def value=(v)#expose a common interface for recursive stuff
     self.selection = v
@@ -655,13 +645,12 @@ class LuxChoice < LuxContainer
   def attribute_init(parent, dic)
     #only happens when the choice's parent calles attribute_init (which is in turn
     #called by the parent at the top of the pyramid.
-    @lrsd = AttributeDic.spawn($lrsd_name) unless @lrsd
     @dic = dic
     @parent = parent
     for child in @children
       child.attribute_init(self, dic)
     end
-    @lrsd.add_obj_reference(self)
+    @dic.add_obj_reference(self)
   end
   def deep_copy()
     new_copy = LuxChoice.new(@id, [], @name)
