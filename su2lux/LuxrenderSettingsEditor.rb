@@ -31,7 +31,8 @@ def initialize
 	@settings_dialog.max_width = 520
 	setting_html_path = Sketchup.find_support_file "settings.html" ,"Plugins/su2lux"
 	@settings_dialog.set_file(setting_html_path)
-  
+	@settings_dialog.set_on_close { @presets[@lrad["preset"].value].save }
+ 
   self.init_presets()
   
 	@settings_dialog.add_action_callback("change_setting") {|dialog, params|
