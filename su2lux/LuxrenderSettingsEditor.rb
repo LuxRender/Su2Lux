@@ -58,7 +58,7 @@ def initialize
           obj.call_block(self)
         end
       end
-      puts value
+      #puts value
 	} #end action callback setting_change
 	
   @settings_dialog.add_action_callback("call_function"){ |dialog, params|
@@ -121,8 +121,8 @@ def visible?
   @settings_dialog.visible?
 end
 
-def updatePresets()
-  self.load_presets() #load presets from files
+def updatePresets() #should be renamed or stuff changed to show_presets
+  self.show_presets() #lshows presets already loaded from files
   puts "UPDTING: " + @lrad["preset"].value
   puts "updating"
   self.js_select_preset(@lrad["preset"].value) #set the current preset
@@ -419,16 +419,23 @@ def init_presets()
     #only change preset to default if no other one has been previously selected and saved
     preset.value = "default"
   #end
+  self.load_presets()
 end
 
-def load_presets
+def show_presets()
+  #puts presets loaded from files into the ui
+  @presets.each_key do |name|
+    @settings_dialog.execute_script("set_preset_selector('#{name}')")#add the preset to the selector in the ui
+  end
+end
+
+def load_presets()
   #preset = @lrad["preset"]
   preset_names = find_presets() #find presets in the preset folder
   @presets = {} #setup a new hash to store preset objects in.
   for name in preset_names
     puts "found: " + name
     name = name.gsub(/[.]txt/, "") #remove .txt from the end
-    @settings_dialog.execute_script("set_preset_selector('#{name}')") #add the preset to the selector in the ui
     puts "PRESET NAME: " + name
     pres = Preset.new(name)
     @presets[name] = pres
