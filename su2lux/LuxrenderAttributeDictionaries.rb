@@ -47,7 +47,7 @@ class SuAttributeDic
     @attribute_dictionary.each {|key, val| yield key, val}
   end
   def include_key?(find_key)
-    puts "FIND KEY: #{find_key}"
+    #puts "FIND KEY: #{find_key}"
     
     self.each do |key, val|
       if find_key == key
@@ -118,8 +118,8 @@ class AttributeDic  #a binding between
         puts "remapping: #{key}"
         @sustrdic[key] = value
       else
-        puts "FOUND"
-        puts key
+        #puts "FOUND"
+        #puts key
       end
       
     end

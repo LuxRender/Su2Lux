@@ -123,9 +123,9 @@ end
 
 def updatePresets() #should be renamed or stuff changed to show_presets
   self.show_presets() #lshows presets already loaded from files
-  puts "UPDTING: " + @lrad["preset"].value
+  puts "UPDTING: " + self.get_current_preset()
   puts "updating"
-  self.js_select_preset(@lrad["preset"].value) #set the current preset
+  self.js_select_preset(self.get_current_preset()) #set the current preset
 end
 
 #set parameters in inputs of settings.html
@@ -369,13 +369,6 @@ def js_select_preset(name)
   end
 end
 
-def load_preset_file(name)
-end
-
-def each_preset_file
-  return []
-end
-
 def su_select_preset(name)
    if @presets.include?(name)
     @lrad["preset"].value = name
@@ -384,8 +377,7 @@ def su_select_preset(name)
   end
 end
 
-
-def find_presets()
+def find_preset_files()
   ret_arr = []
   preset_dir = SU2LUX.plugin_dir + "su2lux/presets"
   Dir.foreach(preset_dir) {|f| ret_arr.push(f) if f != "." and f != ".." and f.include?(".txt")}
@@ -406,32 +398,21 @@ def new_preset(name)
   js_select_preset(name)
 end
 
+def set_current_preset(name)
+  #self.su_select_preset(name)
+  @lrad["preset"].value = name
+end
+
+def get_current_preset()
+  return @lrad["preset"].value
+end
+
+
 def remove_preset(name)
 end
 
-def init_presets()
-  preset = Attribute.new("preset")
-  @lrad.add_root("preset", preset)
-  @presets = {} #setup a new hash to store preset objects in.
-  new_preset("default")#can be disabled for releases if too slow?
-  @lrad["preset"].value = "default"
-  #if preset.value == "" 
-    #only change preset to default if no other one has been previously selected and saved
-    preset.value = "default"
-  #end
-  self.load_presets()
-end
-
-def show_presets()
-  #puts presets loaded from files into the ui
-  @presets.each_key do |name|
-    @settings_dialog.execute_script("set_preset_selector('#{name}')")#add the preset to the selector in the ui
-  end
-end
-
-def load_presets()
-  #preset = @lrad["preset"]
-  preset_names = find_presets() #find presets in the preset folder
+def load_preset_dic()
+  preset_names = find_preset_files() 
   @presets = {} #setup a new hash to store preset objects in.
   for name in preset_names
     puts "found: " + name
@@ -440,8 +421,42 @@ def load_presets()
     pres = Preset.new(name)
     @presets[name] = pres
   end
-  puts "PRESET.VALUE: " + @lrad["preset"].value
+end
+
+
+def load_current_preset()
+  #preset = @lrad["preset"]
+  #find presets in the preset folder
+  #puts "Loading Current Preset: " + @lrad["preset"].value
   @presets[@lrad["preset"].value].load
+end
+
+def init_presets()
+  preset = Attribute.new("preset")
+  @lrad.add_root("preset", preset)
+  self.load_preset_dic()
+  if @lrad["preset"].value != "" #ensure that the selected preset is reloaded properly
+    puts "FOUND PRESET SETTING: "
+    puts @lrad["preset"].value
+    if not @presets.include?(@lrad["preset"].value)
+      puts "Preset: #{@lrad["preset"].value} not found in file"
+      self.set_current_preset("default")
+    end
+  else
+    self.set_current_preset("default")
+    self.load_current_preset()
+  end
+end
+
+
+def show_presets()
+  #puts presets loaded from files into the ui
+  @presets.each_key do |name|
+    @settings_dialog.execute_script("set_preset_selector('#{name}')")#add the preset to the selector in the ui
+  end
+end
+
+def load_default_preset()
 end
 
 
@@ -451,6 +466,7 @@ class Preset
   def initialize(name)
     @file_name = SU2LUX.plugin_dir + "su2lux/presets/" + name.to_s + ".txt"
     @lrsd = AttributeDic.spawn($lrsd_name)
+    @loaded = false
   end
   def save
     File.open(@file_name, "w") do |file|
@@ -460,6 +476,8 @@ class Preset
     puts "SAVED!"
   end
   def load
+    @loaded = true
+    puts "LOADING PRESET: #{@file_name}"
     File.open(@file_name, "r") do |file|
       puts "IMPORTING"
       file.each_line do |line|
@@ -469,5 +487,8 @@ class Preset
         end      
       end
     end
+  end
+  def loaded?
+    return @loaded
   end
 end
