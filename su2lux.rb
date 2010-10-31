@@ -549,9 +549,9 @@ class SU2LUX_app_observer < Sketchup::AppObserver
     AttributeDic::reload_all()
     puts "RELOADED ALL DICS"
     SU2LUX.reset_editor("settings")
-    #@settings_editor = SU2LUX.get_editor("settings")
-    #@settings_editor.updateAllSettings()
-    #@settings_editor.updatePresets()
+    @settings_editor = SU2LUX.get_editor("settings")
+    @settings_editor.updateAllSettings()
+    @settings_editor.updatePresets()
     puts "RESET SETTINGS EDITOR"
 		#model.active_view.add_observer(SU2LUX_view_observer.new)
 		
@@ -568,6 +568,9 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 
 	def onOpenModel(model)
     AttributeDic::reload_all()
+    @settings_editor = SU2LUX.get_editor("settings")
+    @settings_editor.updateAllSettings()
+    @settings_editor.updatePresets()
     puts "RELOADING ALL DICS"
     #Sketchup.add_observer(SU2LUX_model_observer.new)
 		#model.active_view.add_observer(SU2LUX_view_observer.new)
