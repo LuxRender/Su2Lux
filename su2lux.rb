@@ -489,6 +489,13 @@ def SU2LUX.get_editor(type)
 	return editor
 end
 
+def SU2LUX.reset_editor(type)
+  case type
+		when "settings"
+      @settings_editor=LuxrenderSettingsEditor.new
+	end
+end
+
 end #end module SU2LUX
 
 
@@ -505,7 +512,65 @@ def slowdown(latency, editor)
   end
 end
 
+
+if( not file_loaded?(__FILE__) )
+	SU2LUX.initialize_variables
+
+	load File.join("su2lux","LuxrenderSettings.rb")
+	load File.join("su2lux","LuxrenderSettingsEditor.rb")
+	load File.join("su2lux","LuxrenderMaterial.rb")
+	load File.join("su2lux","LuxrenderMaterialEditor.rb")
+	load File.join("su2lux","MeshCollector.rb")
+	load File.join("su2lux","LuxrenderExport.rb")
+	load File.join("su2lux", "LuxrenderToolbar.rb")
+	load File.join("su2lux", "LuxrenderPrimatives.rb")
   
+  create_toolbar()
+	end
+
+class SU2LUX_model_observer < Sketchup::ModelObserver
+  def onTransactionRedo(model)
+    settings_editor = SU2LUX.get_editor("settings")
+    if settings_editor.visible?
+      settings_editor.updateAllSettings()
+    end
+  end
+  
+  def onTransactionUndo(model)
+    settings_editor = SU2LUX.get_editor("settings")
+    if settings_editor.visible?
+      settings_editor.updateAllSettings()
+    end
+  end
+end
+
+class SU2LUX_app_observer < Sketchup::AppObserver
+	def onNewModel(model)
+    AttributeDic::reload_all()
+    puts "RELOADED ALL DICS"
+    SU2LUX.reset_editor("settings")
+    puts "RESET SETTINGS EDITOR"
+		#model.active_view.add_observer(SU2LUX_view_observer.new)
+		
+		#@lrs.xresolution = Sketchup.active_model.active_view.vpwidth
+		#@lrs.yresolution = Sketchup.active_model.active_view.vpheight
+		#settings_editor = SU2LUX.get_editor("settings")
+		# @lrs.camera_scale = nil
+		#if settings_editor
+		#	#settings_editor.setValue("xresolution", @lrs.xresolution)
+		#	#settings_editor.setValue("yresolution", @lrs.yresolution)
+		#	# settings_editor.setValue("camera_scale", @lrs.camera_scale)
+		#end
+	end
+
+	def onOpenModel(model)
+    AttributeDic::reload_all()
+    puts "RELOADING ALL DICS"
+    #Sketchup.add_observer(SU2LUX_model_observer.new)
+		#model.active_view.add_observer(SU2LUX_view_observer.new)
+	end
+end
+
 class SU2LUX_view_observer < Sketchup::ViewObserver
 include SU2LUX
 def initialize
@@ -539,63 +604,12 @@ def onViewChanged(view)
 end
 end
 
-class SU2LUX_model_observer < Sketchup::ModelObserver
-  def onTransactionRedo(model)
-    settings_editor = SU2LUX.get_editor("settings")
-    if settings_editor.visible?
-      settings_editor.updateAllSettings()
-    end
-  end
-  
-  def onTransactionUndo(model)
-    settings_editor = SU2LUX.get_editor("settings")
-    if settings_editor.visible?
-      settings_editor.updateAllSettings()
-    end
-  end
-end
-
-
-class SU2LUX_app_observer < Sketchup::AppObserver
-	def onNewModel(model)
-		#model.active_view.add_observer(SU2LUX_view_observer.new)
-		
-		#@lrs.xresolution = Sketchup.active_model.active_view.vpwidth
-		#@lrs.yresolution = Sketchup.active_model.active_view.vpheight
-		#settings_editor = SU2LUX.get_editor("settings")
-		# @lrs.camera_scale = nil
-		if settings_editor
-			#settings_editor.setValue("xresolution", @lrs.xresolution)
-			#settings_editor.setValue("yresolution", @lrs.yresolution)
-			# settings_editor.setValue("camera_scale", @lrs.camera_scale)
-		end
-	end
-
-	def onOpenModel(model)
-    #Sketchup.add_observer(SU2LUX_model_observer.new)
-		#model.active_view.add_observer(SU2LUX_view_observer.new)
-	end
-end
-
 if( not file_loaded?(__FILE__) )
-	SU2LUX.initialize_variables
-
-	load File.join("su2lux","LuxrenderSettings.rb")
-	load File.join("su2lux","LuxrenderSettingsEditor.rb")
-	load File.join("su2lux","LuxrenderMaterial.rb")
-	load File.join("su2lux","LuxrenderMaterialEditor.rb")
-	load File.join("su2lux","MeshCollector.rb")
-	load File.join("su2lux","LuxrenderExport.rb")
-	load File.join("su2lux", "LuxrenderToolbar.rb")
-	load File.join("su2lux", "LuxrenderPrimatives.rb")
-  
-  create_toolbar()
-  
-	#observers
-	Sketchup.add_observer(SU2LUX_app_observer.new)
+  Sketchup.add_observer(SU2LUX_app_observer.new)
   Sketchup.active_model.add_observer(SU2LUX_model_observer.new)
-	#Sketchup.active_model.active_view.add_observer(SU2LUX_view_observer.new)
+  #Sketchup.active_model.active_view.add_observer(SU2LUX_view_observer.new)
 end
+
 
 
 file_loaded(__FILE__)

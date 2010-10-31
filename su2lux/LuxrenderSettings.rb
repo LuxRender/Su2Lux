@@ -33,7 +33,6 @@ require "su2lux/LuxrenderAttributeDictionaries.rb"
 ########## -- SU2LUX Attributes -- ###########
 export_file_path = Attribute.new('export_file_path', 'rb_file_path', '')
 @lrad.add_root("export_file_path", export_file_path)
-
 ########## -- Camera Settings -- ###########
 def camera_settings()
 camera = LuxObject.new('camera', [], 'Camera')#name, because exporting requires capitals
@@ -322,7 +321,7 @@ accelerator_settings()
 pixelfilter_settings()
 ## -- end initialize settings -- ##
 
-
+  
 #@lrsd["camera"]["camera_type"].select!("environment")
 #@lrsd["sampler"]["sampler_type"]["random"]["pixelsampler"].value.select!("vegas")
 
@@ -334,19 +333,6 @@ pixelfilter_settings()
 #puts "Somethings" + @lrsd["accelerator"]["accelerator_type"]["tabreckdtree"].attribute_key
 
 #it should be very easy to set up and save presets using this method.
-def explore(obj)
-  if obj.respond_to?("each")
-    obj.each do |element|
-      if element.respond_to?("attribute_key")
-        if  element.respond_to?("value")
-          puts element.attribute_key + " = " + element.value.to_s
-        end
-        explore(element)
-      end
-    end
-  end
-  return
-end
 
 #File.open("test.lxs", "w") do |out|
 #  @lrsd.each_root do |p|

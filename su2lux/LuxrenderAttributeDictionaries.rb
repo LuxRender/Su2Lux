@@ -15,6 +15,20 @@ def cast(obj, newtype)
   end
 end
 
+def explore(obj)
+  if obj.respond_to?("each")
+    obj.each do |element|
+      if element.respond_to?("attribute_key")
+        if  element.respond_to?("value")
+          puts element.attribute_key + " = " + element.value.to_s
+        end
+        explore(element)
+      end
+    end
+  end
+  return
+end
+
 class SuAttributeDic
   def initialize(name)
     model = Sketchup.active_model
@@ -33,6 +47,8 @@ class SuAttributeDic
     @attribute_dictionary.each {|key, val| yield key, val}
   end
   def include_key?(find_key)
+    puts "FIND KEY: #{find_key}"
+    
     self.each do |key, val|
       if find_key == key
         return true
@@ -52,7 +68,18 @@ class AttributeDic  #a binding between
   private_class_method :new #stuff to manage different dictionaries 
   @@attrdic = nil
   @@attrdics = {}
+  @@recreate_blocks = []
   attr_accessor :dic
+  
+  def AttributeDic::add_recreate_block(&block)
+    @@recreate_blocks.push(block)
+  end
+  
+  def AttributeDic::recreate_all() #only to be called on an empty attribute dic
+    for block in @@recreate_blocks
+      block.call()
+    end
+  end
   
   def AttributeDic::is_path?(path)
     if path.is_a? String
@@ -68,6 +95,34 @@ class AttributeDic  #a binding between
     @sustrdic = SuAttributeDic.new(name)
     @objdic = {} #references to objects
     @objtree = {} #object tree for tree construction
+    @name = name #for reload_sustrdic()
+  end
+  
+  def reload_sustrdic()
+    @sustrdic  = SuAttributeDic.new(@name)
+  end
+  
+  
+  def AttributeDic::reload_all()
+    @@attrdics.each do |key,  val| 
+      val.reload_sustrdic()
+      val.remap_object_values()
+    end
+  end
+  
+  def remap_object_values()
+    #key = obj.attribute_key
+    #@strdic[key] = value.to_s
+    @strdic.each do |key, value|
+      if not @sustrdic[key]
+        puts "remapping: #{key}"
+        @sustrdic[key] = value
+      else
+        puts "FOUND"
+        puts key
+      end
+      
+    end
   end
   
   def AttributeDic::spawn(name=nil)
@@ -101,6 +156,7 @@ class AttributeDic  #a binding between
   end
   
   def map_object_value(obj, value)
+    puts "mapping object value"
     if self.compat_object(obj)
       key = obj.attribute_key
       @strdic[key] = value.to_s
