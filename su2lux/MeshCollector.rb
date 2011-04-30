@@ -142,7 +142,7 @@ class MeshCollector
 				@model_textures[mat_name]=[0,e,mat_dir,handle,tname,mat] if @model_textures[mat_name]==nil
 				return [mat_name,uvHelp,mat_dir]
 			else
-				distorted=texture_distorted?(e,mat,mat_dir) if false
+				distorted=texture_distorted?(e,mat,mat_dir)# if false
 				txcount=tw.count
 				handle = tw.load(e,mat_dir)
 				tname=get_texture_name(mat_name,mat)
@@ -212,21 +212,38 @@ class MeshCollector
 	#
 	##
 	def texture_distorted?(e,mat,mat_dir)
-
-		distorted=false
-		temp_tw=Sketchup.create_texture_writer
-		model = Sketchup.active_model
-		entities = model.active_entities
-		model.start_operation "Group" #For Undo
-		group=entities.add_group
-		group.material = mat
-		g_handle=temp_tw.load(group)
-		temp_handle=temp_tw.load(e,mat_dir)
-		entities.erase_entities group
-		Sketchup.undo
-		distorted=true if temp_handle!=g_handle
-		temp_tw=nil
+	# p "MIMMO"
+		distorted = false
+		if e.valid? and e.is_a? Sketchup::Face
+			for v in e.vertices
+				p = v.position
+				uvHelp = get_UVHelp(e, mat_dir)
+				# uv = uvHelp.get_front_UVQ(p) if mat_dir==true
+				# uv = uvHelp.get_back_UVQ(p) if mat_dir==false
+				uvq = mat_dir ? uvHelp.get_front_UVQ(p) : uvHelp.get_back_UVQ(p)
+				# if ( uvq and ((uvq.z.to_f)*10000000).round != 10000000)
+				if ( uvq and (uvq.z.to_f - 1).abs > 1e-5)
+					distorted = true
+					break
+				end
+			end
+		end
 		return distorted
+	
+		# distorted=false
+		# temp_tw=Sketchup.create_texture_writer
+		# model = Sketchup.active_model
+		# entities = model.active_entities
+		# model.start_operation "Group" #For Undo
+		# group=entities.add_group
+		# group.material = mat
+		# g_handle=temp_tw.load(group)
+		# temp_handle=temp_tw.load(e,mat_dir)
+		# entities.erase_entities group
+		# Sketchup.undo
+		# distorted=true if temp_handle!=g_handle
+		# temp_tw=nil
+		# return distorted
 	end # END texture_distorted?
 
 	##
