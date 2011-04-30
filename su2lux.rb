@@ -524,6 +524,7 @@ if( not file_loaded?(__FILE__) )
 			UI.messagebox("Unknown operating system: contact developer to add support for it")
 	end
 
+	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderAttributeDictionary.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderSettings.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderSettingsEditor.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderMaterial.rb")
@@ -531,7 +532,7 @@ if( not file_loaded?(__FILE__) )
 	load File.join(SU2LUX::PLUGIN_FOLDER, "MeshCollector.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderExport.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderToolbar.rb")
-  load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderPrimatives.rb")
+  # load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderPrimatives.rb")
   
 	SU2LUX.initialize_variables
 

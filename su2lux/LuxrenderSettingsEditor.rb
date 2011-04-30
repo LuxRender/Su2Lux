@@ -623,7 +623,7 @@ class LuxrenderSettingsEditor
 	##
 	def sendDataFromSketchup()
 	
-		Sketchup.active_model.start_operation "Updating setting editor"
+		# Sketchup.active_model.start_operation "Updating setting editor"
 		
 		#TODO: check if get_all_write_accessors can be used here to simplify things
 		updateSettingValue("fov")
@@ -663,7 +663,7 @@ class LuxrenderSettingsEditor
 
 		updateSettingValue("max_prims_per_leaf")
 		updateSettingValue("skip_factor")
-		Sketchup.active_model.commit_operation
+		# Sketchup.active_model.commit_operation
 	end # END sendDataFromSketchup
 
 	##

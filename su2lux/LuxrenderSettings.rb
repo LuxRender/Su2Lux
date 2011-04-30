@@ -129,7 +129,7 @@ class LuxrenderSettings
 		'film_displayinterval'=>4,
 		'haltspp'=>0,
 		'halttime'=>0,
-		'saveexr' => false,
+		# 'saveexr' => false,
 	# END Film
 		
 	##
@@ -183,23 +183,23 @@ class LuxrenderSettings
 
 			define_method("[]") do |key| 
 				value = @@settings[key]
-				return @model.get_attribute(@dict,key,value)
+				return LuxrenderAttributeDictionary.get_attribute(@dict, key, value)
 			end
 			
 			@@settings.each do |key, value|
 				
 				######## -- get any attribute -- #######
-				define_method(key) { @model.get_attribute(@dict,key,value) }
+				define_method(key) { LuxrenderAttributeDictionary.get_attribute(@dict, key, value) }
 
 				case key
 					when LuxrenderSettings::ui_refreshable?(key)# set ui_refreshable
 						define_method("#{key}=") do |new_value|
 						settings_editor = SU2LUX.get_editor("settings")
-						@model.set_attribute(@dict,key,new_value)
+						LuxrenderAttributeDictionary.set_attribute(@dict, key, new_value)
 						settings_editor.updateSettingValue(key) if settings_editor
 					end
 					else # set other
-						define_method("#{key}=") { |new_value| @model.set_attribute(@dict,key,new_value) }
+						define_method("#{key}=") { |new_value| LuxrenderAttributeDictionary.set_attribute(@dict, key, new_value) }
 				end #end case
 			end #end settings.each
 		end #end module_eval

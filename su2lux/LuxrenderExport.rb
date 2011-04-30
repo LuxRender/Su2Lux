@@ -144,9 +144,9 @@ class LuxrenderExport
 		out.puts "\t\"integer xresolution\" [#{@lrs.xresolution}]"
 		out.puts "\t\"integer yresolution\" [#{@lrs.yresolution}]"
 		out.puts "\t\"integer haltspp\" [#{@lrs.haltspp}]"
-		out.puts "\t\"bool write_exr\" [#{@lrs.saveexr}]"
 		
 		out.puts '
+		"integer halttime" [0]
 		"bool premultiplyalpha" ["false"]
 		"string tonemapkernel" ["reinhard"]
 		"float reinhard_prescale" [1.000000]
