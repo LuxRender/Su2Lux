@@ -4,6 +4,7 @@ function checkbox_expander(id)
 	if ($("#" + id).attr("checked"))
 	{
 		$("#" + id).next(".collapse").show();
+		$("#" + id).next(".collapse").children("#focus_type").change();
 	}
 	else if ($("#" + id).attr("checked") == false)
 	{
@@ -15,6 +16,7 @@ $(document).ready(
 	{
 
 		$(".collapse").hide();
+		$(".collapse2").hide();
 
 		$("#settings_panel select, :text").change(
 			function()
@@ -29,6 +31,25 @@ $(document).ready(
 				$(this).nextAll().hide();
 				$(this).nextAll("." + this.value).show();
 				window.location = 'skp:camera_change@' + this.value
+			}
+		);
+		
+		$("#settings_panel #focus_type").change(
+			function()
+			{
+				$(this).nextAll("div").hide();
+				$(this).nextAll("span").hide();
+				$(this).nextAll("." + this.value).show();
+				// window.location = 'skp:camera_change@' + this.value
+			}
+		);
+		
+		$("#settings_panel #environment_light_type").change(
+			function()
+			{
+				$(this).nextAll().hide();
+				$(this).nextAll("." + this.value).show();
+				//window.location = 'skp:camera_change@' + this.value
 			}
 		);
 		
@@ -52,12 +73,27 @@ $(document).ready(
 		$("#settings_panel p.header").click(
 			function()
 			{
-				$(this).next("div.collapse").slideToggle(300);
 				node = $(this).next("div.collapse").children("#accelerator_type").attr("value");
 				$(this).next("div.collapse").children("#accelerator_type").siblings("#" + node).show();
 				node = $(this).next("div.collapse").children("#sintegrator_type").attr("value");
 				$(this).next("div.collapse").children("#sintegrator_type").siblings("#" + node).show();
 				node = $(this).next("div.collapse").children("#camera_type").change();
+				node = $(this).next("div.collapse").children("#environment_light_type").change();
+				$(this).next("div.collapse").slideToggle(300);
+				// node = $(this).next("div.collapse").children("#environment_light_type").attr("value");
+				// $(this).next("div.collapse").children("#environment_light_type").siblings("#" + node).show();
+			}
+		);
+				
+		$("#settings_panel p.header2").click(
+			function()
+			{
+				node = $(this).next("div.collapse2").children("#accelerator_type").attr("value");
+				$(this).next("div.collapse2").children("#accelerator_type").siblings("#" + node).show();
+				node = $(this).next("div.collapse2").children("#sintegrator_type").attr("value");
+				$(this).next("div.collapse2").children("#sintegrator_type").siblings("#" + node).show();
+//				node = $(this).next("div.collapse2").children("#camera_type").change();
+				$(this).next("div.collapse2").slideToggle(300);
 				// node = $(this).next("div.collapse").children("#environment_light_type").attr("value");
 				// $(this).next("div.collapse").children("#environment_light_type").siblings("#" + node).show();
 			}

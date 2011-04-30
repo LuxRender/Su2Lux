@@ -14,6 +14,15 @@ body {
 	margin: 1px;
 }
 
+.header2 {
+	padding: 5px 10px;
+	background-color: #b2c6c9;/*#c67700; /*#d77f00;*/
+	color: #000000;
+	cursor: pointer;
+	position: relative;
+	margin: 1px 20px 1px 1px;
+}
+
 #settings_panel {
 	border: 2px solid #eeeeee;
 	margin-top: 10px;
@@ -21,6 +30,12 @@ body {
 }
 
 .collapse {
+	display:none;
+	margin: 0 0 0 15px;
+	padding: 6px;
+}
+   
+.collapse2 {
 	display:none;
 	padding: 6px;
 }

@@ -34,7 +34,7 @@
 	<div id="settings_panel">
 		<p class="header">Camera</p>
 		<div class="collapse">
-			Type:	<select id="camera_type">
+			Select camera type:	<select id="camera_type">
 				<option value="perspective">perspective</option>
 				<option value="orthographic">orthographic</option>
 				<option value="environment">environment</option>
@@ -46,33 +46,91 @@
 				<input type='text' id="focal_length" size="10">
 			</div>
 			
-			<div id="scale" class="orthographic">
+			<div id="scale_view" class="orthographic">
 				<label for="camera_scale">scale:</label>
 				<input type='text' id="camera_scale" size="4">
 			</div>
 			
 			<div id="near_far_clipping_block" class="perspective orthographic environment">
-				<input type="checkbox" id="near_far_clipping" onchange="$(this).next('.collapse').show();">
-				near_far_clipping
-				<div class="collapse">
-					start:<input type='text' id="hither" size="10">
-					end:<input type='text' id="yon" size="10">
+				<p class="header2">Near-Far clipping</p>
+				<div class="collapse2">
+					<label for="use_architectural">On/Off</label>
+					<input type="checkbox" id="use_clipping">
+					<div class="collapse">
+						start:<input type='text' id="hither" size="10">
+						end:<input type='text' id="yon" size="10">
+					</div>
 				</div>
-			</div>
-			<br>
+			</div> <!-- END near_far_clipping_block -->
 			
 			<div id="dof_bokeh_block" class="perspective orthographic">
-			<input type="checkbox" id="dof_bokeh">DOF & Bokeh
-			</div>
+				<p class="header2">DOF & Bokeh</p>
+				<div class="collapse2">
+					<label for="use_dof_bokeh">On/Off</label>
+					<input type="checkbox" id="use_dof_bokeh">
+					<div class="collapse">
+						Focus type: <select id="focus_type">
+							<option value="autofocus">Autofocus</option>
+							<option value="manual">Manual</option>
+						</select>
+						<span class="autofocus">
+							<label for="autofocus">Autofocus</label>
+							<input type="checkbox" id="autofocus">
+						</span>
+						<span class="manual">
+							<label for="focaldistance">Manual</label>
+							<input type='text' id="focaldistance" size="10">
+						</span>
+						<br>
+						Distribution <select id="distribution">
+							<option value="uniform">Uniform</option>
+							<option value="exponential">Exponential</option>
+							<option value="inverse exponential">Inverse Exponential</option>
+							<option value="gaussian">Gaussian</option>
+							<option value="inverse gaussian">Inverse Gaussian</option>
+						</select>
+						Blades: <input type='text' id="blades" size="10">
+						Power: <input type='text' id="power" size="10">
+					</div>
+				</div>
+			</div> <!-- END dof_bokeh_block -->
 			
 			<div id="architectural_block" class="perspective orthographic">
-			<input type="checkbox" id="architectural" value="true">Architectural (Lens Shift) & Aspect Ratio
-			</div>
+				<p class="header2">Architectural (Lens Shift) & Aspect Ratio</p>
+				<div class="collapse2">
+					<label for="use_architectural">On/Off</label>
+					<input type="checkbox" id="use_architectural">
+					<div class="collapse">
+						<label for="shiftX">Shift X</label>
+						<input type='text' id="shiftX" size="10">
+						<label for="shiftY">Shift Y</label>
+						<input type='text' id="shiftY" size="10">
+						<br>
+						<label for="use_ratio">Use custom aspect ratio</label>
+						<input type="checkbox" id="use_ratio">
+						<div class ="collapse">
+							Aspect ratio<input type='text' id="frameaspectratio" size="10">
+						</div>
+					</div>
+				</div>
+			</div> <!-- END architectural_block -->
 			
 			<div id="motion_blur_block" class="perspective orthographic environment">
-			<input type="checkbox" id="motion_blur" value="true">Motion Blur
-			</div>
-		</div>
+				<p class="header2">Motion Blur</p>
+				<div class="collapse2">
+					<label for="use_motion_blur">On/Off</label>
+					<input type="checkbox" id="use_motion_blur">
+					<div class="collapse">
+						start:<input type='text' id="shutteropen" size="10">
+						end:<input type='text' id="shutterclose" size="10">
+						Distribution <select id="shutterdistribution">
+							<option value="uniform">Uniform</option>
+							<option value="gaussian">Gaussian</option>
+						</select>
+					</div>
+				</div>
+			</div> <!-- END motion_blur_block -->
+		</div><!-- END Camera section -->
 
 
 		<p class="header">Environment</p>
@@ -91,9 +149,21 @@
 				<label for="env_rotate_z">Rotate Z:</label>
 				<input type='text' id="env_rotate_z" size="4">
 			</div> -->
-			<div class="collapse" id="sunsky">
+			<div class="sunsky" id="sunsky">
+				<p class="header2">Sky</p>
+				<label for="environment_sky_gain">gain</label>
+				<input type='text' id="environment_sky_gain" size="10">
+				<label for="environment_sky_turbidity">turbidity</label>
+				<input type='text' id="environment_sky_turbidity" size="10">
+				<p class="header2">Sun</p>
+				<label for="environment_sun_gain">gain</label>
+				<input type='text' id="environment_sun_gain" size="10">
+				<label for="environment_sun_turbidity">turbidity</label>
+				<input type='text' id="environment_sun_turbidity" size="10">
+				<label for="environment_sun_relsize">relative size</label>
+				<input type='text' id="environment_sun_relsize" size="10">
 			</div>
-			<div class="collapse" id="infinite">
+			<div class="infinite" id="infinite">
 			</div>
 		</div>
 
@@ -223,34 +293,34 @@
 				<option value="qbvh">qbvh</option>
 			</select>
 			<div class="collapse" id="tabreckdtree">
-				<label for="intersection_cost">Intersection cost:</label>
-				<input type='text' id="intersection_cost" size="4">
+				<label for="kdtree_intersection_cost">Intersection cost:</label>
+				<input type='text' id="kdtree_intersection_cost" size="4">
 				<br>
-				<label for="traversal_cost">Traversal cost:</label>
-				<input type='text' id="traversal_cost" size="4">
+				<label for="kdtree_traversal_cost">Traversal cost:</label>
+				<input type='text' id="kdtree_traversal_cost" size="4">
 				<br>
-				<label for="empty_bonus">Empty bonus:</label>
-				<input type='text' id="empty_bonus" size="4">
+				<label for="kdtree_empty_bonus">Empty bonus:</label>
+				<input type='text' id="kdtree_empty_bonus" size="4">
 				<br>
-				<label for="max_prims">Max primitives per volume:</label>
-				<input type='text' id="max_prims" size="4">
+				<label for="kdtree_max_prims">Max primitives per volume:</label>
+				<input type='text' id="kdtree_max_prims" size="4">
 				<br>
-				<label for="max_depth">Max tree depth:</label>
-				<input type='text' id="max_depth" size="4">
+				<label for="kdtree_max_depth">Max tree depth:</label>
+				<input type='text' id="kdtree_max_depth" size="4">
 			</div>
 			<div class="collapse" id="grid">
-			<label for="refine_immediately">refine immediately</label>
-				<input type="checkbox" id="refine_immediately">
+			<label for="grid_refine_immediately">refine immediately</label>
+				<input type="checkbox" id="grid_refine_immediately">
 			</div>
 			<div class="collapse" id="bvh">
 			</div>
 			<div class="collapse" id="qbvh">
-				<label for="max_prims_per_leaf">Max primitives per leaf:</label>
-				<input type='text' id="max_prims_per_leaf" size="4">
+				<label for="qbvh_max_prims_per_leaf">Max primitives per leaf:</label>
+				<input type='text' id="qbvh_max_prims_per_leaf" size="4">
 <!--				<label for="full_sweep_threshold">Sweep threshold:</label>
 				<input type='text' id="full_sweep_threshold" size="4"> -->
-				<label for="skip_factor">Skip factor:</label>
-				<input type='text' id="skip_factor" size="4">
+				<label for="qbvh_skip_factor">Skip factor:</label>
+				<input type='text' id="qbvh_skip_factor" size="4">
 			</div>
 		</div>
 		

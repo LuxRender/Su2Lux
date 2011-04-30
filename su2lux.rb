@@ -467,26 +467,28 @@ class SU2LUX_view_observer < Sketchup::ViewObserver
 	def onViewChanged(view)
 
 		settings_editor = SU2LUX.get_editor("settings")
-	#	@lrs = LuxrenderSettings.new
+		@lrs = LuxrenderSettings.new
 		if Sketchup.active_model.active_view.camera.perspective?
-	#		@lrs.camera_type = 'perspective'
-			camera_type = 'perspective'
+			@lrs.camera_type = 'perspective'
+			# camera_type = 'perspective'
 		else
-			#@lrs.camera_type = 'orthographic'
-			camera_type = 'orthographic'
+			@lrs.camera_type = 'orthographic'
+			# camera_type = 'orthographic'
 		end
-		if (settings_editor)
+		# if (settings_editor)
 			if (Sketchup.active_model.active_view.camera.perspective?)
 				fov = Sketchup.active_model.active_view.camera.fov
 				fov = format("%.2f", fov)
+				@lrs.fov = fov
 				settings_editor.setValue("fov", fov)
 				focal_length = Sketchup.active_model.active_view.camera.focal_length
 				focal_length = format("%.2f", focal_length)
+				@lrs.focal_length = focal_length
 				settings_editor.setValue("focal_length", focal_length)
 			end
 	#		settings_editor.setValue("camera_type", @lrs.camera_type)
-			settings_editor.setValue("camera_type", camera_type)
-		end
+			settings_editor.setValue("camera_type", @lrs.camera_type)
+		# end
 	end # END onViewChanged
 	
 end # END class SU2LUX_view_observer
@@ -496,13 +498,13 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 		model.active_view.add_observer(SU2LUX_view_observer.new)
 		
 		@lrs = LuxrenderSettings.new
-		@lrs.xresolution = Sketchup.active_model.active_view.vpwidth
-		@lrs.yresolution = Sketchup.active_model.active_view.vpheight
+		@lrs.fleximage_xresolution = Sketchup.active_model.active_view.vpwidth
+		@lrs.fleximage_yresolution = Sketchup.active_model.active_view.vpheight
 		settings_editor = SU2LUX.get_editor("settings")
 		# @lrs.camera_scale = nil
 		if settings_editor
-			settings_editor.setValue("xresolution", @lrs.xresolution)
-			settings_editor.setValue("yresolution", @lrs.yresolution)
+			settings_editor.setValue("xresolution", @lrs.fleximage_xresolution)
+			settings_editor.setValue("yresolution", @lrs.fleximage_yresolution)
 			# settings_editor.setValue("camera_scale", @lrs.camera_scale)
 		end
 	end # END onNewModel

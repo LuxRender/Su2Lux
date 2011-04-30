@@ -26,80 +26,169 @@ class LuxrenderSettings
 	##
 	# Camera
 	###
-		'camera_type'=>'perspective',
-		'fov'=> format("%.2f", Sketchup.active_model.active_view.camera.fov),#35, # not currently in use
-		'focal_length'=> format("%.2f", Sketchup.active_model.active_view.camera.focal_length),
-		'camera_scale'=>7.31,
-		'near_far_clipping'=>false,
-		'dof_bokeh'=>false,
-		'architectural'=>false,
-		'motion_blur'=>false,
-		'hither'=>0.1,
-		'yon'=>100,  
+		'camera_type' => 'perspective',
+		'fov' => format("%.2f", Sketchup.active_model.active_view.camera.fov),#35, # not currently in use
+		'focal_length' => format("%.2f", Sketchup.active_model.active_view.camera.focal_length),
+		'camera_scale' => 7.31,
+		'use_clipping' => false,
+		'hither'=> 0.1,
+		'yon' => 100,  
+		'use_dof_bokeh'=>false,
+		'lensradius' => 0.006250,
+		'focus_type' => 'autofocus',
+		'autofocus' => true,
+		'focaldistance' => 0.0,
+		'distribution' => 'uniform',
+		'power' => 1,
+		'blades' => 6,
+		'use_architectural'=>false,
+		'shiftX' => 0.0,
+		'shiftY' => 0.0,
+		'use_ratio' => false,
+		'frameaspectratio' => 1.333333,
+		'use_motion_blur'=>false,
+		'shutteropen' => 0.0,
+		'shutterclose' => 1.0,
+		'shutterdistribution' => 'uniform',
 	# END Camera
 
 	##
 	#Environment
 	##
-		'environment_light_type'=>'infinite',
-	# END Environment
+		'environment_light_type'=> 'sunsky',
+		'environment_infinite_lightgroup' => 'default',
+		'environment_infinite_gain' => 1.0,
+		'environment_infinite_map_type' => 'latlong',
+		'environment_infinite_map' => '',
+		'environment_infinite_gamma' => 1.0,
+		'use_environment_infinite_sun' => true,
+		'environment_sky_lightgroup' => 'default',
+		'environment_sky_gain' => 1.0,
+		'environment_sky_turbidity' => 2.2,
+		'environment_sun_lightgroup' => 'default',
+		'environment_sun_gain' => 1.0,
+		'environment_sun_relsize' => 1.0,
+		'environment_sun_turbidity' => 2.2,
+	#END Environment
 
+	##
+	# Filter
+	##
+		'pixelfilter_show_advanced' => false,
+		'pixelfilter_type' => 'mitchell',
+		'pixelfilter_mitchell_sharpness' => 1.0/3.0,
+		'pixelfilter_mitchell_xwidth' => 2.0, 
+		'pixelfilter_mitchell_ywidth' => 2.0,
+		'pixelfilter_mitchell_optmode' => 'slider',
+		'pixelfilter_mitchell_B' => 1.0/3.0,
+		'pixelfilter_mitchell_C' => 1.0/3.0,
+		'pixelfilter_mitchell_supersample' => false,
+		'pixelfilter_box_xwidth' => 0.5, 
+		'pixelfilter_box_ywidth' => 0.5,
+		'pixelfilter_triangle_xwidth' => 2.0, 
+		'pixelfilter_triangle_ywidth' => 2.0,
+		'pixelfilter_sinc_xwidth' => 2.0, 
+		'pixelfilter_sinc_ywidth' => 2.0,
+		'pixelfilter_sinc_tau' => 2.0,
+		'pixelfilter_gaussian_xwidth' => 2.0, 
+		'pixelfilter_gaussian_ywidth' => 2.0,
+		'pixelfilter_gaussian_alpha' => 2.0,
+	# END Filter
+	
 	##
 	#Sampler
 	##
-		'sampler_showadvanced'=>false,
-		'sampler_type'=>'lowdiscrepancy',
-		'sampler_lowdisc_pixelsamples'=>1,
-		'sampler_lowdisc_pixelsampler'=>'lowdiscrepancy',
-		'sampler_metro_strength'=>0.6,
-		'sampler_metro_lmprob'=>0.4,
-		'sampler_metro_maxrejects'=>512,
-		'sampler_metro_usevariance'=>false,
+		'sampler_show_advanced'=>false,
+		'sampler_type'=>'metropolis',
+		'sampler_random_pixelsamples' => 4,
+		'sampler_random_pixelsampler' => 'vegas',
+		'sampler_lowdisc_pixelsamples' => 4,
+		'sampler_lowdisc_pixelsampler' => 'vegas',
+		'sampler_metropolis_strength' => 0.6,
+		'sampler_metropolis_lmprob' => 0.4,
+		'sampler_metropolis_maxrejects' => 512,
+		'sampler_metropolis_usevariance'=> false,
+		'sampler_erpt_chainlength' => 2000,
 	# END Sampler
 		
 	##
 	#Integrator
 	##
-		'sintegrator_showadvanced'=>false,
+		'sintegrator_show_advanced'=>true,
 		'sintegrator_type'=>'bidirectional',
-		'sintegrator_distributedpath_directsampleall'=>true,
-		'sintegrator_distributedpath_directsamples'=>1,
-		'sintegrator_distributedpath_directdiffuse'=>true,
-		'sintegrator_distributedpath_directglossy'=>true,
-		'sintegrator_distributedpath_indirectsampleall'=>false,
-		'sintegrator_distributedpath_indirectsamples'=>1,
-		'sintegrator_distributedpath_indirectdiffuse'=>true,
-		'sintegrator_distributedpath_indirectglossy'=>true,
-		'sintegrator_distributedpath_diffusereflectdepth'=>1,
-		'sintegrator_distributedpath_diffusereflectsamples'=>4,
-		'sintegrator_distributedpath_diffuserefractdepth'=>4,
-		'sintegrator_distributedpath_diffuserefractsamples'=>1,
-		'sintegrator_distributedpath_glossyreflectdepth'=>1,
-		'sintegrator_distributedpath_glossyreflectsamples'=>2,
-		'sintegrator_distributedpath_glossyrefractdepth'=>4,
-		'sintegrator_distributedpath_glossyrefractsamples'=>1,
-		'sintegrator_distributedpath_specularreflectdepth'=>2,
-		'sintegrator_distributedpath_specularrefractdepth'=>4,
-		'sintegrator_distributedpath_causticsonglossy'=>true,
-		'sintegrator_distributedpath_causticsondiffuse'=>false,
-		'sintegrator_distributedpath_strategy'=>'auto',
-		
-		'sintegrator_dlighting_maxdepth'=>5,
-		
-		'sintegrator_bidir_maxdepth'=>10,
-		'sintegrator_bidir_bounces'=>16,
-		'sintegrator_bidir_eyedepth'=>16,
-		'singtegrator_bidir_lightdepth'=>16,
-		'sintegrator_bidir_strategy'=>'auto',
 
-		'sintegrator_path_maxdepth'=>10,
-		'singtegrator_path_ienvironment'=>true,
+		'sintegrator_bidir_bounces' => 16,
+		'sintegrator_bidir_eyedepth' => 8,
+		'sintegrator_bidir_eyethreshold' => 0.0,
+		'sintegrator_bidir_lightdepth' => 8,
+		'sintegrator_bidir_lightthreshold' => 0.0,
+		'sintegrator_bidir_strategy' => 'auto',
 
-		'singtegrator_path_strategy'=>'auto',
-		'sintegrator_path_rrstrategy'=>'efficiency',
-		'sintegrator_path_rrcontinueprob'=>0.65,
+		'sintegrator_direct_bounces' => 5,
+		'sintegrator_direct_maxdepth' => 5,
+		'sintegrator_direct_shadow_ray_count' => 1,
+		'sintegrator_direct_strategy' => 'auto',
 		
-		'sintegrator_igi_maxdepth'=>5,
+		'sintegrator_distributedpath_directsampleall' => true,
+		'sintegrator_distributedpath_directsamples' => 1,
+		'sintegrator_distributedpath_directdiffuse' => true,
+		'sintegrator_distributedpath_directglossy' => true,
+		'sintegrator_distributedpath_indirectsampleall' => false,
+		'sintegrator_distributedpath_indirectsamples' => 1,
+		'sintegrator_distributedpath_indirectdiffuse' => true,
+		'sintegrator_distributedpath_indirectglossy' => true,
+		'sintegrator_distributedpath_diffusereflectdepth' => 3,
+		'sintegrator_distributedpath_diffusereflectsamples' => 1,
+		'sintegrator_distributedpath_diffuserefractdepth' => 5,
+		'sintegrator_distributedpath_diffuserefractsamples' => 1,
+		'sintegrator_distributedpath_glossyreflectdepth' => 2,
+		'sintegrator_distributedpath_glossyreflectsamples' => 1,
+		'sintegrator_distributedpath_glossyrefractdepth' => 5,
+		'sintegrator_distributedpath_glossyrefractsamples' => 1,
+		'sintegrator_distributedpath_specularreflectdepth' => 2,
+		'sintegrator_distributedpath_specularrefractdepth' => 5,
+		'sintegrator_distributedpath_strategy' => 'auto',
+		'sintegrator_distributedpath_reject' => false,
+		'sintegrator_distributedpath_diffusereflectreject' => false,
+		'sintegrator_distributedpath_diffusereflectreject_threshold' => 10.0,
+		'sintegrator_distributedpath_diffuserefractreject' => false,
+		'sintegrator_distributedpath_diffuserefractreject_threshold' => 10.0,
+		'sintegrator_distributedpath_glossyreflectreject' => false,
+		'sintegrator_distributedpath_glossyreflectreject_threshold' => 10.0,
+		'sintegrator_distributedpath_glossyrefractreject' => false,
+		'sintegrator_distributedpath_glossyrefractreject_threshold' => 10.0,
+		
+		'sintegrator_exphoton_causticphotons' => 20000,
+		'sintegrator_exphoton_directphotons' => 200000,
+		'sintegrator_exphoton_finalgather' => true,
+		'sintegrator_exphoton_finalgathersamples' => 32,
+		'sintegrator_exphoton_gatherangle' => 10.0,
+		'sintegrator_exphoton_maxdepth' => 5,
+		'sintegrator_exphoton_maxphotondepth' => 10,
+		'sintegrator_exphoton_maxphotondist' => 0.5,
+		'sintegrator_exphoton_nphotonsused' => 50,
+		'sintegrator_exphoton_rendermode' => 'directlighting',
+		'sintegrator_exphoton_rrcontinueprob' => 0.65,
+		'sintegrator_exphoton_rrstrategy' => 'efficiency',
+		'sintegrator_exphoton_shadow_ray_count' => 1,
+		'sintegrator_exphoton_strategy' => 'auto',
+		'sintegrator_exphoton_dbg_enable_direct' => true,
+		'sintegrator_exphoton_dbg_enable_indircaustic' => true,
+		'sintegrator_exphoton_dbg_enable_indirdiffuse' => true,
+		'sintegrator_exphoton_dbg_enable_indirspecular' => true,
+		'sintegrator_exphoton_dbg_enable_radiancemap' => false,
+
+		'sintegrator_igi_maxdepth' => 5,
+		'sintegrator_igi_mindist' => 0.1,
+		'sintegrator_igi_nsets' => 4,
+		'sintegrator_igi_nlights' => 64,
+
+		'sintegrator_path_include_environment' => true,
+		'sintegrator_path_maxdepth' => 10,
+		'sintegrator_path_rrstrategy' => 'efficiency',
+		'sintegrator_path_rrcontinueprob' => 0.65,
+		'sintegrator_path_shadow_ray_count' => 1,
+		'sintegrator_path_strategy' => 'auto',
 	# END Integrator
 		
 	##
@@ -110,44 +199,83 @@ class LuxrenderSettings
 	# END VolumeIntegrator
 		
 	##
-	# Filter
-	##
-		'pixelfilter_showadvanced'=>false,
-		'pixelfilter_type'=>'mitchell',
-		'pixelfilter_mitchell_sharp'=>0.250, 
-		'pixelfilter_mitchell_xwidth'=>2.0, 
-		'pixelfilter_mitchell_ywidth'=>2.0,
-		'pixelfilter_mitchell_optmode'=>'slider',
-	# END Filter
-	
-	##
 	# Film
 	##
-		'film_type'=>"fleximage",
-		'xresolution'=> nil, #Sketchup.active_model.active_view.vpwidth,#800
-		'yresolution'=> nil, #Sketchup.active_model.active_view.vpheight,#600
-		'film_displayinterval'=>4,
-		'haltspp'=>0,
-		'halttime'=>0,
+		'film_film_type' => "fleximage",
+		'fleximage_premultiplyalpha' => false,
+		'fleximage_xresolution' => nil,
+		'fleximage_yresolution' => nil,
+		'fleximage_filterquality' => 4,
+		'fleximage_ldr_clamp_method' => "lum",
+		'fleximage_write_exr' => false,
+		'fleximage_write_exr_channels' => "RGB",
+		'fleximage_write_exr_halftype' => true,
+		'fleximage_write_exr_compressiontype' => "PIX (lossless)",
+		'fleximage_write_exr_applyimaging' => true,
+		'fleximage_write_exr_gamutclamp' => true,
+		'fleximage_write_exr_ZBuf' => false,
+		'fleximage_write_exr_zbuf_normalizationtype' => "None",
+		'fleximage_write_png' => true,
+		'fleximage_write_png_channels' => "RGB",
+		'fleximage_write_png_16bit' => false,
+		'fleximage_write_png_gamutclamp' => true,
+		'fleximage_write_png_ZBuf' => false,
+		'fleximage_write_png_zbuf_normalizationtype' => "Min/Max",
+		'fleximage_write_tga' => false,
+		'fleximage_write_tga_channels' => "RGB",
+		'fleximage_write_tga_gamutclamp' => true,
+		'fleximage_write_tga_ZBuf' => false,
+		'fleximage_write_tga_zbuf_normalizaziontype' => "Min/Max",
+		'fleximage_write_resume_flm' => false,
+		'fleximage_restart_resume_flm' => false,
+		'fleximage_filename' => "SU2LUX_rendered_image",
+		'fleximage_writeinterval' => 60,
+		'fleximage_displayinterval' => 12,
+		'fleximage_reject_warmup' => 64,
+		'fleximage_outlierrejection_k' => 0,
+		'fleximage_debug' => false,
+		'fleximage_haltspp' => -1,
+		'fleximage_halttime' => -1,
+		'fleximage_colorspace_red_x' => 0.63,
+		'fleximage_colorspace_red_y' => 0.34,
+		'fleximage_colorspace_green_x' => 0.31,
+		'fleximage_colorspace_green_y' => 0.595,
+		'fleximage_colorspace_blue_x' => 0.155,
+		'fleximage_colorspace_blue_y' => 0.07,
+		'fleximage_colorspace_white_x' => 0.314275,
+		'fleximage_colorspace_white_y' => 0.329411,
+		'fleximage_tonemapkernel' => 'reinhard',
+		'fleximage_reinhard_prescale' => 1.0,
+		'fleximage_reinhard_postscale' => 1.0,
+		'fleximage_reinahrd_burn' => 6.0,
+		'fleximage_linear_sensitivity' => 50.0,
+		'fleximage_linear_exposure' => 1.0,
+		'fleximage_linear_fstop' => 2.8,
+		'fleximage_linear_gamma' => 1.0,
+		'fleximage_contrast_ywa' => 1.0,
+		'fleximage_cameraresponse' => "",
+		'fleximage_gamma' => 2.2,
+		
+		
 		# 'saveexr' => false,
 	# END Film
 		
 	##
 	# Accelerator
 	##
-		'accelerator_type'=> "tabreckdtree",
+		'accelerator_type' => "tabreckdtree",
 		#tabreckdtree  properties
-		'intersection_cost'=> 80,
-		'traversal_cost'=> 1,
-		'empty_bonus'=> 0.5,
-		'max_prims'=> 1,
-		'max_depth'=> -1,
+		'kdtree_intersection_cost' => 80,
+		'kdtree_traversal_cost' => 1,
+		'kdtree_empty_bonus' => 0.5,
+		'kdtree_max_prims' => 1,
+		'kdtree_max_depth' => -1,
 		#bvh properties
 		#qbvh properties
-		'max_prims_per_leaf'=> 4,
-		'skip_factor'=> 1,
+		'qbvh_max_prims_per_leaf' => 4,
+		'qbvh_skip_factor' => 1,
 		#grid properties
-		'refine_immediately'=> false,
+		'grid_refine_immediately' => false,
 	# END Accelerator
 
 	##
@@ -187,7 +315,6 @@ class LuxrenderSettings
 			end
 			
 			@@settings.each do |key, value|
-				
 				######## -- get any attribute -- #######
 				define_method(key) { LuxrenderAttributeDictionary.get_attribute(@dict, key, value) }
 
@@ -205,4 +332,11 @@ class LuxrenderSettings
 		end #end module_eval
 	end #end initialize
 
+	def get_names
+		settings = []
+		@@settings.each { |key, value|
+			settings.push(key)
+		}
+		return settings
+	end
 end # END class LuxrenderSettings

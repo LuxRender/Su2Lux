@@ -47,16 +47,13 @@ class LuxrenderSettingsEditor
 					when "focal_length"
 						Sketchup.active_model.active_view.camera.focal_length = value.to_f
 					when "xresolution"
-						SU2LUX.dbg_p 'set xresolution '+value
-						@lrs.xresolution=value.to_f
-						change_aspect_ratio(@lrs.xresolution.to_f / @lrs.yresolution.to_f)
+						@lrs.fleximage_xresolution=value.to_f
+						change_aspect_ratio(@lrs.fleximage_xresolution.to_f / @lrs.fleximage_yresolution.to_f)
 					when "yresolution"
-						SU2LUX.dbg_p 'set yresolution '+value
-						@lrs.yresolution=value.to_f
-						change_aspect_ratio(@lrs.xresolution.to_f / @lrs.yresolution.to_f)
+						@lrs.fleximage_yresolution=value.to_f
+						change_aspect_ratio(@lrs.fleximage_xresolution.to_f / @lrs.fleximage_yresolution.to_f)
 					else
 						if (@lrs.respond_to?(key))
-							SU2LUX.dbg_p key + " => " + value
 							method_name = key + "="
 							@lrs.send(method_name, value)
 						else
@@ -172,8 +169,8 @@ class LuxrenderSettingsEditor
 			height = (Sketchup.active_model.active_view.vpheight)
 			setValue("xresolution", width)
 			setValue("yresolution", height)
-			@lrs.xresolution = width
-			@lrs.yresolution = height
+			@lrs.fleximage_xresolution = width
+			@lrs.fleximage_yresolution = height
 			change_aspect_ratio(0.0)
 		}
 
@@ -186,8 +183,8 @@ class LuxrenderSettingsEditor
 			height = values[1].to_i
 			setValue("xresolution", width)
 			setValue("yresolution", height)
-			@lrs.xresolution = width
-			@lrs.yresolution= height
+			@lrs.fleximage_xresolution = width
+			@lrs.fleximage_yresolution= height
 			change_aspect = values[2]
 			change_aspect_ratio(width.to_f / height.to_f) if change_aspect == "true"
 		}
@@ -623,60 +620,79 @@ class LuxrenderSettingsEditor
 	##
 	def sendDataFromSketchup()
 	
-		# Sketchup.active_model.start_operation "Updating setting editor"
+		# # Sketchup.active_model.start_operation "Updating setting editor"
 		
-		#TODO: check if get_all_write_accessors can be used here to simplify things
-		updateSettingValue("fov")
-		updateSettingValue("focal_length")
-		updateSettingValue("camera_scale")
-		updateSettingValue("near_far_clipping")
-		#TODO: check the following commented lines for UNDO/REDO issues
-		@lrs.xresolution = Sketchup.active_model.active_view.vpwidth unless @lrs.xresolution
-		updateSettingValue("xresolution")
-		@lrs.yresolution = Sketchup.active_model.active_view.vpheight unless @lrs.yresolution
-		updateSettingValue("yresolution")
-		if Sketchup.active_model.active_view.camera.perspective?
-			@lrs.camera_type = 'perspective'
-		else
-			@lrs.camera_type = 'orthographic'
-		end
-		updateSettingValue("camera_type")
-		updateSettingValue("hither")
-		updateSettingValue("yon")
-		updateSettingValue("accelerator_type")
-		updateSettingValue("sintegrator_type")
-		updateSettingValue("sintegrator_dlighting_maxdepth")
-		updateSettingValue("sintegrator_path_maxdepth")
-		updateSettingValue("sintegrator_igi_maxdepth")
-		updateSettingValue("sampler_type")
-		updateSettingValue("volume_integrator_type")
-		updateSettingValue("volume_integrator_stepsize")
-		updateSettingValue("export_file_path")
+		# #TODO: check if get_all_write_accessors can be used here to simplify things
+		# updateSettingValue("fov")
+		# updateSettingValue("focal_length")
+		# updateSettingValue("scale")
+		# # updateSettingValue("near_far_clipping")
+		# @lrs.xresolution = Sketchup.active_model.active_view.vpwidth unless @lrs.xresolution
+		# updateSettingValue("xresolution")
+		# @lrs.yresolution = Sketchup.active_model.active_view.vpheight unless @lrs.yresolution
+		# updateSettingValue("yresolution")
+		# if Sketchup.active_model.active_view.camera.perspective?
+			# @lrs.camera_type = 'perspective'
+		# else
+			# @lrs.camera_type = 'orthographic'
+		# end
+		# updateSettingValue("camera_type")
+		# updateSettingValue("hither")
+		# updateSettingValue("yon")
+		# updateSettingValue("blades")
+		# updateSettingValue("focaldistance")
+		# updateSettingValue("power")
+		# updateSettingValue("accelerator_type")
+		# updateSettingValue("sintegrator_type")
+		# updateSettingValue("sintegrator_dlighting_maxdepth")
+		# updateSettingValue("sintegrator_path_maxdepth")
+		# updateSettingValue("sintegrator_igi_maxdepth")
+		# updateSettingValue("sampler_type")
+		# updateSettingValue("volume_integrator_type")
+		# updateSettingValue("volume_integrator_stepsize")
+		# updateSettingValue("export_file_path")
 		
-		updateSettingValue("intersection_cost")
-		updateSettingValue("traversal_cost")
-		updateSettingValue("empty_bonus")
-		updateSettingValue("max_prims")
-		updateSettingValue("max_depth")
+		# updateSettingValue("intersection_cost")
+		# updateSettingValue("traversal_cost")
+		# updateSettingValue("empty_bonus")
+		# updateSettingValue("max_prims")
+		# updateSettingValue("max_depth")
 
-		updateSettingValue("refine_immediately")
+		# updateSettingValue("refine_immediately")
 
-		updateSettingValue("max_prims_per_leaf")
-		updateSettingValue("skip_factor")
-		# Sketchup.active_model.commit_operation
+		# updateSettingValue("max_prims_per_leaf")
+		# updateSettingValue("skip_factor")
+		# # Sketchup.active_model.commit_operation
+		@lrs.fleximage_xresolution = Sketchup.active_model.active_view.vpwidth unless @lrs.fleximage_xresolution
+		@lrs.fleximage_yresolution = Sketchup.active_model.active_view.vpheight unless @lrs.fleximage_yresolution
+		# if (@lrs.camera_type != 'environment')
+			# if Sketchup.active_model.active_view.camera.perspective?
+				# @lrs.camera_type = 'perspective'
+			# else
+				# @lrs.camera_type = 'orthographic'
+			# end
+		# end
+		# settings = get_all_write_accessors
+		settings = @lrs.get_names
+		settings.each { |setting|
+			updateSettingValue(setting)
+		}
+		# updateSettingValue("xresolution")
+		# updateSettingValue("yresolution")
+		# updateSettingValue("camera_type")
 	end # END sendDataFromSketchup
 
 	##
 	#
 	##
-	def get_all_write_accessors
-		methods_list = @lrs.public_methods(false)
-		methods = []
-		methods_list.each { |m|
-			methods.push(m) unless m =~ /=$/ or m == "[]"
-		}
-		return methods
-	end
+	# def get_all_write_accessors
+		# methods_list = @lrs.public_methods(false)
+		# methods = []
+		# methods_list.each { |m|
+			# methods.push(m) unless m =~ /=$/ or m == "[]"
+		# }
+		# return methods
+	# end
 	
 	##
 	#
