@@ -70,7 +70,9 @@ module SU2LUX
 		os = OSSpecific.new
 		@os_specific_vars = os.get_variables 
 
+		@lrs= LuxrenderSettings.new
 		@luxrender_filename = @os_specific_vars["luxrender_filename"]
+		#TODO: check if the following variables needs to be a module variable
 		@luxrender_path = "" #needs to go with luxrender settings
 		@os_separator = @os_specific_vars["path_separator"]
 	end # END initialize_variables
@@ -87,9 +89,6 @@ module SU2LUX
 		@model_textures={} #duplicated/unused here
 		@texturewriter=Sketchup.create_texture_writer #duplicated
 		@selected=false
-		#TODO: delete all occurrences of this instance variable and replace with the
-		#			 appropriate constant PREFIX_TEXTURES (in all files)
-		@textures_prefix = "TX_"
 
 		@components = {} #unused
 		@export_materials = true #unused
@@ -161,7 +160,7 @@ module SU2LUX
 		whether or not to render the lxs after it has been exported
 		"""
 		##### --- awful hack --- 1.0 ####
-		@lrs=LuxrenderSettings.new
+		# @lrs=LuxrenderSettings.new
 		@export_file_path = @lrs.export_file_path #shouldn't need this
 		#####################
 
@@ -203,7 +202,7 @@ module SU2LUX
 	##
 	def SU2LUX.export_copy
 
-		@lrs=LuxrenderSettings.new
+		# @lrs=LuxrenderSettings.new
 		#temporary file path for exporting copy
 		old_export_file_path = @lrs.export_file_path 
 		
@@ -225,7 +224,7 @@ module SU2LUX
 	plugin menu.
 	"""
 		##### --- awful hack --- 1.0 ####
-		@lrs=LuxrenderSettings.new
+		# @lrs=LuxrenderSettings.new
 		@export_file_path = @lrs.export_file_path #shouldn't need this
 		#####################
 		
@@ -333,8 +332,9 @@ module SU2LUX
 	#
 	##
 	def SU2LUX.get_luxrender_filename
-		filename = @os_specific_vars["luxrender_filename"]
-		return filename
+		# filename = @os_specific_vars["luxrender_filename"]
+		# return filename
+		return @luxrender_filename
 	end # END get_luxrender_filename
 
 	##
@@ -524,8 +524,6 @@ if( not file_loaded?(__FILE__) )
 			UI.messagebox("Unknown operating system: contact developer to add support for it")
 	end
 
-	SU2LUX.initialize_variables
-
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderSettings.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderSettingsEditor.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderMaterial.rb")
@@ -535,6 +533,8 @@ if( not file_loaded?(__FILE__) )
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderToolbar.rb")
   load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderPrimatives.rb")
   
+	SU2LUX.initialize_variables
+
   create_toolbar()
   
 	#observers

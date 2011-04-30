@@ -4,10 +4,11 @@ class LuxrenderExport
 	#
 	##
 	def initialize(export_file_path,os_separator)
+		@lrs=LuxrenderSettings.new
 		@export_file_path=export_file_path
-		@os_separator=os_separator
 		@model_name=File.basename(@export_file_path)
 		@model_name=@model_name.split(".")[0]
+		@os_separator=os_separator
 
 		@path_textures=File.dirname(@export_file_path)
 	end # END initialize
@@ -22,7 +23,7 @@ class LuxrenderExport
 		@count_tri = 0
 		@model_textures={}
 	#	@textures_prefix = "TX_"
-		@lrs=LuxrenderSettings.new
+		# @lrs=LuxrenderSettings.new
 		@lrs.xresolution = Sketchup.active_model.active_view.vpwidth unless @lrs.xresolution
 		@lrs.yresolution = Sketchup.active_model.active_view.vpheight unless @lrs.yresolution
 	end #END reset
@@ -42,7 +43,7 @@ class LuxrenderExport
 	#
 	##
 	def export_camera(view, out)
-		@lrs=LuxrenderSettings.new
+		# @lrs=LuxrenderSettings.new
 
 		user_camera = view.camera
 		user_eye = user_camera.eye
@@ -175,7 +176,7 @@ class LuxrenderExport
 	#
 	##
 	def export_render_settings(out)
-		@lrs=LuxrenderSettings.new
+		# @lrs=LuxrenderSettings.new
 		
 		#pixel filter
 		out.print "\n"

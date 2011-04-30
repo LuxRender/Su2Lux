@@ -23,9 +23,9 @@ class LuxrenderSettings
 	@@settings=
 	{
 	#'name_option'=>'default_value'
-	#####################################################################
-	###### - Camera	-														######
-	#####################################################################
+	##
+	# Camera
+	###
 		'camera_type'=>'perspective',
 		'fov'=> format("%.2f", Sketchup.active_model.active_view.camera.fov),#35, # not currently in use
 		'focal_length'=> format("%.2f", Sketchup.active_model.active_view.camera.focal_length),
@@ -36,15 +36,17 @@ class LuxrenderSettings
 		'motion_blur'=>false,
 		'hither'=>0.1,
 		'yon'=>100,  
-		#end Camera
-	#####################################################################
-	#####################################################################
+	# END Camera
 
-		#Environment 
+	##
+	#Environment
+	##
 		'environment_light_type'=>'infinite',
-		#end Environment
+	# END Environment
 
-		#Sampler
+	##
+	#Sampler
+	##
 		'sampler_showadvanced'=>false,
 		'sampler_type'=>'lowdiscrepancy',
 		'sampler_lowdisc_pixelsamples'=>1,
@@ -53,9 +55,11 @@ class LuxrenderSettings
 		'sampler_metro_lmprob'=>0.4,
 		'sampler_metro_maxrejects'=>512,
 		'sampler_metro_usevariance'=>false,
-		#end Sampler
+	# END Sampler
 		
-		#Integrator
+	##
+	#Integrator
+	##
 		'sintegrator_showadvanced'=>false,
 		'sintegrator_type'=>'bidirectional',
 		'sintegrator_distributedpath_directsampleall'=>true,
@@ -96,37 +100,40 @@ class LuxrenderSettings
 		'sintegrator_path_rrcontinueprob'=>0.65,
 		
 		'sintegrator_igi_maxdepth'=>5,
-		#end Integrator
+	# END Integrator
 		
-		#Volume Integrator
+	##
+	# Volume Integrator
+	##
 		'volume_integrator_type'=>"emission",
 		'volume_integrator_stepsize'=>1.00,
-		#end VolumeIntegrator
+	# END VolumeIntegrator
 		
-		#Filter
+	##
+	# Filter
+	##
 		'pixelfilter_showadvanced'=>false,
 		'pixelfilter_type'=>'mitchell',
 		'pixelfilter_mitchell_sharp'=>0.250, 
 		'pixelfilter_mitchell_xwidth'=>2.0, 
 		'pixelfilter_mitchell_ywidth'=>2.0,
 		'pixelfilter_mitchell_optmode'=>'slider',
-		#end Filter
-		
-		#Film
-	#####################################################################
-	###### - Film	-												######
-	#####################################################################
+	# END Filter
+	
+	##
+	# Film
+	##
 		'film_type'=>"fleximage",
 		'xresolution'=> nil, #Sketchup.active_model.active_view.vpwidth,#800
 		'yresolution'=> nil, #Sketchup.active_model.active_view.vpheight,#600
 		'film_displayinterval'=>4,
 		'haltspp'=>0,
 		'halttime'=>0,
-		#end Film
+	# END Film
 		
-	#####################################################################
-	###### - Accelerator	-														######
-	#####################################################################
+	##
+	# Accelerator
+	##
 		'accelerator_type'=> "tabreckdtree",
 		#tabreckdtree  properties
 		'intersection_cost'=> 80,
@@ -140,11 +147,11 @@ class LuxrenderSettings
 		'skip_factor'=> 1,
 		#grid properties
 		'refine_immediately'=> false,
-		#end Accelerator
-	#####################################################################
-	#####################################################################
-		
-		#Other
+	# END Accelerator
+
+	##
+	# Other
+	##
 		'useparamkeys'=>false,
 		'export_file_path'=>""
 	}
@@ -182,22 +189,16 @@ class LuxrenderSettings
 				
 				######## -- get any attribute -- #######
 				define_method(key) { @model.get_attribute(@dict,key,value) }
-				############################
 
 				case key
-					
-					###### -- set ui_refreshable -- #######
-					when LuxrenderSettings::ui_refreshable?(key)
+					when LuxrenderSettings::ui_refreshable?(key)# set ui_refreshable
 						define_method("#{key}=") do |new_value|
 						settings_editor = SU2LUX.get_editor("settings")
 						@model.set_attribute(@dict,key,new_value)
 						settings_editor.updateSettingValue(key) if settings_editor
 					end
-					###########################
-					######## -- set other -- ##########
-					else
+					else # set other
 						define_method("#{key}=") { |new_value| @model.set_attribute(@dict,key,new_value) }
-					###########################
 				end #end case
 			end #end settings.each
 		end #end module_eval
