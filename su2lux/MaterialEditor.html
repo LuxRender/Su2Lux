@@ -2,7 +2,7 @@
 
 <html>
 <head>
-<title>SU2LUX Material Editor</title>
+<title>SU2LUX Texture Editor</title>
 
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="MaterialEditor.js"></script>
@@ -18,6 +18,7 @@
 			<select id="material_name">
 				<option value="bogus">bogus</option>
 			</select>
+			<br>
 			<input type="button" id="preset_load" value="Load">
 			<input type="button" id="preset_save" value="Save">
 			<input type="button" id="preset_delete" value="Delete">
@@ -41,22 +42,26 @@
 			</select>
 			<div id="diffuse" class="matte glossy glossytranslucent">
 				<p class="header2">Diffuse</p>
-				<label for="matte_kd_R">Red</label>
-				<input type='text' id="matte_kd_R" size="6">
-				<label for="matte_kd_G">Green</label>
-				<input type='text' id="matte_kd_G" size="6">
-				<label for="matte_kd_B">Blue</label>
-				<input type='text' id="matte_kd_B" size="6">
-				<label for="use_diffuse_texture">Texture</label>
+				<label for="kd_R">Red</label>
+				<input type='text' id="kd_R" size="6">
+				<label for="kd_G">Green</label>
+				<input type='text' id="kd_G" size="6">
+				<label for="kd_B">Blue</label>
+				<input type='text' id="kd_B" size="6">
+<!--				<label for="use_diffuse_texture">Texture</label>
 				<input type="checkbox" id="use_diffuse_texture">
 				<div class="collapse" id="diffuse_texture">
-					<p class="header3">Image Map parameters</p>
-					<label for="kd_texturetype">Texture </label>
+					<p class="header3">Image Map parameters</p> -->
+					<br>
+					<label for="kd_texturetype">Texture type</label>
 					<select id="kd_texturetype">
+						<option value="none">None</option>
 						<option value="imagemap">Image Map</option>
 						<option value="sketchup">Sketchup Texture</option>
 					</select>
-					<div class="imagemap">
+					<span class="imagemap">
+						<input type="button" id="kd_browse_map" value="Load">
+<!--					
 						<label for="kd_imagemap_wrap">Image clipping</label>
 						<select id="kd_imagemap_wrap">
 							<option value="repeat">Repeat</option>
@@ -64,13 +69,6 @@
 							<option value="clamp">Clamp</option>
 						</select>
 						<br>
-						<!--
-						<br>
-						<label for="kd_imagemap_Sketchup">Sketchup Texture</label>
-						<br>
-						<input type="text" id="kd_imagemap_Sketchup" size="55" readonly="true">
-						<br>
-						-->
 						<label for="kd_imagemap_filename">Filename</label>
 						<input type="text" id="kd_imagemap_filename" size="30">
 						<input type="button" id="kd_imagemap_filename_browse" value="Browse">
@@ -93,19 +91,20 @@
 							<label for="kd_imagemap_discardmipmaps">Discard mip-maps</label>
 							<input type='text' id="kd_imagemap_discardmipmaps" size="6">
 						</div>
-					</div> <!-- END imagemap -->
-				</div> <!-- END diffuse_texture -->
+-->
+	<!--				</div> <!-- END imagemap -->
+				</span> <!-- END diffuse_texture -->
 			</div> <!-- END diffuse -->
 			<div id="specular" class="glossy shinymetal glossytranslucent">
 				<p class="header2">Specular</p>
 				<input type="button" id="get_diffuse_color" value="Get diffuse color">
 				<br>
-				<label for="glossy_ks_R">Red</label>
-				<input type='text' id="glossy_ks_R" size="6">
-				<label for="glossy_ks_G">Green</label>
-				<input type='text' id="glossy_ks_G" size="6">
-				<label for="glossy_ks_B">Blue</label>
-				<input type='text' id="glossy_ks_B" size="6">
+				<label for="ks_R">Red</label>
+				<input type='text' id="ks_R" size="6">
+				<label for="ks_G">Green</label>
+				<input type='text' id="ks_G" size="6">
+				<label for="ks_B">Blue</label>
+				<input type='text' id="ks_B" size="6">
 				<!--
 				<label for="use_specular_texture">Texture</label>
 				<input type="checkbox" id="use_specular_texture">
@@ -309,10 +308,10 @@
 					<option value=""></option>
 				</select>
 			</div> <!-- END matal -->
-			<div id="exponent" class="glossy metal roughglass shinymetal glossytranslucent">
+			<div id="exponent_div" class="glossy metal roughglass shinymetal glossytranslucent">
 				<p class="header2">Exponent</p>
-				<label for="glossy_exponent">Value</label>
-				<input type='text' id="glossy_exponent" size="6">
+				<label for="exponent">Value</label>
+				<input type='text' id="exponent" size="6">
 				<!--
 				<label for="use_uroughness_texture">Texture</label>
 				<input type="checkbox" id="use_uroughness_texture">
@@ -358,8 +357,8 @@
 			</div> <!-- END exponent -->
 			<div id="ior" class="glass roughglass">
 				<p class="header2">IOR</p>
-				<label for="glossy_index">Value</label>
-				<input type='text' id="glossy_index" size="6">
+				<label for="IOR_index">Value</label>
+				<input type='text' id="IOR_index" size="6">
 				<!--
 				<label for="use_IOR_texture">Texture</label>
 				<input type="checkbox" id="use_ior_texture">
@@ -413,12 +412,12 @@
 				<label for="use_absorption">Enable/Disable</label>
 				<input type="checkbox" id="use_absorption">
 				<div class="collapse">
-					<label for="glossy_ka_R">Red</label>
-					<input type='text' id="glossy_ka_R" size="6">
-					<label for="glossy_ka_G">Green</label>
-					<input type='text' id="glossy_ka_G" size="6">
-					<label for="glossy_ka_B">Blue</label>
-					<input type='text' id="glossy_ka_B" size="6">
+					<label for="ka_R">Red</label>
+					<input type='text' id="ka_R" size="6">
+					<label for="ka_G">Green</label>
+					<input type='text' id="ka_G" size="6">
+					<label for="ka_B">Blue</label>
+					<input type='text' id="ka_B" size="6">
 					<!--
 					<label for="use_absorption_texture">Texture</label>
 					<input type="checkbox" id="use_absorption_texture">

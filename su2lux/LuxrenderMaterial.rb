@@ -27,34 +27,42 @@ class LuxrenderMaterial
 	{
 		'type' => "matte",
 		'kd_imagemap_Sketchup_filename' => '',
-		'matte_kd_R' => 0.64,
-		'matte_kd_G' => 0.64,
-		'matte_kd_B' => 0.64,
+
+		'kd_R' => 0.64,
+		'kd_G' => 0.64,
+		'kd_B' => 0.64,
+
+		'ks_R' => 0.5,
+		'ks_G' => 0.5,
+		'ks_B' => 0.5,
+
+		'ka_R' => 0.0,
+		'ka_G' => 0.0,
+		'ka_B' => 0.0,
+
+		'kr_R' => 1.0,
+		'kr_G' => 1.0,
+		'kr_B' => 1.0,
+
+		'kt_R' => 1.0,
+		'kt_G' => 1.0,
+		'kt_B' => 1.0,
+
+		'exponent' => 50,
+		'uroughness' => 0.1,
+		'vroughness' => 0.1,
+
 		'matte_sigma' => 0.0,
-		'glossy_ks_R' => 0.5,
-		'glossy_ks_G' => 0.5,
-		'glossy_ks_B' => 0.5,
-		'glossy_ka_R' => 0.0,
-		'glossy_ka_G' => 0.0,
-		'glossy_ka_B' => 0.0,
-		'glossy_exponent' => 50,
-		'glossy_uroughness' => 0.1,
-		'glossy_vroughness' => 0.1,
 		'ka_d' => 0.0,
-		'glossy_index' => 1.5,
+		'IOR_index' => 1.5,
 		'multibounce' => false,
 		'cauchyb' => 0.004,
 		'film' => 200,
 		'film_index' => 1.5,
-		'kr_R' => 1.0,
-		'kr_G' => 1.0,
-		'kr_B' => 1.0,
-		'kt_R' => 1.0,
-		'kt_G' => 1.0,
-		'kt_B' => 1.0,
 		'nk_preset' => '',
 		'energyconserving' => true,
 		'bumpmap' => 0.0001,
+
 		'light_L' => 'blackbody',
 		'light_temperature' => 6500.0,
 		'light_power' => 100.0,
@@ -89,7 +97,7 @@ class LuxrenderMaterial
 		material_prefix += "_" if ( ! material.empty?)
 		key_prefix = material_prefix + "#{name}"
 		key = "#{key_prefix}_#{texture}_"
-		@@settings[key_prefix + "_texturetype"] = "sketchup"
+		@@settings[key_prefix + "_texturetype"] = "none"
 		@@settings[key + "wrap"] = "repeat"
 		@@settings[key + "channel"] = "mean" if (type == "float")
 		@@settings[key + "filename"] = ""
@@ -140,10 +148,10 @@ class LuxrenderMaterial
 		lux_image_texture("", "uroughness", "imagemap", "float")
 		lux_image_texture("", "vroughness", "imagemap", "float")
 		lux_image_texture("", "ka_d", "imagemap", "float")
-		lux_image_texture("glossy", "index", "imagemap", "float")
+		lux_image_texture("", "IOR_index", "imagemap", "float")
 		lux_image_texture("", "kr", "imagemap", "color")
 		lux_image_texture("", "kt", "imagemap", "color")
-		lux_image_texture("", "IOR", "imagemap", "float")
+		# lux_image_texture("", "IOR", "imagemap", "float")
 		lux_image_texture("", "cauchyb", "imagemap", "float")
 		lux_image_texture("", "film_thickness", "imagemap", "float")
 		lux_image_texture("", "film_index", "imagemap", "float")
@@ -235,7 +243,7 @@ class LuxrenderMaterial
 	#
 	##
 	def color
-		color = [self.matte_kd_R, self.matte_kd_G, self.matte_kd_B]
+		color = [self.kd_R, self.kd_G, self.kd_B]
 	end
 
 	##
@@ -243,9 +251,9 @@ class LuxrenderMaterial
 	##
 	def color=(su_mat_color)
 		scale = 1/255.0
-		self.matte_kd_R = format("%.6f", su_mat_color.red.to_f * scale)
-		self.matte_kd_G = format("%.6f", su_mat_color.green.to_f * scale)
-		self.matte_kd_B = format("%.6f", su_mat_color.blue.to_f * scale)
+		self.kd_R = format("%.6f", su_mat_color.red.to_f * scale)
+		self.kd_G = format("%.6f", su_mat_color.green.to_f * scale)
+		self.kd_B = format("%.6f", su_mat_color.blue.to_f * scale)
 	end
 	
 	##
@@ -264,23 +272,23 @@ class LuxrenderMaterial
 	#
 	##
 	def specular
-		specular = [self.glossy_ks_R, self.glossy_ks_G, self.glossy_ks_B]
+		specular = [self.ks_R, self.ks_G, self.ks_B]
 	end
 
 	##
 	#
 	##
 	def specular=(color)
-		self.glossy_ks_R = format("%.6f", color[0])
-		self.glossy_ks_G = format("%.6f", color[1])
-		self.glossy_ks_B = format("%.6f", color[2])
+		self.ks_R = format("%.6f", color[0])
+		self.ks_G = format("%.6f", color[1])
+		self.ks_B = format("%.6f", color[2])
 	end
 	
 	##
 	#
 	##
 	def absorption
-		specular = [self.glossy_ka_R, self.glossy_ka_G, self.glossy_ka_B]
+		specular = [self.ka_R, self.ka_G, self.ka_B]
 	end
 	
 	##

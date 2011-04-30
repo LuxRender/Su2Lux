@@ -328,7 +328,7 @@ module SU2LUX
 	##
 	#
 	##
-	def SU2LUX.load_image(title, object, method)
+	def SU2LUX.load_image(title, object, method, prefix)
 		
 		model = Sketchup.active_model
 		model_filename = File.basename(model.path)
@@ -343,9 +343,8 @@ module SU2LUX
 			user_input.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
 			user_input.gsub!(/\\/, '/') if user_input.include?('\\')
 			#store file path for quick exports
-				
-			object.send(method+"=", user_input)
-			
+			prefix += '_' unless prefix.empty?
+			object.send(prefix + method+"=", user_input)
 			return true #user has selected a path
 		end
 		return false #user has not selected a path
@@ -606,6 +605,10 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 		if (material_editor && material_editor.visible?)
 			material_editor.close
 		end
+		for mat in model.materials
+			luxmat = LuxrenderMaterial.new(mat)
+			luxmat.reset
+		end
 	end # END onNewModel
 
 	def onOpenModel(model)
@@ -698,7 +701,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 			else
 				luxmat.kd_imagemap_Sketchup_filename = ''
 				if (luxmat.kd_texturetype == 'sketchup')
-					# luxmat.kd_texturetype = 'sketchup'
+					luxmat.kd_texturetype = 'none'
 					luxmat.use_diffuse_texture = false
 				end
 			end
@@ -726,6 +729,7 @@ if( not file_loaded?(__FILE__) )
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderSettingsEditor.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderMaterial.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderMaterialEditor.rb")
+	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderTextureEditor.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "MeshCollector.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderExport.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderToolbar.rb")
@@ -745,6 +749,21 @@ if( not file_loaded?(__FILE__) )
 	# Sketchup.active_model.rendering_options.add_observer($SU2LUX_rendering_options_observer)
 	# $SU2LUX_materials_observer = SU2LUX_materials_observer.new
 	# Sketchup.active_model.materials.add_observer($SU2LUX_materials_observer)
+	
+	#The following code is needed because the AppObserver methods are not called when a Sketchup scene
+	#is loaded by double clicking on it
+	#TODO: insert the following code into a function
+	@lrs = LuxrenderSettings.new
+	loaded = @lrs.load_from_model
+	@lrs.reset unless loaded
+	for mat in Sketchup.active_model.materials
+		luxmat = LuxrenderMaterial.new(mat)
+		loaded = luxmat.load_from_model
+		luxmat.reset unless loaded
+	end
+	SU2LUX.create_material_editor
+	# material_editor = SU2LUX.get_editor("material")
+	# material_editor.refresh
 end
 
 

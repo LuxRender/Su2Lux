@@ -1145,6 +1145,7 @@ class LuxrenderExport
 					else
 						filename = material.kd_imagemap_Sketchup_filename
 						filled = false
+								return [before, after]
 					end
 					preceding += "\"string filename\" [\"#{filename}\"]" + "\n"
 				when "imagemap"
@@ -1153,11 +1154,13 @@ class LuxrenderExport
 			preceding += "\"float gamma\" [#{material.kd_imagemap_gamma}]" + "\n"
 			preceding += "\"float gain\" [#{material.kd_imagemap_gain}]" + "\n"
 			preceding += "\"string filtertype\" [\"#{material.kd_imagemap_filtertype}\"]" + "\n"
-			if (material.color[0].to_f != 1.0 && material.color[1].to_f != 1.0 &&material.color[2].to_f != 1.0)
+			if (material.color[0].to_f != 1.0 or material.color[1].to_f != 1.0 or material.color[2].to_f != 1.0)
 				color = "#{"%.6f" %(material.color[0])} #{"%.6f" %(material.color[1])} #{"%.6f" %(material.color[2])}"
 				preceding += "Texture \"#{material.name}::Kd.scale\" \"color\" \"scale\" \"texture tex1\" [\"#{material.name}::Kd\"] \"color tex2\" [#{color}]" + "\n"
+				following += "\"texture Kd\" [\"#{material.name}::Kd.scale\"]" + "\n"
+			else
+				following += "\"texture Kd\" [\"#{material.name}\"]" + "\n"
 			end
-			following += "\"texture Kd\" [\"#{material.name}::Kd.scale\"]" + "\n"
 		end
 		return [before + preceding, after + following]
 		# return filled ? component : color_component
@@ -1184,7 +1187,7 @@ class LuxrenderExport
 		following = ""
 		filled = true
 		if ( ! material.use_uroughness_texture)
-			u_roughness = Math.sqrt(2.0 / (material.glossy_exponent.to_f + 2))
+			u_roughness = Math.sqrt(2.0 / (material.exponent.to_f + 2))
 			following += "\"float uroughness\" [#{"%.6f" %(u_roughness)}]" + "\n"
 			following += "\"float vroughness\" [#{"%.6f" %(u_roughness)}]"
 		end
@@ -1199,7 +1202,7 @@ class LuxrenderExport
 		following = ""
 		filled = true
 		if ( ! material.use_IOR_texture)
-			following += "\"float index\" [#{material.glossy_index}]"
+			following += "\"float index\" [#{material.IOR_index}]"
 		else
 		end
 		return [before + preceding, after + following]

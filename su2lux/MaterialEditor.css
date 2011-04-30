@@ -89,3 +89,7 @@ input#get_diffuse_color {
 #preview {
 	height: 150px;
 }
+
+#imagemap_right {
+	float: right;
+}

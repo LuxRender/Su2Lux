@@ -19,7 +19,7 @@
 
 class LuxrenderMaterialEditor
 
-	attr_writer :current
+	attr_accessor :current
 	
 	def initialize
 		@material_editor_dialog = UI::WebDialog.new("Luxrender Material Editor", true, "LuxrenderMaterialEditor", 500, 500, 900, 400, true)
@@ -28,6 +28,7 @@ class LuxrenderMaterialEditor
 		@material_editor_dialog.set_file(material_editor_dialog_path)
 
 		# @lm = LuxrenderMaterial.new(Sketchup.active_model.materials.current.name)
+		@texture_editor_data = {}
 		
 		@material_editor_dialog.add_action_callback('param_generate') {|dialog, params|
 			# Get the data from the Webdialog.
@@ -47,10 +48,11 @@ class LuxrenderMaterialEditor
 					end
 					lux_material.send(method_name, v)
 					case
-						when k.match(/matte_kd_/)
+						when k.match(/^kd_.$/)
 							red = lux_material.color[0]
 							green = lux_material.color[1]
 							blue = lux_material.color[2]
+							#TODO: use start operation
 							material.color = lux_material.RGB_color
 					end
 				end
@@ -62,7 +64,7 @@ class LuxrenderMaterialEditor
 			material = Sketchup.active_model.materials.current
 			# lux_material = LuxrenderMaterial.new(material)
 			lux_material = @current
-			SU2LUX.load_image("Open image", lux_material, data)
+			SU2LUX.load_image("Open image", lux_material, data, '')
 		} #end action callback open_dialog
 		
 		@material_editor_dialog.add_action_callback('material_changed') { |dialog, material_name|
@@ -92,9 +94,9 @@ class LuxrenderMaterialEditor
 		 p 'get_diffuse_color'
 			lux_material = @current
 			lux_material.specular = lux_material.color
-			updateSettingValue("glossy_ks_R")
-			updateSettingValue("glossy_ks_G")
-			updateSettingValue("glossy_ks_B")
+			updateSettingValue("ks_R")
+			updateSettingValue("ks_G")
+			updateSettingValue("ks_B")
 		}
 		
 		@material_editor_dialog.add_action_callback("reset_to_default") {|dialog, params|
@@ -116,6 +118,22 @@ class LuxrenderMaterialEditor
 			end
 		}
 		
+		@material_editor_dialog.add_action_callback("texture_editor") {|dialog, params|
+			lux_material = @current
+			data = params.to_s
+			method_name = data + '_texturetype'
+			texture_type = lux_material.send(method_name)
+			
+			prefix = data + '_' + texture_type + '_'
+			@texture_editor_data['texturetype'] = lux_material.send(method_name)
+			['wrap', 'channel', 'filename', 'gamma', 'gain', 'filtertype', 'mapping', 
+				'uscale', 'vscale', 'udelta', 'vdelta', 'maxanisotropy', 'discardmipmaps'].each {|par|
+				@texture_editor_data[texture_type + '_' + par] = lux_material.send(prefix + par) if(lux_material.respond_to?(prefix+par))
+			}
+			@texture_editor = LuxrenderTextureEditor.new(@texture_editor_data, data)
+			@texture_editor.show
+		}
+
 		# @material_editor_dialog.add_action_callback('param_generate') {|dialog, params|
 				# #p 'param_generate'
 				# SU2LUX.dbg_p params

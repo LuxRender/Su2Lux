@@ -119,6 +119,16 @@ $(document).ready(
 			}
 		)
 		
+		$('input[id$="_browse_map"]').click(
+			function()
+			{
+				id = this.id;
+				index = id.lastIndexOf("_browse_map");
+				text = id.substring(0, index);
+				window.location = 'skp:texture_editor@' + text;
+			}
+		)
+		
 		$("#get_diffuse_color").click(
 			function()
 			{
@@ -139,6 +149,20 @@ $(document).ready(
 				window.location = 'skp:reset_to_default';
 			}
 		);
+		
+		$('input[id="update_changes"]').click(
+			function()
+			{
+				window.location = 'skp:update_changes';
+			}
+		)
+		
+		$('input[id="cancel_changes"]').click(
+			function()
+			{
+				window.location = 'skp:cancel_changes';
+			}
+		)
 		
 	}		
 );
