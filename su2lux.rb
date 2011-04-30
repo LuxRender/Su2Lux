@@ -627,7 +627,6 @@ end
 
 class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 	def onMaterialSetCurrent(materials, material)
-	SU2LUX.dbg_p 'calling observer event'
 		material_editor = SU2LUX.get_editor("material")
 		luxmat = LuxrenderMaterial.new(material)
 		if (material_editor)

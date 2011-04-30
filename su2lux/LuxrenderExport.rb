@@ -906,7 +906,7 @@ class LuxrenderExport
 				when "light"
 					out.puts "LightGroup \"default\""
 					out.puts "AreaLightSource \"area\" \"texture L\" [\"#{luxrender_mat.name}:light:L\"]"
-					out.puts "\"float power\" [#{"%.6f" %(luxrender_mat.lightpower)}]"
+					out.puts "\"float power\" [#{"%.6f" %(luxrender_mat.light_power)}]"
 					out.puts "\"float efficacy\" [#{"%.6f" %(luxrender_mat.light_efficacy)}]"
 					out.puts "\"float gain\" [#{"%.6f" %(luxrender_mat.light_gain)}]"
 				else

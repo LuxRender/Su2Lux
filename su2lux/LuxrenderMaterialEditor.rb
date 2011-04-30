@@ -217,7 +217,6 @@ class LuxrenderMaterialEditor
 	##
 	def set_current(name)
 		# cmd = "$(#material_name).attr('selected', 'selected'"
-		SU2LUX.dbg_p "call to set_current"
 		cmd = "$('#material_name option:contains(#{name})').attr('selected', true)"
 		@material_editor_dialog.execute_script(cmd)
 	end
