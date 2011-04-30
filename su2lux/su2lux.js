@@ -157,7 +157,7 @@ $(document).ready(
 				// checkbox_expander("fleximage_write_png")
 				// checkbox_expander("fleximage_write_tga")
 				// checkbox_expander("fleximage_use_preset")
-				$("input:checkbox").each(function(i) { checkbox_expander(i) } );
+				$("input:checkbox").each(function(index, element) { checkbox_expander(element.id) } );
 				$(this).next("div.collapse").slideToggle(300);
 				// node = $(this).next("div.collapse").children("#environment_light_type").attr("value");
 				// $(this).next("div.collapse").children("#environment_light_type").siblings("#" + node).show();

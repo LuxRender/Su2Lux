@@ -70,10 +70,15 @@ class LuxrenderMaterialEditor
 			@current = self.find(material_name)
 			materials.current = materials[material_name] if ( ! @current.nil?)
 			# updateSettingValue("type")
-			self.sendDataFromSketchup()
+			# self.sendDataFromSketchup()
 		}
 		
 		@material_editor_dialog.add_action_callback('type_changed') { |dialog, material_type|
+			# if material_type == "roughglass"
+				# @current.use_architectural = false
+				# updateSettingValue("use_architectural")
+				# @current.use_architectural = true
+			# end
 			# material = Sketchup.active_model.materials.current
 			# lux_material = LuxrenderMaterial.new(material)
 			# lux_material.type = material_type

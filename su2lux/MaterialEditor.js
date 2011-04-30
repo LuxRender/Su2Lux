@@ -14,6 +14,10 @@ function checkbox_expander(id)
 {
 	if ($("#" + id).attr("checked"))
 	{
+		// if (id.match("use_architectural")) {
+			// $("#thin_film_coating").hide();
+			// $("#dispersive_refraction").hide();
+		// }
 		if (id.match("show_advanced") || id.match("_use_")) {
 			$("#" + id).nextAll(".basic").hide();
 			$("#" + id).nextAll(".advanced").show();
@@ -23,6 +27,10 @@ function checkbox_expander(id)
 	}
 	else if ($("#" + id).attr("checked") == false)
 	{
+		// if (id.match("use_architectural")) {
+			// $("#thin_film_coating").show();
+			// $("#dispersive_refraction").show();
+		// }
 		if (id.match("show_advanced") || id.match("_use_")) {
 			$("#" + id).nextAll(".basic").show();
 			$("#" + id).nextAll(".advanced").hide();
@@ -70,7 +78,7 @@ $(document).ready(
 				expand_section($(this), "div.collapse", "+", "-");
 				$(this).next("div.collapse").find("select").change();
 				// checkbox_expander("use_diffuse_texture");
-				$("input:checkbox").each(function(i) { checkbox_expander(i) } );
+				$("input:checkbox").each(function(index, element) { checkbox_expander(element.id) } );
 				
 				// node = $(this).next("div.collapse").children("#accelerator_type").attr("value");
 				// $(this).next("div.collapse").children("#accelerator_type").siblings("#" + node).show();

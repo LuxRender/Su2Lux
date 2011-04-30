@@ -31,9 +31,6 @@ class LuxrenderMaterial
 		'matte_kd_G' => 0.64,
 		'matte_kd_B' => 0.64,
 		'matte_sigma' => 0.0,
-		# 'glossy_kd_R' => 0.5,
-		# 'glossy_kd_G' => 0.5,
-		# 'glossy_kd_B' => 0.5,
 		'glossy_ks_R' => 0.5,
 		'glossy_ks_G' => 0.5,
 		'glossy_ks_B' => 0.5,
@@ -44,8 +41,20 @@ class LuxrenderMaterial
 		'glossy_uroughness' => 0.1,
 		'glossy_vroughness' => 0.1,
 		'ka_d' => 0.0,
-		'glossy_index' => 0.0,
+		'glossy_index' => 1.5,
 		'multibounce' => false,
+		'cauchyb' => 0.004,
+		'film' => 200,
+		'film_index' => 1.5,
+		'kr_R' => 1.0,
+		'kr_G' => 1.0,
+		'kr_B' => 1.0,
+		'kt_R' => 1.0,
+		'kt_G' => 1.0,
+		'kt_B' => 1.0,
+		'nk_preset' => '',
+		'energyconserving' => true,
+		'bumpmap' => 0.0001,
 		#GUI
 		'use_diffuse_texture' => false,
 		'use_sigma_texture' => false,
@@ -53,6 +62,18 @@ class LuxrenderMaterial
 		'use_specular_texture' => false,
 		'use_absorption_texture' => false,
 		'use_absorption_depth_texture' => false,
+		'use_reflection_texture' => false,
+		'use_transmission_texture' => false,
+		'use_architectural' => false,
+		'use_IOR_texture' => false,
+		'use_dispersive_refraction_texture' => false,
+		'use_film_texture' => false,
+		'use_film_index_texture' => false,
+		'use_absorption' => false,
+		'use_dispersive_refraction' => false,
+		'use_thin_film_coating' => false,
+		'use_bump' => false,
+		'use_bump_texture' => false,
 	}
 
 	##
@@ -91,6 +112,8 @@ class LuxrenderMaterial
 			"vroughness_imagemap_filename",
 			"ka_imagemap_filename",
 			"ka_d_imagemap_filename",
+			"kr_imagemap_filename",
+			"kt_imagemap_filename",
 		]
 		if ui_refreshable_settings.include?(id)
 			return id
@@ -113,6 +136,14 @@ class LuxrenderMaterial
 		lux_image_texture("", "vroughness", "imagemap", "float")
 		lux_image_texture("", "ka_d", "imagemap", "float")
 		lux_image_texture("glossy", "index", "imagemap", "float")
+		lux_image_texture("", "kr", "imagemap", "color")
+		lux_image_texture("", "kt", "imagemap", "color")
+		lux_image_texture("", "IOR", "imagemap", "float")
+		lux_image_texture("", "cauchyb", "imagemap", "float")
+		lux_image_texture("", "film_thickness", "imagemap", "float")
+		lux_image_texture("", "film_index", "imagemap", "float")
+		lux_image_texture("", "bump", "imagemap", "float")
+		
 		singleton_class = (class << self; self; end)
 		@model=Sketchup.active_model
 		@view=@model.active_view
@@ -240,7 +271,6 @@ class LuxrenderMaterial
 		self.glossy_ks_B = format("%.6f", color[2])
 	end
 	
-	
 	##
 	#
 	##
@@ -248,6 +278,20 @@ class LuxrenderMaterial
 		specular = [self.glossy_ka_R, self.glossy_ka_G, self.glossy_ka_B]
 	end
 	
+	##
+	#
+	##
+	def reflection
+		reflection = [self.kr_R, self.kr_G, self.kr_B]
+	end
+
+	##
+	#
+	##
+	def transmission
+		transmission = [self.kt_R, self.kt_G, self.kt_B]
+	end
+
 	private :lux_image_texture
 	
 end # END class LuxrenderMaterial
