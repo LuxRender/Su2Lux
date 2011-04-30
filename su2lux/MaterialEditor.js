@@ -164,6 +164,13 @@ $(document).ready(
 			}
 		)
 		
+		// $("#imagemap_uvset").change(
+			// function()
+			// {
+				// window.location = 'skp:param_generate@' + this.id+'='+this.value
+			// }
+		// );
+		
 	}		
 );
 

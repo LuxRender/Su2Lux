@@ -126,8 +126,8 @@ class LuxrenderMaterialEditor
 			
 			prefix = data + '_' + texture_type + '_'
 			@texture_editor_data['texturetype'] = lux_material.send(method_name)
-			['wrap', 'channel', 'filename', 'gamma', 'gain', 'filtertype', 'mapping', 
-				'uscale', 'vscale', 'udelta', 'vdelta', 'maxanisotropy', 'discardmipmaps'].each {|par|
+			['wrap', 'channel', 'filename', 'gamma', 'gain', 'filtertype', 'mapping', 'uscale',
+			 'vscale', 'udelta', 'vdelta', 'maxanisotropy', 'discardmipmaps'].each {|par|
 				@texture_editor_data[texture_type + '_' + par] = lux_material.send(prefix + par) if(lux_material.respond_to?(prefix+par))
 			}
 			@texture_editor = LuxrenderTextureEditor.new(@texture_editor_data, data)

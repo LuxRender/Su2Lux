@@ -212,7 +212,6 @@ class MeshCollector
 	#
 	##
 	def texture_distorted?(e,mat,mat_dir)
-	# p "MIMMO"
 		distorted = false
 		if e.valid? and e.is_a? Sketchup::Face
 			for v in e.vertices

@@ -111,6 +111,7 @@ class LuxrenderMaterial
 		@@settings[key + "vdelta"] = 1.0
 		@@settings[key + "maxanisotropy"] = 8.0
 		@@settings[key + "discardmipmaps"] = 0
+		# @@settings[key + "uvset"] = 0
 	end
 	
 	##
@@ -140,6 +141,7 @@ class LuxrenderMaterial
 	##
 	def initialize(su_material)
 		@mat = su_material
+		@uvs = {}
 		
 		lux_image_texture("", "kd", "imagemap", "color")
 		lux_image_texture("matte", "sigma", "imagemap", "float")
@@ -305,6 +307,36 @@ class LuxrenderMaterial
 		transmission = [self.kt_R, self.kt_G, self.kt_B]
 	end
 
+	##
+	#
+	##
+	def save_uv(channel_number, uv_set)
+		# uvs = {}
+		# (uvs[channel_number] ||= []) << uv_set
+		@uvs[channel_number] = uv_set
+		LuxrenderAttributeDictionary.set_attribute(@dict, 'uv_set', @uvs)
+	end
+
+	##
+	#
+	##
+	def get_uv(channel_number)
+		uvs = LuxrenderAttributeDictionary.get_attribute(@dict, 'uv_set', {})
+		p "get"
+		p uvs
+		uv = uvs[channel_number]
+	end
+	
+	##
+	#
+	##
+	def has_uvs?(channel_number=1)
+		uvs = LuxrenderAttributeDictionary.get_attribute(@dict, 'uv_set', {})
+		p "hasuvs"
+		p uvs
+		return uvs ? true : false
+	end
+	
 	private :lux_image_texture
 	
 end # END class LuxrenderMaterial

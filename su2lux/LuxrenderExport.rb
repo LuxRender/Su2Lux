@@ -851,7 +851,6 @@ class LuxrenderExport
 			mat_dir.push ft[3]
 
 			polymesh.transform! trans
-			
 		 
 			xa = point_to_vector(ft[1].xaxis)
 			ya = point_to_vector(ft[1].yaxis)
@@ -974,6 +973,7 @@ class LuxrenderExport
 		
 		@exp_default_uvs=true
 		no_texture_uvs=(!has_texture and @exp_default_uvs==true)
+		
 		if has_texture or no_texture_uvs
 			current_step += 1
 			i = 0

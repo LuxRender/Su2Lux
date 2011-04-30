@@ -551,6 +551,25 @@ end #END luxrender_path_valid?
 		return editor
 	end # END get_editor
 
+	##
+	#
+	##
+	def SU2LUX.selected_face_has_texture?
+		has_texture = false
+		model = Sketchup.active_model
+		selection = model.selection
+		sel = selection.first
+		if sel.valid? and sel.is_a? Sketchup::Face
+			mesh = sel.mesh 5
+			material = sel.material
+			material = sel.back_material if material.nil?
+			if material and material.materialType > 0
+				has_texture = true
+			end
+		end
+		return has_texture
+	end
+	
 end # END module SU2LUX
 
 class SU2LUX_view_observer < Sketchup::ViewObserver
@@ -733,11 +752,13 @@ if( not file_loaded?(__FILE__) )
 	load File.join(SU2LUX::PLUGIN_FOLDER, "MeshCollector.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderExport.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderToolbar.rb")
+	load File.join(SU2LUX::PLUGIN_FOLDER, "SU2LUX_UV.rb")
   # load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderPrimatives.rb")
   
 	SU2LUX.initialize_variables
 
   create_toolbar()
+	create_context_menu()
   
 	#observers
 	SU2LUX.create_observers

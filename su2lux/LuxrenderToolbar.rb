@@ -44,3 +44,34 @@ def create_toolbar
 
 	toolbar.show
 end
+
+def create_context_menu
+	UI.add_context_menu_handler do |menu|
+		if( SU2LUX.selected_face_has_texture? )
+			menu.add_separator
+			uvs = SU2LUX_UV.new
+			lux_menu = menu.add_submenu("SU2LUX Add-ons")
+			su2lux_menu = lux_menu.add_submenu("UV Manager")
+			su2lux_menu.add_item("Save UV coordinates") { uvs.get_selection_uvs(1) }
+			# su2lux_menu.add_item("Save UV coordinates in slot 2") { nil }
+			# su2lux_menu.add_item("Save UV coordinates in slot 3") { nil }
+			# su2lux_menu.add_item("Save UV coordinates in slot 4") { nil }
+			# su2lux_menu.add_item("Save UV coordinates in slot 5") { nil }
+			# su2lux_menu.add_item("Save UV coordinates in slot 6") { nil }
+			# su2lux_menu.add_item("Save UV coordinates in slot 7") { nil }
+			# su2lux_menu.add_item("Save UV coordinates in slot 8") { nil }
+			# su2lux_menu.add_item("Save UV coordinates in slot 9") { nil }
+			# su2lux_menu.add_item("Save UV coordinates in slot 10") { nil }
+			# su2lux_menu.add_item("Save UV coordinates in slot 11") { nil }
+			# su2lux_menu.add_item("Save UV coordinates in slot 12") { nil }
+			# su2lux_menu.add_item("Save UV coordinates in slot 13") { nil }
+			# su2lux_menu.add_item("Save UV coordinates in slot 14") { nil }
+			# su2lux_menu.add_item("Save UV coordinates in slot 15") { nil }
+			# su2lux_menu.add_item("Save UV coordinates in slot 16") { nil }
+			# su2lux_menu.add_item("Save UV coordinates in slot 17") { nil }
+			# su2lux_menu.add_item("Save UV coordinates in slot 18") { nil }
+			# su2lux_menu.add_item("Save UV coordinates in slot 19") { nil }
+			# su2lux_menu.add_item("Save UV coordinates in slot 20") { nil }
+		end
+	end
+end
