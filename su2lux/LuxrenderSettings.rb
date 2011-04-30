@@ -129,6 +129,7 @@ class LuxrenderSettings
 		'film_displayinterval'=>4,
 		'haltspp'=>0,
 		'halttime'=>0,
+		'saveexr' => false,
 	# END Film
 		
 	##

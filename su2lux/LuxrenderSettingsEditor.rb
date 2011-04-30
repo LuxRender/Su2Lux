@@ -25,10 +25,10 @@ class LuxrenderSettingsEditor
 	##
 	def initialize
 
-		pref_key="LuxrenderSettingsEditor"
-		@settings_dialog=UI::WebDialog.new("Luxrender Render Settings", true,pref_key,520,500, 10,10,true)
+		pref_key = "LuxrenderSettingsEditor"
+		@settings_dialog = UI::WebDialog.new("Luxrender Render Settings", true, pref_key, 520, 500, 10, 10, true)
 		@settings_dialog.max_width = 520
-		setting_html_path = Sketchup.find_support_file "settings.html" ,"Plugins/su2lux"
+		setting_html_path = Sketchup.find_support_file("settings.html" , "Plugins/"+SU2LUX::PLUGIN_FOLDER)
 		@settings_dialog.set_file(setting_html_path)
 		
 		@lrs=LuxrenderSettings.new
@@ -42,62 +42,10 @@ class LuxrenderSettingsEditor
 				key = pair[0]		   
 				value = pair[1]
 				case key
-					#Camera
-					when "camera_type"
-						@lrs.camera_type=value
 					when "fov"
 						Sketchup.active_model.active_view.camera.fov = value.to_f
 					when "focal_length"
 						Sketchup.active_model.active_view.camera.focal_length = value.to_f
-					when "camera_scale"
-						@lrs.camera_scale=value
-					when "near_far_clipping"
-						@lrs.near_far_clipping=true if value=="true"
-						@lrs.near_far_clipping=false if value=="false"
-					when "hither"
-						@lrs.hither=value
-					when "yon"
-						@lrs.yon=value
-					when "dof_bokeh"
-						@lrs.dof_bokeh=true if value=="true"
-						@lrs.dof_bokeh=false if value=="false"
-					when "architectural"
-						@lrs.architectural=true if value=="true"
-						@lrs.architectural=false if value=="false"
-					when "motion_blur"
-						@lrs.motion_blur=true if value=="true"
-						@lrs.motion_blur=false if value=="false"
-					#end Camera
-					
-					#Environment
-					
-					#end Environment
-					
-					#Sampler
-					when "sampler_type"
-						@lrs.sampler_type=value	
-					#end Sampler
-					
-					#Integerator
-					when "sintegrator_type"
-						SU2LUX.dbg_p 'set integrator '+value
-						@lrs.sintegrator_type=value
-					when "sintegrator_dlighting_maxdepth"
-						@lrs.sintegrator_dlighting_maxdepth=value
-					when "singtegrator_path_maxdepth"
-						@lrs.sintegrator_path_maxdepth=value
-					when "sintegrator_igi_maxdepth"
-						@lrs.sintegrator_igi_maxdepth=value
-					#end Integrator
-					
-					#Volume integrator
-					when "volume_integrator_type"
-						@lrs.volume_integrator_type=value
-					when "volume_integrator_stepsize"
-						@lrs.volume_integrator_stepsize=value
-					#end Volume integrator
-					
-					#Film
 					when "xresolution"
 						SU2LUX.dbg_p 'set xresolution '+value
 						@lrs.xresolution=value.to_f
@@ -106,33 +54,113 @@ class LuxrenderSettingsEditor
 						SU2LUX.dbg_p 'set yresolution '+value
 						@lrs.yresolution=value.to_f
 						change_aspect_ratio(@lrs.xresolution.to_f / @lrs.yresolution.to_f)
+					else
+						if (@lrs.respond_to?(key))
+							SU2LUX.dbg_p key + " => " + value
+							method_name = key + "="
+							@lrs.send(method_name, value)
+						else
+							UI.messagebox "Parameter " + key + " does not exist.\n\nContact developers."
+						end
+					#Camera
+					# when "fov"
+						# Sketchup.active_model.active_view.camera.fov = value.to_f
+					# when "focal_length"
+						# Sketchup.active_model.active_view.camera.focal_length = value.to_f
+					# when "camera_type"
+						# @lrs.camera_type=value
+					# when "camera_scale"
+						# @lrs.camera_scale=value
+					# when "near_far_clipping"
+						# @lrs.near_far_clipping=true if value=="true"
+						# @lrs.near_far_clipping=false if value=="false"
+					# when "hither"
+						# @lrs.hither=value
+					# when "yon"
+						# @lrs.yon=value
+					# when "dof_bokeh"
+						# @lrs.dof_bokeh=true if value=="true"
+						# @lrs.dof_bokeh=false if value=="false"
+					# when "architectural"
+						# @lrs.architectural=true if value=="true"
+						# @lrs.architectural=false if value=="false"
+					# when "motion_blur"
+						# @lrs.motion_blur=true if value=="true"
+						# @lrs.motion_blur=false if value=="false"
+					#end Camera
+					
+					#Environment
+					
+					#end Environment
+					
+					#Sampler
+					# when "sampler_type"
+						# @lrs.sampler_type=value	
+					#end Sampler
+					
+					#Integerator
+					# when "sintegrator_type"
+						# SU2LUX.dbg_p 'set integrator '+value
+						# @lrs.sintegrator_type=value
+					# when "sintegrator_dlighting_maxdepth"
+						# @lrs.sintegrator_dlighting_maxdepth=value
+					# when "singtegrator_path_maxdepth"
+						# @lrs.sintegrator_path_maxdepth=value
+					# when "sintegrator_igi_maxdepth"
+						# @lrs.sintegrator_igi_maxdepth=value
+					#end Integrator
+					
+					#Volume integrator
+					# when "volume_integrator_type"
+						# @lrs.volume_integrator_type=value
+					# when "volume_integrator_stepsize"
+						# @lrs.volume_integrator_stepsize=value
+					#end Volume integrator
+					
+					#Film
+					# when "xresolution"
+						# SU2LUX.dbg_p 'set xresolution '+value
+						# @lrs.xresolution=value.to_f
+						# change_aspect_ratio(@lrs.xresolution.to_f / @lrs.yresolution.to_f)
+					# when "yresolution"
+						# SU2LUX.dbg_p 'set yresolution '+value
+						# @lrs.yresolution=value.to_f
+						# change_aspect_ratio(@lrs.xresolution.to_f / @lrs.yresolution.to_f)
 					#end Film
 					
 					#Accelerator
-					when "accelerator_type"
-						@lrs.accelerator_type=value
-					#tabrec
-					when "intersection_cost"
-						@lrs.intersection_cost=value
-					when "traversal_cost"
-						@lrs.traversal_cost=value
-					when "empty_bonus"
-						@lrs.empty_bonus=value
-					when "max_prims"
-						@lrs.max_prims=value
-					when "max_depth"
-						@lrs.max_depth=value
+					# when "accelerator_type"
+						# @lrs.accelerator_type=value
+					# #tabrec
+					# when "intersection_cost"
+						# @lrs.intersection_cost=value
+					# when "traversal_cost"
+						# @lrs.traversal_cost=value
+					# when "empty_bonus"
+						# @lrs.empty_bonus=value
+					# when "max_prims"
+						# @lrs.max_prims=value
+					# when "max_depth"
+						# @lrs.max_depth=value
 
 					#grid
-					when "refine_immediately"
-						@lrs.refine_immediately=value
+					# when "refine_immediately"
+						# @lrs.refine_immediately=value
 
 					#qbvh
-					when "max_prims_per_leaf"
-						@lrs.max_prims_per_leaf=value
-					when "skip_factor"
-						@lrs.skip_factor=value
+					# when "max_prims_per_leaf"
+						# @lrs.max_prims_per_leaf=value
+					# when "skip_factor"
+						# @lrs.skip_factor=value
 					#end Accelerator
+					# else
+						# if (@lrs.respond_to?(key))
+							# SU2LUX.dbg_p key + " => " + value
+							# method_name = key + "="
+							# @lrs.send(method_name, value)
+						# else
+							# UI.messagebox "Parameter " + key + " does not exist.\n\nContact developers."
+						# end
 				end	
 		} #end action callback param_generatate
 		
@@ -594,10 +622,15 @@ class LuxrenderSettingsEditor
 	#set parameters in inputs of settings.html
 	##
 	def sendDataFromSketchup()
+	
+		Sketchup.active_model.start_operation "Updating setting editor"
+		
+		#TODO: check if get_all_write_accessors can be used here to simplify things
 		updateSettingValue("fov")
 		updateSettingValue("focal_length")
 		updateSettingValue("camera_scale")
 		updateSettingValue("near_far_clipping")
+		#TODO: check the following commented lines for UNDO/REDO issues
 		@lrs.xresolution = Sketchup.active_model.active_view.vpwidth unless @lrs.xresolution
 		updateSettingValue("xresolution")
 		@lrs.yresolution = Sketchup.active_model.active_view.vpheight unless @lrs.yresolution
@@ -630,13 +663,26 @@ class LuxrenderSettingsEditor
 
 		updateSettingValue("max_prims_per_leaf")
 		updateSettingValue("skip_factor")
+		Sketchup.active_model.commit_operation
 	end # END sendDataFromSketchup
 
 	##
 	#
 	##
+	def get_all_write_accessors
+		methods_list = @lrs.public_methods(false)
+		methods = []
+		methods_list.each { |m|
+			methods.push(m) unless m =~ /=$/ or m == "[]"
+		}
+		return methods
+	end
+	
+	##
+	#
+	##
 	def is_a_checkbox?(id)#much better to use objects for settings?!
-		@lrs=LuxrenderSettings.new
+		# @lrs=LuxrenderSettings.new
 		if @lrs[id] == true or @lrs[id] == false
 			return id
 		end
@@ -673,6 +719,8 @@ class LuxrenderSettingsEditor
 		else
 			cmd="$('##{id}').val('#{new_value}');" #syntax jquery
 			SU2LUX.dbg_p cmd
+			# cmd = "document.getElementById('#{id}').value=\"#{new_value}\""
+			# SU2LUX.dbg_p cmd
 			@settings_dialog.execute_script(cmd)
 			#Horror coding?
 			if(id == "camera_type")
@@ -688,7 +736,7 @@ class LuxrenderSettingsEditor
 	#
 	##
 	def updateSettingValue(id)
-		@lrs=LuxrenderSettings.new
+		# @lrs=LuxrenderSettings.new
 		setValue(id, @lrs[id])
 	end # END updateSettingValue
 
