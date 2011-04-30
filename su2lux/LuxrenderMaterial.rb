@@ -55,6 +55,11 @@ class LuxrenderMaterial
 		'nk_preset' => '',
 		'energyconserving' => true,
 		'bumpmap' => 0.0001,
+		'light_L' => 'blackbody',
+		'light_temperature' => 6500.0,
+		'light_power' => 100.0,
+		'light_efficacy' => 17.0,
+		'light_gain' => 1.0,
 		#GUI
 		'use_diffuse_texture' => false,
 		'use_sigma_texture' => false,

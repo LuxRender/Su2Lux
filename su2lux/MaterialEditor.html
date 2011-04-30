@@ -37,6 +37,7 @@
 				<option value="shinymetal">Shiny Metal</option>
 				<option value="mattetranslucent">Matte Translucent</option>
 				<option value="glossytranslucent">Glossy Translucent</option>
+				<option value="light">Light</option>
 			</select>
 			<div id="diffuse" class="matte glossy glossytranslucent">
 				<p class="header2">Diffuse</p>
@@ -665,8 +666,8 @@
 				<label for="energyconserving">Enable/Disable</label>
 				<input type="checkbox" id="energyconserving">
 			</div> <!-- END asperity --> 
-<!--			<div id="bump" class="matte glossy glass roughglass metal mirror shinymetal mattetranslucent glossytranslucent">-->
-			<div id="bump" class="">
+			<div id="bump" class="matte glossy glass roughglass metal mirror shinymetal mattetranslucent glossytranslucent">
+<!--			<div id="bump" class="">-->
 				<p class="header2">Bump</p>
 				<label for="use_bump">Enable/Disable</label>
 				<input type="checkbox" id="use_bump">
@@ -715,6 +716,21 @@
 					</div>
 				</div>
 			</div> <!-- END Bump -->
+			<div class="light">
+				<label for="light_L">Texture</label>
+				<select id="light_L">
+					<option value="blackbody">Blackbody</option>
+				</select>
+				<label for="light_temperature">Temperature</label>
+				<input type="text" id="light_temperature" size="6">
+				<br>
+				<label for="light_power">Power</label>
+				<input type="text" id="light_power" size="6">
+				<label for="light_efficacy">Efficacy</label>
+				<input type="text" id="light_efficacy" size="6">
+				<label for="light_gain">Gain</label>
+				<input type="text" id="light_gain" size="6">
+			</div>
 		</div> <!-- END material_type -->
 		<br>
 		<br>

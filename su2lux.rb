@@ -617,7 +617,6 @@ end # END class SU2LUX_app_observer
 
 class SU2LUX_rendering_options_observer < Sketchup::RenderingOptionsObserver
 	def onRenderingOptionsChanged(renderoptions, type)
-		UI.messagebox("onRenderingOptionsChanged: " + renderoptions["BackgroundColor"].to_s + ',' + type.to_s)
 		if (type == 12)
 			color = renderoptions["BackgroundColor"]
 			@lrs = LuxrenderSettings.new
