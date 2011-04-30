@@ -304,6 +304,32 @@ module SU2LUX
 	##
 	#
 	##
+	def SU2LUX.load_image(title, object, method)
+		
+		model = Sketchup.active_model
+		model_filename = File.basename(model.path)
+		default_folder = SU2LUX.find_default_folder
+		export_folder = default_folder
+		export_folder = File.dirname(model.path) if ! model.path.empty?
+		
+		user_input = UI.openpanel(title, export_folder, "*")
+		
+		#check whether user has pressed cancel
+		if user_input
+			user_input.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
+			user_input.gsub!(/\\/, '/') if user_input.include?('\\')
+			#store file path for quick exports
+				
+			object.send(method+"=", user_input)
+			
+			return true #user has selected a path
+		end
+		return false #user has not selected a path
+	end # END new_export_file_path
+
+	##
+	#
+	##
 	#TODO: try to write better code for the function
 	def SU2LUX.get_luxrender_path
 		find_luxrender = true
@@ -571,6 +597,33 @@ class SU2LUX_rendering_options_observer < Sketchup::RenderingOptionsObserver
 	end
 end
 
+class SU2LUX_materials_observer < Sketchup::MaterialsObserver
+	def onMaterialSetCurrent(materials, material)
+	p 'calling observer event'
+		material_editor = SU2LUX.get_editor("material")
+		luxmat = LuxrenderMaterial.new(material)
+		material_editor.set_current(luxmat.name) if (material_editor)
+	end
+	
+	def onMaterialAdd(materials, material)
+		material_editor = SU2LUX.get_editor("material")
+		material_editor = SU2LUX.get_editor("material")
+		material_editor.refresh() if (material_editor);
+		# material_editor.set_material_list() if (material_editor)
+		# luxmat = LuxrenderMaterial.new(material)
+		# material_editor.set_current(luxmat.name) if (material_editor)
+	end
+
+	def onMaterialRemove(materials, material)
+		material_editor = SU2LUX.get_editor("material")
+		material_editor.refresh() if (material_editor);
+		# material_editor.set_material_list() if (material_editor)
+		# luxmat = LuxrenderMaterial.new(material)
+		# material_editor.set_current(luxmat.name) if (material_editor)
+	end
+	
+end
+
 if( not file_loaded?(__FILE__) )
 
 	case SU2LUX.get_os
@@ -600,6 +653,7 @@ if( not file_loaded?(__FILE__) )
 	Sketchup.add_observer(SU2LUX_app_observer.new)
 	Sketchup.active_model.active_view.add_observer(SU2LUX_view_observer.new)
 	Sketchup.active_model.rendering_options.add_observer(SU2LUX_rendering_options_observer.new)
+	Sketchup.active_model.materials.add_observer(SU2LUX_materials_observer.new)
 end
 
 

@@ -17,9 +17,9 @@ class LuxrenderAttributeDictionary
 	#
 	##
 	def LuxrenderAttributeDictionary::get_attribute(name, key, default)
-		@@dictionary = self.choose(name)
-		if ( ! @@dictionary[key].nil?)
-			return @@dictionary[key]
+		dictionary = self.choose(name)
+		if ( dictionary.key? key)
+			return dictionary[key]
 		else
 			return default
 		end
@@ -29,8 +29,9 @@ class LuxrenderAttributeDictionary
 	#
 	##
 	def LuxrenderAttributeDictionary::set_attribute(name, key, value)
-		@@dictionary = self.choose(name)
-		@@dictionary[key] = value
+		dictionary = self.choose(name)
+		dictionary[key] = value
+		@@dictionaries[name] = dictionary
 	end #END set_attribute
 	
 	##
@@ -41,11 +42,10 @@ class LuxrenderAttributeDictionary
 		if (name.nil? or name.strip.empty?)
 			return @@dictionary
 		end
-		if (@@dictionaries[name].nil?)
-			@@dictionaries[name] = @@dictionary
-		else
-			@@dictionary = @@dictionaries[name]
+		if ( ! @@dictionaries.key? name)
+			@@dictionaries[name] = {}
 		end
+		@@dictionary = @@dictionaries[name]
 		return @@dictionary
 	end #END choose
 	
@@ -82,5 +82,15 @@ class LuxrenderAttributeDictionary
 		}
 		return false
 	end #END modified?
+	
+	def LuxrenderAttributeDictionary::list_dictionaries()
+		puts @@dictionaries.length
+		keys = @@dictionaries.keys
+		keys.each{|k|
+		puts "\n\n#{k}\n\n"
+			puts @@dictionaries[k].each{|kk,vv| puts "#{kk}=>#{vv}"}
+		}
+	end
+
 	
 end #END class Luxrender_Attribute_dictionary

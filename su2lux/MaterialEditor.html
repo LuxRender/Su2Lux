@@ -1,0 +1,314 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+<title>SU2LUX Material Editor</title>
+
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="MaterialEditor.js"></script>
+
+<link href="MaterialEditor.css" type="text/css" rel="stylesheet">
+ 
+</head>
+<body>
+	<div id="settings_panel">
+		<div id="material_management">
+			<p class="header">Material presets management</p>
+			<label for="material_name">Name </label>
+			<select id="material_name">
+			</select>
+			<input type="button" id="preset_load" value="Load">
+			<input type="button" id="preset_save" value="Save">
+			<input type="button" id="preset_delete" value="Delete">
+		</div>
+		<p class="header">+ Material preview</p>
+		<div class="collapse" id="preview">
+		</div>
+		<p class="header">+ Material properties</p>
+		<div class="collapse" id="material_type">
+			Material type <select id="type">
+				<option value="matte">Matte</option>
+				<option value="glossy">Glossy</option>
+			</select>
+			<div id="diffuse" class="matte glossy">
+				<p class="header2">Diffuse</p>
+				<label for="matte_kd_R">Red</label>
+				<input type='text' id="matte_kd_R" size="6">
+				<label for="matte_kd_G">Green</label>
+				<input type='text' id="matte_kd_G" size="6">
+				<label for="matte_kd_B">Blue</label>
+				<input type='text' id="matte_kd_B" size="6">
+				<label for="use_diffuse_texture">Texture</label>
+				<input type="checkbox" id="use_diffuse_texture">
+				<div class="collapse" id="diffuse_texture">
+					<p class="header3">Image Map parameters</p>
+					<label for="kd_texturetype">Texture </label>
+					<select id="kd_texturetype">
+						<option value ="imagemap"> Image Map</option>
+					</select>
+					<label for="kd_imagemap_wrap">Image clipping</label>
+					<select id="kd_imagemap_wrap">
+						<option value="repeat">Repeat</option>
+						<option value="black">Black</option>
+						<option value="clamp">Clamp</option>
+					</select>
+					<br>
+					<label for="kd_imagemap_filename">Filename</label>
+					<input type="text" id="kd_imagemap_filename" size="30">
+					<input type="button" id="kd_imagemap_filename_browse" value="Browse">
+					<br>
+					<label for="kd_imagemap_gamma">Gamma</label>
+					<input type='text' id="kd_imagemap_gamma" size="6">
+					<label for="kd_imagemap_gain">Gain</label>
+					<input type='text' id="kd_imagemap_gain" size="6">
+					<br>
+					<label for="kd_imagemap_filtertype">Filter Type</label>
+					<select id="kd_imagemap_filtertype">
+						<option value="bilinear">bilinear</option>
+						<option value="nearest">nearest</option>
+						<option value="mipmap_ewa">mipmap_ewa</option>
+						<option value="mipmap_trilinear">mipmap_trilinear</option>
+					</select>
+					<div class="mipmap_trilinear mipmap_ewa">
+						<label for="kd_imagemap_maxanisotropy">Max anisotropy</label>
+						<input type='text' id="kd_imagemap_maxanisotropy" size="6">
+						<label for="kd_imagemap_discardmipmaps">Discard mip-maps</label>
+						<input type='text' id="kd_imagemap_discardmipmaps" size="6">
+					</div>
+				</div>
+			</div>
+			<div id="Oren-Nayar" class="matte">
+				<p class="header2">Oren-Nayar</p>
+				<label for="matte_sigma">Sigma</label>
+				<input type='text' id="matte_sigma" size="6">
+				<label for="use_matte_matte_sigma_texture">Texture</label>
+				<input type="checkbox" id="use_matte_matte_sigma_texture">
+				<div class="collapse" id="matte_sigma_texture">
+					<p class="header3">Image Map parameters</p>
+					<label for="matte_matte_sigma_texturetype">Texture </label>
+					<select id="matte_matte_sigma_texturetype">
+						<option value ="imagemap"> Image Map</option>
+					</select>
+					<label for="matte_sigma_imagemap_wrap">Image clipping</label>
+					<select id="matte_sigma_imagemap_wrap">
+						<option value="repeat">Repeat</option>
+						<option value="black">Black</option>
+						<option value="clamp">Clamp</option>
+					</select>
+					<br>
+					<label for="matte_sigma_imagemap_filename">Filename</label>
+					<input type="text" id="matte_sigma_imagemap_filename" size="30">
+					<input type="button" id="matte_sigma_imagemap_filename_browse" value="Browse">
+					<br>
+					<label for="matte_sigma_imagemap_gamma">Gamma</label>
+					<input type='text' id="matte_sigma_imagemap_gamma" size="6">
+					<label for="matte_sigma_imagemap_gain">Gain</label>
+					<input type='text' id="matte_sigma_imagemap_gain" size="6">
+					<br>
+					<label for="matte_sigma_imagemap_filtertype">Filter Type</label>
+					<select id="matte_sigma_imagemap_filtertype">
+						<option value="bilinear">bilinear</option>
+						<option value="nearest">nearest</option>
+						<option value="mipmap_ewa">mipmap_ewa</option>
+						<option value="mipmap_trilinear">mipmap_trilinear</option>
+					</select>
+					<div class="mipmap_trilinear mipmap_ewa">
+						<label for="matte_sigma_imagemap_maxanisotropy">Max anisotropy</label>
+						<input type='text' id="matte_sigma_imagemap_maxanisotropy" size="6">
+						<label for="matte_sigma_imagemap_discardmipmaps">Discard mip-maps</label>
+						<input type='text' id="matte_sigma_imagemap_discardmipmaps" size="6">
+					</div>
+				</div>
+			</div>
+			<div id="specular" class="glossy">
+				<p class="header2">Specular</p>
+				<label for="glossy_ks_R">Red</label>
+				<input type='text' id="glossy_ks_R" size="6">
+				<label for="glossy_ks_G">Green</label>
+				<input type='text' id="glossy_ks_G" size="6">
+				<label for="glossy_ks_B">Blue</label>
+				<input type='text' id="glossy_ks_B" size="6">
+				<label for="use_specular_texture">Texture</label>
+				<input type="checkbox" id="use_specular_texture">
+				<div class="collapse" id="specular_texture">
+					<p class="header3">Image Map parameters</p>
+					<label for="ks_texturetype">Texture </label>
+					<select id="ks_texturetype">
+						<option value ="imagemap"> Image Map</option>
+					</select>
+					<label for="ks_imagemap_wrap">Image clipping</label>
+					<select id="ks_imagemap_wrap">
+						<option value="repeat">Repeat</option>
+						<option value="black">Black</option>
+						<option value="clamp">Clamp</option>
+					</select>
+					<br>
+					<label for="ks_imagemap_filename">Filename</label>
+					<input type="text" id="ks_imagemap_filename" size="30">
+					<input type="button" id="ks_imagemap_filename_browse" value="Browse">
+					<br>
+					<label for="ks_imagemap_gamma">Gamma</label>
+					<input type='text' id="ks_imagemap_gamma" size="6">
+					<label for="ks_imagemap_gain">Gain</label>
+					<input type='text' id="ks_imagemap_gain" size="6">
+					<br>
+					<label for="ks_imagemap_filtertype">Filter Type</label>
+					<select id="ks_imagemap_filtertype">
+						<option value="bilinear">bilinear</option>
+						<option value="nearest">nearest</option>
+						<option value="mipmap_ewa">mipmap_ewa</option>
+						<option value="mipmap_trilinear">mipmap_trilinear</option>
+					</select>
+					<div class="mipmap_trilinear mipmap_ewa">
+						<label for="ks_imagemap_maxanisotropy">Max anisotropy</label>
+						<input type='text' id="ks_imagemap_maxanisotropy" size="6">
+						<label for="ks_imagemap_discardmipmaps">Discard mip-maps</label>
+						<input type='text' id="ks_imagemap_discardmipmaps" size="6">
+					</div>
+				</div>
+			</div>
+			<div id="exponent" class="glossy">
+				<p class="header2">Exponent</p>
+				<label for="glossy_uroughness">Roughness</label>
+				<input type='text' id="glossy_uroughness" size="6">
+				<label for="use_uroughness_texture">Texture</label>
+				<input type="checkbox" id="use_uroughness_texture">
+				<div class="collapse" id="uroughness_texture">
+					<p class="header3">Image Map parameters</p>
+					<label for="uroughness_texturetype">Texture </label>
+					<select id="uroughness_texturetype">
+						<option value ="imagemap"> Image Map</option>
+					</select>
+					<label for="uroughness_imagemap_wrap">Image clipping</label>
+					<select id="uroughness_imagemap_wrap">
+						<option value="repeat">Repeat</option>
+						<option value="black">Black</option>
+						<option value="clamp">Clamp</option>
+					</select>
+					<br>
+					<label for="uroughness_imagemap_filename">Filename</label>
+					<input type="text" id="uroughness_imagemap_filename" size="30">
+					<input type="button" id="uroughness_imagemap_filename_browse" value="Browse">
+					<br>
+					<label for="uroughness_imagemap_gamma">Gamma</label>
+					<input type='text' id="uroughness_imagemap_gamma" size="6">
+					<label for="uroughness_imagemap_gain">Gain</label>
+					<input type='text' id="uroughness_imagemap_gain" size="6">
+					<br>
+					<label for="uroughness_imagemap_filtertype">Filter Type</label>
+					<select id="uroughness_imagemap_filtertype">
+						<option value="bilinear">bilinear</option>
+						<option value="nearest">nearest</option>
+						<option value="mipmap_ewa">mipmap_ewa</option>
+						<option value="mipmap_trilinear">mipmap_trilinear</option>
+					</select>
+					<div class="mipmap_trilinear mipmap_ewa">
+						<label for="uroughness_imagemap_maxanisotropy">Max anisotropy</label>
+						<input type='text' id="uroughness_imagemap_maxanisotropy" size="6">
+						<label for="uroughness_imagemap_discardmipmaps">Discard mip-maps</label>
+						<input type='text' id="uroughness_imagemap_discardmipmaps" size="6">
+					</div>
+				</div>
+			</div>
+			<div id="asperity" class="glossy">
+				<p class="header2">Asperity</p>
+				<label for="multibounce">Enable/Disable</label>
+				<input type="checkbox" id="multibounce">
+			</div>
+			<div id="absorption" class="glossy">
+				<p class="header2">Absorption</p>
+				<label for="glossy_ka_R">Red</label>
+				<input type='text' id="glossy_ka_R" size="6">
+				<label for="glossy_ka_G">Green</label>
+				<input type='text' id="glossy_ka_G" size="6">
+				<label for="glossy_ka_B">Blue</label>
+				<input type='text' id="glossy_ka_B" size="6">
+				<label for="use_absorption_texture">Texture</label>
+				<input type="checkbox" id="use_absorption_texture">
+				<div class="collapse" id="absorption_texture">
+					<p class="header3">Image Map parameters</p>
+					<label for="ka_texturetype">Texture </label>
+					<select id="ka_texturetype">
+						<option value ="imagemap"> Image Map</option>
+					</select>
+					<label for="ka_imagemap_wrap">Image clipping</label>
+					<select id="ka_imagemap_wrap">
+						<option value="repeat">Repeat</option>
+						<option value="black">Black</option>
+						<option value="clamp">Clamp</option>
+					</select>
+					<br>
+					<label for="ka_imagemap_filename">Filename</label>
+					<input type="text" id="ka_imagemap_filename" size="30">
+					<input type="button" id="ka_imagemap_filename_browse" value="Browse">
+					<br>
+					<label for="ka_imagemap_gamma">Gamma</label>
+					<input type='text' id="ka_imagemap_gamma" size="6">
+					<label for="ka_imagemap_gain">Gain</label>
+					<input type='text' id="ka_imagemap_gain" size="6">
+					<br>
+					<label for="ka_imagemap_filtertype">Filter Type</label>
+					<select id="ka_imagemap_filtertype">
+						<option value="bilinear">bilinear</option>
+						<option value="nearest">nearest</option>
+						<option value="mipmap_ewa">mipmap_ewa</option>
+						<option value="mipmap_trilinear">mipmap_trilinear</option>
+					</select>
+					<div class="mipmap_trilinear mipmap_ewa">
+						<label for="ka_imagemap_maxanisotropy">Max anisotropy</label>
+						<input type='text' id="ka_imagemap_maxanisotropy" size="6">
+						<label for="ka_imagemap_discardmipmaps">Discard mip-maps</label>
+						<input type='text' id="ka_imagemap_discardmipmaps" size="6">
+					</div>
+				</div>
+				<br>
+				<label for="ka_d">Depth</label>
+				<input type='text' id="ka_d" size="6">
+				<label for="use_absorption_depth_texture">Texture</label>
+				<input type="checkbox" id="use_absorption_depth_texture">
+				<div class="collapse" id="absorption_depth_texture">
+					<p class="header3">Image Map parameters</p>
+					<label for="ka_d_texturetype">Texture </label>
+					<select id="ka_d_texturetype">
+						<option value ="imagemap"> Image Map</option>
+					</select>
+					<label for="ka_d_imagemap_wrap">Image clipping</label>
+					<select id="ka_d_imagemap_wrap">
+						<option value="repeat">Repeat</option>
+						<option value="black">Black</option>
+						<option value="clamp">Clamp</option>
+					</select>
+					<br>
+					<label for="ka_d_imagemap_filename">Filename</label>
+					<input type="text" id="ka_d_imagemap_filename" size="30">
+					<input type="button" id="ka_d_imagemap_filename_browse" value="Browse">
+					<br>
+					<label for="ka_d_imagemap_gamma">Gamma</label>
+					<input type='text' id="ka_d_imagemap_gamma" size="6">
+					<label for="ka_d_imagemap_gain">Gain</label>
+					<input type='text' id="ka_d_imagemap_gain" size="6">
+					<br>
+					<label for="ka_d_imagemap_filtertype">Filter Type</label>
+					<select id="ka_d_imagemap_filtertype">
+						<option value="bilinear">bilinear</option>
+						<option value="nearest">nearest</option>
+						<option value="mipmap_ewa">mipmap_ewa</option>
+						<option value="mipmap_trilinear">mipmap_trilinear</option>
+					</select>
+					<div class="mipmap_trilinear mipmap_ewa">
+						<label for="ka_d_imagemap_maxanisotropy">Max anisotropy</label>
+						<input type='text' id="ka_d_imagemap_maxanisotropy" size="6">
+						<label for="ka_d_imagemap_discardmipmaps">Discard mip-maps</label>
+						<input type='text' id="ka_d_imagemap_discardmipmaps" size="6">
+					</div>
+				</div>
+			</div>
+		</div>
+		<br>
+		<br>
+		<hr>
+		<input type="button" id="save_to_model" value="Save settings to model">
+		<input type="button" id="reset" value="Reset to defaults">
+	</div>
+</body>
+</html>

@@ -1043,6 +1043,7 @@ class LuxrenderExport
 	#
 	##
 	def export_mat(mat, out)
+	# TODO
 		SU2LUX.dbg_p "export_mat"
 		out.puts "# Material '" + mat.name + "'"
 		case mat.type
@@ -1050,7 +1051,8 @@ class LuxrenderExport
 				out.puts "MakeNamedMaterial \"" + mat.name + "\""
 				SU2LUX.dbg_p "mat.name " + mat.name
 				out.puts  "\"string type\" [\"matte\"]"
-				out.puts  "\"color Kd\" [#{"%.6f" %(mat.color.red.to_f/255)} #{"%.6f" %(mat.color.green.to_f/255)} #{"%.6f" %(mat.color.blue.to_f/255)}]"
+				# out.puts  "\"color Kd\" [#{"%.6f" %(mat.color.red.to_f/255)} #{"%.6f" %(mat.color.green.to_f/255)} #{"%.6f" %(mat.color.blue.to_f/255)}]"
+				out.puts  "\"color Kd\" [#{"%.6f" %(mat.diffuse_color[0])} #{"%.6f" %(mat.diffuse_color[1])} #{"%.6f" %(mat.diffuse_color[2])}]"
 			when "glass"
 				out.puts "MakeNamedMaterial \"" + mat.name + "\""
 				SU2LUX.dbg_p "mat.name " + mat.name

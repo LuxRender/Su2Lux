@@ -1,0 +1,87 @@
+body {
+	overflow: hidden;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	background: #444444;
+	color: #eeeeee;
+}
+
+.header {
+	padding: 5px 10px;
+	cursor: pointer;
+	position: relative;
+	background-color: #bf8040;/*#c67700; /*#d77f00;*/
+	margin: 1px;
+}
+
+.header2 {
+	padding: 5px 10px;
+	background-color: #b2c6c9;/*#c67700; /*#d77f00;*/
+	color: #000000;
+	cursor: pointer;
+	position: relative;
+	margin: 15px 20px 15px 1px;
+}
+
+.header3 {
+	padding: 2px 10px;
+	background-color: #d1c6d6;/*#c67700; /*#d77f00;*/
+	color: #000000;
+	cursor: pointer;
+	position: relative;
+	margin: 1px 20px 1px 1px;
+}
+
+#settings_panel {
+	border: 2px solid #eeeeee;
+	margin-top: 10px;
+	padding: 3px;
+}
+
+.collapse {
+	display:none;
+	margin: 0 0 0 15px;
+	padding: 6px;
+}
+   
+.collapse2 {
+	display:none;
+	padding: 6px;
+}
+   
+input[type=button] {
+	margin: 3px;
+	margin-right: 2px;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	width: 8em;
+}
+
+input#divide_by_2, input#multiply_by_2 {
+	width: 5em;
+}
+
+input#save_to_model, input#reset {
+	width: 140px;
+}
+
+#current_view {
+/*	height: 45px;*/
+/*	float: right;*/
+	width: 139px;
+	margin-left: 5px;
+}
+
+#flip_dim {
+	width: 169px;
+}
+
+#fleximage_xresolution, #fleximage_yresolution {
+	margin: -23px 5px 0 0;
+	text-align: right;
+	font-size: 10px;
+}
+
+#preview {
+	height: 150px;
+}

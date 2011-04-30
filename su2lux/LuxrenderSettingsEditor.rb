@@ -145,7 +145,6 @@ class LuxrenderSettingsEditor
 		##
 		#
 		##
-		#TODO: change variables names
 		@settings_dialog.add_action_callback("preset") {|d,p|
 			case p
 				when '0' #<option value='0'>0 Preview - Global Illumination</option> in settings.html
