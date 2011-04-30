@@ -69,7 +69,8 @@ $(document).ready(
 			{
 				expand_section($(this), "div.collapse", "+", "-");
 				$(this).next("div.collapse").find("select").change();
-				// checkbox_expander("glossy_multibounce")
+				// checkbox_expander("use_diffuse_texture");
+				$("input:checkbox").each(function(i) { checkbox_expander(i) } );
 				
 				// node = $(this).next("div.collapse").children("#accelerator_type").attr("value");
 				// $(this).next("div.collapse").children("#accelerator_type").siblings("#" + node).show();
@@ -85,6 +86,14 @@ $(document).ready(
 		// );
 		
 		$('select[id$="_imagemap_filtertype"]').change(
+			function()
+			{
+				$(this).nextAll().hide();
+				$(this).nextAll("." + this.value).show();
+			}
+		);
+		
+		$('select[id$="_texturetype"]').change(
 			function()
 			{
 				$(this).nextAll().hide();

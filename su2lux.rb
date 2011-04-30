@@ -557,6 +557,8 @@ end # END class SU2LUX_view_observer
 class SU2LUX_app_observer < Sketchup::AppObserver
 	def onNewModel(model)
 		model.active_view.add_observer(SU2LUX_view_observer.new)
+		model.rendering_options.add_observer(SU2LUX_rendering_options_observer.new)
+		model.materials.add_observer(SU2LUX_materials_observer.new)
 		@lrs = LuxrenderSettings.new
 		@lrs.reset
 		@lrs.fleximage_xresolution = Sketchup.active_model.active_view.vpwidth
@@ -570,18 +572,33 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 			settings_editor.close
 			# settings_editor.setValue("camera_scale", @lrs.camera_scale)
 		end
+		material_editor = SU2LUX.get_editor("material")
+		if (material_editor && material_editor.visible?)
+			material_editor.close
+		end
 	end # END onNewModel
 
 	def onOpenModel(model)
 		model.active_view.add_observer(SU2LUX_view_observer.new)
+		model.rendering_options.add_observer(SU2LUX_rendering_options_observer.new)
+		model.materials.add_observer(SU2LUX_materials_observer.new)
 		@lrs = LuxrenderSettings.new
 		settings_editor = SU2LUX.get_editor("settings")
 		if(settings_editor && settings_editor.visible?)
 			settings_editor.close
 		end
+		material_editor = SU2LUX.get_editor("material")
+		if (material_editor && material_editor.visible?)
+			material_editor.close
+		end
 		# loaded = LuxrenderAttributeDictionary.load_from_model(@lrs.dictionary_name)
 		loaded = @lrs.load_from_model
 		@lrs.reset if ( ! loaded)
+		for mat in model.materials
+			luxmat = LuxrenderMaterial.new(mat)
+			loaded = luxmat.load_from_model
+			luxmat.reset if ( ! loaded)
+		end
 	end
 	
 end # END class SU2LUX_app_observer
@@ -602,7 +619,12 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 	p 'calling observer event'
 		material_editor = SU2LUX.get_editor("material")
 		luxmat = LuxrenderMaterial.new(material)
-		material_editor.set_current(luxmat.name) if (material_editor)
+		if (material_editor)
+			material_editor.set_current(luxmat.name)
+			material_editor.current = luxmat
+			material_editor.sendDataFromSketchup
+			material_editor.fire_event("#type", "change", "")
+		end
 	end
 	
 	def onMaterialAdd(materials, material)
@@ -620,6 +642,35 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 		# material_editor.set_material_list() if (material_editor)
 		# luxmat = LuxrenderMaterial.new(material)
 		# material_editor.set_current(luxmat.name) if (material_editor)
+	end
+	
+	def onMaterialChange(materials, material)
+		material_editor = SU2LUX.get_editor("material")
+		if (material_editor)
+			luxmat = material_editor.find(material.name)
+			luxmat.color = material.color
+			material_editor.updateSettingValue("matte_kd_R")
+			material_editor.updateSettingValue("matte_kd_G")
+			material_editor.updateSettingValue("matte_kd_B")
+
+			if material.texture
+				texture_name = material.texture.filename
+				texture_name.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
+				texture_name.gsub!(/\\/, '/') if texture_name.include?('\\')
+				luxmat.kd_imagemap_Sketchup_filename = texture_name
+				luxmat.kd_texturetype = 'sketchup'
+				luxmat.use_diffuse_texture = true
+			else
+				luxmat.kd_imagemap_Sketchup_filename = ''
+				if (luxmat.kd_texturetype == 'sketchup')
+					# luxmat.kd_texturetype = 'sketchup'
+					luxmat.use_diffuse_texture = false
+				end
+			end
+			material_editor.updateSettingValue("kd_imagemap_Sketchup_filename")
+			material_editor.updateSettingValue("kd_texturetype")
+			material_editor.updateSettingValue("use_diffuse_texture")
+		end
 	end
 	
 end

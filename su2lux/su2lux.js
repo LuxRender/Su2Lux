@@ -153,10 +153,11 @@ $(document).ready(
 				node = $(this).next("div.collapse").find("#fleximage_linear_camera_type").change();
 				
 				//TODO: expand all checkbox
-				checkbox_expander("fleximage_write_exr")
-				checkbox_expander("fleximage_write_png")
-				checkbox_expander("fleximage_write_tga")
-				checkbox_expander("fleximage_use_preset")
+				// checkbox_expander("fleximage_write_exr")
+				// checkbox_expander("fleximage_write_png")
+				// checkbox_expander("fleximage_write_tga")
+				// checkbox_expander("fleximage_use_preset")
+				$("input:checkbox").each(function(i) { checkbox_expander(i) } );
 				$(this).next("div.collapse").slideToggle(300);
 				// node = $(this).next("div.collapse").children("#environment_light_type").attr("value");
 				// $(this).next("div.collapse").children("#environment_light_type").siblings("#" + node).show();

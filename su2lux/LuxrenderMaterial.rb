@@ -26,6 +26,7 @@ class LuxrenderMaterial
 	@@settings=
 	{
 		'type' => "matte",
+		'kd_imagemap_Sketchup_filename' => '',
 		'matte_kd_R' => 0.64,
 		'matte_kd_G' => 0.64,
 		'matte_kd_B' => 0.64,
@@ -60,7 +61,7 @@ class LuxrenderMaterial
 		material_prefix += "_" if ( ! material.empty?)
 		key_prefix = material_prefix + "#{name}"
 		key = "#{key_prefix}_#{texture}_"
-		@@settings[key_prefix + "_texturetype"] = "none"
+		@@settings[key_prefix + "_texturetype"] = "sketchup"
 		@@settings[key + "wrap"] = "repeat"
 		@@settings[key + "channel"] = "mean" if (type == "float")
 		@@settings[key + "filename"] = ""
@@ -147,15 +148,15 @@ class LuxrenderMaterial
 			end
 	end #END reset
 	
-	# def load_from_model
-		# return LuxrenderAttributeDictionary.load_from_model(@dict)
-	# end #END load_from_model
+	def load_from_model
+		return LuxrenderAttributeDictionary.load_from_model(@dict)
+	end #END load_from_model
 	
-	# def save_to_model
-		# Sketchup.active_model.start_operation "SU2LUX settings saved"
-		# LuxrenderAttributeDictionary.save_to_model(@dict)
-		# Sketchup.active_model.commit_operation
-	# end #END load_from_model
+	def save_to_model
+		Sketchup.active_model.start_operation "SU2LUX Material settings saved"
+		LuxrenderAttributeDictionary.save_to_model(@dict)
+		Sketchup.active_model.commit_operation
+	end #END save_to_model
 	
 	def get_names
 		settings = []
@@ -186,7 +187,11 @@ class LuxrenderMaterial
 	
 	def RGB_color
 		scale = 255
-		rgb = [(self.color[0] * scale), (self.color[1] * scale), (self.color[2] * scale)]
+		rgb = []
+		for c in self.color
+			rgb.push((c.to_f * scale).to_i)
+		end
+		return rgb
 	end
 	
 	def color2

@@ -19,6 +19,8 @@
 
 class LuxrenderMaterialEditor
 
+	attr_writer :current
+	
 	def initialize
 		@material_editor_dialog = UI::WebDialog.new("Luxrender Material Editor", true, "LuxrenderMaterialEditor", 500, 500, 900, 400, true)
 		material_editor_dialog_path = Sketchup.find_support_file("materialeditor.html", "Plugins/su2lux")
@@ -32,11 +34,20 @@ class LuxrenderMaterialEditor
 			parameters = string_to_hash(params)
 			material = Sketchup.active_model.materials.current
 			# lux_material = LuxrenderMaterial.new(material)
-			lux_material = self.find(material.name)
+			# lux_material = self.find(material.name)
+			lux_material = @current
 			parameters.each{ |k, v|
 				if (lux_material.respond_to?(k))
 					method_name = k + "="
 					lux_material.send(method_name, v)
+					case
+						when k.match(/matte_kd_/)
+							red = lux_material.color[0]
+							green = lux_material.color[1]
+							blue = lux_material.color[2]
+							p lux_material.RGB_color.to_a.to_s
+							material.color = lux_material.RGB_color
+					end
 				end
 			}
 		}
@@ -44,17 +55,17 @@ class LuxrenderMaterialEditor
 		@material_editor_dialog.add_action_callback("open_dialog") {|dialog, params|
 			data = params.to_s
 			material = Sketchup.active_model.materials.current
-			lux_material = LuxrenderMaterial.new(material)
+			# lux_material = LuxrenderMaterial.new(material)
+			lux_material = @current
 			SU2LUX.load_image("Open image", lux_material, data)
 		} #end action callback open_dialog
 		
 		@material_editor_dialog.add_action_callback('material_changed') { |dialog, material_name|
 			materials = Sketchup.active_model.materials
-			lm = self.find(material_name)
-			materials.current = materials[material_name] if ( ! lm.nil?)
-			# self.setValue("type", lm.type)
-			updateSettingValue("type")
-			UI.start_timer(0.05, false) { self.sendDataFromSketchup() }
+			@current = self.find(material_name)
+			materials.current = materials[material_name] if ( ! @current.nil?)
+			# updateSettingValue("type")
+			self.sendDataFromSketchup()
 		}
 		
 		@material_editor_dialog.add_action_callback('type_changed') { |dialog, material_type|
@@ -62,6 +73,25 @@ class LuxrenderMaterialEditor
 			# lux_material = LuxrenderMaterial.new(material)
 			# lux_material.type = material_type
 			# UI.start_timer(0.2, false) { self.sendDataFromSketchup() }
+		}
+		
+		@material_editor_dialog.add_action_callback("reset_to_default") {|dialog, params|
+			materials = Sketchup.active_model.materials
+			for mat in materials
+				luxmat = self.find(mat.name)
+				luxmat.reset
+			end
+			self.close
+			UI.start_timer(0.5, false) { self.show }
+			# self.show
+		}
+
+		@material_editor_dialog.add_action_callback("save_to_model") {|dialog, params|
+			materials = Sketchup.active_model.materials
+			for mat in materials
+				luxmat = self.find(mat.name)
+				luxmat.save_to_model
+			end
 		}
 		
 		# @material_editor_dialog.add_action_callback('param_generate') {|dialog, params|
@@ -142,15 +172,24 @@ class LuxrenderMaterialEditor
 			luxmat = LuxrenderMaterial.new(mat)
 			# TODO: set up all the parameters
 			luxmat.color = mat.color
+			if mat.texture
+				texture_name = mat.texture.filename
+				texture_name.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
+				texture_name.gsub!(/\\/, '/') if texture_name.include?('\\')
+				luxmat.kd_imagemap_Sketchup_filename = texture_name
+				luxmat.kd_texturetype = 'sketchup'
+				luxmat.use_diffuse_texture = true
+			end
 		end
 		current = materials.current
 		if (current.nil?)
 			current = materials[0]
 			materials.current = current
 		end
-		luxmat = LuxrenderMaterial.new(current)
+		luxmat = self.find(current.name)
 		self.set_current(luxmat.name)
-		UI.start_timer(0.1, false) { self.sendDataFromSketchup() }
+		@current = luxmat
+		self.sendDataFromSketchup()
 	end
 	
 	##
@@ -226,26 +265,27 @@ class LuxrenderMaterialEditor
 	#set parameters in inputs of settings.html
 	##
 	def sendDataFromSketchup()
-		material = Sketchup.active_model.materials.current
-		lux_material = self.find(material.name)
+		# material = Sketchup.active_model.materials.current
+		# lux_material = self.find(material.name)
+		lux_material = @current
 		settings = lux_material.get_names
 		# current_settings = settings.select{ |k, v| k.include?(lux_material.type) }
 		# current_settings = settings
 		settings.each { |setting|
 			updateSettingValue(setting)
-			# setValue(setting, lux_material[setting])
 		}
-		setting = "type"
+		# setting = "type"
 		# setValue(setting, lux_material[setting])
-		updateSettingValue(setting)
+		# updateSettingValue(setting)
 	end # END sendDataFromSketchup
 	
 	##
 	#
 	##
 	def is_a_checkbox?(id)#much better to use objects for settings?!
-		material = Sketchup.active_model.materials.current
-		lux_material = LuxrenderMaterial.new(material)
+		# material = Sketchup.active_model.materials.current
+		# lux_material = LuxrenderMaterial.new(material)
+		lux_material = @current
 		if lux_material[id] == true or lux_material[id] == false
 			return id
 		end
@@ -258,10 +298,11 @@ class LuxrenderMaterialEditor
 		new_value=value.to_s
 		case id
 			when is_a_checkbox?(id)
-				cmd="$('##{id}').attr('checked', #{value});" #different asignment method
+				self.fire_event("##{id}", "attr", "checked=#{value}")
+				cmd="checkbox_expander('#{id}');"
 				@material_editor_dialog.execute_script(cmd)
-				# cmd="checkbox_expander('#{id}');"
-				# @material_editor_dialog.execute_script(cmd)
+				cmd = "$('##{id}').next('div.collapse').find('select').change();"
+				@material_editor_dialog.execute_script(cmd)
 			# #############################
 			# when "use_plain_color"
 				# radio_id = @lrs.use_plain_color
@@ -270,8 +311,9 @@ class LuxrenderMaterialEditor
 			
 			######### -- other -- #############
 			else
-				cmd="$('##{id}').val('#{new_value}');"
-				@material_editor_dialog.execute_script(cmd)
+				self.fire_event("##{id}", "val", new_value)
+				# cmd="$('##{id}').val('#{new_value}');"
+				# @material_editor_dialog.execute_script(cmd)
 			end
 			#############################
 	end # END setValue
@@ -280,9 +322,34 @@ class LuxrenderMaterialEditor
 	#
 	##
 	def updateSettingValue(id)
-		material = Sketchup.active_model.materials.current
-		lux_material = LuxrenderMaterial.new(material)
+		# material = Sketchup.active_model.materials.current
+		# lux_material = LuxrenderMaterial.new(material)
+		lux_material = @current
 		setValue(id, lux_material[id])
 	end # END updateSettingValue
 
+	def fire_event(object, event, parameters)
+		cmd = ""
+		case event
+			when "change"
+				cmd = "$('#{object}').#{event}();"
+			when "val"
+				cmd = "$('#{object}').val('#{parameters}');"
+			when "attr"
+				params = string_to_hash(parameters)
+				params.each{ |key, value|
+					cmd += "$('#{object}').attr('#{key}', #{value});"
+				}
+		end
+		@material_editor_dialog.execute_script(cmd)
+	end
+
+	def close
+		@material_editor_dialog.close
+	end
+	
+	def visible?
+		return @material_editor_dialog.visible?
+	end
+	
 end #end class LuxrenderMaterialEditor

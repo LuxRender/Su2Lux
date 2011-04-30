@@ -44,36 +44,46 @@
 					<p class="header3">Image Map parameters</p>
 					<label for="kd_texturetype">Texture </label>
 					<select id="kd_texturetype">
-						<option value ="imagemap"> Image Map</option>
+						<option value="imagemap">Image Map</option>
+						<option value="sketchup">Sketchup Texture</option>
 					</select>
-					<label for="kd_imagemap_wrap">Image clipping</label>
-					<select id="kd_imagemap_wrap">
-						<option value="repeat">Repeat</option>
-						<option value="black">Black</option>
-						<option value="clamp">Clamp</option>
-					</select>
-					<br>
-					<label for="kd_imagemap_filename">Filename</label>
-					<input type="text" id="kd_imagemap_filename" size="30">
-					<input type="button" id="kd_imagemap_filename_browse" value="Browse">
-					<br>
-					<label for="kd_imagemap_gamma">Gamma</label>
-					<input type='text' id="kd_imagemap_gamma" size="6">
-					<label for="kd_imagemap_gain">Gain</label>
-					<input type='text' id="kd_imagemap_gain" size="6">
-					<br>
-					<label for="kd_imagemap_filtertype">Filter Type</label>
-					<select id="kd_imagemap_filtertype">
-						<option value="bilinear">bilinear</option>
-						<option value="nearest">nearest</option>
-						<option value="mipmap_ewa">mipmap_ewa</option>
-						<option value="mipmap_trilinear">mipmap_trilinear</option>
-					</select>
-					<div class="mipmap_trilinear mipmap_ewa">
-						<label for="kd_imagemap_maxanisotropy">Max anisotropy</label>
-						<input type='text' id="kd_imagemap_maxanisotropy" size="6">
-						<label for="kd_imagemap_discardmipmaps">Discard mip-maps</label>
-						<input type='text' id="kd_imagemap_discardmipmaps" size="6">
+					<div class="imagemap">
+						<label for="kd_imagemap_wrap">Image clipping</label>
+						<select id="kd_imagemap_wrap">
+							<option value="repeat">Repeat</option>
+							<option value="black">Black</option>
+							<option value="clamp">Clamp</option>
+						</select>
+						<br>
+						<!--
+						<br>
+						<label for="kd_imagemap_Sketchup">Sketchup Texture</label>
+						<br>
+						<input type="text" id="kd_imagemap_Sketchup" size="55" readonly="true">
+						<br>
+						-->
+						<label for="kd_imagemap_filename">Filename</label>
+						<input type="text" id="kd_imagemap_filename" size="30">
+						<input type="button" id="kd_imagemap_filename_browse" value="Browse">
+						<br>
+						<label for="kd_imagemap_gamma">Gamma</label>
+						<input type='text' id="kd_imagemap_gamma" size="6">
+						<label for="kd_imagemap_gain">Gain</label>
+						<input type='text' id="kd_imagemap_gain" size="6">
+						<br>
+						<label for="kd_imagemap_filtertype">Filter Type</label>
+						<select id="kd_imagemap_filtertype">
+							<option value="bilinear">bilinear</option>
+							<option value="nearest">nearest</option>
+							<option value="mipmap_ewa">mipmap_ewa</option>
+							<option value="mipmap_trilinear">mipmap_trilinear</option>
+						</select>
+						<div class="mipmap_trilinear mipmap_ewa">
+							<label for="kd_imagemap_maxanisotropy">Max anisotropy</label>
+							<input type='text' id="kd_imagemap_maxanisotropy" size="6">
+							<label for="kd_imagemap_discardmipmaps">Discard mip-maps</label>
+							<input type='text' id="kd_imagemap_discardmipmaps" size="6">
+						</div>
 					</div>
 				</div>
 			</div>
