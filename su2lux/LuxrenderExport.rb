@@ -22,8 +22,6 @@ class LuxrenderExport
 		@scale = 0.0254
 		@count_tri = 0
 		@model_textures={}
-	#	@textures_prefix = "TX_"
-		# @lrs=LuxrenderSettings.new
 		@lrs.fleximage_xresolution = Sketchup.active_model.active_view.vpwidth unless @lrs.fleximage_xresolution
 		@lrs.fleximage_yresolution = Sketchup.active_model.active_view.vpheight unless @lrs.fleximage_yresolution
 	end #END reset
@@ -115,12 +113,6 @@ class LuxrenderExport
 		end
 		sw = compute_screen_window
 		out.puts	"\t\"float screenwindow\" [" + "%.6f" %(sw[0]) + " " + "%.6f" %(sw[1]) + " " + "%.6f" %(sw[2]) + " " + "%.6f" %(sw[3]) +"]\n"
-		# out.puts "	\"float hither\" [%.6f" %(@lrs.hither) + "]"
-		# out.puts "	\"float yon\" [%.6f" %(@lrs.yon) + "]"
-		
-		#TODO  depends aspect_ratio and resolution 
-		#http://www.luxrender.net/wiki/index.php?title=Scene_file_format#Common_Camera_Parameters
-				
 		out.print "\n"
 	end # END export_camera
 
@@ -217,33 +209,6 @@ class LuxrenderExport
 		
 		flm = @lrs.useparamkeys ? "true" : "false"
 		out.puts "\t\"bool useparamkeys\" [\"#{flm}\"]\n"
-
-		# out.puts '
-		# "integer halttime" [0]
-		# "bool premultiplyalpha" ["false"]
-		# "string tonemapkernel" ["reinhard"]
-		# "float reinhard_prescale" [1.000000]
-		# "float reinhard_postscale" [1.200000]
-		# "float reinhard_burn" [6.000000]
-		# "integer displayinterval" [4]
-		# "integer writeinterval" [10]
-		# "string ldr_clamp_method" ["lum"]
-		# "bool write_exr" ["false"]
-		# "bool write_png" ["true"]
-		# "string write_png_channels" ["RGB"]
-		# "bool write_png_16bit" ["false"]
-		# "bool write_png_gamutclamp" ["true"]
-		# "bool write_tga" ["false"]
-		# "string filename" ["exported_image"]
-		# "bool write_resume_flm" ["false"]
-		# "bool restart_resume_flm" ["true"]
-		# "integer reject_warmup" [128]
-		# "bool debug" ["true"]
-		# "float colorspace_white" [0.314275 0.329411]
-		# "float colorspace_red" [0.630000 0.340000]
-		# "float colorspace_green" [0.310000 0.595000]
-		# "float colorspace_blue" [0.155000 0.070000]
-		# "float gamma" [2.200000]'
 	end # END export_film
 
 	##

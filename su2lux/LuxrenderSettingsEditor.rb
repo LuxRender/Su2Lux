@@ -61,105 +61,6 @@ class LuxrenderSettingsEditor
 						else
 							UI.messagebox "Parameter " + key + " does not exist.\n\nContact developers."
 						end
-					#Camera
-					# when "fov"
-						# Sketchup.active_model.active_view.camera.fov = value.to_f
-					# when "focal_length"
-						# Sketchup.active_model.active_view.camera.focal_length = value.to_f
-					# when "camera_type"
-						# @lrs.camera_type=value
-					# when "camera_scale"
-						# @lrs.camera_scale=value
-					# when "near_far_clipping"
-						# @lrs.near_far_clipping=true if value=="true"
-						# @lrs.near_far_clipping=false if value=="false"
-					# when "hither"
-						# @lrs.hither=value
-					# when "yon"
-						# @lrs.yon=value
-					# when "dof_bokeh"
-						# @lrs.dof_bokeh=true if value=="true"
-						# @lrs.dof_bokeh=false if value=="false"
-					# when "architectural"
-						# @lrs.architectural=true if value=="true"
-						# @lrs.architectural=false if value=="false"
-					# when "motion_blur"
-						# @lrs.motion_blur=true if value=="true"
-						# @lrs.motion_blur=false if value=="false"
-					#end Camera
-					
-					#Environment
-					
-					#end Environment
-					
-					#Sampler
-					# when "sampler_type"
-						# @lrs.sampler_type=value	
-					#end Sampler
-					
-					#Integerator
-					# when "sintegrator_type"
-						# SU2LUX.dbg_p 'set integrator '+value
-						# @lrs.sintegrator_type=value
-					# when "sintegrator_dlighting_maxdepth"
-						# @lrs.sintegrator_dlighting_maxdepth=value
-					# when "singtegrator_path_maxdepth"
-						# @lrs.sintegrator_path_maxdepth=value
-					# when "sintegrator_igi_maxdepth"
-						# @lrs.sintegrator_igi_maxdepth=value
-					#end Integrator
-					
-					#Volume integrator
-					# when "volume_integrator_type"
-						# @lrs.volume_integrator_type=value
-					# when "volume_integrator_stepsize"
-						# @lrs.volume_integrator_stepsize=value
-					#end Volume integrator
-					
-					#Film
-					# when "xresolution"
-						# SU2LUX.dbg_p 'set xresolution '+value
-						# @lrs.xresolution=value.to_f
-						# change_aspect_ratio(@lrs.xresolution.to_f / @lrs.yresolution.to_f)
-					# when "yresolution"
-						# SU2LUX.dbg_p 'set yresolution '+value
-						# @lrs.yresolution=value.to_f
-						# change_aspect_ratio(@lrs.xresolution.to_f / @lrs.yresolution.to_f)
-					#end Film
-					
-					#Accelerator
-					# when "accelerator_type"
-						# @lrs.accelerator_type=value
-					# #tabrec
-					# when "intersection_cost"
-						# @lrs.intersection_cost=value
-					# when "traversal_cost"
-						# @lrs.traversal_cost=value
-					# when "empty_bonus"
-						# @lrs.empty_bonus=value
-					# when "max_prims"
-						# @lrs.max_prims=value
-					# when "max_depth"
-						# @lrs.max_depth=value
-
-					#grid
-					# when "refine_immediately"
-						# @lrs.refine_immediately=value
-
-					#qbvh
-					# when "max_prims_per_leaf"
-						# @lrs.max_prims_per_leaf=value
-					# when "skip_factor"
-						# @lrs.skip_factor=value
-					#end Accelerator
-					# else
-						# if (@lrs.respond_to?(key))
-							# SU2LUX.dbg_p key + " => " + value
-							# method_name = key + "="
-							# @lrs.send(method_name, value)
-						# else
-							# UI.messagebox "Parameter " + key + " does not exist.\n\nContact developers."
-						# end
 				end	
 		} #end action callback param_generatate
 		
@@ -632,86 +533,18 @@ class LuxrenderSettingsEditor
 	#set parameters in inputs of settings.html
 	##
 	def sendDataFromSketchup()
-	
-		# # Sketchup.active_model.start_operation "Updating setting editor"
-		
-		# #TODO: check if get_all_write_accessors can be used here to simplify things
-		# updateSettingValue("fov")
-		# updateSettingValue("focal_length")
-		# updateSettingValue("scale")
-		# # updateSettingValue("near_far_clipping")
-		# @lrs.xresolution = Sketchup.active_model.active_view.vpwidth unless @lrs.xresolution
-		# updateSettingValue("xresolution")
-		# @lrs.yresolution = Sketchup.active_model.active_view.vpheight unless @lrs.yresolution
-		# updateSettingValue("yresolution")
-		# if Sketchup.active_model.active_view.camera.perspective?
-			# @lrs.camera_type = 'perspective'
-		# else
-			# @lrs.camera_type = 'orthographic'
-		# end
-		# updateSettingValue("camera_type")
-		# updateSettingValue("hither")
-		# updateSettingValue("yon")
-		# updateSettingValue("blades")
-		# updateSettingValue("focaldistance")
-		# updateSettingValue("power")
-		# updateSettingValue("accelerator_type")
-		# updateSettingValue("sintegrator_type")
-		# updateSettingValue("sintegrator_dlighting_maxdepth")
-		# updateSettingValue("sintegrator_path_maxdepth")
-		# updateSettingValue("sintegrator_igi_maxdepth")
-		# updateSettingValue("sampler_type")
-		# updateSettingValue("volume_integrator_type")
-		# updateSettingValue("volume_integrator_stepsize")
-		# updateSettingValue("export_file_path")
-		
-		# updateSettingValue("intersection_cost")
-		# updateSettingValue("traversal_cost")
-		# updateSettingValue("empty_bonus")
-		# updateSettingValue("max_prims")
-		# updateSettingValue("max_depth")
-
-		# updateSettingValue("refine_immediately")
-
-		# updateSettingValue("max_prims_per_leaf")
-		# updateSettingValue("skip_factor")
-		# # Sketchup.active_model.commit_operation
 		@lrs.fleximage_xresolution = Sketchup.active_model.active_view.vpwidth unless @lrs.fleximage_xresolution
 		@lrs.fleximage_yresolution = Sketchup.active_model.active_view.vpheight unless @lrs.fleximage_yresolution
-		# if (@lrs.camera_type != 'environment')
-			# if Sketchup.active_model.active_view.camera.perspective?
-				# @lrs.camera_type = 'perspective'
-			# else
-				# @lrs.camera_type = 'orthographic'
-			# end
-		# end
-		# settings = get_all_write_accessors
 		settings = @lrs.get_names
 		settings.each { |setting|
 			updateSettingValue(setting)
 		}
-		# updateSettingValue("xresolution")
-		# updateSettingValue("yresolution")
-		# updateSettingValue("camera_type")
 	end # END sendDataFromSketchup
-
-	##
-	#
-	##
-	# def get_all_write_accessors
-		# methods_list = @lrs.public_methods(false)
-		# methods = []
-		# methods_list.each { |m|
-			# methods.push(m) unless m =~ /=$/ or m == "[]"
-		# }
-		# return methods
-	# end
 	
 	##
 	#
 	##
 	def is_a_checkbox?(id)#much better to use objects for settings?!
-		# @lrs=LuxrenderSettings.new
 		if @lrs[id] == true or @lrs[id] == false
 			return id
 		end
@@ -765,7 +598,6 @@ class LuxrenderSettingsEditor
 	#
 	##
 	def updateSettingValue(id)
-		# @lrs=LuxrenderSettings.new
 		setValue(id, @lrs[id])
 	end # END updateSettingValue
 
@@ -804,4 +636,5 @@ class LuxrenderSettingsEditor
 	def visible?
 		return @settings_dialog.visible?
 	end #END visible?
+	
 end # # END class LuxrenderSettingsEditor
