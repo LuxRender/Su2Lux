@@ -783,8 +783,8 @@ if( not file_loaded?(__FILE__) )
 		luxmat.reset unless loaded
 	end
 	SU2LUX.create_material_editor
-	# material_editor = SU2LUX.get_editor("material")
-	# material_editor.refresh
+	material_editor = SU2LUX.get_editor("material")
+	material_editor.refresh
 end
 
 
