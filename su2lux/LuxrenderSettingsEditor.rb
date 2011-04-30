@@ -20,6 +20,8 @@
 
 class LuxrenderSettingsEditor
 
+	attr_reader :settings_dialog
+	alias_method :settings_editor, :settings_dialog
 	##
 	#
 	##
@@ -605,6 +607,17 @@ class LuxrenderSettingsEditor
 					SU2LUX.new_export_file_path
 			end #end case
 		} #end action callback open_dialog
+
+		@settings_dialog.add_action_callback("save_to_model") {|dialog, params|
+			@lrs.save_to_model
+		}
+		
+		@settings_dialog.add_action_callback("reset_to_default") {|dialog, params|
+			@lrs.reset
+			self.close
+			UI.start_timer(0.5, false) { self.show }
+			# self.show
+		}
 		
 	end # END initialize
 
@@ -715,7 +728,7 @@ class LuxrenderSettingsEditor
 		when "export_file_path"
 			new_value.gsub!(/\\/, '\/') #bug with sketchup not allowing \ characters
 			cmd="$('##{id}').text('#{new_value}');" #different asignment method
-			SU2LUX.dbg_p cmd
+			# SU2LUX.dbg_p cmd
 			@settings_dialog.execute_script(cmd)
 		############################
 
@@ -723,10 +736,10 @@ class LuxrenderSettingsEditor
 		########  -- checkboxes -- ##########
 		when is_a_checkbox?(id)
 			cmd="$('##{id}').attr('checked', #{value});" #different asignment method
-			SU2LUX.dbg_p cmd
+			# SU2LUX.dbg_p cmd
 			@settings_dialog.execute_script(cmd)
 			cmd="checkbox_expander('#{id}');"
-			SU2LUX.dbg_p cmd
+			# SU2LUX.dbg_p cmd
 			@settings_dialog.execute_script(cmd)
 		#############################
 		
@@ -734,7 +747,7 @@ class LuxrenderSettingsEditor
 		######### -- other -- #############
 		else
 			cmd="$('##{id}').val('#{new_value}');" #syntax jquery
-			SU2LUX.dbg_p cmd
+			# SU2LUX.dbg_p cmd
 			# cmd = "document.getElementById('#{id}').value=\"#{new_value}\""
 			# SU2LUX.dbg_p cmd
 			@settings_dialog.execute_script(cmd)
@@ -784,4 +797,11 @@ class LuxrenderSettingsEditor
 		#TODO
 	end # END setCheckbox
 
+	def close
+		@settings_dialog.close
+	end #END close
+	
+	def visible?
+		return @settings_dialog.visible?
+	end #END visible?
 end # # END class LuxrenderSettingsEditor

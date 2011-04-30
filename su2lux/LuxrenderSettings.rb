@@ -20,6 +20,9 @@
 
 class LuxrenderSettings
 
+	attr_reader :dict
+	alias_method :dictionary_name, :dict
+	
 	@@settings=
 	{
 	#'name_option'=>'default_value'
@@ -358,11 +361,28 @@ class LuxrenderSettings
 		end #end module_eval
 	end #end initialize
 
+	def reset
+			@@settings.each do |key, value|
+				LuxrenderAttributeDictionary.set_attribute(@dict, key, value)
+			end
+	end #END reset
+	
+	def load_from_model
+		return LuxrenderAttributeDictionary.load_from_model(@dict)
+	end #END load_from_model
+	
+	def save_to_model
+		Sketchup.active_model.start_operation "SU2LUX settings saved"
+		LuxrenderAttributeDictionary.save_to_model(@dict)
+		Sketchup.active_model.commit_operation
+	end #END load_from_model
+	
 	def get_names
 		settings = []
 		@@settings.each { |key, value|
 			settings.push(key)
 		}
 		return settings
-	end
+	end #END get_names
+	
 end # END class LuxrenderSettings

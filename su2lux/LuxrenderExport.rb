@@ -354,7 +354,7 @@ class LuxrenderExport
 		case @lrs.sintegrator_type
 			# "bidirectional"
 			when "bidirectional"
-				if (@lrs.sintegrator_show_advanced)
+				if (@lrs.sintegrator_bidir_show_advanced)
 					integrator += "\t\"integer eyedepth\" [#{@lrs.sintegrator_bidir_eyedepth}]\n"
 					integrator += "\t\"integer lightdepth\" [#{@lrs.sintegrator_bidir_lightdepth}]\n"
 					integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_bidir_strategy}\"]\n"
@@ -366,7 +366,7 @@ class LuxrenderExport
 				end
 			# 'path'
 			when 'path'
-				if (@lrs.sintegrator_show_advanced)
+				if (@lrs.sintegrator_path_show_advanced)
 					integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_path_maxdepth}]\n"
 					environment = @lrs.sintegrator_path_include_environment ? "true" : "false"
 					integrator += "\t\"bool includeenvironment\" [\"#{environment}\"]\n"
@@ -425,12 +425,12 @@ class LuxrenderExport
 
 			# "directlighting"
 			when "directlighting"
-				if (@lrs.sintegrator_show_advanced)
+				if (@lrs.sintegrator_direct_show_advanced)
 					integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_direct_maxdepth}]\n"
-				else
-					integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_direct_bounces}]\n"
 					integrator += "\t\"integer shadowraycount\" [#{@lrs.sintegrator_direct_shadow_ray_count}]\n"
 					integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_direct_strategy}\"]\n"
+				else
+					integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_direct_bounces}]\n"
 				end
 			# "exphotonmap"
 			when "exphotonmap"
@@ -452,7 +452,7 @@ class LuxrenderExport
 				integrator += "\t\"integer shadowraycount\" [#{@lrs.sintegrator_exphoton_shadow_ray_count}]\n"
 				integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_exphoton_strategy}\"]\n"
 				integrator += "\t\"string renderingmode\" [\"#{@lrs.sintegrator_exphoton_rendermode}\"]\n"
-				if (@lrs.sintegrator_show_advanced)
+				if (@lrs.sintegrator_exphoton_show_advanced)
 					dbg = @lrs.sintegrator_exphoton_dbg_enable_direct ? "true" : "false"
 					integrator += "\t\"bool dbg_enabledirect\" [\"#{dbg}\"]\n"
 					dbg = @lrs.sintegrator_exphoton_dbg_enable_indircaustic ? "true" : "false"
@@ -467,7 +467,7 @@ class LuxrenderExport
 			# "igi"
 			when "igi"
 				integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_igi_maxdepth}]\n"
-				if (@lrs.sintegrator_show_advanced)
+				if (@lrs.sintegrator_igi_show_advanced)
 					integrator += "\t\"integer nsets\" [#{@lrs.sintegrator_igi_nsets}]\n"
 					integrator += "\t\"integer nlights\" [#{@lrs.sintegrator_igi_nlights}]\n"
 					integrator += "\t\"float mindist\" [#{"%.6f" %(@lrs.sintegrator_igi_mindist)}]\n"

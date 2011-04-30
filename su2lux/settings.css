@@ -52,6 +52,10 @@ input#divide_by_2, input#multiply_by_2 {
 	width: 5em;
 }
 
+input#save_to_model, input#reset {
+	width: 140px;
+}
+
 #current_view {
 /*	height: 45px;*/
 /*	float: right;*/

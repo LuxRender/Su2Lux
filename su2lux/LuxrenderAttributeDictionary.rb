@@ -49,9 +49,9 @@ class LuxrenderAttributeDictionary
 		return @@dictionary
 	end #END choose
 	
-	def save_to_model(name)
+	def LuxrenderAttributeDictionary::save_to_model(name)
 		@@dictionary = self.choose(name)
-		if (@@dictionary.modified?)
+		if (self.modified?(name))
 			model = Sketchup.active_model
 			@@dictionary.each { |key, value|
 				model.set_attribute(name, key, value)
@@ -59,15 +59,20 @@ class LuxrenderAttributeDictionary
 		end
 	end #END save_to_model
 	
-	def load_from_model(name)
+	def LuxrenderAttributeDictionary::load_from_model(name)
 		@@dictionary = self.choose(name)
 		model_dictionary = Sketchup.active_model.attribute_dictionary(name)
-		model_dictionary.each { |key, value|
-			self.set_attribute(name, key, value)
-		}
+		if (model_dictionary)
+			model_dictionary.each { |key, value|
+				self.set_attribute(name, key, value)
+			}
+			return true
+		else
+			return false
+		end
 	end #END load_from_model
 	
-	def modified?(name)
+	def LuxrenderAttributeDictionary::modified?(name)
 		model = Sketchup.active_model
 		@@dictionary = self.choose(name)
 		@@dictionary.each { |key, value|

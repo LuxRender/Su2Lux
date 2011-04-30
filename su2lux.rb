@@ -475,7 +475,7 @@ class SU2LUX_view_observer < Sketchup::ViewObserver
 			@lrs.camera_type = 'orthographic'
 			# camera_type = 'orthographic'
 		end
-		# if (settings_editor)
+		if (settings_editor)
 			if (Sketchup.active_model.active_view.camera.perspective?)
 				fov = Sketchup.active_model.active_view.camera.fov
 				fov = format("%.2f", fov)
@@ -488,7 +488,7 @@ class SU2LUX_view_observer < Sketchup::ViewObserver
 			end
 	#		settings_editor.setValue("camera_type", @lrs.camera_type)
 			settings_editor.setValue("camera_type", @lrs.camera_type)
-		# end
+		end
 	end # END onViewChanged
 	
 end # END class SU2LUX_view_observer
@@ -498,19 +498,29 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 		model.active_view.add_observer(SU2LUX_view_observer.new)
 		
 		@lrs = LuxrenderSettings.new
+		@lrs.reset
 		@lrs.fleximage_xresolution = Sketchup.active_model.active_view.vpwidth
 		@lrs.fleximage_yresolution = Sketchup.active_model.active_view.vpheight
 		settings_editor = SU2LUX.get_editor("settings")
 		# @lrs.camera_scale = nil
-		if settings_editor
+		if (settings_editor && settings_editor.visible?)
 			settings_editor.setValue("xresolution", @lrs.fleximage_xresolution)
 			settings_editor.setValue("yresolution", @lrs.fleximage_yresolution)
+			settings_editor.close
 			# settings_editor.setValue("camera_scale", @lrs.camera_scale)
 		end
 	end # END onNewModel
 
 	def onOpenModel(model)
 		model.active_view.add_observer(SU2LUX_view_observer.new)
+		@lrs = LuxrenderSettings.new
+		settings_editor = SU2LUX.get_editor("settings")
+		if(settings_editor && settings_editor.visible?)
+			settings_editor.close
+		end
+		# loaded = LuxrenderAttributeDictionary.load_from_model(@lrs.dictionary_name)
+		loaded = @lrs.load_from_model
+		@lrs.reset if ( ! loaded)
 	end
 	
 end # END class SU2LUX_app_observer
