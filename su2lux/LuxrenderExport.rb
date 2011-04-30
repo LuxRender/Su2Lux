@@ -799,7 +799,7 @@ class LuxrenderExport
 			export=@materials[mat]
 		end
 		
-		has_texture = false
+		has_texture = true
 		if mat.respond_to?(:name)
 			matname = mat.display_name.delete("[<>]")
 			# matname = mat.display_name.gsub(/[<>]/,'*')
@@ -1166,7 +1166,7 @@ class LuxrenderExport
 	##
 	#
 	##
-	def export_specular_component(material, befor, after)
+	def export_specular_component(material, before, after)
 		preceding = ""
 		following = ""
 		filled = true
@@ -1194,7 +1194,7 @@ class LuxrenderExport
 	##
 	#
 	##
-	def export_IOR(material)
+	def export_IOR(material, before, after)
 		preceding = ""
 		following = ""
 		filled = true
@@ -1208,7 +1208,7 @@ class LuxrenderExport
 	##
 	#
 	##
-	def export_absorption_component(material)
+	def export_absorption_component(material, before, after)
 		preceding = ""
 		following = ""
 		filled = true
@@ -1226,7 +1226,7 @@ class LuxrenderExport
 	##
 	#
 	##
-	def export_nk(material)
+	def export_nk(material, before, after)
 		preceding = ""
 		following = ""
 		filled = true
@@ -1237,7 +1237,7 @@ class LuxrenderExport
 	##
 	#
 	##
-	def export_reflection_component(material)
+	def export_reflection_component(material, before, after)
 		preceding = ""
 		following = ""
 		filled = true
@@ -1250,7 +1250,7 @@ class LuxrenderExport
 	##
 	#
 	##
-	def export_transmission_component(material)
+	def export_transmission_component(material, before, after)
 		preceding = ""
 		following = ""
 		filled = true
@@ -1263,7 +1263,7 @@ class LuxrenderExport
 	##
 	#
 	##
-	def export_thin_film(material)
+	def export_thin_film(material, before, after)
 		preceding = ""
 		following = ""
 		filled = true
@@ -1281,7 +1281,7 @@ class LuxrenderExport
 	##
 	#
 	##
-	def export_dispersive_refraction(material)
+	def export_dispersive_refraction(material, before, after)
 		preceding = ""
 		following = ""
 		filled = true

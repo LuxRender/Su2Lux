@@ -5,16 +5,16 @@ class MeshCollector
 	##
 	#
 	##
-	def initialize(model_name,os_separator)
-		@model_name=model_name
-		@os_separator=os_separator
-		@parent_mat=[]
-		@fm_comp=[]
+	def initialize(model_name, os_separator)
+		@model_name = model_name
+		@os_separator = os_separator
+		@parent_mat = []
+		@fm_comp = []
 		@materials = {}
 		@fm_materials = {}
 		@count_faces = 0
-		@model_textures={}
-		@texturewriter=Sketchup.create_texture_writer
+		@model_textures = {}
+		@texturewriter = Sketchup.create_texture_writer
 	end # END initialize
 
 	##
@@ -65,11 +65,6 @@ class MeshCollector
 	# private method
 	##
 	def find_face_material(e)
-		mat = Sketchup.active_model.materials[SU2LUX::FRONT_FACE_MATERIAL]
-		mat = Sketchup.active_model.materials.add SU2LUX::FRONT_FACE_MATERIAL if mat.nil?
-		front_color = Sketchup.active_model.rendering_options["FaceFrontColor"]
-		scale = 0.8 / 255.0
-		mat.color = Sketchup::Color.new(front_color.red * scale, front_color.green * scale, front_color.blue * scale)
 		uvHelp=nil
 		mat_dir=true
 		if e.material!=nil
@@ -79,13 +74,21 @@ class MeshCollector
 				mat=e.back_material
 				mat_dir=false
 			else
-				mat=@parent_mat.last if @parent_mat.last!=nil
+				if @parent_mat.last!=nil
+					mat=@parent_mat.last
+				else
+					mat = Sketchup.active_model.materials[SU2LUX::FRONT_FACE_MATERIAL]
+					mat = Sketchup.active_model.materials.add SU2LUX::FRONT_FACE_MATERIAL if mat.nil?
+					front_color = Sketchup.active_model.rendering_options["FaceFrontColor"]
+					scale = 0.8 / 255.0
+					mat.color = Sketchup::Color.new(front_color.red * scale, front_color.green * scale, front_color.blue * scale)
+				end
 			end
 		end
 
 		if (mat.respond_to?(:texture) and mat.texture !=nil)
 			ret=store_textured_entities(e,mat,mat_dir)
-			 mat=ret[0]
+			mat=ret[0]
 			uvHelp=ret[1]
 		end
 
@@ -139,9 +142,7 @@ class MeshCollector
 				@model_textures[mat_name]=[0,e,mat_dir,handle,tname,mat] if @model_textures[mat_name]==nil
 				return [mat_name,uvHelp,mat_dir]
 			else
-
-				distorted=texture_distorted?(e,mat,mat_dir)
-
+				distorted=texture_distorted?(e,mat,mat_dir) if false
 				txcount=tw.count
 				handle = tw.load(e,mat_dir)
 				tname=get_texture_name(mat_name,mat)
