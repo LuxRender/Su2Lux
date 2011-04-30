@@ -163,8 +163,11 @@ class LuxrenderExport
 	##
 	def export_film(out)
 		out.puts "Film \"fleximage\""
-		out.puts "\t\"integer xresolution\" [#{@lrs.fleximage_xresolution.to_i}]"
-		out.puts "\t\"integer yresolution\" [#{@lrs.fleximage_yresolution.to_i}]"
+		percent = @lrs.fleximage_resolution_percent.to_i / 100.0
+		xres = @lrs.fleximage_xresolution.to_i * percent
+		yres = @lrs.fleximage_yresolution.to_i * percent
+		out.puts "\t\"integer xresolution\" [#{xres.to_i}]"
+		out.puts "\t\"integer yresolution\" [#{yres.to_i}]"
 		out.puts "\t\"integer haltspp\" [#{@lrs.fleximage_haltspp.to_i}]"
 		out.puts "\t\"integer halttime\" [#{@lrs.fleximage_halttime.to_i}]"
 		out.puts "\t\"integer filterquality\" [#{@lrs.fleximage_filterquality.to_i}]"
@@ -175,22 +178,73 @@ class LuxrenderExport
 		out.puts "\t\"string ldr_clamp_method\" [\"#{@lrs.fleximage_ldr_clamp_method}\"]"
 		out.puts "\t\"string tonemapkernel\" [\"#{@lrs.fleximage_tonemapkernel}\"]"
 		case @lrs.fleximage_tonemapkernel
-			when "reinahrd"
+			when "reinhard"
+				out.puts "\t\"float reinhard_prescale\" [#{"%.6f" %(@lrs.fleximage_reinhard_prescale)}]\n"
+				out.puts "\t\"float reinhard_postscale\" [#{"%.6f" %(@lrs.fleximage_reinhard_postscale)}]\n"
+				out.puts "\t\"float reinhard_burn\" [#{"%.6f" %(@lrs.fleximage_reinhard_burn)}]\n"
 			when "linear"
+				if (@lrs.fleximage_linear_use_preset)
+					out.puts "\t\"float linear_sensitivity\" [#{"%.6f" %(@lrs.fleximage_linear_iso)}]\n"
+					if (@lrs.fleximage_linear_use_half_stop == true)
+						fstop = @lrs.fleximage_linear_hf_stopT
+					else
+						fstop = @lrs.fleximage_linear_hf_stopF
+					end
+					out.puts "\t\"float linear_fstop\" [#{"%.6f" %(fstop)}]\n"
+
+					case @lrs.fleximage_linear_camera_type
+						when "photo"
+							exposure_preset = @lrs.fleximage_linear_photo_exposure
+						when "cinema"
+							exposure_preset = @lrs.fleximage_linear_cinema_exposure
+					end
+					exposure = get_exposure(@lrs.fleximage_linear_camera_type, exposure_preset, @lrs.fleximage_linear_cinema_fps)
+					out.puts "\t\"float linear_exposure\" [#{"%.6f" %(exposure)}]\n"
+				else
+					out.puts "\t\"float linear_sensitivity\" [#{"%.6f" %(@lrs.fleximage_linear_sensitivity)}]\n"
+					out.puts "\t\"float linear_exposure\" [#{"%.6f" %(@lrs.fleximage_linear_exposure)}]\n"
+					out.puts "\t\"float linear_fstop\" [#{"%.6f" %(@lrs.fleximage_linear_fstop)}]\n"
+				end
 			when "contrast"
+				out.puts "\t\"float contrast_ywa\" [#{"%.6f" %(@lrs.fleximage_contrast_ywa)}]\n"
 			when "maxwhite"
 		end
 		exr = @lrs.fleximage_write_exr ? "true" : "false"
 		out.puts "\t\"bool write_exr\" [\"#{exr}\"]\n"
 		if (@lrs.fleximage_write_exr)
+			out.puts "\t\"string write_exr_channels\" [\"#{@lrs.fleximage_write_exr_channels}\"]"
+			bits = @lrs.fleximage_write_exr_halftype ? "true" : "false"
+			out.puts "\t\"bool write_exr_halftype\" [\"#{bits}\"]\n"
+			out.puts "\t\"string write_exr_compressiontype\" [\"#{@lrs.fleximage_write_exr_compressiontype}\"]"
+			if (@lrs.fleximage_write_exr_applyimaging)
+				gamut = @lrs.fleximage_write_exr_gamutclamp ? "true" : "false"
+				out.puts "\t\"bool write_exr_gamutclamp\" [\"#{gamut}\"]\n"
+			end
+			if (@lrs.fleximage_write_exr_ZBuf)
+				out.puts "\t\"string write_exr_zbuf_normalizationtype\" [\"#{@lrs.fleximage_write_exr_zbuf_normalizationtype}\"]"
+			end
 		end
 		png = @lrs.fleximage_write_png ? "true" : "false"
 		out.puts "\t\"bool write_png\" [\"#{png}\"]\n"
 		if (@lrs.fleximage_write_png)
+			out.puts "\t\"string write_png_channels\" [\"#{@lrs.fleximage_write_png_channels}\"]"
+			bits = @lrs.fleximage_write_png_16bit ? "true" : "false"
+			out.puts "\t\"bool write_png_16bit\" [\"#{bits}\"]\n"
+			gamut = @lrs.fleximage_write_png_gamutclamp ? "true" : "false"
+			out.puts "\t\"bool write_png_gamutclamp\" [\"#{gamut}\"]\n"
+			if (@lrs.fleximage_write_png_ZBuf)
+				out.puts "\t\"string write_png_zbuf_normalizationtype\" [\"#{@lrs.fleximage_write_png_zbuf_normalizationtype}\"]"
+			end
 		end
 		tga = @lrs.fleximage_write_tga ? "true" : "false"
 		out.puts "\t\"bool write_tga\" [\"#{tga}\"]\n"
 		if (@lrs.fleximage_write_tga)
+			out.puts "\t\"string write_tga_channels\" [\"#{@lrs.fleximage_write_tga_channels}\"]"
+			gamut = @lrs.fleximage_write_tga_gamutclamp ? "true" : "false"
+			out.puts "\t\"bool write_exr_gamutclamp\" [\"#{gamut}\"]\n"
+			if (@lrs.fleximage_write_tga_ZBuf)
+				out.puts "\t\"string write_tga_zbuf_normalizationtype\" [\"#{@lrs.fleximage_write_tga_zbuf_normalizationtype}\"]"
+			end
 		end
 		flm = @lrs.fleximage_write_resume_flm ? "true" : "false"
 		out.puts "\t\"bool write_resume_flm\" [\"#{flm}\"]\n"
@@ -200,17 +254,168 @@ class LuxrenderExport
 		out.puts "\t\"integer reject_warmup\" [#{@lrs.fleximage_reject_warmup.to_i}]"
 		dbg = @lrs.fleximage_debug ? "true" : "false"
 		out.puts "\t\"bool debug\" [\"#{dbg}\"]\n"
-		out.puts "\t\"float colorspace_white\" [#{"%.6f" %(@lrs.fleximage_colorspace_white_x)} #{"%.6f" %(@lrs.fleximage_colorspace_white_y)}]\n"
-		out.puts "\t\"float colorspace_red\" [#{"%.6f" %(@lrs.fleximage_colorspace_red_x)} #{"%.6f" %(@lrs.fleximage_colorspace_red_y)}]\n"
-		out.puts "\t\"float colorspace_green\" [#{"%.6f" %(@lrs.fleximage_colorspace_green_x)} #{"%.6f" %(@lrs.fleximage_colorspace_green_y)}]\n"
-		out.puts "\t\"float colorspace_blue\" [#{"%.6f" %(@lrs.fleximage_colorspace_blue_x)} #{"%.6f" %(@lrs.fleximage_colorspace_blue_y)}]\n"
-		out.puts "\t\"float gamma\" [#{"%.6f" %(@lrs.fleximage_gamma)}]\n"
+		if (@lrs.fleximage_use_preset)
+		SU2LUX.dbg_p @lrs.fleximage_colorspace_preset
+			case @lrs.fleximage_colorspace_preset
+				when "sRGB - HDTV (ITU-R BT.709-5)"
+					cspacewhiteX = 0.314275
+					cspacewhiteY = 0.329411 # sRGB
+					cspaceredX = 0.63
+					cspaceredY = 0.34
+					cspacegreenX = 0.31
+					cspacegreenY = 0.595
+					cspaceblueX = 0.155
+					cspaceblueY = 0.07
+				when "ROMM RGB"
+					cspacewhiteX = 0.346
+					cspacewhiteY = 0.359 # D50
+					cspaceredX = 0.7347
+					cspaceredY = 0.2653
+					cspacegreenX = 0.1596
+					cspacegreenY = 0.8404
+					cspaceblueX = 0.0366
+					cspaceblueY = 0.0001
+				when "Adobe RGB 98"
+					cspacewhiteX = 0.313
+					cspacewhiteY = 0.329 # D65
+					cspaceredX = 0.64
+					cspaceredY = 0.34
+					cspacegreenX = 0.21
+					cspacegreenY = 0.71
+					cspaceblueX = 0.15
+					cspaceblueY = 0.06
+				when "Apple RGB"
+					cspacewhiteX = 0.313
+					cspacewhiteY = 0.329 # D65
+					cspaceredX = 0.625
+					cspaceredY = 0.34
+					cspacegreenX = 0.28
+					cspacegreenY = 0.595
+					cspaceblueX = 0.155
+					cspaceblueY = 0.07
+				when "NTSC (FCC 1953, ITU-R BT.470-2 System M)"
+					cspacewhiteX = 0.310
+					cspacewhiteY = 0.316 # C
+					cspaceredX = 0.67
+					cspaceredY = 0.33
+					cspacegreenX = 0.21
+					cspacegreenY = 0.71
+					cspaceblueX = 0.14
+					cspaceblueY = 0.08
+				when "NTSC (FCC 1953, ITU-R BT.470-2 System M)"
+					cspacewhiteX = 0.313
+					cspacewhiteY = 0.329 # D65
+					cspaceredX = 0.63
+					cspaceredY = 0.34
+					cspacegreenX = 0.31
+					cspacegreenY = 0.595
+					cspaceblueX = 0.155
+					cspaceblueY = 0.07
+				when "PAL/SECAM (EBU 3213, ITU-R BT.470-6)"
+					cspacewhiteX = 0.313
+					cspacewhiteY = 0.329 # D65
+					cspaceredX = 0.64
+					cspaceredY = 0.33
+					cspacegreenX = 0.29
+					cspacegreenY = 0.60
+					cspaceblueX = 0.15
+					cspaceblueY = 0.06
+				when "CIE (1931) E"
+					cspacewhiteX = 0.333
+					cspacewhiteY = 0.333 # E
+					cspaceredX = 0.7347
+					cspaceredY = 0.2653
+					cspacegreenX = 0.2738
+					cspacegreenY = 0.7174
+					cspaceblueX = 0.1666
+					cspaceblueY = 0.0089
+			end
+			if (@lrs.fleximage_use_colorspace_gamma)
+				gamma = @lrs.fleximage_gamma
+			else
+				gamma = @lrs.fleximage_colorspace_gamma
+			end
+			if ( ! @lrs.fleximage_use_colorspace_whitepoint)
+				if (@lrs.fleximage_use_colorspace_whitepoint_preset)
+					if (((@lrs.fleximage_colorspace_wp_preset)).include?("E - "))
+						cspacewhiteX = 0.333
+						cspacewhiteY = 0.333
+					elsif ((@lrs.fleximage_colorspace_wp_preset).include?("D50 - "))
+						cspacewhiteX = 0.346
+						cspacewhiteY = 0.359
+					elsif ((@lrs.fleximage_colorspace_wp_preset).include?("D55 - "))
+						cspacewhiteX = 0.332
+						cspacewhiteY = 0.347
+					elsif ((@lrs.fleximage_colorspace_wp_preset).include?("D65 - "))
+						cspacewhiteX = 0.313
+						cspacewhiteY = 0.329
+					elsif ((@lrs.fleximage_colorspace_wp_preset).include?("D75 - "))
+						cspacewhiteX = 0.299
+						cspacewhiteY = 0.315
+					elsif (((@lrs.fleximage_colorspace_wp_preset)).include?("A - "))
+						cspacewhiteX = 0.448
+						cspacewhiteY = 0.407
+					elsif ((@lrs.fleximage_colorspace_wp_preset).include?("B - "))
+						cspacewhiteX = 0.348
+						cspacewhiteY = 0.352
+					elsif ((@lrs.fleximage_colorspace_wp_preset).include?("C - "))
+						cspacewhiteX = 0.310
+						cspacewhiteY = 0.316
+					elsif ((@lrs.fleximage_colorspace_wp_preset).include?("9300"))
+						cspacewhiteX = 0.285
+						cspacewhiteY = 0.293
+					elsif ((@lrs.fleximage_colorspace_wp_preset).include?("F2 - "))
+						cspacewhiteX = 0.372
+						cspacewhiteY = 0.375
+					elsif ((@lrs.fleximage_colorspace_wp_preset).include?("F7 - "))
+						cspacewhiteX = 0.313
+						cspacewhiteY = 0.329
+					elsif ((@lrs.fleximage_colorspace_wp_preset).include?("F11 - "))
+						cspacewhiteX = 0.381
+						cspacewhiteY = 0.377
+					end
+				else
+					cspacewhiteX = @lrs.fleximage_colorspace_preset_white_x
+					cspacewhiteY = @lrs.fleximage_colorspace_preset_white_y
+				end
+			end
+			out.puts "\t\"float colorspace_white\" [#{"%.6f" %(cspacewhiteX)} #{"%.6f" %(cspacewhiteY)}]\n"
+			out.puts "\t\"float colorspace_red\" [#{"%.6f" %(cspaceredX)} #{"%.6f" %(cspaceredY)}]\n"
+			out.puts "\t\"float colorspace_green\" [#{"%.6f" %(cspacegreenX)} #{"%.6f" %(cspacegreenY)}]\n"
+			out.puts "\t\"float colorspace_blue\" [#{"%.6f" %(cspaceblueX)} #{"%.6f" %(cspaceblueY)}]\n"
+			out.puts "\t\"float gamma\" [#{"%.6f" %(gamma)}]\n"
+		else
+			out.puts "\t\"float colorspace_white\" [#{"%.6f" %(@lrs.fleximage_colorspace_white_x)} #{"%.6f" %(@lrs.fleximage_colorspace_white_y)}]\n"
+			out.puts "\t\"float colorspace_red\" [#{"%.6f" %(@lrs.fleximage_colorspace_red_x)} #{"%.6f" %(@lrs.fleximage_colorspace_red_y)}]\n"
+			out.puts "\t\"float colorspace_green\" [#{"%.6f" %(@lrs.fleximage_colorspace_green_x)} #{"%.6f" %(@lrs.fleximage_colorspace_green_y)}]\n"
+			out.puts "\t\"float colorspace_blue\" [#{"%.6f" %(@lrs.fleximage_colorspace_blue_x)} #{"%.6f" %(@lrs.fleximage_colorspace_blue_y)}]\n"
+			out.puts "\t\"float gamma\" [#{"%.6f" %(@lrs.fleximage_gamma)}]\n"
+		end
 		out.puts "\t\"integer outlierrejection_k\" [#{@lrs.fleximage_outlierrejection_k.to_i}]"
 		
 		flm = @lrs.useparamkeys ? "true" : "false"
 		out.puts "\t\"bool useparamkeys\" [\"#{flm}\"]\n"
 	end # END export_film
 
+	##
+	#
+	##
+	def get_exposure(type, shutterStr, fpsStr)
+		if (type == 'photo')
+			fps = 1
+		else
+			fps = fpsStr.split(" ")[0].to_f  # assuming fps are in form 'n FPS'
+		end
+
+		if (shutterStr == '1')
+			exp = 1.0
+		elsif (type == 'photo')
+			exp = 1.0 / shutterStr[/(?!.*?\/).*/].to_f  # assuming still camera shutterspeed is in form '1/n'
+		elsif (type == 'cinema')
+			exp = (1.0 / fps) * (1 - shutterStr.split("-")[1].to_f/360) # assuming motion camera shutterspeed is in form 'n-degree'
+		end
+		return exp
+	end
 	##
 	#
 	##
@@ -231,18 +436,18 @@ class LuxrenderExport
 		filter += "PixelFilter \"#{@lrs.pixelfilter_type}\"\n"
 		case @lrs.pixelfilter_type
 			when "box"
-				if (@lrs.pixelfilter_show_advanced)
+				if (@lrs.pixelfilter_show_advanced_box)
 					filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_box_xwidth)}]\n"
 					filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_box_ywidth)}]\n"
 				end
 			when "gaussian"
-				if (@lrs.pixelfilter_show_advanced)
+				if (@lrs.pixelfilter_show_advanced_gaussian)
 					filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_gaussian_xwidth)}]\n"
 					filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_gaussian_ywidth)}]\n"
 					filter += "\t\"float alpha\" [#{"%.6f" %(@lrs.pixelfilter_gaussian_alpha)}]\n"
 				end
 			when "mitchell"
-				if (@lrs.pixelfilter_show_advanced)
+				if (@lrs.pixelfilter_show_advanced_mitchell)
 					filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_mitchell_xwidth)}]\n"
 					filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_mitchell_ywidth)}]\n"
 					case @lrs.pixelfilter_mitchell_optmode
@@ -268,13 +473,13 @@ class LuxrenderExport
 					filter += "\t\"bool supersample\" [\"true\"]\n"
 				end
 			when "sinc"
-				if (@lrs.pixelfilter_show_advanced)
+				if (@lrs.pixelfilter_show_advanced_sinc)
 					filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_sinc_xwidth)}]\n"
 					filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_sinc_ywidth)}]\n"
 					filter += "\t\"float tau\" [#{"%.6f" %(@lrs.pixelfilter_sinc_tau)}]\n"
 				end
 			when "triangle"
-				if (@lrs.pixelfilter_show_advanced)
+				if (@lrs.pixelfilter_show_advanced_triangle)
 					filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_triangle_xwidth)}]\n"
 					filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_triangle_ywidth)}]\n"
 				end
@@ -296,15 +501,15 @@ class LuxrenderExport
 					usevariance = @lrs.sampler_metropolis_usevariance ? "true" : "false"
 					sampler += "\t\"bool usevariance\" [\"#{usevariance}\"]\n"
 				else
-					sampler += "\t\"float largemutationprob\" [#{"%.6f" %(1 - @lrs.sampler_metropolis_strength)}]\n"
+					sampler += "\t\"float largemutationprob\" [#{"%.6f" %(1 - @lrs.sampler_metropolis_strength.to_f)}]\n"
 				end
 			when "lowdiscrepancy"
 				sampler += "\t\"string pixelsampler\" [\"#{@lrs.sampler_lowdisc_pixelsampler}\"]\n"
 				sampler += "\t\"integer pixelsamples\" [#{@lrs.sampler_lowdisc_pixelsamples.to_i}]\n"
 			when "random"
-				sampler += "\t\"string pixelsampler\" [\"#{@lrs.sampler_lowdisc_pixelsampler}\"]\n"
-				sampler += "\t\"integer pixelsamples\" [#{@lrs.sampler_lowdisc_pixelsamples.to_i}]\n"
-			when erpt
+				sampler += "\t\"string pixelsampler\" [\"#{@lrs.sampler_random_pixelsampler}\"]\n"
+				sampler += "\t\"integer pixelsamples\" [#{@lrs.sampler_random_pixelsamples.to_i}]\n"
+			when "erpt"
 				sampler += "\t\"integer cheinlength\" [#{@lrs.sampler_erpt_chainlength.to_i}]\n"
 		end
 		return sampler
@@ -330,7 +535,7 @@ class LuxrenderExport
 					integrator += "\t\"integer lightdepth\" [#{@lrs.sintegrator_bidir_bounces.to_i}]\n"
 				end
 			# 'path'
-			when 'path'
+			when "path"
 				if (@lrs.sintegrator_path_show_advanced)
 					integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_path_maxdepth}]\n"
 					environment = @lrs.sintegrator_path_include_environment ? "true" : "false"
@@ -348,31 +553,31 @@ class LuxrenderExport
 				end
 			# "distributedpath"
 			when "distributedpath"
+				integrator += "\t\"string strategy\" [\"#{@lrs.sintegrator_distributedpath_strategy}\"]\n"
 				bool_value = @lrs.sintegrator_distributedpath_directsampleall ? "true" : "false"
 				integrator += "\t\"bool directsampleall\" [\"#{bool_value}\"]\n"
 				integrator += "\t\"integer directsamples\" [#{@lrs.sintegrator_distributedpath_directsamples.to_i}]\n"
-				bool_value = @lrs.sintegrator_distributedpath_directdiffuse ? "true" : "false"
-				integrator += "\t\"bool directdiffuse\" [\"#{bool_value}\"]\n"
-				bool_value = @lrs.sintegrator_distributedpath_directglossy ? "true" : "false"
-				integrator += "\t\"bool directglossy\" [\"#{bool_value}\"]\n"
 				bool_value = @lrs.sintegrator_distributedpath_indirectsampleall ? "true" : "false"
 				integrator += "\t\"bool indirectsampleall\" [\"#{bool_value}\"]\n"
 				integrator += "\t\"integer indirectsamples\" [#{@lrs.sintegrator_distributedpath_indirectsamples.to_i}]\n"
-				bool_value = @lrs.sintegrator_distributedpath_indirectdiffuse ? "true" : "false"
-				integrator += "\t\"bool indirectdiffuse\" [\"#{bool_value}\"]\n"
-				bool_value = @lrs.sintegrator_distributedpath_indirectglossy ? "true" : "false"
-				integrator += "\t\"bool indirectglossy\" [\"#{bool_value}\"]\n"
 				integrator += "\t\"integer diffusereflectdepth\" [#{@lrs.sintegrator_distributedpath_diffusereflectdepth.to_i}]\n"
 				integrator += "\t\"integer diffusereflectsamples\" [#{@lrs.sintegrator_distributedpath_diffusereflectsamples.to_i}]\n"
 				integrator += "\t\"integer diffuserefractdepth\" [#{@lrs.sintegrator_distributedpath_diffuserefractdepth.to_i}]\n"
 				integrator += "\t\"integer diffuserefractsamples\" [#{@lrs.sintegrator_distributedpath_diffuserefractsamples.to_i}]\n"
+				bool_value = @lrs.sintegrator_distributedpath_directdiffuse ? "true" : "false"
+				integrator += "\t\"bool directdiffuse\" [\"#{bool_value}\"]\n"
+				bool_value = @lrs.sintegrator_distributedpath_indirectdiffuse ? "true" : "false"
+				integrator += "\t\"bool indirectdiffuse\" [\"#{bool_value}\"]\n"
 				integrator += "\t\"integer glossyreflectdepth\" [#{@lrs.sintegrator_distributedpath_glossyreflectdepth.to_i}]\n"
 				integrator += "\t\"integer glossyreflectsamples\" [#{@lrs.sintegrator_distributedpath_glossyreflectsamples.to_i}]\n"
 				integrator += "\t\"integer glossyrefractdepth\" [#{@lrs.sintegrator_distributedpath_glossyrefractdepth.to_i}]\n"
 				integrator += "\t\"integer glossyrefractsamples\" [#{@lrs.sintegrator_distributedpath_glossyrefractsamples.to_i}]\n"
+				bool_value = @lrs.sintegrator_distributedpath_directglossy ? "true" : "false"
+				integrator += "\t\"bool directglossy\" [\"#{bool_value}\"]\n"
+				bool_value = @lrs.sintegrator_distributedpath_indirectglossy ? "true" : "false"
+				integrator += "\t\"bool indirectglossy\" [\"#{bool_value}\"]\n"
 				integrator += "\t\"integer specularreflectdepth\" [#{@lrs.sintegrator_distributedpath_specularreflectdepth.to_i}]\n"
 				integrator += "\t\"integer specularrefractdepth\" [#{@lrs.sintegrator_distributedpath_specularrefractdepth.to_i}]\n"
-				integrator += "\t\"string strategy\" [\"#{@lrs.sintegrator_distributedpath_strategy}\"]\n"
 				if (@lrs.sintegrator_distributedpath_reject)
 					bool_value = @lrs.sintegrator_distributedpath_diffusereflectreject ? "true" : "false"
 					integrator += "\t\"bool diffusereflectreject\" [\"#{bool_value}\"]\n"
@@ -400,19 +605,21 @@ class LuxrenderExport
 			# "exphotonmap"
 			when "exphotonmap"
 				integrator += "\t\"integer directphotons\" [#{@lrs.sintegrator_exphoton_directphotons}]\n"
+				integrator += "\t\"integer indirectphotons\" [#{@lrs.sintegrator_exphoton_indirectphotons}]\n"
 				integrator += "\t\"integer causticphotons\" [#{@lrs.sintegrator_exphoton_causticphotons}]\n"
 				finalgather = @lrs.sintegrator_exphoton_finalgather ? "true" : "false"
 				integrator += "\t\"bool finalgather\" [\"#{finalgather}\"]\n"
 				if (@lrs.sintegrator_exphoton_finalgather)
 					integrator += "\t\"integer finalgathersamples\" [#{@lrs.sintegrator_exphoton_finalgathersamples}]\n"
 					integrator += "\t\"string rrstrategy\" [\"#{@lrs.sintegrator_exphoton_rrstrategy}\"]\n"
-					if (@lrs.sintegrator_exphoton_rrstrategy)
+					if (@lrs.sintegrator_exphoton_rrstrategy.match("probability"))
 						integrator += "\t\"float rrcontinueprob\" [#{"%.6f" %(@lrs.sintegrator_exphoton_rrcontinueprob)}]\n"
 					end
 					integrator += "\t\"float gatherangle\" [#{"%.6f" %(@lrs.sintegrator_exphoton_gatherangle)}]\n"
 				end
 				integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_exphoton_maxdepth}]\n"
 				integrator += "\t\"integer maxphotondepth\" [#{@lrs.sintegrator_exphoton_maxphotondepth}]\n"
+				integrator += "\t\"float maxphotondist\" [#{"%.6f" %(@lrs.sintegrator_exphoton_maxphotondist)}]\n"
 				integrator += "\t\"integer nphotonsused\" [#{@lrs.sintegrator_exphoton_nphotonsused}]\n"
 				integrator += "\t\"integer shadowraycount\" [#{@lrs.sintegrator_exphoton_shadow_ray_count}]\n"
 				integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_exphoton_strategy}\"]\n"
@@ -508,11 +715,11 @@ class LuxrenderExport
 					out.puts "\t\"string mapname\" [\"" + @lrs.environment_infinite_map + "\"]"
 				end
 				if (@lrs.use_environment_infinite_sun)
-					out.puts "\tLightGroup \"#{@lrs.environment_sun_lightgroup}\""
+					out.puts "\tLightGroup \"#{@lrs.environment_infinite_sun_lightgroup}\""
 					out.puts "\tLightSource \"sun\""
-					out.puts "\t\"float gain\" [#{"%.6f" %(@lrs.environment_sun_gain)}]"
-					out.puts "\t\"float relsize\" [#{"%.6f" %(@lrs.environment_sun_relsize)}]"
-					out.puts "\t\"float turbidity\" [#{"%.6f" %(@lrs.environment_sun_turbidity)}]"
+					out.puts "\t\"float gain\" [#{"%.6f" %(@lrs.environment_infinite_sun_gain)}]"
+					out.puts "\t\"float relsize\" [#{"%.6f" %(@lrs.environment_infinite_sun_relsize)}]"
+					out.puts "\t\"float turbidity\" [#{"%.6f" %(@lrs.environment_infinite_sun_turbidity)}]"
 					out.puts "\t\"vector sundir\" [#{"%.6f" %(sun_direction.x)} #{"%.6f" %(sun_direction.y)} #{"%.6f" %(sun_direction.z)}]"
 				end
 		end

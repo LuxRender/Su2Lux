@@ -3,16 +3,19 @@ function checkbox_expander(id)
 {
 	if ($("#" + id).attr("checked"))
 	{
-		$("#" + id).nextAll(".basic").hide();
-		$("#" + id).nextAll(".advanced").show();
-		
+		if (id.match("show_advanced") || id.match("_use_")) {
+			$("#" + id).nextAll(".basic").hide();
+			$("#" + id).nextAll(".advanced").show();
+		}
 		$("#" + id).next(".collapse").show();
 		$("#" + id).next(".collapse").children("#focus_type").change();
 	}
 	else if ($("#" + id).attr("checked") == false)
 	{
-		$("#" + id).nextAll(".basic").show();
-		$("#" + id).nextAll(".advanced").hide();
+		if (id.match("show_advanced") || id.match("_use_")) {
+			$("#" + id).nextAll(".basic").show();
+			$("#" + id).nextAll(".advanced").hide();
+		}
 		$("#" + id).next(".collapse").hide();
 	}
 }
@@ -99,6 +102,15 @@ $(document).ready(
 			}
 		);
 		
+		$("#settings_panel #fleximage_linear_camera_type").change(
+			function()
+			{
+				$(this).nextAll("div").hide();
+				$(this).nextAll("span").hide();
+				$(this).nextAll("." + this.value).show();
+			}
+		);
+		
 		$("#presets select").change(
 			function()
 			{
@@ -128,9 +140,17 @@ $(document).ready(
 				node = $(this).next("div.collapse").children("#sampler_type").change();
 				node = $(this).next("div.collapse").children("#pixelfilter_type").change();
 				node = $(this).next("div.collapse").children("#fleximage_tonemapkernel").change();
-				node = $(this).next("div.collapse").children("div.collapse").children("div.advanced").children("#sintegrator_path_rrstrategy").change();
-				node = $(this).next("div.collapse").children("div.collapse").children("div.collapse").children("#sintegrator_exphoton_rrstrategy").change();
+				node = $(this).next("div.collapse").find("#sintegrator_path_rrstrategy").change();
+				node = $(this).next("div.collapse").find("#sintegrator_exphoton_rrstrategy").change();
+				node = $(this).next("div.collapse").find("#fleximage_write_exr_compressiontype").change();
+				node = $(this).next("div.collapse").find("#fleximage_write_exr_zbuf_normalizationtype").change();
+				node = $(this).next("div.collapse").find("#fleximage_linear_camera_type").change();
+				
+				//TODO: expand all checkbox
+				checkbox_expander("fleximage_write_exr")
 				checkbox_expander("fleximage_write_png")
+				checkbox_expander("fleximage_write_tga")
+				checkbox_expander("fleximage_use_preset")
 				$(this).next("div.collapse").slideToggle(300);
 				// node = $(this).next("div.collapse").children("#environment_light_type").attr("value");
 				// $(this).next("div.collapse").children("#environment_light_type").siblings("#" + node).show();
@@ -196,7 +216,7 @@ $(document).ready(
 			function()
 			{	
 				width = $("#fleximage_xresolution").val();
-				height = $("fleximage_#yresolution").val();
+				height = $("#fleximage_yresolution").val();
 				$("#fleximage_xresolution").val(parseInt(height));
 				$("#fleximage_yresolution").val(parseInt(width));
 				window.location = 'skp:set_image_size@' + height + 'x' + width;

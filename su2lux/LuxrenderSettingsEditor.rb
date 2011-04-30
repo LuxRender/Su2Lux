@@ -57,6 +57,12 @@ class LuxrenderSettingsEditor
 					else
 						if (@lrs.respond_to?(key))
 							method_name = key + "="
+							if (value.to_s.downcase == "true")
+								value = true
+							end
+							if (value.to_s.downcase == "false")
+								value = false
+							end
 							@lrs.send(method_name, value)
 						else
 							UI.messagebox "Parameter " + key + " does not exist.\n\nContact developers."
@@ -70,8 +76,8 @@ class LuxrenderSettingsEditor
 		@settings_dialog.add_action_callback("get_view_size") { |dialog, params|
 			width = (Sketchup.active_model.active_view.vpwidth)
 			height = (Sketchup.active_model.active_view.vpheight)
-			setValue("xresolution", width)
-			setValue("yresolution", height)
+			setValue("fleximage_xresolution", width)
+			setValue("fleximage_yresolution", height)
 			@lrs.fleximage_xresolution = width
 			@lrs.fleximage_yresolution = height
 			change_aspect_ratio(0.0)
@@ -84,8 +90,8 @@ class LuxrenderSettingsEditor
 			values = params.split('x')
 			width = values[0].to_i
 			height = values[1].to_i
-			setValue("xresolution", width)
-			setValue("yresolution", height)
+			setValue("fleximage_xresolution", width)
+			setValue("fleximage_yresolution", height)
 			@lrs.fleximage_xresolution = width
 			@lrs.fleximage_yresolution= height
 			change_aspect = values[2]
@@ -113,6 +119,7 @@ class LuxrenderSettingsEditor
 		##
 		#
 		##
+		#TODO: change variables names
 		@settings_dialog.add_action_callback("preset") {|d,p|
 			case p
 				when '0' #<option value='0'>0 Preview - Global Illumination</option> in settings.html
@@ -559,8 +566,10 @@ class LuxrenderSettingsEditor
 			
 		#### -- export_file_path slash change -- ####
 		when "export_file_path"
-			new_value.gsub!(/\\/, '\/') #bug with sketchup not allowing \ characters
-			cmd="$('##{id}').text('#{new_value}');" #different asignment method
+		SU2LUX.dbg_p new_value
+			new_value.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
+			new_value.gsub!(/\\/, '/') if new_value.include?('\\')
+			cmd="$('##{id}').val('#{new_value}');" #different asignment method
 			# SU2LUX.dbg_p cmd
 			@settings_dialog.execute_script(cmd)
 		############################

@@ -229,38 +229,40 @@ module SU2LUX
 		#####################
 		
 		model = Sketchup.active_model
-			model_filename = File.basename(model.path)
-			if model_filename.empty?
-				export_filename = SCENE_NAME
-			else
-				dot_position = model_filename.rindex(".")
-				export_filename = model_filename.slice(0..(dot_position - 1))
-				export_filename += SCENE_EXTENSION
-			end
+		model_filename = File.basename(model.path)
+		if model_filename.empty?
+			export_filename = SCENE_NAME
+		else
+			dot_position = model_filename.rindex(".")
+			export_filename = model_filename.slice(0..(dot_position - 1))
+			export_filename += SCENE_EXTENSION
+		end
 		#	if model.path.empty?
-			default_folder = SU2LUX.find_default_folder
-			export_folder = default_folder
-			export_folder = File.dirname(model.path) if ! model.path.empty?
+		default_folder = SU2LUX.find_default_folder
+		export_folder = default_folder
+		export_folder = File.dirname(model.path) if ! model.path.empty?
 		
 		user_input = UI.savepanel("Save lxs file", export_folder, export_filename)
 		
 		#check whether user has pressed cancel
-			if user_input
-				#store file path for quick exports
-				@export_file_path = user_input
+		if user_input
+			user_input.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
+			user_input.gsub!(/\\/, '/') if user_input.include?('\\')
+			#store file path for quick exports
+			@export_file_path = user_input
 				
+			@lrs.export_file_path = @export_file_path
+			#would be nice to store export_file_path in luxrender preferences (attatch to skp)
+				
+			if @export_file_path == @export_file_path.chomp(SCENE_EXTENSION)
+				@export_file_path += SCENE_EXTENSION
+					
+				#### --- awful hack --- 1.0 #####
 				@lrs.export_file_path = @export_file_path
-				#would be nice to store export_file_path in luxrender preferences (attatch to skp)
-				
-				if @export_file_path == @export_file_path.chomp(SCENE_EXTENSION)
-					@export_file_path += SCENE_EXTENSION
+				#####################
 					
-					#### --- awful hack --- 1.0 #####
-					@lrs.export_file_path = @export_file_path
-					#####################
-					
-					@luxrender_path = SU2LUX.get_luxrender_path
-				end
+				@luxrender_path = SU2LUX.get_luxrender_path
+			end
 			return true #user has selected a path
 		end
 		return false #user has not selected a path

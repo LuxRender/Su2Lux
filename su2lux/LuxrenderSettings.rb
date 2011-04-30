@@ -65,6 +65,7 @@ class LuxrenderSettings
 		'environment_infinite_map' => '',
 		'environment_infinite_gamma' => 1.0,
 		'use_environment_infinite_sun' => true,
+		'environment_infinite_sun_lightgroup' => 'default',
 		'environment_infinite_sun_gain' => 1.0,
 		'environment_infinite_sun_relsize' => 1.0,
 		'environment_infinite_sun_turbidity' => 2.2,
@@ -90,7 +91,7 @@ class LuxrenderSettings
 		'pixelfilter_mitchell_sharpness' => 1.0/3.0,
 		'pixelfilter_mitchell_xwidth' => 2.0, 
 		'pixelfilter_mitchell_ywidth' => 2.0,
-		'pixelfilter_mitchell_optmode' => 'slider',
+		'pixelfilter_mitchell_optmode' => 'manual', #TODO: change to slider
 		'pixelfilter_mitchell_B' => 1.0/3.0,
 		'pixelfilter_mitchell_C' => 1.0/3.0,
 		'pixelfilter_mitchell_supersample' => false,
@@ -223,12 +224,13 @@ class LuxrenderSettings
 		'fleximage_premultiplyalpha' => false,
 		'fleximage_xresolution' => nil,
 		'fleximage_yresolution' => nil,
+		'fleximage_resolution_percent' => 100,
 		'fleximage_filterquality' => 4,
 		'fleximage_ldr_clamp_method' => "lum",
 		'fleximage_write_exr' => false,
 		'fleximage_write_exr_channels' => "RGB",
 		'fleximage_write_exr_halftype' => true,
-		'fleximage_write_exr_compressiontype' => "piz",
+		'fleximage_write_exr_compressiontype' => "PIZ (lossless)",
 		'fleximage_write_exr_applyimaging' => true,
 		'fleximage_write_exr_gamutclamp' => true,
 		'fleximage_write_exr_ZBuf' => false,
@@ -274,16 +276,24 @@ class LuxrenderSettings
 		'fleximage_cameraresponse' => "",
 		'fleximage_gamma' => 2.2,
 		#added for GUI
-		'fleximage_linear_use_preset' => FALSE,
+		'fleximage_linear_use_preset' => false,
+		'fleximage_linear_camera_type' => "photo",
+		'fleximage_linear_cinema_exposure' => "180-deg",
+		'fleximage_linear_cinema_fps' => "25 FPS",
+		'fleximage_linear_photo_exposure' => "1/125",
+		'fleximage_linear_use_half_stop' => "false",
+		'fleximage_linear_hf_stopF' => 2.8,
+		'fleximage_linear_hf_stopT' => 3.3,
+		'fleximage_linear_iso' => "100",
 		'fleximage_use_preset' => true,
 		'fleximage_use_colorspace_whitepoint' => true,
 		'fleximage_use_colorspace_gamma' => true,
 		'fleximage_use_colorspace_whitepoint_preset' => true,
-		'fleximage_use_colospace_wp_preset' => true,
+		'fleximage_colorspace_wp_preset' => "D65 - daylight, 6504",
 		'fleximage_colorspace_gamma' => 2.2,
 		'fleximage_colorspace_preset_white_x' => 0.314275,
 		'fleximage_colorspace_preset_white_y' => 0.329411,
-		'fleximage_colorspace_preset' => 'rRGB',
+		'fleximage_colorspace_preset' => 'sRGB - HDTV (ITU-R BT.709-5)',
 		
 		
 		# 'saveexr' => false,
@@ -310,8 +320,8 @@ class LuxrenderSettings
 	##
 	# Other
 	##
-		'useparamkeys'=>false,
-		'export_file_path'=>""
+		'useparamkeys' => false,
+		'export_file_path' => ""
 	}
 
 	##
@@ -365,6 +375,10 @@ class LuxrenderSettings
 			@@settings.each do |key, value|
 				LuxrenderAttributeDictionary.set_attribute(@dict, key, value)
 			end
+			LuxrenderAttributeDictionary.set_attribute(@dict, 'fov', format("%.2f", Sketchup.active_model.active_view.camera.fov))
+			LuxrenderAttributeDictionary.set_attribute(@dict, 'focal_length', format("%.2f", Sketchup.active_model.active_view.camera.focal_length))
+			LuxrenderAttributeDictionary.set_attribute(@dict, 'fleximage_xresolution', Sketchup.active_model.active_view.vpwidth)
+			LuxrenderAttributeDictionary.set_attribute(@dict, 'fleximage_yresolution', Sketchup.active_model.active_view.vpheight)
 	end #END reset
 	
 	def load_from_model
