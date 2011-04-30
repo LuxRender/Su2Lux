@@ -799,15 +799,15 @@ class LuxrenderExport
 			export=@materials[mat]
 		end
 		
-		has_texture = true
+		has_texture = false
 		if mat.respond_to?(:name)
 			matname = mat.display_name.delete("[<>]")
 			# matname = mat.display_name.gsub(/[<>]/,'*')
 			p 'matname: '+matname
 			has_texture = true if mat.texture!=nil
-		else
-			matname = "Default"
-			has_texture=true if matname!=SU2LUX::FRONT_FACE_MATERIAL
+		# else
+			# matname = "Default"
+			# has_texture=true if matname!=SU2LUX::FRONT_FACE_MATERIAL
 		 end
 		
 		matname="FM_"+matname if fm_mat
@@ -888,9 +888,9 @@ class LuxrenderExport
 		out.puts 'AttributeBegin'
 		i=0
 		
-		if mat.class==String
-		out.puts "NamedMaterial \""+mat+"\""
-		else
+		# if mat.class==String
+			# out.puts "NamedMaterial \""+mat+"\""
+		# else
 		luxrender_mat=LuxrenderMaterial.new(mat)
 		#Exporting faces indices
 		#light
@@ -912,7 +912,7 @@ class LuxrenderExport
 					out.puts "NamedMaterial \""+luxrender_mat.name+"\""
 					SU2LUX.dbg_p "NAME: " + luxrender_mat.name
 			end
-		end
+		# end
 		
 		out.puts 'Shape "trianglemesh" "integer indices" ['
 		for mesh in meshes
@@ -974,7 +974,7 @@ class LuxrenderExport
 		@exp_default_uvs=true
 		no_texture_uvs=(!has_texture and @exp_default_uvs==true)
 		
-		if has_texture or no_texture_uvs
+		if has_texture
 			current_step += 1
 			i = 0
 			#Exporting uv-coordinates
@@ -1009,6 +1009,15 @@ class LuxrenderExport
 				i += 1
 			end
 			out.puts ']'
+		else
+			saved_uvs = luxrender_mat.get_uv(1)
+			if saved_uvs
+				out.puts '"float uv" ['
+				saved_uvs.each { |uv|
+					out.puts "#{"%.4f" %(uv.x)} #{"%.4f" %(-uv.y+1)}"
+				}
+				out.puts ']'
+			end
 		end
 		
 		out.puts 'AttributeEnd'
@@ -1053,68 +1062,74 @@ class LuxrenderExport
 		SU2LUX.dbg_p "export_mat"
 		out.puts "# Material '" + mat.name + "'"
 		heading = "MakeNamedMaterial \"#{mat.name}\"" + "\n"
-		heading += "\"string type\" [\"#{mat.type}\"]" + "\n"
+		heading += "\t" + "\"string type\" [\"#{mat.type}\"]" + "\n"
 		pre = ""
 		post = ""
 		case mat.type
 			when "matte"
 				pre, post = self.export_diffuse_component(mat, pre, post)
-				post += "\"float sigma\" [#{mat.matte_sigma}]"
+				pre, post = self.export_sigma(mat, pre, post)
 			when "glossy"
 				pre, post = self.export_diffuse_component(mat, pre, post)
-				pre, post =  self.export_specular_component(mat, pre, post)
+				pre, post = self.export_specular_component(mat, pre, post)
 				pre, post = self.export_exponent(mat, pre, post)
-				post += "\"float index\" [0.000000]"
-				pre, post = self.export_absorption_component(mat, pre, post)
+				pre, post = self.export_IOR(mat, pre, post)
+				if (mat.use_absorption)
+					pre, post = self.export_absorption_component(mat, pre, post)
+				end
 				multibounce = mat.multibounce ? "true": "false"
-				post += "\"bool multibounce\" [\"#{multibounce}\"]"
+				post += "\t" + "\"bool multibounce\" [\"#{multibounce}\"]" + "\n"
 			when "glass"
 				pre, post = self.export_reflection_component(mat, pre, post)
 				pre, post = self.export_transmission_component(mat, pre, post)
-				pre, post = export_IOR(mat, pre, post)
+				pre, post = self.export_IOR(mat, pre, post)
 				architectural = mat.use_architectural ? "true" : "false"
-				post += "\t\"bool architectural\" [\"#{architectural}\"]"
+				post += "\t" + "\"bool architectural\" [\"#{architectural}\"]" + "\n"
 				if ( ! mat.use_architectural)
-					pre, post = export_thin_film(mat, pre, post)
-					pre, post = export_dispersive_refraction(mat, pre, post)
+					if (mat.use_thin_film_coating)
+						pre, post = self.export_thin_film(mat, pre, post)
+					end
+					if (mat.use_dispersive_refraction)
+						pre, post = self.export_dispersive_refraction(mat, pre, post)
+					end
 				end
 			when "roughglass"
 				pre, post = self.export_reflection_component(mat, pre, post)
 				pre, post = self.export_transmission_component(mat, pre, post)
-				pre, post = export_IOR(mat, pre, post)
-				pre, post = export_dispersive_refraction(mat, pre, post)
+				pre, post = self.export_IOR(mat, pre, post)
+				pre, post = self.export_dispersive_refraction(mat, pre, post)
 			when "metal"
-				pre, post = export_nk(mat, pre, post)
+				pre, post = self.export_nk(mat, pre, post)
 				pre, post = self.export_exponent(mat, pre, post)
 			when "shinymetal"
 				pre, post = self.export_reflection_component(mat, pre, post)
 				pre, post = self.export_specular_component(mat, pre, post)
 				pre, post = self.export_exponent(mat, pre, post)
-				pre, post = export_thin_film(mat, pre, post)
+				pre, post = self.export_thin_film(mat, pre, post)
 			when "mirror"
 				pre, post = self.export_reflection_component(mat, pre, post)
-				pre, post = export_thin_film(mat, pre, post)
+				pre, post = self.export_thin_film(mat, pre, post)
 			when "mattetranslucent"
 				pre, post = self.export_reflection_component(mat, pre, post)
 				pre, post = self.export_transmission_component(mat, pre, post)
 				energyconserving = mat.energyconserving ? "true": "false"
-				post += "\"bool energyconserving\" [\"#{energyconserving}\"]"
-				post += "\"float sigma\" [#{mat.matte_sigma}]"
+				post += "\t" + "\"bool energyconserving\" [\"#{energyconserving}\"]" + "\n"
+				pre, post = self.export_sigma(mat, pre, post)
 			when "glossytranslucent"
 				pre, post = self.export_diffuse_component(mat, pre, post)
 				pre, post = self.export_transmission_component(mat, pre, post)
 				pre, post = self.export_specular_component(mat, pre, post)
 				pre, post = self.export_exponent(mat, pre, post)
-				post += "\"float index\" [0.000000]"
+				pre, post = self.export_IOR(mat, pre, post)
 				pre, post = self.export_absorption_component(mat, pre, post)
 				multibounce = mat.multibounce ? "true": "false"
-				post += "\"bool multibounce\" [\"#{multibounce}\"]"
+				post += "\t" + "\"bool multibounce\" [\"#{multibounce}\"]" + "\n"
 			when "light"
-				post += export_mesh_light(mat)
+				post += self.export_mesh_light(mat)
 		end
-		if (mat.use_bump)
-			pre, post = export_bump(mat, pre, post)
-		end
+		# if (mat.use_bump)
+			pre, post = self.export_bump(mat, pre, post)
+		# end
 		if (mat.type == "light")
 			out.puts post
 		else
@@ -1131,39 +1146,50 @@ class LuxrenderExport
 	def export_diffuse_component(material, before, after)
 		preceding = ""
 		following = ""
-		filled = true
-		if ( ! material.use_diffuse_texture)
-			preceding = ""
-			following += "\"color Kd\" [#{"%.6f" %(material.color[0])} #{"%.6f" %(material.color[1])} #{"%.6f" %(material.color[2])}]" + "\n"
+		# if ( ! material.use_diffuse_texture)
+		if ( not material.has_texture?("kd"))
+			# preceding = ""
+			following += "\t" + "\"color Kd\" [#{material.color_tos}]" + "\n"
 		else
 			preceding += "Texture \"#{material.name}::Kd\" \"color\" \"imagemap\"" + "\n"
-			preceding += "\"string wrap\" [\"#{material.kd_imagemap_wrap}\"]" + "\n"
+			preceding += "\t" + "\"string wrap\" [\"#{material.kd_imagemap_wrap}\"]" + "\n"
 			case material.kd_texturetype
 				when "sketchup"
 					if (@model_textures.has_key?(material.name))
 						filename = @model_textures[material.name][4]
 					else
-						filename = material.kd_imagemap_Sketchup_filename
-						filled = false
-								return [before, after]
+						return [before, after]
 					end
-					preceding += "\"string filename\" [\"#{filename}\"]" + "\n"
+					preceding += "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
 				when "imagemap"
-					preceding += "\"string filename\" [\"#{material.kd_imagemap_filename}\"]" + "\n"
+					preceding += "\t" + "\"string filename\" [\"#{material.kd_imagemap_filename}\"]" + "\n"
 			end
-			preceding += "\"float gamma\" [#{material.kd_imagemap_gamma}]" + "\n"
-			preceding += "\"float gain\" [#{material.kd_imagemap_gain}]" + "\n"
-			preceding += "\"string filtertype\" [\"#{material.kd_imagemap_filtertype}\"]" + "\n"
-			if (material.color[0].to_f != 1.0 or material.color[1].to_f != 1.0 or material.color[2].to_f != 1.0)
-				color = "#{"%.6f" %(material.color[0])} #{"%.6f" %(material.color[1])} #{"%.6f" %(material.color[2])}"
-				preceding += "Texture \"#{material.name}::Kd.scale\" \"color\" \"scale\" \"texture tex1\" [\"#{material.name}::Kd\"] \"color tex2\" [#{color}]" + "\n"
-				following += "\"texture Kd\" [\"#{material.name}::Kd.scale\"]" + "\n"
+			preceding += "\t" + "\"float gamma\" [#{material.kd_imagemap_gamma}]" + "\n"
+			preceding += "\t" + "\"float gain\" [#{material.kd_imagemap_gain}]" + "\n"
+			preceding += "\t" + "\"string filtertype\" [\"#{material.kd_imagemap_filtertype}\"]" + "\n"
+			if (material.color['red'].to_f != 1.0 or material.color['green'].to_f != 1.0 or material.color['blue'].to_f != 1.0)
+				# color = "#{"%.6f" %(material.color[0])} #{"%.6f" %(material.color[1])} #{"%.6f" %(material.color[2])}"
+				preceding += "Texture \"#{material.name}::Kd.scale\" \"color\" \"scale\" \"texture tex1\" [\"#{material.name}::Kd\"] \"color tex2\" [#{material.color_tos}]" + "\n"
+				following += "\t" + "\"texture Kd\" [\"#{material.name}::Kd.scale\"]" + "\n"
 			else
-				following += "\"texture Kd\" [\"#{material.name}\"]" + "\n"
+				following += "\t" + "\"texture Kd\" [\"#{material.name}\"]" + "\n"
 			end
 		end
 		return [before + preceding, after + following]
-		# return filled ? component : color_component
+	end
+	
+	##
+	#
+	##
+	def export_sigma(material, before, after)
+		preceding = ""
+		following = ""
+		if ( ! material.has_texture?("matte_sigma"))
+			following += "\t" + "\"float sigma\" [#{material.matte_sigma}]" + "\n"
+		else
+			preceding, following = self.export_texture(material, "matte_sigma", "float", before, after)
+		end
+		return [before + preceding, after + following]
 	end
 	
 	##
@@ -1172,9 +1198,10 @@ class LuxrenderExport
 	def export_specular_component(material, before, after)
 		preceding = ""
 		following = ""
-		filled = true
-		if ( ! material.use_specular_texture)
-			following += "\"color Ks\" [#{"%.6f" %(material.specular[0])} #{"%.6f" %(material.specular[1])} #{"%.6f" %(material.specular[2])}]"
+		if ( ! material.has_texture?("ks"))
+			following += "\t" + "\"color Ks\" [#{material.specular_tos}]" + "\n"
+		else
+			preceding, following = self.export_texture(material, "ks", "color", before, after)
 		end
 		return [before + preceding, after + following]
 	end
@@ -1185,11 +1212,17 @@ class LuxrenderExport
 	def export_exponent(material, before, after)
 		preceding = ""
 		following = ""
-		filled = true
-		if ( ! material.use_uroughness_texture)
-			u_roughness = Math.sqrt(2.0 / (material.exponent.to_f + 2))
-			following += "\"float uroughness\" [#{"%.6f" %(u_roughness)}]" + "\n"
-			following += "\"float vroughness\" [#{"%.6f" %(u_roughness)}]"
+		material.uroughness = Math.sqrt(2.0 / (material.u_exponent.to_f + 2))
+		material.vroughness = Math.sqrt(2.0 / (material.v_exponent.to_f + 2))
+		if ( ! material.has_texture?('u_exponent'))
+			following += "\t" + "\"float uroughness\" [#{"%.6f" %(material.uroughness)}]" + "\n"
+			following += "\t" + "\"float vroughness\" [#{"%.6f" %(material.vroughness)}]" + "\n"
+		else
+		# TODO:
+			preceding_t, following_t = self.export_texture(material, "u_exponent", "float", before, after)
+			preceding, following = self.export_texture(material, "v_exponent", "float", before, after)
+			preceding = preceding_t+ preceding
+			following = following_t + following
 		end
 		return [before + preceding, after + following]
 	end
@@ -1200,10 +1233,10 @@ class LuxrenderExport
 	def export_IOR(material, before, after)
 		preceding = ""
 		following = ""
-		filled = true
-		if ( ! material.use_IOR_texture)
-			following += "\"float index\" [#{material.IOR_index}]"
+		if ( ! material.has_texture?('IOR_index'))
+			following += "\t" + "\"float index\" [#{material.IOR_index}]\n"
 		else
+			preceding, following = self.export_texture(material, 'IOR_index', 'float', before, after)
 		end
 		return [before + preceding, after + following]
 	end
@@ -1214,14 +1247,15 @@ class LuxrenderExport
 	def export_absorption_component(material, before, after)
 		preceding = ""
 		following = ""
-		filled = true
-		if (material.use_absorption)
-			if ( ! material.use_absorption_texture)
-				following += "\"color Ka\" [#{"%.6f" %(material.absorption[0])} #{"%.6f" %(material.absorption[1])} #{"%.6f" %(material.absorption[2])}]" + "\n"
-			end
-			if ( ! material.use_absorption_depth_texture)
-				following += "\"float d\" [#{"%.6f" %(material.ka_d)}]"
-			end
+		if ( ! material.has_texture?('ka'))
+			following += "\t" + "\"color Ka\" [#{"%.6f" %(material.absorption[0])} #{"%.6f" %(material.absorption[1])} #{"%.6f" %(material.absorption[2])}]" + "\n"
+		else
+			preceding, following = self.export_texture(material, "ka", "color", before, after)
+		end
+		if ( ! material.has_texture?('ka_d'))
+			following += "\t" + "\"float d\" [#{"%.6f" %(material.ka_d)}]" + "\n"
+		else
+			preceding, following = self.export_texture(material, "d", "float", before, after)
 		end
 		return [before + preceding, after + following]
 	end
@@ -1232,8 +1266,7 @@ class LuxrenderExport
 	def export_nk(material, before, after)
 		preceding = ""
 		following = ""
-		filled = true
-		following += "\"string name\" [\"#{material.nk_preset}\"]"
+		following += "\t" + "\"string name\" [\"#{material.nk_preset}\"]" + "\n"
 		return [before + preceding, after + following]
 	end
 
@@ -1243,9 +1276,10 @@ class LuxrenderExport
 	def export_reflection_component(material, before, after)
 		preceding = ""
 		following = ""
-		filled = true
-		if ( ! material.use_reflection_texture)
-			following += "\"color Kr\" [#{"%.6f" %(material.kr_R)} #{"%.6f" %(material.kr_G)} #{"%.6f" %(material.kr_B)}]" + "\n"
+		if ( ! material.has_texture?('kr'))
+			following += "\t" + "\"color Kr\" [#{"%.6f" %(material.kr_R)} #{"%.6f" %(material.kr_G)} #{"%.6f" %(material.kr_B)}]" + "\n"
+		else
+			preceding, following = self.export_texture(material, 'kr', 'color', before, after)
 		end
 		return [before + preceding, after + following]
 	end
@@ -1256,9 +1290,10 @@ class LuxrenderExport
 	def export_transmission_component(material, before, after)
 		preceding = ""
 		following = ""
-		filled = true
-		if ( ! material.use_reflection_texture)
-			following += "\"color Kt\" [#{"%.6f" %(material.kt_R)} #{"%.6f" %(material.kt_G)} #{"%.6f" %(material.kt_B)}]" + "\n"
+		if ( ! material.has_texture?('kt'))
+			following += "\t" + "\"color Kt\" [#{"%.6f" %(material.kt_R)} #{"%.6f" %(material.kt_G)} #{"%.6f" %(material.kt_B)}]" + "\n"
+		else
+			preceding, following = self.export_texture(material, 'kt', 'color', before, after)
 		end
 		return [before + preceding, after + following]
 	end
@@ -1269,14 +1304,15 @@ class LuxrenderExport
 	def export_thin_film(material, before, after)
 		preceding = ""
 		following = ""
-		filled = true
-		if (material.use_thin_film_coating)
-			if ( ! material.use_film_texture)
-				following += "\"float film\" [#{"%.6f" %(material.film)}]" + "\n"
-			end
-			if ( ! material.use_film_texture)
-				following += "\"float filmindex\" [#{"%.6f" %(material.film_index)}]" + "\n"
-			end
+		if ( ! material.has_texture?('film'))
+			following += "\t" + "\"float film\" [#{"%.6f" %(material.film)}]" + "\n"
+		else
+			preceding, following = self.export_texture(material, 'film', 'float', before, after)
+		end
+		if ( ! material.has_texture?('filmindex'))
+			following += "\t" + "\"float filmindex\" [#{"%.6f" %(material.filmindex)}]" + "\n"
+		else
+			preceding, following = self.export_texture(material, 'filmindex', 'float', before, after)
 		end
 		return [before + preceding, after + following]
 	end
@@ -1287,11 +1323,10 @@ class LuxrenderExport
 	def export_dispersive_refraction(material, before, after)
 		preceding = ""
 		following = ""
-		filled = true
-		if (material.use_dispersive_refraction)
-			if ( ! material.use_dispersive_refraction_texture)
-				following += "\"float cauchyb\" [#{"%.6f" %(material.cauchyb)}]" + "\n"
-			end
+		if ( ! material.has_texture?('cauchyb'))
+			following += "\t" + "\"float cauchyb\" [#{"%.6f" %(material.cauchyb)}]" + "\n"
+		else
+			preceding, following = self.export_texture(material, 'cauchyb', 'float', before, after)
 		end
 		return [before + preceding, after + following]
 	end
@@ -1302,29 +1337,8 @@ class LuxrenderExport
 	def export_bump(material, before, after)
 		preceding = ""
 		following = ""
-		filled = true
-		if ( ! material.use_bump_texture)
-			following += "\"float bumpmap\" [#{"%.6f" %(material.bumpmap)}]"
-		else
-			preceding += "Texture \"#{material.name}::bumpmap\" \"float\" \"imagemap\"" + "\n"
-			preceding += "\"string wrap\" [\"#{material.bump_imagemap_wrap}\"]" + "\n"
-			case material.bump_texturetype
-				when "sketchup"
-					if (@model_textures.has_key?(material.name))
-						filename = @model_textures[material.name][4]
-					else
-						filename = ""
-						filled = false
-					end
-					preceding += "\"string filename\" [\"#{filename}\"]" + "\n"
-				when "imagemap"
-					preceding += "\"string filename\" [\"#{material.bump_imagemap_filename}\"]" + "\n"
-			end
-			preceding += "\"float gamma\" [#{material.bump_imagemap_gamma}]" + "\n"
-			preceding += "\"float gain\" [#{material.bump_imagemap_gain}]" + "\n"
-			preceding += "\"string filtertype\" [\"#{material.bump_imagemap_filtertype}\"]" + "\n"
-			preceding += "Texture \"#{material.name}::bumpmap.scale\" \"float\" \"scale\" \"texture tex1\" [\"#{material.name}::bumpmap\"] \"float tex2\" [#{material.bumpmap}]" + "\n"
-			following += "\"texture bumpmap\" [\"#{material.name}::bumpmap.scale\"]" + "\n"
+		if (material.has_texture?('bump'))
+			preceding, following = self.export_texture(material, "bump", "float", before, after)
 		end
 		return [before + preceding, after + following]
 	end
@@ -1335,8 +1349,88 @@ class LuxrenderExport
 	def export_mesh_light(material)
 		case material.light_L
 			when "blackbody"
-				following = "Texture \"" + material.name + ":light:L\" \"color\" \"blackbody\" \"float temperature\" [#{material.light_temperature}]"
+				following = "Texture \"" + material.name + ":light:L\" \"color\" \"blackbody\" \"float temperature\" [#{material.light_temperature}]" + "\n"
 		end
+	end
+	
+	##
+	#
+	##
+	def export_texture(material, mat_type, type, before, after)
+		type_str, type_str2 = self.texture_parameters_from_type(mat_type)
+		preceding = ""
+		following = ""
+		preceding += "Texture \"#{material.name}::#{type_str}\" \"#{type}\" \"imagemap\"" + "\n"
+		preceding += "\t" + "\"string wrap\" [\"#{material.send(mat_type + "_imagemap_wrap")}\"]" + "\n"
+		case material.send(mat_type + "_texturetype")
+			when "sketchup"
+				if (@model_textures.has_key?(material.name))
+					filename = @model_textures[material.name][4]
+				else
+					return [preceding, following]
+				end
+				preceding += "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
+			when "imagemap"
+				preceding += "\t" + "\"string filename\" [\"#{material.send(mat_type + "_imagemap_filename")}\"]" + "\n"
+		end
+		preceding += "\t" + "\"float gamma\" [#{material.send(mat_type + "_imagemap_gamma")}]" + "\n"
+		preceding += "\t" + "\"float gain\" [#{material.send(mat_type + "_imagemap_gain")}]" + "\n"
+		preceding += "\t" + "\"string filtertype\" [\"#{material.send(mat_type + "_imagemap_filtertype")}\"]" + "\n"
+		preceding += "\t" + "\"string mapping\" [\"#{material.send(mat_type + "_imagemap_mapping")}\"]" + "\n"
+		preceding += "\t" + "\"float uscale\" [#{"%.6f" %(material.send(mat_type + "_imagemap_uscale"))}]" + "\n"
+		preceding += "\t" + "\"float vscale\" [#{"%.6f" %(material.send(mat_type + "_imagemap_vscale"))}]" + "\n"
+		preceding += "\t" + "\"float udelta\" [#{"%.6f" %(material.send(mat_type + "_imagemap_udelta"))}]" + "\n"
+		preceding += "\t" + "\"float vdelta\" [#{"%.6f" %(material.send(mat_type + "_imagemap_vdelta"))}]" + "\n"
+		preceding += "Texture \"#{material.name}::#{type_str}.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{material.name}::#{type_str}\"] \"#{type} tex2\" [#{material.send(type_str2)}]" + "\n"
+		following += "\t" + "\"texture #{type_str}\" [\"#{material.name}::#{type_str}.scale\"]" + "\n"
+		return [preceding, following]
+	end
+
+	##
+	#
+	##
+	def texture_parameters_from_type(mat_type)
+		case mat_type
+			when 'kd'
+				type_str = "Kd"
+				if (material.color['red'].to_f != 1.0 or material.color['green'].to_f != 1.0 or material.color['blue'].to_f != 1.0)
+					color = material.color_tos
+				end
+				type_str2 = ""
+			when 'bump'
+				type_str = "bumpmap"
+				type_str2 = "bumpmap"
+			when 'matte_sigma'
+				type_str = "sigma"
+				type_str = "matte_sigma"
+			when 'ks'
+				type_str = "Ks"
+				type_str2 = "specular_tos"
+			when 'ka'
+				type_str = "Ka"
+				type_str2 = "absorption_tos"
+			when 'ka_d'
+				type_str = "d"
+				type_str2 = "ka_d"
+			when 'kr'
+				type_str = "Kr"
+				type_str2 = "reflection_tos"
+			when 'kt'
+				type_str = "Kt"
+				type_str2 = "transmission_tos"
+			when 'IOR_index'
+				type_str = 'index'
+				type_str2 = 'IOR_index'
+			when 'u_exponent'
+				type_str = 'uroughness'
+				type_str2 = 'uroughness'
+			when 'v_exponent'
+				type_str = 'vroughness'
+				type_str2 = 'vroughness'
+			else
+				type_str = type_str2 = mat_type
+		end
+		return [type_str, type_str2]
 	end
 	
 	##

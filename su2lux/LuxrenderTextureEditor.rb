@@ -89,7 +89,12 @@ class LuxrenderTextureEditor
 				lux_material.send(@lux_parameter + '_' + method_name + "=", value)
 			}
 			has_texture = ! (lux_material.send(@lux_parameter + '_' + 'imagemap_filename')).empty?
-			lux_material.use_diffuse_texture = true if has_texture
+			if (has_texture)
+				case @lux_parameter
+					when 'kd'
+						lux_material.use_diffuse_texture = true
+				end
+			end
 			self.close
 		}
 	

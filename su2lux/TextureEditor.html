@@ -20,28 +20,52 @@
 				<input type="button" id="imagemap_filename_browse" value="Browse">
 				<input type="text" id="imagemap_filename" size="50">
 				<br>
-				<input type="text" id="texturetype" size="10">
-				<input type="text" id="imagemap_wrap" size="10">
+				<label for="texturetype">Texture Type</label>
+				<select id="texturetype">
+					<option value="imagemap">Image Map</option>
+				</select>
+				<label for="imagemap_wrap">Wrapping mode</label>
+				<select id="imagemap_wrap">
+					<option value="black">Black</option>
+					<option value="clamp">Clamp</option>
+					<option value="repeat">Repeat</option>
+				</select>
 			<!--	<input type="text" id="imagemap_channel" size="10"> -->
 				<br>
+				<label for="imagemap_gamma">Gamma</label>
 				<input type="text" id="imagemap_gamma" size="10">
+				<label for="imagemap_gain">Gain</label>
 				<input type="text" id="imagemap_gain" size="10">
-				<input type="text" id="imagemap_filtertype" size="10">
-				<input type="text" id="imagemap_mapping" size="10">
+				<br>
+				<label for="imagemap_filtertype">Filter</label>
+				<select id="imagemap_filtertype">
+					<option value="bilinear">Mipmap Bilinear</option>
+					<option value="mipmap_trilinear">Mipmap trilinear</option>
+					<option value="mipmap_ewa">Mipmap EWA</option>
+					<option value="nearest">Nearest</option>
+				</select>
+				<br>
+				<label for="imagemap_mapping">Mapping</label>
+				<select id="imagemap_mapping">
+					<option value="uv">UV</option>
+				</select>
+				<br>
+				<label for="imagemap_uscale">Scale on U</label>
 				<input type="text" id="imagemap_uscale" size="10">
+				<label for="imagemap_vscale">Scale on V</label>
 				<input type="text" id="imagemap_vscale" size="10">
+				<br>
+				<label for="imagemap_udelta">Move on U</label>
 				<input type="text" id="imagemap_udelta" size="10">
+				<label for="imagemap_vdelta">Move on V</label>
 				<input type="text" id="imagemap_vdelta" size="10">
+				<br>
+				<label for="imagemap_maxanisotropy">Max Anisotropy</label>
 				<input type="text" id="imagemap_maxanisotropy" size="10">
+				<label for="imagemap_discardmipmaps">Discard mipmaps</label>
 				<input type="text" id="imagemap_discardmipmaps" size="10">
 				<br>
 				<input type="hidden" id="imagemap_uvset" value="1">
-				<br>
-				<br>
-				<br>
-				<br>
-				<br>
-				<br>
 				<br>
 				<br>
 				<br>

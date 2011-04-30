@@ -49,9 +49,9 @@ class LuxrenderMaterialEditor
 					lux_material.send(method_name, v)
 					case
 						when k.match(/^kd_.$/)
-							red = lux_material.color[0]
-							green = lux_material.color[1]
-							blue = lux_material.color[2]
+							red = lux_material.color['red']
+							green = lux_material.color['green']
+							blue = lux_material.color['blue']
 							#TODO: use start operation
 							material.color = lux_material.RGB_color
 					end

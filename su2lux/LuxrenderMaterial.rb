@@ -48,7 +48,8 @@ class LuxrenderMaterial
 		'kt_G' => 1.0,
 		'kt_B' => 1.0,
 
-		'exponent' => 50,
+		'u_exponent' => 50,
+		'v_exponent' => 50,
 		'uroughness' => 0.1,
 		'vroughness' => 0.1,
 
@@ -58,7 +59,7 @@ class LuxrenderMaterial
 		'multibounce' => false,
 		'cauchyb' => 0.004,
 		'film' => 200,
-		'film_index' => 1.5,
+		'filmindex' => 1.5,
 		'nk_preset' => '',
 		'energyconserving' => true,
 		'bumpmap' => 0.0001,
@@ -70,23 +71,23 @@ class LuxrenderMaterial
 		'light_gain' => 1.0,
 		#GUI
 		'use_diffuse_texture' => false,
-		'use_sigma_texture' => false,
-		'use_uroughness_texture' => false,
-		'use_specular_texture' => false,
-		'use_absorption_texture' => false,
-		'use_absorption_depth_texture' => false,
-		'use_reflection_texture' => false,
-		'use_transmission_texture' => false,
+		# 'use_sigma_texture' => false,
+		# 'use_uroughness_texture' => false,
+		# 'use_specular_texture' => false,
+		# 'use_absorption_texture' => false,
+		# 'use_absorption_depth_texture' => false,
+		# 'use_reflection_texture' => false,
+		# 'use_transmission_texture' => false,
 		'use_architectural' => false,
-		'use_IOR_texture' => false,
-		'use_dispersive_refraction_texture' => false,
-		'use_film_texture' => false,
-		'use_film_index_texture' => false,
+		# 'use_IOR_texture' => false,
+		# 'use_dispersive_refraction_texture' => false,
+		# 'use_film_texture' => false,
+		# 'use_filmindex_texture' => false,
 		'use_absorption' => false,
 		'use_dispersive_refraction' => false,
 		'use_thin_film_coating' => false,
 		'use_bump' => false,
-		'use_bump_texture' => false,
+		# 'use_bump_texture' => false,
 	}
 
 	##
@@ -147,6 +148,8 @@ class LuxrenderMaterial
 		lux_image_texture("matte", "sigma", "imagemap", "float")
 		lux_image_texture("", "ks", "imagemap", "color")
 		lux_image_texture("", "ka", "imagemap", "color")
+		lux_image_texture("", "u_exponent", "imagemap", "float")
+		lux_image_texture("", "v_exponent", "imagemap", "float")
 		lux_image_texture("", "uroughness", "imagemap", "float")
 		lux_image_texture("", "vroughness", "imagemap", "float")
 		lux_image_texture("", "ka_d", "imagemap", "float")
@@ -155,8 +158,8 @@ class LuxrenderMaterial
 		lux_image_texture("", "kt", "imagemap", "color")
 		# lux_image_texture("", "IOR", "imagemap", "float")
 		lux_image_texture("", "cauchyb", "imagemap", "float")
-		lux_image_texture("", "film_thickness", "imagemap", "float")
-		lux_image_texture("", "film_index", "imagemap", "float")
+		lux_image_texture("", "film", "imagemap", "float")
+		lux_image_texture("", "filmindex", "imagemap", "float")
 		lux_image_texture("", "bump", "imagemap", "float")
 		
 		singleton_class = (class << self; self; end)
@@ -245,7 +248,18 @@ class LuxrenderMaterial
 	#
 	##
 	def color
-		color = [self.kd_R, self.kd_G, self.kd_B]
+		color = {}
+		color['red'] = self.kd_R
+		color['green'] = self.kd_G
+		color['blue'] = self.kd_B
+		# color = [self.kd_R, self.kd_G, self.kd_B]
+	end
+
+	##
+	#
+	##
+	def color_tos
+		specular = "#{"%.6f" %(self.kd_R)} #{"%.6f" %(self.kd_G)} #{"%.6f" %(self.kd_B)}"
 	end
 
 	##
@@ -274,16 +288,27 @@ class LuxrenderMaterial
 	#
 	##
 	def specular
-		specular = [self.ks_R, self.ks_G, self.ks_B]
+		specular = {}
+		specular['red'] = self.ks_R
+		specular['green'] = self.ks_G
+		specular['blue'] = self.ks_B
+		# specular = [self.ks_R, self.ks_G, self.ks_B]
+	end
+
+	##
+	#
+	##
+	def specular_tos
+		specular = "#{"%.6f" %(self.ks_R)} #{"%.6f" %(self.ks_G)} #{"%.6f" %(self.ks_B)}"
 	end
 
 	##
 	#
 	##
 	def specular=(color)
-		self.ks_R = format("%.6f", color[0])
-		self.ks_G = format("%.6f", color[1])
-		self.ks_B = format("%.6f", color[2])
+		self.ks_R = format("%.6f", color['red'])
+		self.ks_G = format("%.6f", color['green'])
+		self.ks_B = format("%.6f", color['blue'])
 	end
 	
 	##
@@ -296,6 +321,13 @@ class LuxrenderMaterial
 	##
 	#
 	##
+	def absorption_tos
+		specular = "#{"%.6f" %(self.ka_R)} #{"%.6f" %(self.ka_G)} #{"%.6f" %(self.ka_B)}"
+	end
+
+	##
+	#
+	##
 	def reflection
 		reflection = [self.kr_R, self.kr_G, self.kr_B]
 	end
@@ -303,8 +335,22 @@ class LuxrenderMaterial
 	##
 	#
 	##
+	def reflection_tos
+		specular = "#{"%.6f" %(self.kr_R)} #{"%.6f" %(self.kr_G)} #{"%.6f" %(self.kr_B)}"
+	end
+
+	##
+	#
+	##
 	def transmission
 		transmission = [self.kt_R, self.kt_G, self.kt_B]
+	end
+
+	##
+	#
+	##
+	def transmission_tos
+		specular = "#{"%.6f" %(self.kt_R)} #{"%.6f" %(self.kt_G)} #{"%.6f" %(self.kt_B)}"
 	end
 
 	##
@@ -335,6 +381,37 @@ class LuxrenderMaterial
 		p "hasuvs"
 		p uvs
 		return uvs ? true : false
+	end
+	
+	##
+	#
+	##
+	def has_bump?
+		has_bump = false
+		if (self.bump_texturetype != 'none')
+			if (self.bump_texturetype == 'sketchup')
+				has_bump = true if (self.kd_texturetype == 'sketchup')
+			elsif (self.bump_texturetype == 'imagemap')
+				has_bump = true if (not self.bump_imagemap_filename.empty?)
+			end
+		end	
+		return has_bump
+	end
+	
+	##
+	#
+	##
+	def has_texture?(type)
+		has_texture = false
+		if (self.send(type + "_texturetype") != 'none')
+			if (self.send(type + "_texturetype") == 'sketchup')
+				# has_bump = true if (self.kd_texturetype == 'sketchup')
+				has_texture = true if (@mat.materialType > 0)
+			elsif (self.send(type + "_texturetype") == 'imagemap')
+				has_texture = true if (not self.send(type + "_imagemap_filename").empty?)
+			end
+		end	
+		return has_texture
 	end
 	
 	private :lux_image_texture

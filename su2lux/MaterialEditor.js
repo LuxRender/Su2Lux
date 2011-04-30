@@ -22,7 +22,7 @@ function checkbox_expander(id)
 			$("#" + id).nextAll(".basic").hide();
 			$("#" + id).nextAll(".advanced").show();
 		}
-		$("#" + id).next(".collapse").show();
+		$("#" + id).next(".collapse_check").show();
 		// $("#" + id).next(".collapse").children("#focus_type").change();
 	}
 	else if ($("#" + id).attr("checked") == false)
@@ -35,7 +35,7 @@ function checkbox_expander(id)
 			$("#" + id).nextAll(".basic").show();
 			$("#" + id).nextAll(".advanced").hide();
 		}
-		$("#" + id).next(".collapse").hide();
+		$("#" + id).next(".collapse_check").hide();
 	}
 }
 
@@ -104,8 +104,8 @@ $(document).ready(
 		$('select[id$="_texturetype"]').change(
 			function()
 			{
-				$(this).nextAll().hide();
-				$(this).nextAll("." + this.value).show();
+				$(this).next().hide();
+				$(this).next("." + this.value).show();
 			}
 		);
 		

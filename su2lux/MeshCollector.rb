@@ -140,6 +140,7 @@ class MeshCollector
 				handle = tw.load(e,mat_dir)
 				tname=get_texture_name(mat_name,mat)
 				@model_textures[mat_name]=[0,e,mat_dir,handle,tname,mat] if @model_textures[mat_name]==nil
+				return [mat,uvHelp,mat_dir]
 				return [mat_name,uvHelp,mat_dir]
 			else
 				distorted=texture_distorted?(e,mat,mat_dir)# if false
@@ -175,7 +176,7 @@ class MeshCollector
 			end
 		end
 		puts "FINAL: #{[mat_name,uvHelp,mat_dir].to_s}" if verb==true
-		return [mat_name,uvHelp,mat_dir]
+		return [mat,uvHelp,mat_dir]
 	end # END store_textured_entities
 
 	##
