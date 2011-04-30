@@ -716,7 +716,6 @@ class LuxrenderSettingsEditor
 		#############################
 		when "use_plain_color"
 			radio_id = @lrs.use_plain_color
-			p radio_id
 			cmd = "$('##{radio_id}').attr('checked', true)"
 			@settings_dialog.execute_script(cmd)
 		

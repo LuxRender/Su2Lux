@@ -485,6 +485,15 @@ end #END luxrender_path_valid?
 	##
 	#
 	##
+	def SU2LUX.create_material_editor
+		if not @material_editor
+			@material_editor=LuxrenderMaterialEditor.new
+		end
+	end # END show_material_editor
+
+	##
+	#
+	##
 	def SU2LUX.show_settings_editor
 
 		if not @settings_editor
@@ -593,12 +602,15 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 		end
 		# loaded = LuxrenderAttributeDictionary.load_from_model(@lrs.dictionary_name)
 		loaded = @lrs.load_from_model
-		@lrs.reset if ( ! loaded)
+		@lrs.reset unless loaded
 		for mat in model.materials
 			luxmat = LuxrenderMaterial.new(mat)
 			loaded = luxmat.load_from_model
-			luxmat.reset if ( ! loaded)
+			luxmat.reset unless loaded
 		end
+		SU2LUX.create_material_editor
+		material_editor = SU2LUX.get_editor("material")
+		material_editor.refresh
 	end
 	
 end # END class SU2LUX_app_observer
@@ -616,7 +628,7 @@ end
 
 class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 	def onMaterialSetCurrent(materials, material)
-	p 'calling observer event'
+	SU2LUX.dbg_p 'calling observer event'
 		material_editor = SU2LUX.get_editor("material")
 		luxmat = LuxrenderMaterial.new(material)
 		if (material_editor)

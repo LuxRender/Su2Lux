@@ -39,13 +39,18 @@ class LuxrenderMaterialEditor
 			parameters.each{ |k, v|
 				if (lux_material.respond_to?(k))
 					method_name = k + "="
+					if (v.to_s.downcase == "true")
+						v = true
+					end
+					if (v.to_s.downcase == "false")
+						v = false
+					end
 					lux_material.send(method_name, v)
 					case
 						when k.match(/matte_kd_/)
 							red = lux_material.color[0]
 							green = lux_material.color[1]
 							blue = lux_material.color[2]
-							p lux_material.RGB_color.to_a.to_s
 							material.color = lux_material.RGB_color
 					end
 				end
@@ -169,7 +174,8 @@ class LuxrenderMaterialEditor
 		#set current material in editor
 		materials = Sketchup.active_model.materials
 		for mat in materials
-			luxmat = LuxrenderMaterial.new(mat)
+			# luxmat = LuxrenderMaterial.new(mat)
+			luxmat = self.find(mat.name)
 			# TODO: set up all the parameters
 			luxmat.color = mat.color
 			if mat.texture
@@ -197,7 +203,7 @@ class LuxrenderMaterialEditor
 	##
 	def set_current(name)
 		# cmd = "$(#material_name).attr('selected', 'selected'"
-		p "call to set_current"
+		SU2LUX.dbg_p "call to set_current"
 		cmd = "$('#material_name option:contains(#{name})').attr('selected', true)"
 		@material_editor_dialog.execute_script(cmd)
 	end

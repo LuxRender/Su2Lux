@@ -48,6 +48,7 @@ class LuxrenderMaterial
 		#GUI
 		'use_diffuse_texture' => false,
 		'use_sigma_texture' => false,
+		'use_uroughness_texture' => false,
 		'use_specular_texture' => false,
 		'use_absorption_texture' => false,
 		'use_absorption_depth_texture' => false,
@@ -142,22 +143,34 @@ class LuxrenderMaterial
 		end #end module_eval
 	end #end initialize
 
+	##
+	#
+	##
 	def reset
 			@@settings.each do |key, value|
 				LuxrenderAttributeDictionary.set_attribute(@dict, key, value)
 			end
 	end #END reset
 	
+	##
+	#
+	##
 	def load_from_model
 		return LuxrenderAttributeDictionary.load_from_model(@dict)
 	end #END load_from_model
 	
+	##
+	#
+	##
 	def save_to_model
 		Sketchup.active_model.start_operation "SU2LUX Material settings saved"
 		LuxrenderAttributeDictionary.save_to_model(@dict)
 		Sketchup.active_model.commit_operation
 	end #END save_to_model
 	
+	##
+	#
+	##
 	def get_names
 		settings = []
 		@@settings.each { |key, value|
@@ -166,18 +179,30 @@ class LuxrenderMaterial
 		return settings
 	end #END get_names
 	
+	##
+	#
+	##
 	def name
 		return mat.display_name.gsub(/[<>]/, '*')  #replaces <> characters with *
 	end
   
+	##
+	#
+	##
 	def original_name
 		return mat.name
 	end
 	
+	##
+	#
+	##
 	def color
 		color = [self.matte_kd_R, self.matte_kd_G, self.matte_kd_B]
 	end
 
+	##
+	#
+	##
 	def color=(su_mat_color)
 		scale = 1/255.0
 		self.matte_kd_R = format("%.6f", su_mat_color.red.to_f * scale)
@@ -185,6 +210,9 @@ class LuxrenderMaterial
 		self.matte_kd_B = format("%.6f", su_mat_color.blue.to_f * scale)
 	end
 	
+	##
+	#
+	##
 	def RGB_color
 		scale = 255
 		rgb = []
@@ -193,12 +221,14 @@ class LuxrenderMaterial
 		end
 		return rgb
 	end
-	
-	def color2
-		mat.color
+
+	##
+	#
+	##
+	def specular
+		specular = [self.glossy_ks_R, self.glossy_ks_G, self.glossy_ks_B]
 	end
-
-
+	
 	private :lux_image_texture
 	
 end # END class LuxrenderMaterial

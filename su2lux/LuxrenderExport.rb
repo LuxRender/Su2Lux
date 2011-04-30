@@ -898,14 +898,17 @@ class LuxrenderExport
 		 # "float efficacy" [17.000000]
 		 # "float gain" [1.000000]
 			case luxrender_mat.type
-				when "matte", "glass"
-					out.puts "NamedMaterial \""+luxrender_mat.name+"\""
+				# when "matte", "glass"
+					# out.puts "NamedMaterial \""+luxrender_mat.name+"\""
 				when "light"
 					out.puts "LightGroup \"default\""
 					out.puts "AreaLightSource \"area\" \"texture L\" [\""+luxrender_mat.name+":light:L\"]"
 					out.puts '"float power" [100.000000]
 					"float efficacy" [17.000000]
 					"float gain" [1.000000]'
+				else
+					out.puts "NamedMaterial \""+luxrender_mat.name+"\""
+					SU2LUX.dbg_p "NAME: " + luxrender_mat.name
 			end
 		end
 		
@@ -1046,18 +1049,26 @@ class LuxrenderExport
 	# TODO
 		SU2LUX.dbg_p "export_mat"
 		out.puts "# Material '" + mat.name + "'"
+		# TEMPORARY LINES: see inner of the case statement
+		out.puts "MakeNamedMaterial \"#{mat.name}\""
+		out.puts  "\"string type\" [\"#{mat.type}\"]"
 		case mat.type
 			when "matte"
-				out.puts "MakeNamedMaterial \"" + mat.name + "\""
 				SU2LUX.dbg_p "mat.name " + mat.name
-				out.puts  "\"string type\" [\"matte\"]"
-				# out.puts  "\"color Kd\" [#{"%.6f" %(mat.color.red.to_f/255)} #{"%.6f" %(mat.color.green.to_f/255)} #{"%.6f" %(mat.color.blue.to_f/255)}]"
-				out.puts  "\"color Kd\" [#{"%.6f" %(mat.diffuse_color[0])} #{"%.6f" %(mat.diffuse_color[1])} #{"%.6f" %(mat.diffuse_color[2])}]"
+				out.puts self.export_diffuse_component(mat)
+				out.puts "\"float sigma\" [#{mat.matte_sigma}]"
+			when "glossy"
+				out.puts self.export_diffuse_component(mat)
+				out.puts self.export_specular_component(mat)
+				out.puts self.export_exponent(mat)
+				out.puts self.export_IOR(mat)
+				multibounce = mat.multibounce ? "true": "false"
+				out.puts "\"bool multibounce\" [\"#{multibounce}\"]"
 			when "glass"
-				out.puts "MakeNamedMaterial \"" + mat.name + "\""
-				SU2LUX.dbg_p "mat.name " + mat.name
-	#   "bool architectural" ["true"]
-				out.puts  "\"string type\" [\"glass\"]"
+				# out.puts "MakeNamedMaterial \"" + mat.name + "\""
+				# SU2LUX.dbg_p "mat.name " + mat.name
+	  # "bool architectural" ["true"]
+				# out.puts  "\"string type\" [\"glass\"]"
 				out.puts  "\"color Kt\" [#{"%.6f" %(mat.color.red.to_f/255)} #{"%.6f" %(mat.color.green.to_f/255)} #{"%.6f" %(mat.color.blue.to_f/255)}]"
 				out.puts "\"float index\" [1.520000]"
 			when "light"
@@ -1067,6 +1078,52 @@ class LuxrenderExport
 		out.puts("\n")
 	end # END export_mat
 
+	##
+	#
+	##
+	def export_diffuse_component(material)
+		component = ""
+		if ( ! material.use_diffuse_texture)
+			# out.puts "MakeNamedMaterial \"" + material.name + "\""
+			# out.puts  "\"string type\" [\"matte\"]"
+			# component +=  "\"color Kd\" [#{"%.6f" %(material.color.red.to_f/255)} #{"%.6f" %(material.color.green.to_f/255)} #{"%.6f" %(material.color.blue.to_f/255)}]"
+			component += "\"color Kd\" [#{"%.6f" %(material.color[0])} #{"%.6f" %(material.color[1])} #{"%.6f" %(material.color[2])}]"
+		end
+		return component
+	end
+	
+	##
+	#
+	##
+	def export_specular_component(material)
+		component = ""
+		if ( ! material.use_specular_texture)
+			component += "\"color Ks\" [#{"%.6f" %(material.specular[0])} #{"%.6f" %(material.specular[1])} #{"%.6f" %(material.specular[2])}]"
+		end
+		return component
+	end
+	
+	##
+	#
+	##
+	def export_exponent(material)
+		component = ""
+		if ( ! material.use_uroughness_texture)
+			component += "\"float uroughness\" [#{material.glossy_uroughness}]\n"
+			component += "\"float vroughness\" [#{material.glossy_uroughness}]"
+		end
+		return component
+	end
+	
+	##
+	#
+	##
+	def export_IOR(material)
+		component = ""
+		component += "\"float index\" [#{material.glossy_index}]"
+		return component
+	end
+	
 	##
 	#
 	##
