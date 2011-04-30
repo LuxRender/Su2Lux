@@ -65,6 +65,10 @@ input#save_to_model, input#reset {
 	width: 140px;
 }
 
+input#get_diffuse_color {
+	width: 140px;
+}
+
 #current_view {
 /*	height: 45px;*/
 /*	float: right;*/

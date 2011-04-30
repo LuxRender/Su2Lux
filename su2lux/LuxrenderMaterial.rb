@@ -40,6 +40,7 @@ class LuxrenderMaterial
 		'glossy_ka_R' => 0.0,
 		'glossy_ka_G' => 0.0,
 		'glossy_ka_B' => 0.0,
+		'glossy_exponent' => 50,
 		'glossy_uroughness' => 0.1,
 		'glossy_vroughness' => 0.1,
 		'ka_d' => 0.0,
@@ -183,7 +184,8 @@ class LuxrenderMaterial
 	#
 	##
 	def name
-		return mat.display_name.gsub(/[<>]/, '*')  #replaces <> characters with *
+		return mat.display_name.delete("[<>]")  #replaces <> characters with *
+		# return mat.display_name.gsub(/[<>]/, '*')  #replaces <> characters with *
 	end
   
 	##
@@ -227,6 +229,23 @@ class LuxrenderMaterial
 	##
 	def specular
 		specular = [self.glossy_ks_R, self.glossy_ks_G, self.glossy_ks_B]
+	end
+
+	##
+	#
+	##
+	def specular=(color)
+		self.glossy_ks_R = format("%.6f", color[0])
+		self.glossy_ks_G = format("%.6f", color[1])
+		self.glossy_ks_B = format("%.6f", color[2])
+	end
+	
+	
+	##
+	#
+	##
+	def absorption
+		specular = [self.glossy_ka_R, self.glossy_ka_G, self.glossy_ka_B]
 	end
 	
 	private :lux_image_texture

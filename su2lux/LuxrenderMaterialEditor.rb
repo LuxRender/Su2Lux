@@ -80,6 +80,15 @@ class LuxrenderMaterialEditor
 			# UI.start_timer(0.2, false) { self.sendDataFromSketchup() }
 		}
 		
+		@material_editor_dialog.add_action_callback('get_diffuse_color') {|dialog, param|
+		 p 'get_diffuse_color'
+			lux_material = @current
+			lux_material.specular = lux_material.color
+			updateSettingValue("glossy_ks_R")
+			updateSettingValue("glossy_ks_G")
+			updateSettingValue("glossy_ks_B")
+		}
+		
 		@material_editor_dialog.add_action_callback("reset_to_default") {|dialog, params|
 			materials = Sketchup.active_model.materials
 			for mat in materials

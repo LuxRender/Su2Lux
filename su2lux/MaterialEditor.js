@@ -111,6 +111,13 @@ $(document).ready(
 			}
 		)
 		
+		$("#get_diffuse_color").click(
+			function()
+			{
+				window.location = 'skp:get_diffuse_color'
+			}
+		);
+		
 		$("#save_to_model").click(
 			function()
 			{

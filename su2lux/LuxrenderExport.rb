@@ -1,5 +1,6 @@
 class LuxrenderExport
 	attr_reader :count_tri
+	attr_reader :used_materials
 	##
 	#
 	##
@@ -737,6 +738,7 @@ class LuxrenderExport
 		mc.collect_faces(Sketchup.active_model.entities, Geom::Transformation.new)
 		@materials=mc.materials
 		@fm_materials=mc.fm_materials
+		@used_materials = @materials.merge(@fm_materials)
 		@model_textures=mc.model_textures
 		@texturewriter=mc.texturewriter
 		@count_faces=mc.count_faces
@@ -799,7 +801,8 @@ class LuxrenderExport
 		
 		has_texture = false
 		if mat.respond_to?(:name)
-			matname = mat.display_name.gsub(/[<>]/,'*')
+			matname = mat.display_name.delete("[<>]")
+			# matname = mat.display_name.gsub(/[<>]/,'*')
 			p 'matname: '+matname
 			has_texture = true if mat.texture!=nil
 		else
@@ -1017,9 +1020,9 @@ class LuxrenderExport
 	##
 	def export_used_materials(materials, out)
 		materials.each { |mat|
-			luxrender_mat = LuxrenderMaterial.new(mat)
-			SU2LUX.dbg_p luxrender_mat.name
-			export_mat(luxrender_mat, out)
+				luxrender_mat = LuxrenderMaterial.new(mat)
+				SU2LUX.dbg_p luxrender_mat.name
+				export_mat(luxrender_mat, out)
 		}
 	end # END export_used_materials
 
@@ -1049,26 +1052,27 @@ class LuxrenderExport
 	# TODO
 		SU2LUX.dbg_p "export_mat"
 		out.puts "# Material '" + mat.name + "'"
-		# TEMPORARY LINES: see inner of the case statement
-		out.puts "MakeNamedMaterial \"#{mat.name}\""
-		out.puts  "\"string type\" [\"#{mat.type}\"]"
 		case mat.type
 			when "matte"
 				SU2LUX.dbg_p "mat.name " + mat.name
-				out.puts self.export_diffuse_component(mat)
-				out.puts "\"float sigma\" [#{mat.matte_sigma}]"
+				component = self.export_diffuse_component(mat)
+				if ( ! component.empty?)
+					out.puts component
+					out.puts "\"float sigma\" [#{mat.matte_sigma}]"
+				end
 			when "glossy"
+				# out.puts "MakeNamedMaterial \"#{mat.name}\""
+				# out.puts  "\"string type\" [\"#{mat.type}\"]"
 				out.puts self.export_diffuse_component(mat)
 				out.puts self.export_specular_component(mat)
 				out.puts self.export_exponent(mat)
 				out.puts self.export_IOR(mat)
+				out.puts self.export_absorption_component(mat)
 				multibounce = mat.multibounce ? "true": "false"
 				out.puts "\"bool multibounce\" [\"#{multibounce}\"]"
 			when "glass"
-				# out.puts "MakeNamedMaterial \"" + mat.name + "\""
-				# SU2LUX.dbg_p "mat.name " + mat.name
-	  # "bool architectural" ["true"]
-				# out.puts  "\"string type\" [\"glass\"]"
+				out.puts "MakeNamedMaterial \"#{mat.name}\""
+				out.puts  "\"string type\" [\"#{mat.type}\"]"
 				out.puts  "\"color Kt\" [#{"%.6f" %(mat.color.red.to_f/255)} #{"%.6f" %(mat.color.green.to_f/255)} #{"%.6f" %(mat.color.blue.to_f/255)}]"
 				out.puts "\"float index\" [1.520000]"
 			when "light"
@@ -1083,13 +1087,41 @@ class LuxrenderExport
 	##
 	def export_diffuse_component(material)
 		component = ""
+		filled = true
+		color_component = "MakeNamedMaterial \"#{material.name}\"" + "\n"
+		color_component += "\"string type\" [\"#{material.type}\"]" + "\n"
+		color_component += "\"color Kd\" [#{"%.6f" %(material.color[0])} #{"%.6f" %(material.color[1])} #{"%.6f" %(material.color[2])}]" + "\n"
 		if ( ! material.use_diffuse_texture)
-			# out.puts "MakeNamedMaterial \"" + material.name + "\""
-			# out.puts  "\"string type\" [\"matte\"]"
-			# component +=  "\"color Kd\" [#{"%.6f" %(material.color.red.to_f/255)} #{"%.6f" %(material.color.green.to_f/255)} #{"%.6f" %(material.color.blue.to_f/255)}]"
-			component += "\"color Kd\" [#{"%.6f" %(material.color[0])} #{"%.6f" %(material.color[1])} #{"%.6f" %(material.color[2])}]"
+			component = color_component
+		else
+			component += "Texture \"#{material.name}\" \"color\" \"imagemap\"" + "\n"
+			component += "\"string wrap\" [\"#{material.kd_imagemap_wrap}\"]" + "\n"
+			case material.kd_texturetype
+				when "sketchup"
+					if (@model_textures.has_key?(material.name))
+						filename = @model_textures[material.name][4]
+					else
+						filename = material.kd_imagemap_Sketchup_filename
+						filled = false
+					end
+					component += "\"string filename\" [\"#{filename}\"]" + "\n"
+				when "imagemap"
+					component += "\"string filename\" [\"#{material.kd_imagemap_filename}\"]" + "\n"
+			end
+			component += "\"float gamma\" [#{material.kd_imagemap_gamma}]" + "\n"
+			component += "\"float gain\" [#{material.kd_imagemap_gain}]" + "\n"
+			component += "\"string filtertype\" [\"#{material.kd_imagemap_filtertype}\"]" + "\n"
+			# if (material.color[0].to_f != 1.0 && material.color[1].to_f != 1.0 &&material.color[2].to_f != 1.0)
+				# color = "#{"%.6f" %(material.color[0])} #{"%.6f" %(material.color[1])} #{"%.6f" %(material.color[2])}"
+				# component += "Texture \"#{material.name}::Kd.scale\" \"color\" \"scale\" \"texture tex1\" [\"#{material.name}::Kd\"] \"color tex2\" [#{color}]" + "\n"
+				# component += "MakeNamedMaterial \"#{material.name}\"" + "\n"
+				# component += "\"string type\" [\"#{material.type}\"] \"texture Kd\" [\"#{material.name}::Kd.scale\"]" + "\n"
+			# else
+				component += "MakeNamedMaterial \"#{material.name}\"" + "\n"
+				component += "\"string type\" [\"#{material.type}\"] \"texture Kd\" [\"#{material.name}\"]" + "\n"
+			# end
 		end
-		return component
+		return filled ? component : color_component
 	end
 	
 	##
@@ -1109,8 +1141,9 @@ class LuxrenderExport
 	def export_exponent(material)
 		component = ""
 		if ( ! material.use_uroughness_texture)
-			component += "\"float uroughness\" [#{material.glossy_uroughness}]\n"
-			component += "\"float vroughness\" [#{material.glossy_uroughness}]"
+			u_roughness = Math.sqrt(2.0 / (material.glossy_exponent + 2))
+			component += "\"float uroughness\" [#{"%.6f" %(u_roughness)}]" + "\n"
+			component += "\"float vroughness\" [#{"%.6f" %(u_roughness)}]"
 		end
 		return component
 	end
@@ -1121,6 +1154,20 @@ class LuxrenderExport
 	def export_IOR(material)
 		component = ""
 		component += "\"float index\" [#{material.glossy_index}]"
+		return component
+	end
+	
+	##
+	#
+	##
+	def export_absorption_component(material)
+		component = ""
+		if ( ! material.use_specular_texture)
+			component += "\"color Ka\" [#{"%.6f" %(material.absorption[0])} #{"%.6f" %(material.absorption[1])} #{"%.6f" %(material.absorption[2])}]" + "\n"
+		end
+		if ( ! material.use_absorption_depth_texture)
+			component += "\"float d\" [#{"%.6f" %(material.ka_d)}]"
+		end
 		return component
 	end
 	

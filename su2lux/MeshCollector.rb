@@ -195,7 +195,7 @@ class MeshCollector
 	##
 	def get_texture_name(name,mat)
 		ext=mat.texture.filename
-		p 'ext '+ext
+#		p 'ext '+ext
 		ext=ext[(ext.length-4)..ext.length]
 		ext=".png" if (ext.upcase ==".BMP" or ext.upcase ==".GIF" or ext.upcase ==".PNG") #Texture writer converts BMP,GIF to PNG
 		ext=".tif" if ext.upcase=="TIFF"
@@ -203,7 +203,7 @@ class MeshCollector
 		s=name+ext
 		#s=@textures_prefix+@model_name+@os_separator+s
 		s=SU2LUX::PREFIX_TEXTURES+@model_name+"/"+s
-		p "texture name "+s
+#		p "texture name "+s
 		return s
 	end # END get_texture_name
 

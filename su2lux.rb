@@ -146,7 +146,7 @@ module SU2LUX
 		#Exporting all materials
 		out_mat = File.new(file_fullname + SUFFIX_MATERIAL, "w")
 		le.export_used_materials(materials, out_mat)
-		le.export_textures(out_mat)
+		# le.export_textures(out_mat)
 		out_mat.close
 		le.write_textures
 		@count_tri = le.count_tri
@@ -640,7 +640,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 	end
 	
 	def onMaterialAdd(materials, material)
-		material_editor = SU2LUX.get_editor("material")
+		SU2LUX.create_material_editor
 		material_editor = SU2LUX.get_editor("material")
 		material_editor.refresh() if (material_editor);
 		# material_editor.set_material_list() if (material_editor)
@@ -649,6 +649,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 	end
 
 	def onMaterialRemove(materials, material)
+		SU2LUX.create_material_editor
 		material_editor = SU2LUX.get_editor("material")
 		material_editor.refresh() if (material_editor);
 		# material_editor.set_material_list() if (material_editor)

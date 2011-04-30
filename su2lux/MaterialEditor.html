@@ -84,9 +84,9 @@
 							<label for="kd_imagemap_discardmipmaps">Discard mip-maps</label>
 							<input type='text' id="kd_imagemap_discardmipmaps" size="6">
 						</div>
-					</div>
-				</div>
-			</div>
+					</div> <!-- END imagemap -->
+				</div> <!-- END diffuse_texture -->
+			</div> <!-- END diffuse -->
 			<div id="Oren-Nayar" class="matte">
 				<p class="header2">Oren-Nayar</p>
 				<label for="matte_sigma">Sigma</label>
@@ -99,7 +99,7 @@
 					<select id="matte_sigma_texturetype">
 						<option value ="imagemap">Image Map</option>
 					</select>
-					<div class="imagemap">
+					<div class="imagemapHIDDEN">
 						<label for="matte_sigma_imagemap_wrap">Image clipping</label>
 						<select id="matte_sigma_imagemap_wrap">
 							<option value="repeat">Repeat</option>
@@ -134,6 +134,8 @@
 			</div>
 			<div id="specular" class="glossy">
 				<p class="header2">Specular</p>
+				<input type="button" id="get_diffuse_color" value="Get diffuse color">
+				<br>
 				<label for="glossy_ks_R">Red</label>
 				<input type='text' id="glossy_ks_R" size="6">
 				<label for="glossy_ks_G">Green</label>
@@ -148,7 +150,7 @@
 					<select id="ks_texturetype">
 						<option value ="imagemap">Image Map</option>
 					</select>
-					<div class="imagemap">
+					<div class="imagemapHIDDEN">
 						<label for="ks_imagemap_wrap">Image clipping</label>
 						<select id="ks_imagemap_wrap">
 							<option value="repeat">Repeat</option>
@@ -183,8 +185,8 @@
 			</div>
 			<div id="exponent" class="glossy">
 				<p class="header2">Exponent</p>
-				<label for="glossy_uroughness">Roughness</label>
-				<input type='text' id="glossy_uroughness" size="6">
+				<label for="glossy_exponent">Value</label>
+				<input type='text' id="glossy_exponent" size="6">
 				<label for="use_uroughness_texture">Texture</label>
 				<input type="checkbox" id="use_uroughness_texture">
 				<div class="collapse" id="uroughness_texture">
@@ -193,7 +195,7 @@
 					<select id="uroughness_texturetype">
 						<option value ="imagemap">Image Map</option>
 					</select>
-					<div class="imagemap">
+					<div class="imagemapHIDDEN">
 						<label for="uroughness_imagemap_wrap">Image clipping</label>
 						<select id="uroughness_imagemap_wrap">
 							<option value="repeat">Repeat</option>
@@ -247,7 +249,7 @@
 					<select id="ka_texturetype">
 						<option value ="imagemap">Image Map</option>
 					</select>
-					<div class="imagemap">
+					<div class="imagemapHIDDEN">
 						<label for="ka_imagemap_wrap">Image clipping</label>
 						<select id="ka_imagemap_wrap">
 							<option value="repeat">Repeat</option>
@@ -290,7 +292,7 @@
 					<select id="ka_d_texturetype">
 						<option value ="imagemap">Image Map</option>
 					</select>
-					<div class="imagemap">
+					<div class="imagemapHIDDEN">
 						<label for="ka_d_imagemap_wrap">Image clipping</label>
 						<select id="ka_d_imagemap_wrap">
 							<option value="repeat">Repeat</option>
@@ -323,7 +325,7 @@
 					</div>
 				</div>
 			</div>
-		</div>
+		</div> <!-- END material_type -->
 		<br>
 		<br>
 		<hr>
