@@ -68,7 +68,10 @@ class LuxrenderMaterialEditor
 		@material_editor_dialog.add_action_callback('material_changed') { |dialog, material_name|
 			materials = Sketchup.active_model.materials
 			@current = self.find(material_name)
-			materials.current = materials[material_name] if ( ! @current.nil?)
+			SU2LUX.dbg_p "material_changed: #{materials.current.name}"
+			if (material_name != materials.current.name)
+				materials.current = materials[material_name] if ( ! @current.nil?)
+			end
 			# updateSettingValue("type")
 			# self.sendDataFromSketchup()
 		}
@@ -217,6 +220,7 @@ class LuxrenderMaterialEditor
 	##
 	def set_current(name)
 		# cmd = "$(#material_name).attr('selected', 'selected'"
+		SU2LUX.dbg_p "call to set_current: #{name}"
 		cmd = "$('#material_name option:contains(#{name})').attr('selected', true)"
 		@material_editor_dialog.execute_script(cmd)
 	end
@@ -296,6 +300,7 @@ class LuxrenderMaterialEditor
 		# setting = "type"
 		# setValue(setting, lux_material[setting])
 		# updateSettingValue(setting)
+		SU2LUX.dbg_p "sendatafromsketchup"
 	end # END sendDataFromSketchup
 	
 	##

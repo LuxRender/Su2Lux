@@ -1054,124 +1054,66 @@ class LuxrenderExport
 		out.puts "# Material '" + mat.name + "'"
 		heading = "MakeNamedMaterial \"#{mat.name}\"" + "\n"
 		heading += "\"string type\" [\"#{mat.type}\"]" + "\n"
+		pre = ""
+		post = ""
 		case mat.type
 			when "matte"
-				components = self.export_diffuse_component(mat)
-				pre = components[0]
-				post = components[1]
+				pre, post = self.export_diffuse_component(mat, pre, post)
 				post += "\"float sigma\" [#{mat.matte_sigma}]"
 			when "glossy"
-				components = self.export_diffuse_component(mat)
-				pre = components[0]
-				post = components[1]
-				components =  self.export_specular_component(mat)
-				pre += components[0]
-				post += components[1]
-				components = self.export_exponent(mat)
-				pre += components[0]
-				post += components[1]
+				pre, post = self.export_diffuse_component(mat, pre, post)
+				pre, post =  self.export_specular_component(mat, pre, post)
+				pre, post = self.export_exponent(mat, pre, post)
 				post += "\"float index\" [0.000000]"
-				components = self.export_absorption_component(mat)
-				pre += components[0]
-				post += components[1]
+				pre, post = self.export_absorption_component(mat, pre, post)
 				multibounce = mat.multibounce ? "true": "false"
 				post += "\"bool multibounce\" [\"#{multibounce}\"]"
 			when "glass"
-				components = self.export_reflection_component(mat)
-				pre = components[0]
-				post = components[1]
-				components = self.export_transmission_component(mat)
-				pre += components[0]
-				post += components[1]
-				components = export_IOR(mat)
-				pre += components[0]
-				post += components[1]
+				pre, post = self.export_reflection_component(mat, pre, post)
+				pre, post = self.export_transmission_component(mat, pre, post)
+				pre, post = export_IOR(mat, pre, post)
 				architectural = mat.use_architectural ? "true" : "false"
 				post += "\t\"bool architectural\" [\"#{architectural}\"]"
 				if ( ! mat.use_architectural)
-					components = export_thin_film(mat)
-					pre += components[0]
-					post += components[1]
-					components = export_dispersive_refraction(mat)
-					pre += components[0]
-					post += components[1]
+					pre, post = export_thin_film(mat, pre, post)
+					pre, post = export_dispersive_refraction(mat, pre, post)
 				end
 			when "roughglass"
-				components = self.export_reflection_component(mat)
-				pre = components[0]
-				post = components[1]
-				components = self.export_transmission_component(mat)
-				pre += components[0]
-				post += components[1]
-				components = export_IOR(mat)
-				pre += components[0]
-				post += components[1]
-				components = export_dispersive_refraction(mat)
-				pre += components[0]
-				post += components[1]
+				pre, post = self.export_reflection_component(mat, pre, post)
+				pre, post = self.export_transmission_component(mat, pre, post)
+				pre, post = export_IOR(mat, pre, post)
+				pre, post = export_dispersive_refraction(mat, pre, post)
 			when "metal"
-				components = export_nk(mat)
-				pre = components[0]
-				post = components[1]
-				components = self.export_exponent(mat)
-				pre += components[0]
-				post += components[1]
+				pre, post = export_nk(mat, pre, post)
+				pre, post = self.export_exponent(mat, pre, post)
 			when "shinymetal"
-				components = self.export_reflection_component(mat)
-				pre = components[0]
-				post = components[1]
-				components = self.export_specular_component(mat)
-				pre += components[0]
-				post += components[1]
-				components = self.export_exponent(mat)
-				pre += components[0]
-				post += components[1]
-				components = export_thin_film(mat)
-				pre += components[0]
-				post += components[1]
+				pre, post = self.export_reflection_component(mat, pre, post)
+				pre, post = self.export_specular_component(mat, pre, post)
+				pre, post = self.export_exponent(mat, pre, post)
+				pre, post = export_thin_film(mat, pre, post)
 			when "mirror"
-				components = self.export_reflection_component(mat)
-				pre = components[0]
-				post = components[1]
-				components = export_thin_film(mat)
-				pre += components[0]
-				post += components[1]
+				pre, post = self.export_reflection_component(mat, pre, post)
+				pre, post = export_thin_film(mat, pre, post)
 			when "mattetranslucent"
-				components = self.export_reflection_component(mat)
-				pre = components[0]
-				post = components[1]
-				components = self.export_transmission_component(mat)
-				pre += components[0]
-				post += components[1]
+				pre, post = self.export_reflection_component(mat, pre, post)
+				pre, post = self.export_transmission_component(mat, pre, post)
 				energyconserving = mat.energyconserving ? "true": "false"
 				post += "\"bool energyconserving\" [\"#{energyconserving}\"]"
 				post += "\"float sigma\" [#{mat.matte_sigma}]"
 			when "glossytranslucent"
-				components = self.export_diffuse_component(mat)
-				pre = components[0]
-				post = components[1]
-				components = self.export_transmission_component(mat)
-				pre += components[0]
-				post += components[1]
-				components = self.export_specular_component(mat)
-				pre += components[0]
-				post += components[1]
-				components = self.export_exponent(mat)
-				pre += components[0]
-				post += components[1]
+				pre, post = self.export_diffuse_component(mat, pre, post)
+				pre, post = self.export_transmission_component(mat, pre, post)
+				pre, post = self.export_specular_component(mat, pre, post)
+				pre, post = self.export_exponent(mat, pre, post)
 				post += "\"float index\" [0.000000]"
-				components = self.export_absorption_component(mat)
-				pre += components[0]
-				post += components[1]
+				pre, post = self.export_absorption_component(mat, pre, post)
 				multibounce = mat.multibounce ? "true": "false"
 				post += "\"bool multibounce\" [\"#{multibounce}\"]"
 			when "light"
-				post = export_mesh_light(mat)
+				post += export_mesh_light(mat)
 		end
 		if (mat.use_bump)
-			components = export_bump(mat)
-			pre += components[0]
-			post += components[1]
+			pre, post = export_bump(mat, pre, post)
 		end
 		if (mat.type == "light")
 			out.puts post
@@ -1186,7 +1128,7 @@ class LuxrenderExport
 	##
 	#
 	##
-	def export_diffuse_component(material)
+	def export_diffuse_component(material, before, after)
 		preceding = ""
 		following = ""
 		filled = true
@@ -1217,27 +1159,27 @@ class LuxrenderExport
 			end
 			following += "\"texture Kd\" [\"#{material.name}::Kd.scale\"]" + "\n"
 		end
-		return [preceding, following]
+		return [before + preceding, after + following]
 		# return filled ? component : color_component
 	end
 	
 	##
 	#
 	##
-	def export_specular_component(material)
+	def export_specular_component(material, befor, after)
 		preceding = ""
 		following = ""
 		filled = true
 		if ( ! material.use_specular_texture)
 			following += "\"color Ks\" [#{"%.6f" %(material.specular[0])} #{"%.6f" %(material.specular[1])} #{"%.6f" %(material.specular[2])}]"
 		end
-		return [preceding, following]
+		return [before + preceding, after + following]
 	end
 	
 	##
 	#
 	##
-	def export_exponent(material)
+	def export_exponent(material, before, after)
 		preceding = ""
 		following = ""
 		filled = true
@@ -1246,7 +1188,7 @@ class LuxrenderExport
 			following += "\"float uroughness\" [#{"%.6f" %(u_roughness)}]" + "\n"
 			following += "\"float vroughness\" [#{"%.6f" %(u_roughness)}]"
 		end
-		return [preceding, following]
+		return [before + preceding, after + following]
 	end
 	
 	##
@@ -1260,7 +1202,7 @@ class LuxrenderExport
 			following += "\"float index\" [#{material.glossy_index}]"
 		else
 		end
-		return [preceding, following]
+		return [before + preceding, after + following]
 	end
 	
 	##
@@ -1278,7 +1220,7 @@ class LuxrenderExport
 				following += "\"float d\" [#{"%.6f" %(material.ka_d)}]"
 			end
 		end
-		return [preceding, following]
+		return [before + preceding, after + following]
 	end
 	
 	##
@@ -1289,7 +1231,7 @@ class LuxrenderExport
 		following = ""
 		filled = true
 		following += "\"string name\" [\"#{material.nk_preset}\"]"
-		return [preceding, following]
+		return [before + preceding, after + following]
 	end
 
 	##
@@ -1302,7 +1244,7 @@ class LuxrenderExport
 		if ( ! material.use_reflection_texture)
 			following += "\"color Kr\" [#{"%.6f" %(material.kr_R)} #{"%.6f" %(material.kr_G)} #{"%.6f" %(material.kr_B)}]" + "\n"
 		end
-		return [preceding, following]
+		return [before + preceding, after + following]
 	end
 
 	##
@@ -1315,7 +1257,7 @@ class LuxrenderExport
 		if ( ! material.use_reflection_texture)
 			following += "\"color Kt\" [#{"%.6f" %(material.kt_R)} #{"%.6f" %(material.kt_G)} #{"%.6f" %(material.kt_B)}]" + "\n"
 		end
-		return [preceding, following]
+		return [before + preceding, after + following]
 	end
 	
 	##
@@ -1333,7 +1275,7 @@ class LuxrenderExport
 				following += "\"float filmindex\" [#{"%.6f" %(material.film_index)}]" + "\n"
 			end
 		end
-		return [preceding, following]
+		return [before + preceding, after + following]
 	end
 	
 	##
@@ -1348,13 +1290,13 @@ class LuxrenderExport
 				following += "\"float cauchyb\" [#{"%.6f" %(material.cauchyb)}]" + "\n"
 			end
 		end
-		return [preceding, following]
+		return [before + preceding, after + following]
 	end
 	
 	##
 	#
 	##
-	def export_bump(material)
+	def export_bump(material, before, after)
 		preceding = ""
 		following = ""
 		filled = true
@@ -1381,7 +1323,7 @@ class LuxrenderExport
 			preceding += "Texture \"#{material.name}::bumpmap.scale\" \"float\" \"scale\" \"texture tex1\" [\"#{material.name}::bumpmap\"] \"float tex2\" [#{material.bumpmap}]" + "\n"
 			following += "\"texture bumpmap\" [\"#{material.name}::bumpmap.scale\"]" + "\n"
 		end
-		return [preceding, following]
+		return [before + preceding, after + following]
 	end
 
 	##

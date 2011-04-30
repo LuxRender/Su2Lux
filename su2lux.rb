@@ -627,13 +627,16 @@ end
 
 class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 	def onMaterialSetCurrent(materials, material)
+		SU2LUX.dbg_p "onMaterialSetCurrent: #{material.name}"
 		material_editor = SU2LUX.get_editor("material")
-		luxmat = LuxrenderMaterial.new(material)
 		if (material_editor)
+			luxmat = LuxrenderMaterial.new(material)
 			material_editor.set_current(luxmat.name)
 			material_editor.current = luxmat
-			material_editor.sendDataFromSketchup
-			material_editor.fire_event("#type", "change", "")
+			if (material_editor.visible?)
+				material_editor.sendDataFromSketchup
+				material_editor.fire_event("#type", "change", "")
+			end
 		end
 	end
 	
@@ -641,6 +644,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 		SU2LUX.create_material_editor
 		material_editor = SU2LUX.get_editor("material")
 		material_editor.refresh() if (material_editor);
+		SU2LUX.dbg_p "onMaterialAdd"
 		# material_editor.set_material_list() if (material_editor)
 		# luxmat = LuxrenderMaterial.new(material)
 		# material_editor.set_current(luxmat.name) if (material_editor)
@@ -650,6 +654,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 		SU2LUX.create_material_editor
 		material_editor = SU2LUX.get_editor("material")
 		material_editor.refresh() if (material_editor);
+		SU2LUX.dbg_p "onMaterialRemove"
 		# material_editor.set_material_list() if (material_editor)
 		# luxmat = LuxrenderMaterial.new(material)
 		# material_editor.set_current(luxmat.name) if (material_editor)
