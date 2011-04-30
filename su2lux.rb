@@ -58,6 +58,27 @@ module SU2LUX
 	##
 	#
 	##
+	def SU2LUX.create_observers
+		$SU2LUX_view_observer = SU2LUX_view_observer.new
+		Sketchup.active_model.active_view.add_observer($SU2LUX_view_observer)
+		$SU2LUX_rendering_options_observer = SU2LUX_rendering_options_observer.new
+		Sketchup.active_model.rendering_options.add_observer($SU2LUX_rendering_options_observer)
+		$SU2LUX_materials_observer = SU2LUX_materials_observer.new
+		Sketchup.active_model.materials.add_observer($SU2LUX_materials_observer)
+	end
+
+	##
+	#
+	##
+	def SU2LUX.remove_observers
+		Sketchup.active_model.active_view.remove_observer $SU2LUX_view_observer
+		Sketchup.active_model.rendering_options.remove_observer $SU2LUX_rendering_options_observer
+		Sketchup.active_model.materials.remove_observer $SU2LUX_materials_observer
+	end
+	
+	##
+	#
+	##
 	def SU2LUX.get_os
 		return (Object::RUBY_PLATFORM =~ /mswin/i) ? :windows : ((Object::RUBY_PLATFORM =~ /darwin/i) ? :mac : :other)
 	end # END get_os
@@ -159,6 +180,8 @@ module SU2LUX
 		"""The argument: 'render' is a boolean which indicates
 		whether or not to render the lxs after it has been exported
 		"""
+		SU2LUX.remove_observers
+
 		##### --- awful hack --- 1.0 ####
 		# @lrs=LuxrenderSettings.new
 		@export_file_path = @lrs.export_file_path #shouldn't need this
@@ -195,6 +218,7 @@ module SU2LUX
 				end
 			end
 		end
+		SU2LUX.create_observers
 	end # END export_dialog
 	
 	##
@@ -535,7 +559,6 @@ class SU2LUX_view_observer < Sketchup::ViewObserver
 	include SU2LUX
 
 	def onViewChanged(view)
-
 		settings_editor = SU2LUX.get_editor("settings")
 		@lrs = LuxrenderSettings.new
 		if Sketchup.active_model.active_view.camera.perspective?
@@ -565,9 +588,7 @@ end # END class SU2LUX_view_observer
 
 class SU2LUX_app_observer < Sketchup::AppObserver
 	def onNewModel(model)
-		model.active_view.add_observer(SU2LUX_view_observer.new)
-		model.rendering_options.add_observer(SU2LUX_rendering_options_observer.new)
-		model.materials.add_observer(SU2LUX_materials_observer.new)
+		SU2LUX.create_observers
 		@lrs = LuxrenderSettings.new
 		@lrs.reset
 		@lrs.fleximage_xresolution = Sketchup.active_model.active_view.vpwidth
@@ -588,9 +609,7 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 	end # END onNewModel
 
 	def onOpenModel(model)
-		model.active_view.add_observer(SU2LUX_view_observer.new)
-		model.rendering_options.add_observer(SU2LUX_rendering_options_observer.new)
-		model.materials.add_observer(SU2LUX_materials_observer.new)
+		SU2LUX.create_observers
 		@lrs = LuxrenderSettings.new
 		settings_editor = SU2LUX.get_editor("settings")
 		if(settings_editor && settings_editor.visible?)
@@ -717,10 +736,15 @@ if( not file_loaded?(__FILE__) )
   create_toolbar()
   
 	#observers
-	Sketchup.add_observer(SU2LUX_app_observer.new)
-	Sketchup.active_model.active_view.add_observer(SU2LUX_view_observer.new)
-	Sketchup.active_model.rendering_options.add_observer(SU2LUX_rendering_options_observer.new)
-	Sketchup.active_model.materials.add_observer(SU2LUX_materials_observer.new)
+	SU2LUX.create_observers
+	$SU2LUX_app_observer = SU2LUX_app_observer.new
+	Sketchup.add_observer($SU2LUX_app_observer)
+	# $SU2LUX_view_observer = SU2LUX_view_observer.new
+	# Sketchup.active_model.active_view.add_observer($SU2LUX_view_observer)
+	# $SU2LUX_rendering_options_observer = SU2LUX_rendering_options_observer.new
+	# Sketchup.active_model.rendering_options.add_observer($SU2LUX_rendering_options_observer)
+	# $SU2LUX_materials_observer = SU2LUX_materials_observer.new
+	# Sketchup.active_model.materials.add_observer($SU2LUX_materials_observer)
 end
 
 

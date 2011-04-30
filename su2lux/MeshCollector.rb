@@ -30,7 +30,7 @@ class MeshCollector
 			entity_list=object
 		end
 
-		p "entity count="+entity_list.count.to_s
+		# p "entity count="+entity_list.count.to_s
 		text=""
 		text="Component: " + object.definition.name if object.class == Sketchup::ComponentInstance
 		text="Group" if object.class == Sketchup::Group
