@@ -3,11 +3,16 @@ function checkbox_expander(id)
 {
 	if ($("#" + id).attr("checked"))
 	{
+		$("#" + id).nextAll(".basic").hide();
+		$("#" + id).nextAll(".advanced").show();
+		
 		$("#" + id).next(".collapse").show();
 		$("#" + id).next(".collapse").children("#focus_type").change();
 	}
 	else if ($("#" + id).attr("checked") == false)
 	{
+		$("#" + id).nextAll(".basic").show();
+		$("#" + id).nextAll(".advanced").hide();
 		$("#" + id).next(".collapse").hide();
 	}
 }
@@ -17,7 +22,8 @@ $(document).ready(
 
 		$(".collapse").hide();
 		$(".collapse2").hide();
-
+		$(".advanced").hide();
+	
 		$("#settings_panel select, :text").change(
 			function()
 			{
@@ -40,7 +46,6 @@ $(document).ready(
 				$(this).nextAll("div").hide();
 				$(this).nextAll("span").hide();
 				$(this).nextAll("." + this.value).show();
-				// window.location = 'skp:camera_change@' + this.value
 			}
 		);
 		
@@ -49,7 +54,48 @@ $(document).ready(
 			{
 				$(this).nextAll().hide();
 				$(this).nextAll("." + this.value).show();
-				//window.location = 'skp:camera_change@' + this.value
+			}
+		);
+		
+		$("#settings_panel #sintegrator_path_rrstrategy").change(
+			function()
+			{
+				$(this).nextAll("div").hide();
+				$(this).nextAll("span").hide();
+				$(this).nextAll("." + this.value).show();
+			}
+		);
+		
+		$("#settings_panel #sintegrator_exphoton_rrstrategy").change(
+			function()
+			{
+				$(this).nextAll("div").hide();
+				$(this).nextAll("span").hide();
+				$(this).nextAll("." + this.value).show();
+			}
+		);
+		
+		$("#settings_panel #sampler_type").change(
+			function()
+			{
+				$(this).nextAll().hide();
+				$(this).nextAll("." + this.value).show();
+			}
+		);
+		
+		$("#settings_panel #pixelfilter_type").change(
+			function()
+			{
+				$(this).nextAll().hide();
+				$(this).nextAll("." + this.value).show();
+			}
+		);
+		
+		$("#settings_panel #fleximage_tonemapkernel").change(
+			function()
+			{
+				$(this).nextAll("div").hide();
+				$(this).nextAll("." + this.value).show();
 			}
 		);
 		
@@ -79,6 +125,12 @@ $(document).ready(
 				$(this).next("div.collapse").children("#sintegrator_type").siblings("#" + node).show();
 				node = $(this).next("div.collapse").children("#camera_type").change();
 				node = $(this).next("div.collapse").children("#environment_light_type").change();
+				node = $(this).next("div.collapse").children("#sampler_type").change();
+				node = $(this).next("div.collapse").children("#pixelfilter_type").change();
+				node = $(this).next("div.collapse").children("#fleximage_tonemapkernel").change();
+				node = $(this).next("div.collapse").children("div.collapse").children("div.advanced").children("#sintegrator_path_rrstrategy").change();
+				node = $(this).next("div.collapse").children("div.collapse").children("div.collapse").children("#sintegrator_exphoton_rrstrategy").change();
+				checkbox_expander("fleximage_write_png")
 				$(this).next("div.collapse").slideToggle(300);
 				// node = $(this).next("div.collapse").children("#environment_light_type").attr("value");
 				// $(this).next("div.collapse").children("#environment_light_type").siblings("#" + node).show();
@@ -143,10 +195,10 @@ $(document).ready(
 		$("#flip_dim").click(
 			function()
 			{	
-				width = $("#xresolution").val();
-				height = $("#yresolution").val();
-				$("#xresolution").val(parseInt(height));
-				$("#yresolution").val(parseInt(width));
+				width = $("#fleximage_xresolution").val();
+				height = $("fleximage_#yresolution").val();
+				$("#fleximage_xresolution").val(parseInt(height));
+				$("#fleximage_yresolution").val(parseInt(width));
 				window.location = 'skp:set_image_size@' + height + 'x' + width;
 			}
 		);
@@ -161,8 +213,8 @@ $(document).ready(
 		$("#multiply_by_2, #divide_by_2").click(
 			function()
 			{	
-				width = $("#xresolution").val();
-				height = $("#yresolution").val();
+				width = $("#fleximage_xresolution").val();
+				height = $("#fleximage_yresolution").val();
 				switch(this.id)
 				{
 					case 'multiply_by_2':
@@ -174,8 +226,8 @@ $(document).ready(
 						height /= 2;
 						break;
 				}
-				$("#xresolution").val(parseInt(width));
-				$("#yresolution").val(parseInt(height));
+				$("#fleximage_xresolution").val(parseInt(width));
+				$("#fleximage_yresolution").val(parseInt(height));
 				window.location = 'skp:set_image_size@' + width + 'x' + height + 'xfalse';
 			}
 		);

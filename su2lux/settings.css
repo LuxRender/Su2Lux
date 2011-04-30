@@ -63,7 +63,7 @@ input#divide_by_2, input#multiply_by_2 {
 	width: 169px;
 }
 
-#xresolution, #yresolution {
+#fleximage_xresolution, #fleximage_yresolution {
 	margin: -23px 5px 0 0;
 	text-align: right;
 	font-size: 10px;

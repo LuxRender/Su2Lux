@@ -62,6 +62,9 @@ class LuxrenderSettings
 		'environment_infinite_map' => '',
 		'environment_infinite_gamma' => 1.0,
 		'use_environment_infinite_sun' => true,
+		'environment_infinite_sun_gain' => 1.0,
+		'environment_infinite_sun_relsize' => 1.0,
+		'environment_infinite_sun_turbidity' => 2.2,
 		'environment_sky_lightgroup' => 'default',
 		'environment_sky_gain' => 1.0,
 		'environment_sky_turbidity' => 2.2,
@@ -75,6 +78,11 @@ class LuxrenderSettings
 	# Filter
 	##
 		'pixelfilter_show_advanced' => false,
+		'pixelfilter_show_advanced_box' => false,
+		'pixelfilter_show_advanced_gaussian' => false,
+		'pixelfilter_show_advanced_mitchell' => false,
+		'pixelfilter_show_advanced_sinc' => false,
+		'pixelfilter_show_advanced_triangle' => false,
 		'pixelfilter_type' => 'mitchell',
 		'pixelfilter_mitchell_sharpness' => 1.0/3.0,
 		'pixelfilter_mitchell_xwidth' => 2.0, 
@@ -114,9 +122,10 @@ class LuxrenderSettings
 	##
 	#Integrator
 	##
-		'sintegrator_show_advanced'=>true,
-		'sintegrator_type'=>'bidirectional',
+		'sintegrator_show_advanced' => true,
+		'sintegrator_type' => 'bidirectional',
 
+		'sintegrator_bidir_show_advanced' => false,
 		'sintegrator_bidir_bounces' => 16,
 		'sintegrator_bidir_eyedepth' => 8,
 		'sintegrator_bidir_eyethreshold' => 0.0,
@@ -124,6 +133,7 @@ class LuxrenderSettings
 		'sintegrator_bidir_lightthreshold' => 0.0,
 		'sintegrator_bidir_strategy' => 'auto',
 
+		'sintegrator_direct_show_advanced' => false,
 		'sintegrator_direct_bounces' => 5,
 		'sintegrator_direct_maxdepth' => 5,
 		'sintegrator_direct_shadow_ray_count' => 1,
@@ -131,20 +141,20 @@ class LuxrenderSettings
 		
 		'sintegrator_distributedpath_directsampleall' => true,
 		'sintegrator_distributedpath_directsamples' => 1,
-		'sintegrator_distributedpath_directdiffuse' => true,
-		'sintegrator_distributedpath_directglossy' => true,
 		'sintegrator_distributedpath_indirectsampleall' => false,
 		'sintegrator_distributedpath_indirectsamples' => 1,
-		'sintegrator_distributedpath_indirectdiffuse' => true,
-		'sintegrator_distributedpath_indirectglossy' => true,
 		'sintegrator_distributedpath_diffusereflectdepth' => 3,
 		'sintegrator_distributedpath_diffusereflectsamples' => 1,
 		'sintegrator_distributedpath_diffuserefractdepth' => 5,
 		'sintegrator_distributedpath_diffuserefractsamples' => 1,
+		'sintegrator_distributedpath_directdiffuse' => true,
+		'sintegrator_distributedpath_indirectdiffuse' => true,
 		'sintegrator_distributedpath_glossyreflectdepth' => 2,
 		'sintegrator_distributedpath_glossyreflectsamples' => 1,
 		'sintegrator_distributedpath_glossyrefractdepth' => 5,
 		'sintegrator_distributedpath_glossyrefractsamples' => 1,
+		'sintegrator_distributedpath_directglossy' => true,
+		'sintegrator_distributedpath_indirectglossy' => true,
 		'sintegrator_distributedpath_specularreflectdepth' => 2,
 		'sintegrator_distributedpath_specularrefractdepth' => 5,
 		'sintegrator_distributedpath_strategy' => 'auto',
@@ -158,8 +168,7 @@ class LuxrenderSettings
 		'sintegrator_distributedpath_glossyrefractreject' => false,
 		'sintegrator_distributedpath_glossyrefractreject_threshold' => 10.0,
 		
-		'sintegrator_exphoton_causticphotons' => 20000,
-		'sintegrator_exphoton_directphotons' => 200000,
+		'sintegrator_exphoton_show_advanced' => false,
 		'sintegrator_exphoton_finalgather' => true,
 		'sintegrator_exphoton_finalgathersamples' => 32,
 		'sintegrator_exphoton_gatherangle' => 10.0,
@@ -167,6 +176,9 @@ class LuxrenderSettings
 		'sintegrator_exphoton_maxphotondepth' => 10,
 		'sintegrator_exphoton_maxphotondist' => 0.5,
 		'sintegrator_exphoton_nphotonsused' => 50,
+		'sintegrator_exphoton_causticphotons' => 20000,
+		'sintegrator_exphoton_directphotons' => 200000,
+		'sintegrator_exphoton_indirectphotons' => 1000000,
 		'sintegrator_exphoton_rendermode' => 'directlighting',
 		'sintegrator_exphoton_rrcontinueprob' => 0.65,
 		'sintegrator_exphoton_rrstrategy' => 'efficiency',
@@ -178,12 +190,15 @@ class LuxrenderSettings
 		'sintegrator_exphoton_dbg_enable_indirspecular' => true,
 		'sintegrator_exphoton_dbg_enable_radiancemap' => false,
 
+		'sintegrator_igi_show_advanced' => false,
 		'sintegrator_igi_maxdepth' => 5,
 		'sintegrator_igi_mindist' => 0.1,
 		'sintegrator_igi_nsets' => 4,
 		'sintegrator_igi_nlights' => 64,
 
+		'sintegrator_path_show_advanced' => false,
 		'sintegrator_path_include_environment' => true,
+		'sintegrator_path_bounces' => 10,
 		'sintegrator_path_maxdepth' => 10,
 		'sintegrator_path_rrstrategy' => 'efficiency',
 		'sintegrator_path_rrcontinueprob' => 0.65,
@@ -201,7 +216,7 @@ class LuxrenderSettings
 	##
 	# Film
 	##
-		'film_film_type' => "fleximage",
+		'film_type' => "fleximage",
 		'fleximage_premultiplyalpha' => false,
 		'fleximage_xresolution' => nil,
 		'fleximage_yresolution' => nil,
@@ -210,7 +225,7 @@ class LuxrenderSettings
 		'fleximage_write_exr' => false,
 		'fleximage_write_exr_channels' => "RGB",
 		'fleximage_write_exr_halftype' => true,
-		'fleximage_write_exr_compressiontype' => "PIX (lossless)",
+		'fleximage_write_exr_compressiontype' => "piz",
 		'fleximage_write_exr_applyimaging' => true,
 		'fleximage_write_exr_gamutclamp' => true,
 		'fleximage_write_exr_ZBuf' => false,
@@ -247,7 +262,7 @@ class LuxrenderSettings
 		'fleximage_tonemapkernel' => 'reinhard',
 		'fleximage_reinhard_prescale' => 1.0,
 		'fleximage_reinhard_postscale' => 1.0,
-		'fleximage_reinahrd_burn' => 6.0,
+		'fleximage_reinhard_burn' => 6.0,
 		'fleximage_linear_sensitivity' => 50.0,
 		'fleximage_linear_exposure' => 1.0,
 		'fleximage_linear_fstop' => 2.8,
@@ -255,6 +270,17 @@ class LuxrenderSettings
 		'fleximage_contrast_ywa' => 1.0,
 		'fleximage_cameraresponse' => "",
 		'fleximage_gamma' => 2.2,
+		#added for GUI
+		'fleximage_linear_use_preset' => FALSE,
+		'fleximage_use_preset' => true,
+		'fleximage_use_colorspace_whitepoint' => true,
+		'fleximage_use_colorspace_gamma' => true,
+		'fleximage_use_colorspace_whitepoint_preset' => true,
+		'fleximage_use_colospace_wp_preset' => true,
+		'fleximage_colorspace_gamma' => 2.2,
+		'fleximage_colorspace_preset_white_x' => 0.314275,
+		'fleximage_colorspace_preset_white_y' => 0.329411,
+		'fleximage_colorspace_preset' => 'rRGB',
 		
 		
 		# 'saveexr' => false,
