@@ -23,16 +23,16 @@ def create_toolbar
 	cmd_settings.menu_text = "Settings"
 	cmd_settings.status_bar_text = "Open SU2LUX Settings Window"
 	toolbar = toolbar.add_item(cmd_settings)
-  
-  toolbar = toolbar.add_separator
-  
-  cmd_addprim = UI::Command.new("Settings"){(select_my_tool())}
-  cmd_addprim.small_icon = "icons\\box.png"
-  cmd_addprim.large_icon = "icons\\box.png"
-  cmd_addprim.tooltip = "Create LuxCube Primative"
-  cmd_addprim.menu_text = "LuxCube"
-  cmd_addprim.status_bar_text = "Create LuxCube Primative"
-  toolbar = toolbar.add_item(cmd_addprim)
-  
-	toolbar.show  
+
+	toolbar = toolbar.add_separator
+	
+	cmd_addprim = UI::Command.new("Settings"){(select_my_tool())}
+	cmd_addprim.small_icon = "icons\\box.png"
+	cmd_addprim.large_icon = "icons\\box.png"
+	cmd_addprim.tooltip = "Create LuxCube Primative"
+	cmd_addprim.menu_text = "LuxCube"
+	cmd_addprim.status_bar_text = "Create LuxCube Primative"
+	toolbar = toolbar.add_item(cmd_addprim)
+
+	toolbar.show
 end
