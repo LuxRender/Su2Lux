@@ -30,70 +30,79 @@ class LuxrenderSettings
 	# Camera
 	###
 		'camera_type' => 'perspective',
-		'fov' => format("%.2f", Sketchup.active_model.active_view.camera.fov),#35, # not currently in use
-		'focal_length' => format("%.2f", Sketchup.active_model.active_view.camera.focal_length),
-		'camera_scale' => 7.31,
-		'use_clipping' => false,
+		
 		'hither'=> 0.1,
 		'yon' => 100,  
-		'use_dof_bokeh'=>false,
-		'lensradius' => 0.006250,
-		'focus_type' => 'autofocus',
-		'autofocus' => true,
-		'focaldistance' => 0.0,
-		'distribution' => 'uniform',
-		'power' => 1,
-		'blades' => 6,
-		'use_architectural'=>false,
-		'shiftX' => 0.0,
-		'shiftY' => 0.0,
-		'use_ratio' => false,
-		'frameaspectratio' => 1.333333,
-		'use_motion_blur'=>false,
 		'shutteropen' => 0.0,
 		'shutterclose' => 1.0,
 		'shutterdistribution' => 'uniform',
+		'lensradius' => 0.006250,
+		'focaldistance' => 0.0,
+		'frameaspectratio' => 1.333333,
+		'autofocus' => true,
+		'fov' => format("%.2f", Sketchup.active_model.active_view.camera.fov),#35, # not currently in use
+		'distribution' => 'uniform',
+		'power' => 1,
+		'blades' => 6,
+
+		'camera_scale' => 7.31, #seems to work only in Blender
+		'use_clipping' => false, #GUI
+		'use_dof_bokeh'=>false, #GUI
+		'focus_type' => 'autofocus', #GUI
+		'use_architectural'=>false, #GUI
+		'shiftX' => 0.0, #GUI
+		'shiftY' => 0.0, #GUI
+		'use_ratio' => false, #GUI
+		'use_motion_blur'=>false, #GUI
+		'focal_length' => format("%.2f", Sketchup.active_model.active_view.camera.focal_length), #GUI
 	# END Camera
 
 	##
 	#Environment
 	##
 		'environment_light_type'=> 'sunsky',
-		'environment_infinite_lightgroup' => 'default',
+		
+		'environment_infinite_lightgroup' => 'infinite light',
+		'environment_infinite_L_R' => Sketchup.active_model.rendering_options["BackgroundColor"].red / 255.0, #environment color red component
+		'environment_infinite_L_G' => Sketchup.active_model.rendering_options["BackgroundColor"].green / 255.0, #environment color green component
+		'environment_infinite_L_B' => Sketchup.active_model.rendering_options["BackgroundColor"].blue / 255.0, #environment color green component
 		'environment_infinite_gain' => 1.0,
-		'environment_infinite_map_type' => 'latlong',
-		'environment_infinite_map' => '',
+		'environment_infinite_mapping' => 'latlong',
+		'environment_infinite_mapname' => '',
 		'environment_infinite_gamma' => 1.0,
-		'use_environment_infinite_sun' => true,
-		'environment_infinite_sun_lightgroup' => 'default',
-		'environment_infinite_sun_gain' => 1.0,
-		'environment_infinite_sun_relsize' => 1.0,
-		'environment_infinite_sun_turbidity' => 2.2,
-		'environment_sky_lightgroup' => 'default',
+		'environment_sky_lightgroup' => 'sky',
 		'environment_sky_gain' => 1.0,
 		'environment_sky_turbidity' => 2.2,
-		'environment_sun_lightgroup' => 'default',
+		'environment_sun_lightgroup' => 'sun',
 		'environment_sun_gain' => 1.0,
 		'environment_sun_relsize' => 1.0,
 		'environment_sun_turbidity' => 2.2,
+
+		'use_environment_infinite_sun' => false, #GUI
+		'use_plain_color' => 'sketchup_color', #GUI
+		'environment_infinite_sun_lightgroup' => 'sun', #for full GUI
+		'environment_infinite_sun_gain' => 1.0, #for full GUI
+		'environment_infinite_sun_relsize' => 1.0, #for full GUI
+		'environment_infinite_sun_turbidity' => 2.2, #for full GUI
 	#END Environment
 
 	##
 	# Filter
 	##
-		'pixelfilter_show_advanced' => false,
-		'pixelfilter_show_advanced_box' => false,
-		'pixelfilter_show_advanced_gaussian' => false,
-		'pixelfilter_show_advanced_mitchell' => false,
-		'pixelfilter_show_advanced_sinc' => false,
-		'pixelfilter_show_advanced_triangle' => false,
+		'pixelfilter_show_advanced' => false, #GUI
+		'pixelfilter_show_advanced_box' => false, #GUI
+		'pixelfilter_show_advanced_gaussian' => false, #GUI
+		'pixelfilter_show_advanced_mitchell' => false, #GUI
+		'pixelfilter_show_advanced_sinc' => false, #GUI
+		'pixelfilter_show_advanced_triangle' => false, #GUI
 		'pixelfilter_type' => 'mitchell',
-		'pixelfilter_mitchell_sharpness' => 1.0/3.0,
+		
+		'pixelfilter_mitchell_sharpness' => 0.333333, #Basic GUI
+		'pixelfilter_mitchell_optmode' => 'manual', #TODO: change to slider ##unused in Sketchup
 		'pixelfilter_mitchell_xwidth' => 2.0, 
 		'pixelfilter_mitchell_ywidth' => 2.0,
-		'pixelfilter_mitchell_optmode' => 'manual', #TODO: change to slider
-		'pixelfilter_mitchell_B' => 1.0/3.0,
-		'pixelfilter_mitchell_C' => 1.0/3.0,
+		'pixelfilter_mitchell_B' => 0.333333,
+		'pixelfilter_mitchell_C' => 0.333333,
 		'pixelfilter_mitchell_supersample' => false,
 		'pixelfilter_box_xwidth' => 0.5, 
 		'pixelfilter_box_ywidth' => 0.5,
@@ -112,13 +121,14 @@ class LuxrenderSettings
 	##
 		'sampler_show_advanced'=>false,
 		'sampler_type'=>'metropolis',
+		
 		'sampler_random_pixelsamples' => 4,
 		'sampler_random_pixelsampler' => 'vegas',
 		'sampler_lowdisc_pixelsamples' => 4,
 		'sampler_lowdisc_pixelsampler' => 'vegas',
-		'sampler_metropolis_strength' => 0.6,
-		'sampler_metropolis_lmprob' => 0.4,
-		'sampler_metropolis_maxrejects' => 512,
+		'sampler_metropolis_strength' => 0.6, #Basic GUI
+		'sampler_metropolis_largemutationprob' => 0.4,
+		'sampler_metropolis_maxconsecrejects' => 512,
 		'sampler_metropolis_usevariance'=> false,
 		'sampler_erpt_chainlength' => 2000,
 	# END Sampler
@@ -126,19 +136,21 @@ class LuxrenderSettings
 	##
 	#Integrator
 	##
-		'sintegrator_show_advanced' => true,
+		'sintegrator_show_advanced' => true, #GUI
 		'sintegrator_type' => 'bidirectional',
 
-		'sintegrator_bidir_show_advanced' => false,
-		'sintegrator_bidir_bounces' => 16,
+		'sintegrator_bidir_show_advanced' => false, #GUI
+		'sintegrator_bidir_bounces' => 16, #Basic GUI
 		'sintegrator_bidir_eyedepth' => 8,
-		'sintegrator_bidir_eyethreshold' => 0.0,
+		'sintegrator_bidir_eyerrthreshold' => 0.0,
 		'sintegrator_bidir_lightdepth' => 8,
 		'sintegrator_bidir_lightthreshold' => 0.0,
 		'sintegrator_bidir_strategy' => 'auto',
+		'sintegrator_bidir_debug' => 'false',
+		
 
 		'sintegrator_direct_show_advanced' => false,
-		'sintegrator_direct_bounces' => 5,
+		'sintegrator_direct_bounces' => 5, #Basic GUI
 		'sintegrator_direct_maxdepth' => 5,
 		'sintegrator_direct_shadow_ray_count' => 1,
 		'sintegrator_direct_strategy' => 'auto',
@@ -162,7 +174,7 @@ class LuxrenderSettings
 		'sintegrator_distributedpath_specularreflectdepth' => 2,
 		'sintegrator_distributedpath_specularrefractdepth' => 5,
 		'sintegrator_distributedpath_strategy' => 'auto',
-		'sintegrator_distributedpath_reject' => false,
+		'sintegrator_distributedpath_reject' => false, #GUI
 		'sintegrator_distributedpath_diffusereflectreject' => false,
 		'sintegrator_distributedpath_diffusereflectreject_threshold' => 10.0,
 		'sintegrator_distributedpath_diffuserefractreject' => false,
@@ -173,6 +185,7 @@ class LuxrenderSettings
 		'sintegrator_distributedpath_glossyrefractreject_threshold' => 10.0,
 		
 		'sintegrator_exphoton_show_advanced' => false,
+		
 		'sintegrator_exphoton_finalgather' => true,
 		'sintegrator_exphoton_finalgathersamples' => 32,
 		'sintegrator_exphoton_gatherangle' => 10.0,
@@ -183,9 +196,11 @@ class LuxrenderSettings
 		'sintegrator_exphoton_causticphotons' => 20000,
 		'sintegrator_exphoton_directphotons' => 200000,
 		'sintegrator_exphoton_indirectphotons' => 1000000,
-		'sintegrator_exphoton_rendermode' => 'directlighting',
+		'sintegrator_exphoton_radiancephotons' => 200000,
+		'sintegrator_exphoton_renderingmode' => 'directlighting',
 		'sintegrator_exphoton_rrcontinueprob' => 0.65,
 		'sintegrator_exphoton_rrstrategy' => 'efficiency',
+		'sintegrator_exphoton_photonmapsfile' => '',
 		'sintegrator_exphoton_shadow_ray_count' => 1,
 		'sintegrator_exphoton_strategy' => 'auto',
 		'sintegrator_exphoton_dbg_enable_direct' => true,
@@ -195,14 +210,16 @@ class LuxrenderSettings
 		'sintegrator_exphoton_dbg_enable_radiancemap' => false,
 
 		'sintegrator_igi_show_advanced' => false,
+		
 		'sintegrator_igi_maxdepth' => 5,
 		'sintegrator_igi_mindist' => 0.1,
 		'sintegrator_igi_nsets' => 4,
 		'sintegrator_igi_nlights' => 64,
 
 		'sintegrator_path_show_advanced' => false,
+		
 		'sintegrator_path_include_environment' => true,
-		'sintegrator_path_bounces' => 10,
+		'sintegrator_path_bounces' => 10, #Basic GUI
 		'sintegrator_path_maxdepth' => 10,
 		'sintegrator_path_rrstrategy' => 'efficiency',
 		'sintegrator_path_rrcontinueprob' => 0.65,
@@ -213,8 +230,8 @@ class LuxrenderSettings
 	##
 	# Volume Integrator
 	##
-		'volume_integrator_type'=>"emission",
-		'volume_integrator_stepsize'=>1.00,
+		'volume_integrator_type' => "emission",
+		'volume_integrator_stepsize' => 1.0,
 	# END VolumeIntegrator
 		
 	##
@@ -224,7 +241,7 @@ class LuxrenderSettings
 		'fleximage_premultiplyalpha' => false,
 		'fleximage_xresolution' => nil,
 		'fleximage_yresolution' => nil,
-		'fleximage_resolution_percent' => 100,
+		'fleximage_resolution_percent' => 100, #GUI
 		'fleximage_filterquality' => 4,
 		'fleximage_ldr_clamp_method' => "lum",
 		'fleximage_write_exr' => false,
@@ -256,14 +273,14 @@ class LuxrenderSettings
 		'fleximage_debug' => false,
 		'fleximage_haltspp' => -1,
 		'fleximage_halttime' => -1,
-		'fleximage_colorspace_red_x' => 0.63,
-		'fleximage_colorspace_red_y' => 0.34,
-		'fleximage_colorspace_green_x' => 0.31,
-		'fleximage_colorspace_green_y' => 0.595,
-		'fleximage_colorspace_blue_x' => 0.155,
-		'fleximage_colorspace_blue_y' => 0.07,
-		'fleximage_colorspace_white_x' => 0.314275,
-		'fleximage_colorspace_white_y' => 0.329411,
+		'fleximage_colorspace_red_x' => 0.63, #GUI
+		'fleximage_colorspace_red_y' => 0.34, #GUI
+		'fleximage_colorspace_green_x' => 0.31, #GUI
+		'fleximage_colorspace_green_y' => 0.595, #GUI
+		'fleximage_colorspace_blue_x' => 0.155, #GUI
+		'fleximage_colorspace_blue_y' => 0.07, #GUI
+		'fleximage_colorspace_white_x' => 0.314275, #GUI
+		'fleximage_colorspace_white_y' => 0.329411, #GUI
 		'fleximage_tonemapkernel' => 'reinhard',
 		'fleximage_reinhard_prescale' => 1.0,
 		'fleximage_reinhard_postscale' => 1.0,
@@ -304,24 +321,25 @@ class LuxrenderSettings
 	##
 		'accelerator_type' => "tabreckdtree",
 		#tabreckdtree  properties
-		'kdtree_intersection_cost' => 80,
-		'kdtree_traversal_cost' => 1,
-		'kdtree_empty_bonus' => 0.5,
-		'kdtree_max_prims' => 1,
-		'kdtree_max_depth' => -1,
+		'kdtree_intersectcost' => 80,
+		'kdtree_traversalcost' => 1,
+		'kdtree_emptybonus' => 0.5,
+		'kdtree_maxprims' => 1,
+		'kdtree_maxdepth' => -1,
 		#bvh properties
 		#qbvh properties
-		'qbvh_max_prims_per_leaf' => 4,
+		'qbvh_maxprimsperleaf' => 4,
 		'qbvh_skip_factor' => 1,
 		#grid properties
-		'grid_refine_immediately' => false,
+		'grid_refineimmediately' => false,
 	# END Accelerator
 
 	##
 	# Other
 	##
 		'useparamkeys' => false,
-		'export_file_path' => ""
+		'export_file_path' => "",
+		'priority' => 'low'
 	}
 
 	##
@@ -329,7 +347,8 @@ class LuxrenderSettings
 	##
 	def LuxrenderSettings::ui_refreshable?(id)
 		ui_refreshable_settings = [
-			'export_file_path'
+			'export_file_path',
+			'environment_infinite_mapname'
 		]
 		if ui_refreshable_settings.include?(id)
 			return id

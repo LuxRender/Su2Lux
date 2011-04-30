@@ -271,6 +271,39 @@ module SU2LUX
 	##
 	#
 	##
+	def SU2LUX.load_env_image
+		
+		model = Sketchup.active_model
+		model_filename = File.basename(model.path)
+		# if model_filename.empty?
+			# export_filename = SCENE_NAME
+		# else
+			# dot_position = model_filename.rindex(".")
+			# export_filename = model_filename.slice(0..(dot_position - 1))
+			# export_filename += SCENE_EXTENSION
+		# end
+		default_folder = SU2LUX.find_default_folder
+		export_folder = default_folder
+		export_folder = File.dirname(model.path) if ! model.path.empty?
+		
+		user_input = UI.openpanel("Open background image", export_folder, "*")
+		
+		#check whether user has pressed cancel
+		if user_input
+			user_input.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
+			user_input.gsub!(/\\/, '/') if user_input.include?('\\')
+			#store file path for quick exports
+				
+			@lrs.environment_infinite_mapname = user_input
+			
+			return true #user has selected a path
+		end
+		return false #user has not selected a path
+	end # END new_export_file_path
+
+	##
+	#
+	##
 	#TODO: try to write better code for the function
 	def SU2LUX.get_luxrender_path
 		find_luxrender = true
@@ -380,7 +413,7 @@ end #END luxrender_path_valid?
 		export_path = "#{@export_file_path}"
 		export_path = File.join(export_path.split(@os_separator))
 		if (ENV['OS'] =~ /windows/i)
-		 command_line = "start \"max\" \"#{@luxrender_path}\" \"#{export_path}\""
+		 command_line = "start \"max\" \/#{@lrs.priority} \"#{@luxrender_path}\" \"#{export_path}\""
 		 puts command_line
 		 system(command_line)
 		 else
@@ -498,11 +531,11 @@ end # END class SU2LUX_view_observer
 class SU2LUX_app_observer < Sketchup::AppObserver
 	def onNewModel(model)
 		model.active_view.add_observer(SU2LUX_view_observer.new)
-		
 		@lrs = LuxrenderSettings.new
 		@lrs.reset
 		@lrs.fleximage_xresolution = Sketchup.active_model.active_view.vpwidth
 		@lrs.fleximage_yresolution = Sketchup.active_model.active_view.vpheight
+
 		settings_editor = SU2LUX.get_editor("settings")
 		# @lrs.camera_scale = nil
 		if (settings_editor && settings_editor.visible?)
@@ -526,6 +559,17 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 	end
 	
 end # END class SU2LUX_app_observer
+
+class SU2LUX_rendering_options_observer < Sketchup::RenderingOptionsObserver
+	def onRenderingOptionsChanged(renderoptions, type)
+		UI.messagebox("onRenderingOptionsChanged: " + renderoptions["BackgroundColor"].to_s + ',' + type.to_s)
+		if (type == 12)
+			color = renderoptions["BackgroundColor"]
+			@lrs = LuxrenderSettings.new
+			#set the background color radio button in settings editor
+		end
+	end
+end
 
 if( not file_loaded?(__FILE__) )
 
@@ -555,6 +599,7 @@ if( not file_loaded?(__FILE__) )
 	#observers
 	Sketchup.add_observer(SU2LUX_app_observer.new)
 	Sketchup.active_model.active_view.add_observer(SU2LUX_view_observer.new)
+	Sketchup.active_model.rendering_options.add_observer(SU2LUX_rendering_options_observer.new)
 end
 
 

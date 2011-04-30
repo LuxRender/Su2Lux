@@ -174,7 +174,7 @@
 				<label for="environment_infinite_gain">gain</label>
 				<input type='text' id="environment_infinite_gain" size="10">
 				<br>
-				<select id="">
+				<select id="environment_infinite_mapping">
 					<option value="latlong">latlong</option>
 					<option value="angular">angular</option>
 					<option value="vcross">vcross</option>
@@ -182,8 +182,8 @@
 				<label for="environment_infinite_gamma">gamma</label>
 				<input type='text' id="environment_infinite_gamma" size="10">
 				<br>
-				<label for="environment_infinite_map">map file</label>
-				<input type='text' id="environment_infinite_map" size="10">
+				<label for="environment_infinite_mapname">map file</label>
+				<input type='text' id="environment_infinite_mapname" size="10">
 				<p class="header2">Sun</p>
 				<label for="use_environment_infinite_sun">add sun</label>
 				<input type="checkbox" id="use_environment_infinite_sun">
@@ -229,10 +229,10 @@
 					<input type='text' id="sampler_metropolis_strength" size="10">
 				</div>
 				<div class ="advanced">
-					<label for="sampler_metropolis_lmprob">Large mutation probability</label>
-					<input type='text' id="sampler_metropolis_lmprob" size="10">
-					<label for="sampler_metropolis_maxrejects">Max number of rejections</label>
-					<input type='text' id="sampler_metropolis_maxrejects" size="10">
+					<label for="sampler_metropolis_largemutationprob">Large mutation probability</label>
+					<input type='text' id="sampler_metropolis_largemutationprob" size="10">
+					<label for="sampler_metropolis_maxconsecrejects">Max number of rejections</label>
+					<input type='text' id="sampler_metropolis_maxconsecrejects" size="10">
 					<label for="sampler_metropolis_usevariance">Use variance</label>
 					<input type="checkbox" id="sampler_metropolis_usevariance">
 				</div>
@@ -338,8 +338,8 @@
 					<div class="advanced">
 						<label for="sintegrator_bidir_eyedepth">eye depth</label>
 						<input type='text' id="sintegrator_bidir_eyedepth" size="10">
-						<label for="sintegrator_bidir_eyethreshold">eye threshold</label>
-						<input type='text' id="sintegrator_bidir_eyethreshold" size="10">
+						<label for="sintegrator_bidir_eyerrthreshold">eye threshold</label>
+						<input type='text' id="sintegrator_bidir_eyerrthreshold" size="10">
 						<br>
 						<label for="sintegrator_bidir_lightdepth">light depth</label>
 						<input type='text' id="sintegrator_bidir_lightdepth" size="10">
@@ -359,8 +359,8 @@
 					<label for="sintegrator_exphoton_show_advanced">Advanced</label>
 					<input type="checkbox" id="sintegrator_exphoton_show_advanced">
 					<br>
-					<label for="sintegrator_exphoton_rendermode">Light strategy</label>
-					<select id="sintegrator_exphoton_rendermode">
+					<label for="sintegrator_exphoton_renderingmode">Light strategy</label>
+					<select id="sintegrator_exphoton_renderingmode">
 						<option value="directlighting">direct lighting</option>
 						<option value="path">path</option>
 					</select>
@@ -949,30 +949,30 @@
 				<option value="qbvh">qbvh</option>
 			</select>
 			<div class="collapse" id="tabreckdtree">
-				<label for="kdtree_intersection_cost">Intersection cost:</label>
-				<input type='text' id="kdtree_intersection_cost" size="4">
+				<label for="kdtree_intersectcost">Intersection cost:</label>
+				<input type='text' id="kdtree_intersectcost" size="4">
 				<br>
-				<label for="kdtree_traversal_cost">Traversal cost:</label>
-				<input type='text' id="kdtree_traversal_cost" size="4">
+				<label for="kdtree_traversalcost">Traversal cost:</label>
+				<input type='text' id="kdtree_traversalcost" size="4">
 				<br>
-				<label for="kdtree_empty_bonus">Empty bonus:</label>
-				<input type='text' id="kdtree_empty_bonus" size="4">
+				<label for="kdtree_emptybonus">Empty bonus:</label>
+				<input type='text' id="kdtree_emptybonus" size="4">
 				<br>
-				<label for="kdtree_max_prims">Max primitives per volume:</label>
-				<input type='text' id="kdtree_max_prims" size="4">
+				<label for="kdtree_maxprims">Max primitives per volume:</label>
+				<input type='text' id="kdtree_maxprims" size="4">
 				<br>
-				<label for="kdtree_max_depth">Max tree depth:</label>
-				<input type='text' id="kdtree_max_depth" size="4">
+				<label for="kdtree_maxdepth">Max tree depth:</label>
+				<input type='text' id="kdtree_maxdepth" size="4">
 			</div>
 			<div class="collapse" id="grid">
-			<label for="grid_refine_immediately">refine immediately</label>
-				<input type="checkbox" id="grid_refine_immediately">
+			<label for="grid_refineimmediately">refine immediately</label>
+				<input type="checkbox" id="grid_refineimmediately">
 			</div>
 			<div class="collapse" id="bvh">
 			</div>
 			<div class="collapse" id="qbvh">
-				<label for="qbvh_max_prims_per_leaf">Max primitives per leaf:</label>
-				<input type='text' id="qbvh_max_prims_per_leaf" size="4">
+				<label for="qbvh_maxprimsperleaf">Max primitives per leaf:</label>
+				<input type='text' id="qbvh_maxprimsperleaf" size="4">
 <!--				<label for="full_sweep_threshold">Sweep threshold:</label>
 				<input type='text' id="full_sweep_threshold" size="4"> -->
 				<label for="qbvh_skip_factor">Skip factor:</label>
@@ -980,20 +980,6 @@
 			</div>
 		</div>
 		
-	<!-- TODO Add section "System" -->
-	<!--
-		<p class="header">System</p>
-		<div class="collapse">
-			Priority:
-			<select id="priority">
-				<option value="low">low</option>
-				<option value="belownormal">belownormal</option>
-				<option value="normal">normal</option>
-				<option value="abovenormal">abovenormal</option>
-			</select>
-		</div>
-	-->
-
 		<p class="header">Image settings</p>
 		<div class="collapse">
 			<label for="fleximage_xresolution">Width&nbsp;</label>
@@ -1034,6 +1020,17 @@
 			<input type="button" id="export_file_path_browse" value="Browse">
 		</div>
 		
+		<p class="header">System</p>
+		<div class="collapse">
+			<label for="priority">Priority:</label>
+			<select id="priority">
+				<option value="low">Very low</option>
+				<option value="belownormal">Low</option>
+				<option value="normal">Normal</option>
+				<option value="abovenormal">High</option>
+			</select>
+		</div>
+
 		<br>
 		<br>
 		<hr>

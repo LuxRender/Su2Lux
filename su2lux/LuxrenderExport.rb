@@ -393,8 +393,8 @@ class LuxrenderExport
 		end
 		out.puts "\t\"integer outlierrejection_k\" [#{@lrs.fleximage_outlierrejection_k.to_i}]"
 		
-		flm = @lrs.useparamkeys ? "true" : "false"
-		out.puts "\t\"bool useparamkeys\" [\"#{flm}\"]\n"
+		# flm = @lrs.useparamkeys ? "true" : "false"
+		# out.puts "\t\"bool useparamkeys\" [\"#{flm}\"]\n"
 	end # END export_film
 
 	##
@@ -496,8 +496,8 @@ class LuxrenderExport
 		case @lrs.sampler_type
 			when "metropolis"
 				if (@lrs.sampler_show_advanced)
-					sampler += "\t\"float largemutationprob\" [#{"%.6f" %(@lrs.sampler_metropolis_lmprob)}]\n"
-					sampler += "\t\"integer maxconsecrejects\" [#{@lrs.sampler_metropolis_maxrejects.to_i}]\n"
+					sampler += "\t\"float largemutationprob\" [#{"%.6f" %(@lrs.sampler_metropolis_largemutationprob)}]\n"
+					sampler += "\t\"integer maxconsecrejects\" [#{@lrs.sampler_metropolis_maxconsecrejects.to_i}]\n"
 					usevariance = @lrs.sampler_metropolis_usevariance ? "true" : "false"
 					sampler += "\t\"bool usevariance\" [\"#{usevariance}\"]\n"
 				else
@@ -528,7 +528,7 @@ class LuxrenderExport
 					integrator += "\t\"integer eyedepth\" [#{@lrs.sintegrator_bidir_eyedepth}]\n"
 					integrator += "\t\"integer lightdepth\" [#{@lrs.sintegrator_bidir_lightdepth}]\n"
 					integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_bidir_strategy}\"]\n"
-					integrator += "\t\"float eyerrthreshold\" [#{"%.6f" %(@lrs.sintegrator_bidir_eyethreshold)}]\n"
+					integrator += "\t\"float eyerrthreshold\" [#{"%.6f" %(@lrs.sintegrator_bidir_eyerrthreshold)}]\n"
 					integrator += "\t\"float lightrrthreshold\" [#{"%.6f" %(@lrs.sintegrator_bidir_lightthreshold)}]\n"
 				else
 					integrator += "\t\"integer eyedepth\" [#{@lrs.sintegrator_bidir_bounces.to_i}]\n"
@@ -623,7 +623,7 @@ class LuxrenderExport
 				integrator += "\t\"integer nphotonsused\" [#{@lrs.sintegrator_exphoton_nphotonsused}]\n"
 				integrator += "\t\"integer shadowraycount\" [#{@lrs.sintegrator_exphoton_shadow_ray_count}]\n"
 				integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_exphoton_strategy}\"]\n"
-				integrator += "\t\"string renderingmode\" [\"#{@lrs.sintegrator_exphoton_rendermode}\"]\n"
+				integrator += "\t\"string renderingmode\" [\"#{@lrs.sintegrator_exphoton_renderingmode}\"]\n"
 				if (@lrs.sintegrator_exphoton_show_advanced)
 					dbg = @lrs.sintegrator_exphoton_dbg_enable_direct ? "true" : "false"
 					integrator += "\t\"bool dbg_enabledirect\" [\"#{dbg}\"]\n"
@@ -657,17 +657,17 @@ class LuxrenderExport
 		accel += "Accelerator \"#{@lrs.accelerator_type}\"\n"
 		case @lrs.accelerator_type
 			when "kdtree", "tabreckdtree"
-				accel += "\t\"integer intersectcost\" [#{@lrs.kdtree_intersection_cost.to_i}]\n"
-				accel += "\t\"integer traversalcost\" [#{@lrs.kdtree_traversal_cost.to_i}]\n"
-				accel += "\t\"float emptybonus\" [#{"%.6f" %(@lrs.kdtree_empty_bonus)}]\n"
-				accel += "\t\"integer maxprims\" [#{@lrs.kdtree_max_prims.to_i}]\n"
-				accel += "\t\"integer maxdepth\" [#{@lrs.kdtree_max_depth.to_i}]\n"
+				accel += "\t\"integer intersectcost\" [#{@lrs.kdtree_intersectcost.to_i}]\n"
+				accel += "\t\"integer traversalcost\" [#{@lrs.kdtree_traversalcost.to_i}]\n"
+				accel += "\t\"float emptybonus\" [#{"%.6f" %(@lrs.kdtree_emptybonus)}]\n"
+				accel += "\t\"integer maxprims\" [#{@lrs.kdtree_maxprims.to_i}]\n"
+				accel += "\t\"integer maxdepth\" [#{@lrs.kdtree_maxdepth.to_i}]\n"
 			when "grid"
-				refine = @lrs.grid_refine_immediately ? "true": "false"
+				refine = @lrs.grid_refineimmediately ? "true": "false"
 				accel += "\t\"bool refineimmediately\" [\"#{refine}\"]\n"
 			when "bvh"
 			when "qbvh"
-				accel += "\t\"integer maxprimsperleaf\" [#{@lrs.qbvh_max_prims_per_leaf.to_i}]\n"
+				accel += "\t\"integer maxprimsperleaf\" [#{@lrs.qbvh_maxprimsperleaf.to_i}]\n"
 				accel += "\t\"integer skipfactor\" [#{@lrs.qbvh_skip_factor.to_i}]\n"
 		end
 		return accel
@@ -707,13 +707,16 @@ class LuxrenderExport
 				out.puts "\t\"vector sundir\" [#{"%.6f" %(sun_direction.x)} #{"%.6f" %(sun_direction.y)} #{"%.6f" %(sun_direction.z)}]"
 			when 'infinite'
 				out.puts "\tLightGroup \"#{@lrs.environment_infinite_lightgroup}\""
-				out.puts "\tLightSource \"infinite\""
+				out.puts "\tLightSource \"infinitesample\""
 				out.puts "\t\"float gain\" [#{"%.6f" %(@lrs.environment_infinite_gain)}]"
-				if ( ! @lrs.environment_infinite_map.strip.empty?)
+				if ( ! @lrs.environment_infinite_mapname.strip.empty?)
 					out.puts "\t\"float gamma\" [#{"%.6f" %(@lrs.environment_infinite_gamma)}]"
-					out.puts "\t\"string mapping\" [\"" + @lrs.environment_infinite_map_type + "\"]"
-					out.puts "\t\"string mapname\" [\"" + @lrs.environment_infinite_map + "\"]"
+					out.puts "\t\"string mapping\" [\"" + @lrs.environment_infinite_mapping + "\"]"
+					out.puts "\t\"string mapname\" [\"" + @lrs.environment_infinite_mapname + "\"]"
+				else
+					out.puts "\t\"color L\" [#{"%.6f" %(@lrs.environment_infinite_L_R)} #{"%.6f" %(@lrs.environment_infinite_L_G)} #{"%.6f" %(@lrs.environment_infinite_L_B)}]"
 				end
+					
 				if (@lrs.use_environment_infinite_sun)
 					out.puts "\tLightGroup \"#{@lrs.environment_infinite_sun_lightgroup}\""
 					out.puts "\tLightSource \"sun\""

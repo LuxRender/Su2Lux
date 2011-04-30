@@ -30,7 +30,7 @@ class LuxrenderSettingsEditor
 		pref_key = "LuxrenderSettingsEditor"
 		@settings_dialog = UI::WebDialog.new("Luxrender Render Settings", true, pref_key, 520, 500, 10, 10, true)
 		@settings_dialog.max_width = 520
-		setting_html_path = Sketchup.find_support_file("settings.html" , "Plugins/"+SU2LUX::PLUGIN_FOLDER)
+		setting_html_path = Sketchup.find_support_file("settings_basic.html" , "Plugins/"+SU2LUX::PLUGIN_FOLDER)
 		@settings_dialog.set_file(setting_html_path)
 		
 		@lrs=LuxrenderSettings.new
@@ -54,6 +54,31 @@ class LuxrenderSettingsEditor
 					when "yresolution"
 						@lrs.fleximage_yresolution=value.to_f
 						change_aspect_ratio(@lrs.fleximage_xresolution.to_f / @lrs.fleximage_yresolution.to_f)
+					when "use_plain_color"
+						method_name = "use_plain_color" + "="
+						@lrs.send(method_name, value)
+						case value
+							when "sketchup_color"
+							SU2LUX.dbg_p "use_sketchup_color"
+								color = Sketchup.active_model.rendering_options["BackgroundColor"]
+								red = color.red / 255.0
+								method_name = "environment_infinite_L_R" + "="
+								@lrs.send(method_name, red)
+								method_name = "environment_infinite_L_G" + "="
+								green = color.green / 255.0
+								@lrs.send(method_name, green)
+								method_name = "environment_infinite_L_B" + "="
+								blue = color.blue / 255.0
+								@lrs.send(method_name, blue)
+							when "no_color"
+							SU2LUX.dbg_p "use_no_color"
+								method_name = "environment_infinite_L_R" + "="
+								@lrs.send(method_name, 0.0)
+								method_name = "environment_infinite_L_G" + "="
+								@lrs.send(method_name, 0.0)
+								method_name = "environment_infinite_L_B" + "="
+								@lrs.send(method_name, 0.0)
+						end
 					else
 						if (@lrs.respond_to?(key))
 							method_name = key + "="
@@ -65,7 +90,8 @@ class LuxrenderSettingsEditor
 							end
 							@lrs.send(method_name, value)
 						else
-							UI.messagebox "Parameter " + key + " does not exist.\n\nContact developers."
+							# UI.messagebox "Parameter " + key + " does not exist.\n\nPlease contact developers."
+							SU2LUX.dbg_p "Parameter " + key + " does not exist.\n\nPlease contact developers."
 						end
 				end	
 		} #end action callback param_generatate
@@ -124,384 +150,487 @@ class LuxrenderSettingsEditor
 			case p
 				when '0' #<option value='0'>0 Preview - Global Illumination</option> in settings.html
 					SU2LUX.dbg_p "set preset 0 Preview - Global Illumination"
-					@lrs.film_displayinterval=4
-					@lrs.haltspp=0
-					@lrs.halttime=0
+					@lrs.fleximage_displayinterval = 4
+					@lrs.fleximage_haltspp = 0
+					@lrs.fleximage_halttime = 0
 					
-				#TODO add "def param ... end" for other paramters in class LuxrenderSettings
-					@lrs.useparamkeys=false
-					@lrs.sampler_showadvanced=false
-					@lrs.sintegrator_showadvanced=false
-					@lrs.pixelfilter_showadvanced=false
+					@lrs.useparamkeys = false
+					@lrs.sampler_show_advanced = false
+					@lrs.sintegrator_show_advanced = false
+					@lrs.pixelfilter_show_advanced = false
 					
-					@lrs.sampler_type='lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples=1
-					@lrs.sampler_lowdisc_pixelsampler='lowdiscrepancy'
+					@lrs.sampler_type = 'lowdiscrepancy'
+					@lrs.sampler_lowdisc_pixelsamples = 1
+					@lrs.sampler_lowdisc_pixelsampler = 'lowdiscrepancy'
 					
-					@lrs.sintegrator_type='distributedpath'
-					@lrs.sintegrator_distributedpath_directsampleall=true
-					@lrs.sintegrator_distributedpath_directsamples=1
-					@lrs.sintegrator_distributedpath_directdiffuse=true
-					@lrs.sintegrator_distributedpath_directglossy=true
-					@lrs.sintegrator_distributedpath_indirectsampleall=false
-					@lrs.sintegrator_distributedpath_indirectsamples=1
-					@lrs.sintegrator_distributedpath_indirectdiffuse=true
-					@lrs.sintegrator_distributedpath_indirectglossy=true
-					@lrs.sintegrator_distributedpath_diffusereflectdepth=1
-					@lrs.sintegrator_distributedpath_diffusereflectsamples=4
-					@lrs.sintegrator_distributedpath_diffuserefractdepth=4
-					@lrs.sintegrator_distributedpath_diffuserefractsamples=1
-					@lrs.sintegrator_distributedpath_glossyreflectdepth=1
-					@lrs.sintegrator_distributedpath_glossyreflectsamples=2
-					@lrs.sintegrator_distributedpath_glossyrefractdepth=4
-					@lrs.sintegrator_distributedpath_glossyrefractsamples=1
-					@lrs.sintegrator_distributedpath_specularreflectdepth=2
-					@lrs.sintegrator_distributedpath_specularrefractdepth=4
-					@lrs.sintegrator_distributedpath_causticsonglossy=true
-					@lrs.sintegrator_distributedpath_causticsondiffuse=false
-					@lrs.sintegrator_distributedpath_strategy='auto'
+					@lrs.sintegrator_type = 'distributedpath'
+					@lrs.sintegrator_distributedpath_directsampleall = true
+					@lrs.sintegrator_distributedpath_directsamples = 1
+					@lrs.sintegrator_distributedpath_directdiffuse = true
+					@lrs.sintegrator_distributedpath_directglossy = true
+					@lrs.sintegrator_distributedpath_indirectsampleall = false
+					@lrs.sintegrator_distributedpath_indirectsamples = 1
+					@lrs.sintegrator_distributedpath_indirectdiffuse = true
+					@lrs.sintegrator_distributedpath_indirectglossy = true
+					@lrs.sintegrator_distributedpath_diffusereflectdepth = 1
+					@lrs.sintegrator_distributedpath_diffusereflectsamples = 4
+					@lrs.sintegrator_distributedpath_diffuserefractdepth = 4
+					@lrs.sintegrator_distributedpath_diffuserefractsamples = 1
+					@lrs.sintegrator_distributedpath_glossyreflectdepth = 1
+					@lrs.sintegrator_distributedpath_glossyreflectsamples = 2
+					@lrs.sintegrator_distributedpath_glossyrefractdepth = 4
+					@lrs.sintegrator_distributedpath_glossyrefractsamples = 1
+					@lrs.sintegrator_distributedpath_specularreflectdepth = 2
+					@lrs.sintegrator_distributedpath_specularrefractdepth = 4
+					@lrs.sintegrator_distributedpath_strategy = 'auto'
 					
-					@lrs.pixelfilter_type='mitchell'
-					@lrs.pixelfilter_mitchell_sharp=0.250 
-					@lrs.pixelfilter_mitchell_xwidth=2.0 
-					@lrs.pixelfilter_mitchell_ywidth=2.0 
-					@lrs.pixelfilter_mitchell_optmode='slider'
+					@lrs.pixelfilter_type = 'mitchell'
+					@lrs.pixelfilter_mitchell_sharpness = 0.250 
+					@lrs.pixelfilter_mitchell_xwidth = 2.0 
+					@lrs.pixelfilter_mitchell_ywidth = 2.0 
+					@lrs.pixelfilter_mitchell_optmode = 'slider'
 				when '0b'
 					SU2LUX.dbg_p 'set preset 0b Preview - Direct Lighting'
-					@lrs.film_displayinterval=4
-					@lrs.haltspp=0
-					@lrs.halttime=0
-					@lrs.useparamkeys=false
-					@lrs.sampler_showadvanced=false
-					@lrs.sintegrator_showadvanced=false
-					@lrs.pixelfilter_showadvanced=false
+					@lrs.fleximage_displayinterval = 4
+					@lrs.fleximage_haltspp = 0
+					@lrs.fleximage_halttime = 0
 					
-					@lrs.sampler_type='lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples=1
-					@lrs.sampler_lowdisc_pixelsampler='lowdiscrepancy'
+					@lrs.useparamkeys = false
+					@lrs.sampler_show_advanced = false
+					@lrs.sintegrator_show_advanced = false
+					@lrs.pixelfilter_show_advanced = false
 					
-					@lrs.sintegrator_type='directlighting'
-					@lrs.sintegrator_dlighting_maxdepth=5
+					@lrs.sampler_type = 'lowdiscrepancy'
+					@lrs.sampler_lowdisc_pixelsamples = 1
+					@lrs.sampler_lowdisc_pixelsampler = 'lowdiscrepancy'
+					
+					@lrs.sintegrator_type = 'directlighting'
+					@lrs.sintegrator_direct_maxdepth = 5
 
-					@lrs.pixelfilter_type='mitchell'
-					@lrs.pixelfilter_mitchell_sharp=0.250 
-					@lrs.pixelfilter_mitchell_xwidth=2.0 
-					@lrs.pixelfilter_mitchell_ywidth=2.0 
-					@lrs.pixelfilter_mitchell_optmode='slider'
+					@lrs.pixelfilter_type = 'mitchell'
+					@lrs.pixelfilter_mitchell_sharpness = 0.333333
+					@lrs.pixelfilter_mitchell_xwidth = 1.5 
+					@lrs.pixelfilter_mitchell_ywidth = 1.5 
+					@lrs.pixelfilter_mitchell_supersample = true
+				
+				when '0c'
+					@lrs.fleximage_displayinterval = 10
+					@lrs.fleximage_haltspp = 1
+					@lrs.fleximage_halttime = 0
+					
+					@lrs.useparamkeys = false
+					@lrs.sampler_show_advanced = false
+					@lrs.sintegrator_show_advanced = false
+					@lrs.pixelfilter_show_advanced = false
+					
+					@lrs.sampler_type = 'lowdiscrepancy'
+					@lrs.sampler_lowdisc_pixelsamples = 4
+					@lrs.sampler_lowdisc_pixelsampler = 'hilbert'
+					
+					@lrs.sintegrator_type = 'exphotonmap'
+					@lrs.sintegrator_exphoton_finalgather = false
+					@lrs.sintegrator_exphoton_finalgathersamples = 32
+					@lrs.sintegrator_exphoton_gatherangle = 10.0
+					@lrs.sintegrator_exphoton_maxdepth = 5
+					@lrs.sintegrator_exphoton_maxphotondepth = 10
+					@lrs.sintegrator_exphoton_maxphotondist = 0.5
+					@lrs.sintegrator_exphoton_nphotonsused = 50
+					@lrs.sintegrator_exphoton_causticphotons = 20000
+					@lrs.sintegrator_exphoton_directphotons = 20000
+					@lrs.sintegrator_exphoton_indirectphotons = 0
+					@lrs.sintegrator_exphoton_renderingmode = 'directlighting'
+					@lrs.sintegrator_exphoton_rrcontinueprob = 0.65
+					@lrs.sintegrator_exphoton_rrstrategy = 'efficiency'
+					@lrs.sintegrator_exphoton_photonmapsfile = ''
+					@lrs.sintegrator_exphoton_radiancephotons = 20000
+					@lrs.sintegrator_exphoton_shadow_ray_count = 1
+					@lrs.sintegrator_exphoton_strategy = 'auto'
+
+					@lrs.pixelfilter_type = 'gaussian'
 				when '1'
 					SU2LUX.dbg_p 'set preset 1 Final - MLT/Bidir Path Tracing (interior) (recommended)'
-					@lrs.film_displayinterval=8
-					@lrs.haltspp=0
-					@lrs.halttime=0
-					@lrs.useparamkeys=false
-					@lrs.sampler_showadvanced=false
-					@lrs.sintegrator_showadvanced=false
-					@lrs.pixelfilter_showadvanced=false
+					@lrs.fleximage_displayinterval = 8
+					@lrs.fleximage_haltspp = 0
+					@lrs.fleximage_halttime = 0
 					
-					@lrs.sampler_type='metropolis'
-					@lrs.sampler_metro_strength=0.6
-					@lrs.sampler_metro_lmprob=0.4
-					@lrs.sampler_metro_maxrejects=512
-					@lrs.sampler_metro_usevariance=false
+					@lrs.useparamkeys = false
+					@lrs.sampler_show_advanced = false
+					@lrs.sintegrator_show_advanced = false
+					@lrs.pixelfilter_show_advanced = false
 					
-					@lrs.sintegrator_type='bidirectional'
-					@lrs.sintegrator_bidir_bounces=16
-					@lrs.sintegrator_bidir_eyedepth=16
-					@lrs.singtegrator_bidir_lightdepth=16
+					@lrs.sampler_type = 'metropolis'
+					@lrs.sampler_metropolis_strength = 0.6
+					@lrs.sampler_metropolis_largemutationprob = 0.4
+					@lrs.sampler_metropolis_maxconsecrejects = 512
+					@lrs.sampler_metropolis_usevariance = false
+					
+					@lrs.sintegrator_type = 'bidirectional'
+					@lrs.sintegrator_bidir_bounces = 16
+					@lrs.sintegrator_bidir_eyedepth = 16
+					@lrs.sintegrator_bidir_lightdepth = 16
 
-					@lrs.pixelfilter_type='mitchell'
-					@lrs.pixelfilter_mitchell_sharp=0.250 
-					@lrs.pixelfilter_mitchell_xwidth=2.0 
-					@lrs.pixelfilter_mitchell_ywidth=2.0 
-					@lrs.pixelfilter_mitchell_optmode='slider'
+					@lrs.pixelfilter_type = 'mitchell'
+					@lrs.pixelfilter_mitchell_sharpness = 0.333333
+					@lrs.pixelfilter_mitchell_xwidth = 1.5 
+					@lrs.pixelfilter_mitchell_ywidth = 1.5 
+					@lrs.pixelfilter_mitchell_supersample = true
 				when '2'
 					SU2LUX.dbg_p 'set preset 2 Final - MLT/Path Tracing (exterior)'
-					@lrs.film_displayinterval=8
-					@lrs.haltspp=0
-					@lrs.halttime=0
-					@lrs.useparamkeys=false
-					@lrs.sampler_showadvanced=false
-					@lrs.sintegrator_showadvanced=false
-					@lrs.pixelfilter_showadvanced=false
+					@lrs.fleximage_displayinterval = 8
+					@lrs.fleximage_haltspp = 0
+					@lrs.fleximage_halttime = 0
 					
-					@lrs.sampler_type='metropolis'
-					@lrs.sampler_metro_strength=0.6
-					@lrs.sampler_metro_lmprob=0.4
-					@lrs.sampler_metro_maxrejects=512
-					@lrs.sampler_metro_usevariance=false
+					@lrs.useparamkeys = false
+					@lrs.sampler_show_advanced = false
+					@lrs.sintegrator_show_advanced = false
+					@lrs.pixelfilter_show_advanced = false
 					
-					@lrs.sintegrator_type='path'
-					@lrs.sintegrator_bidir_bounces=10
-					@lrs.sintegrator_bidir_maxdepth=10
+					@lrs.sampler_type = 'metropolis'
+					@lrs.sampler_metropolis_strength = 0.6
+					@lrs.sampler_metropolis_largemutationprob = 0.4
+					@lrs.sampler_metropolis_maxconsecrejects = 512
+					@lrs.sampler_metropolis_usevariance  = false
+					
+					@lrs.sintegrator_type = 'path'
+					@lrs.sintegrator_path_bounces = 10
+					@lrs.sintegrator_path_maxdepth = 10
 
-					@lrs.pixelfilter_type='mitchell'
-					@lrs.pixelfilter_mitchell_sharp=0.250 
-					@lrs.pixelfilter_mitchell_xwidth=2.0 
-					@lrs.pixelfilter_mitchell_ywidth=2.0 
-					@lrs.pixelfilter_mitchell_optmode='slider'
+					@lrs.pixelfilter_type = 'mitchell'
+					@lrs.pixelfilter_mitchell_sharpness = 0.333333
+					@lrs.pixelfilter_mitchell_xwidth = 1.5 
+					@lrs.pixelfilter_mitchell_ywidth = 1.5 
+					@lrs.pixelfilter_mitchell_supersample = true
 				when '5'
 					SU2LUX.dbg_p 'set preset 5 Progressive - Bidir Path Tracing (interior)'
-					@lrs.film_displayinterval=8
-					@lrs.haltspp=0
-					@lrs.halttime=0
-					@lrs.useparamkeys=false
-					@lrs.sampler_showadvanced=false
-					@lrs.sintegrator_showadvanced=false
-					@lrs.pixelfilter_showadvanced=false
+					@lrs.fleximage_displayinterval = 8
+					@lrs.fleximage_haltspp = 0
+					@lrs.fleximage_halttime = 0
 					
-					@lrs.sampler_type='lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples=1
-					@lrs.sampler_lowdisc_pixelsampler='lowdiscrepancy'
+					@lrs.useparamkeys = false
+					@lrs.sampler_show_advanced = false
+					@lrs.sintegrator_show_advanced = false
+					@lrs.pixelfilter_show_advanced = false
 					
-					@lrs.sintegrator_type='bidirectional'
-					@lrs.sintegrator_bidir_bounces=16
-					@lrs.sintegrator_bidir_eyedepth=16
-					@lrs.singtegrator_bidir_lightdepth=16
+					@lrs.sampler_type = 'lowdiscrepancy'
+					@lrs.sampler_lowdisc_pixelsamples = 1
+					@lrs.sampler_lowdisc_pixelsampler = 'lowdiscrepancy'
+					
+					@lrs.sintegrator_type = 'bidirectional'
+					@lrs.sintegrator_bidir_bounces = 16
+					@lrs.sintegrator_bidir_eyedepth = 16
+					@lrs.sintegrator_bidir_lightdepth = 16
 
-					@lrs.pixelfilter_type='mitchell'
-					@lrs.pixelfilter_mitchell_sharp=0.250 
-					@lrs.pixelfilter_mitchell_xwidth=2.0 
-					@lrs.pixelfilter_mitchell_ywidth=2.0 
-					@lrs.pixelfilter_mitchell_optmode='slider'
+					@lrs.pixelfilter_type = 'mitchell'
+					@lrs.pixelfilter_mitchell_sharpness = 0.333333
+					@lrs.pixelfilter_mitchell_xwidth = 1.5 
+					@lrs.pixelfilter_mitchell_ywidth = 1.5 
+					@lrs.pixelfilter_mitchell_supersample = true
 				when '6'
 					SU2LUX.dbg_p 'set preset 6 Progressive - Path Tracing (exterior)'
-					@lrs.film_displayinterval=8
-					@lrs.haltspp=0
-					@lrs.halttime=0
-					@lrs.useparamkeys=false
-					@lrs.sampler_showadvanced=false
-					@lrs.sintegrator_showadvanced=false
-					@lrs.pixelfilter_showadvanced=false
+					@lrs.fleximage_displayinterval = 8
+					@lrs.fleximage_haltspp = 0
+					@lrs.fleximage_halttime = 0
 					
-					@lrs.sampler_type='lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples=1
-					@lrs.sampler_lowdisc_pixelsampler='lowdiscrepancy'
+					@lrs.useparamkeys = false
+					@lrs.sampler_show_advanced = false
+					@lrs.sintegrator_show_advanced = false
+					@lrs.pixelfilter_show_advanced = false
 					
-					@lrs.sintegrator_type='path'
-					@lrs.sintegrator_bidir_bounces=10
-					@lrs.sintegrator_bidir_maxdepth=10
+					@lrs.sampler_type = 'lowdiscrepancy'
+					@lrs.sampler_lowdisc_pixelsamples = 1
+					@lrs.sampler_lowdisc_pixelsampler = 'lowdiscrepancy'
 					
-					@lrs.pixelfilter_type='mitchell'
-					@lrs.pixelfilter_mitchell_sharp=0.250 
-					@lrs.pixelfilter_mitchell_xwidth=2.0 
-					@lrs.pixelfilter_mitchell_ywidth=2.0 
-					@lrs.pixelfilter_mitchell_optmode='slider'
+					@lrs.sintegrator_type = 'path'
+					@lrs.sintegrator_path_bounces = 10
+					@lrs.sintegrator_path_maxdepth = 10
+					
+					@lrs.pixelfilter_type = 'mitchell'
+					@lrs.pixelfilter_mitchell_sharpness = 0.333333
+					@lrs.pixelfilter_mitchell_xwidth = 1.5 
+					@lrs.pixelfilter_mitchell_ywidth = 1.5 
+					@lrs.pixelfilter_mitchell_supersample = true
 				when '8'
 					SU2LUX.dbg_p 'set preset 8 Bucket - Bidir Path Tracing (interior)'
-					@lrs.film_displayinterval=8
-					@lrs.haltspp=0
-					@lrs.halttime=0
-					@lrs.useparamkeys=false
-					@lrs.sampler_showadvanced=false
-					@lrs.sintegrator_showadvanced=false
-					@lrs.pixelfilter_showadvanced=false
+					@lrs.fleximage_displayinterval = 8
+					@lrs.fleximage_haltspp = 0
+					@lrs.fleximage_halttime = 0
 					
-					@lrs.sampler_type='lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples=64
-					@lrs.sampler_lowdisc_pixelsampler='hilbert'
+					@lrs.useparamkeys = false
+					@lrs.sampler_show_advanced = false
+					@lrs.sintegrator_show_advanced = false
+					@lrs.pixelfilter_show_advanced = false
 					
-					@lrs.sintegrator_type='bidirectional'
-					@lrs.sintegrator_bidir_bounces=8
-					@lrs.sintegrator_bidir_eyedepth=8
-					@lrs.singtegrator_bidir_lightdepth=10
+					@lrs.sampler_type = 'lowdiscrepancy'
+					@lrs.sampler_lowdisc_pixelsamples = 64
+					@lrs.sampler_lowdisc_pixelsampler = 'hilbert'
 					
-					@lrs.pixelfilter_type='mitchell'
-					@lrs.pixelfilter_mitchell_sharp=0.250 
-					@lrs.pixelfilter_mitchell_xwidth=2.0 
-					@lrs.pixelfilter_mitchell_ywidth=2.0 
-					@lrs.pixelfilter_mitchell_optmode='slider'
+					@lrs.sintegrator_type = 'bidirectional'
+					@lrs.sintegrator_bidir_bounces = 8
+					@lrs.sintegrator_bidir_eyedepth = 8
+					@lrs.sintegrator_bidir_lightdepth = 10
+					
+					@lrs.pixelfilter_type = 'mitchell'
+					@lrs.pixelfilter_mitchell_sharpness = 0.333333
+					@lrs.pixelfilter_mitchell_xwidth = 1.5 
+					@lrs.pixelfilter_mitchell_ywidth = 1.5 
+					@lrs.pixelfilter_mitchell_supersample = true
 				when '9'
 					SU2LUX.dbg_p 'set preset 9 Bucket - Path Tracing (exterior)'
-					@lrs.film_displayinterval=8
-					@lrs.haltspp=0
-					@lrs.halttime=0
-					@lrs.useparamkeys=false
-					@lrs.sampler_showadvanced=false
-					@lrs.sintegrator_showadvanced=false
-					@lrs.pixelfilter_showadvanced=false
+					@lrs.fleximage_displayinterval = 8
+					@lrs.fleximage_haltspp = 0
+					@lrs.fleximage_halttime = 0
 					
-					@lrs.sampler_type='lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples=64
-					@lrs.sampler_lowdisc_pixelsampler='hilbert'
+					@lrs.useparamkeys = false
+					@lrs.sampler_show_advanced = false
+					@lrs.sintegrator_show_advanced = false
+					@lrs.pixelfilter_show_advanced = false
 					
-					@lrs.sintegrator_type='path'
-					@lrs.sintegrator_bidir_bounces=8
-					@lrs.sintegrator_bidir_maxdepth=8
+					@lrs.sampler_type = 'lowdiscrepancy'
+					@lrs.sampler_lowdisc_pixelsamples = 64
+					@lrs.sampler_lowdisc_pixelsampler = 'hilbert'
 					
-					@lrs.pixelfilter_type='mitchell'
-					@lrs.pixelfilter_mitchell_sharp=0.333 
-					@lrs.pixelfilter_mitchell_xwidth=2.0 
-					@lrs.pixelfilter_mitchell_ywidth=2.0 
-					@lrs.pixelfilter_mitchell_optmode='slider'
+					@lrs.sintegrator_type = 'path'
+					@lrs.sintegrator_path_bounces = 8
+					@lrs.sintegrator_path_maxdepth = 8
+					
+					@lrs.pixelfilter_type = 'mitchell'
+					@lrs.pixelfilter_mitchell_sharpness = 0.333333
+					@lrs.pixelfilter_mitchell_xwidth = 1.5 
+					@lrs.pixelfilter_mitchell_ywidth = 1.5 
+					@lrs.pixelfilter_mitchell_supersample = true
 				when 'B'
 					SU2LUX.dbg_p 'set preset B Anim - Distributed/GI low Q'
-					@lrs.film_displayinterval=8
-					@lrs.haltspp=1
-					@lrs.halttime=0
-					@lrs.useparamkeys=false
-					@lrs.sampler_showadvanced=false
-					@lrs.sintegrator_showadvanced=false
-					@lrs.pixelfilter_showadvanced=false
+					@lrs.fleximage_displayinterval = 8
+					@lrs.fleximage_haltspp = 1
+					@lrs.fleximage_halttime = 0
 					
-					@lrs.sampler_type='lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples=16
-					@lrs.sampler_lowdisc_pixelsampler='hilbert'
+					@lrs.useparamkeys = false
+					@lrs.sampler_show_advanced = false
+					@lrs.sintegrator_show_advanced = false
+					@lrs.pixelfilter_show_advanced = false
 					
-					@lrs.sintegrator_type='distributedpath'
-					@lrs.sintegrator_distributedpath_causticsonglossy=true
-					@lrs.sintegrator_distributedpath_directsampleall=true
-					@lrs.sintegrator_distributedpath_directsamples=1
-					@lrs.sintegrator_distributedpath_directdiffuse=true
-					@lrs.sintegrator_distributedpath_directglossy=true
-					@lrs.sintegrator_distributedpath_indirectsampleall=false
-					@lrs.sintegrator_distributedpath_indirectsamples=1
-					@lrs.sintegrator_distributedpath_indirectdiffuse=true
-					@lrs.sintegrator_distributedpath_indirectglossy=true
-					@lrs.sintegrator_distributedpath_diffusereflectdepth=2
-					@lrs.sintegrator_distributedpath_diffusereflectsamples=1
-					@lrs.sintegrator_distributedpath_diffuserefractdepth=5
-					@lrs.sintegrator_distributedpath_diffuserefractsamples=1
-					@lrs.sintegrator_distributedpath_glossyreflectdepth=2
-					@lrs.sintegrator_distributedpath_glossyreflectsamples=1
-					@lrs.sintegrator_distributedpath_glossyrefractdepth=5
-					@lrs.sintegrator_distributedpath_glossyrefractsamples=1
-					@lrs.sintegrator_distributedpath_specularreflectdepth=2
-					@lrs.sintegrator_distributedpath_specularrefractdepth=5
-					@lrs.sintegrator_distributedpath_causticsondiffuse=false
-					@lrs.sintegrator_distributedpath_strategy='auto'
+					@lrs.sampler_type = 'lowdiscrepancy'
+					@lrs.sampler_lowdisc_pixelsamples = 16
+					@lrs.sampler_lowdisc_pixelsampler = 'hilbert'
 					
-					@lrs.pixelfilter_type='mitchell'
-					@lrs.pixelfilter_mitchell_sharp=0.333 
-					@lrs.pixelfilter_mitchell_xwidth=2.0 
-					@lrs.pixelfilter_mitchell_ywidth=2.0 
-					@lrs.pixelfilter_mitchell_optmode='slider'
+					@lrs.sintegrator_type = 'distributedpath'
+					@lrs.sintegrator_distributedpath_directsampleall = true
+					@lrs.sintegrator_distributedpath_directsamples = 1
+					@lrs.sintegrator_distributedpath_directdiffuse = true
+					@lrs.sintegrator_distributedpath_directglossy = true
+					@lrs.sintegrator_distributedpath_indirectsampleall = false
+					@lrs.sintegrator_distributedpath_indirectsamples = 1
+					@lrs.sintegrator_distributedpath_indirectdiffuse = true
+					@lrs.sintegrator_distributedpath_indirectglossy = true
+					@lrs.sintegrator_distributedpath_diffusereflectdepth = 2
+					@lrs.sintegrator_distributedpath_diffusereflectsamples = 1
+					@lrs.sintegrator_distributedpath_diffuserefractdepth = 5
+					@lrs.sintegrator_distributedpath_diffuserefractsamples = 1
+					@lrs.sintegrator_distributedpath_glossyreflectdepth = 2
+					@lrs.sintegrator_distributedpath_glossyreflectsamples = 1
+					@lrs.sintegrator_distributedpath_glossyrefractdepth = 5
+					@lrs.sintegrator_distributedpath_glossyrefractsamples = 1
+					@lrs.sintegrator_distributedpath_specularreflectdepth = 2
+					@lrs.sintegrator_distributedpath_specularrefractdepth = 5
+					
+					@lrs.pixelfilter_type = 'mitchell'
+					@lrs.pixelfilter_mitchell_sharpness = 0.333333
+					@lrs.pixelfilter_mitchell_xwidth = 1.5 
+					@lrs.pixelfilter_mitchell_ywidth = 1.5 
+					@lrs.pixelfilter_mitchell_supersample = true
 				when 'C'
 					SU2LUX.dbg_p 'set preset C Anim - Distributed/GI medium Q'
-					@lrs.film_displayinterval=8
-					@lrs.haltspp=1
-					@lrs.halttime=0
-					@lrs.useparamkeys=false
-					@lrs.sampler_showadvanced=false
-					@lrs.sintegrator_showadvanced=false
-					@lrs.pixelfilter_showadvanced=false
+					@lrs.fleximage_displayinterval = 8
+					@lrs.fleximage_haltspp = 1
+					@lrs.fleximage_halttime = 0
 					
-					@lrs.sampler_type='lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples=64
-					@lrs.sampler_lowdisc_pixelsampler='hilbert'
+					@lrs.useparamkeys = false
+					@lrs.sampler_show_advanced = false
+					@lrs.sintegrator_show_advanced = false
+					@lrs.pixelfilter_show_advanced = false
 					
-					@lrs.sintegrator_type='distributedpath'
-					@lrs.sintegrator_distributedpath_causticsonglossy=true
-					@lrs.sintegrator_distributedpath_diffuserefractdepth=5
-					@lrs.sintegrator_distributedpath_indirectglossy=true
-					@lrs.sintegrator_distributedpath_directsamples=1
-					@lrs.sintegrator_distributedpath_diffuserefractsamples=1
-					@lrs.sintegrator_distributedpath_glossyreflectdepth=2
-					@lrs.sintegrator_distributedpath_causticsondiffuse=false
-					@lrs.sintegrator_distributedpath_directsampleall=true
-					@lrs.sintegrator_distributedpath_indirectdiffuse=true
-					@lrs.sintegrator_distributedpath_specularreflectdepth=3
-					@lrs.sintegrator_distributedpath_diffusereflectsamples=1
-					@lrs.sintegrator_distributedpath_glossyreflectsamples=1
-					@lrs.sintegrator_distributedpath_glossyrefractdepth=5
-					@lrs.sintegrator_distributedpath_diffusereflectdepth=2
-					@lrs.sintegrator_distributedpath_indirectsamples=1
-					@lrs.sintegrator_distributedpath_indirectsampleall=false
-					@lrs.sintegrator_distributedpath_glossyrefractsamples=1
-					@lrs.sintegrator_distributedpath_directdiffuse=true
-					@lrs.sintegrator_distributedpath_directglossy=true
-					@lrs.sintegrator_distributedpath_strategy='auto'
-					@lrs.sintegrator_distributedpath_specularrefractdepth=5
+					@lrs.sampler_type = 'lowdiscrepancy'
+					@lrs.sampler_lowdisc_pixelsamples = 64
+					@lrs.sampler_lowdisc_pixelsampler = 'hilbert'
 					
-					@lrs.pixelfilter_type='mitchell'
-					@lrs.pixelfilter_mitchell_sharp=0.333 
-					@lrs.pixelfilter_mitchell_xwidth=2.0 
-					@lrs.pixelfilter_mitchell_ywidth=2.0 
-					@lrs.pixelfilter_mitchell_optmode='slider'
+					@lrs.sintegrator_type = 'distributedpath'
+					@lrs.sintegrator_distributedpath_diffuserefractdepth = 5
+					@lrs.sintegrator_distributedpath_indirectglossy = true
+					@lrs.sintegrator_distributedpath_directsamples = 1
+					@lrs.sintegrator_distributedpath_diffuserefractsamples = 1
+					@lrs.sintegrator_distributedpath_glossyreflectdepth = 2
+					@lrs.sintegrator_distributedpath_directsampleall = true
+					@lrs.sintegrator_distributedpath_indirectdiffuse = true
+					@lrs.sintegrator_distributedpath_specularreflectdepth = 3
+					@lrs.sintegrator_distributedpath_diffusereflectsamples = 1
+					@lrs.sintegrator_distributedpath_glossyreflectsamples = 1
+					@lrs.sintegrator_distributedpath_glossyrefractdepth = 5
+					@lrs.sintegrator_distributedpath_diffusereflectdepth = 2
+					@lrs.sintegrator_distributedpath_indirectsamples = 1
+					@lrs.sintegrator_distributedpath_indirectsampleall = false
+					@lrs.sintegrator_distributedpath_glossyrefractsamples = 1
+					@lrs.sintegrator_distributedpath_directdiffuse = true
+					@lrs.sintegrator_distributedpath_directglossy = true
+					@lrs.sintegrator_distributedpath_strategy = 'auto'
+					@lrs.sintegrator_distributedpath_specularrefractdepth = 5
+					
+					@lrs.pixelfilter_type = 'mitchell'
+					@lrs.pixelfilter_mitchell_sharpness = 0.333333
+					@lrs.pixelfilter_mitchell_xwidth = 1.5 
+					@lrs.pixelfilter_mitchell_ywidth = 1.5 
+					@lrs.pixelfilter_mitchell_supersample = true
 				when 'D'
 					SU2LUX.dbg_p 'set preset D Anim - Distributed/GI high Q'
-					@lrs.film_displayinterval=8
-					@lrs.haltspp=1
-					@lrs.halttime=0
-					@lrs.useparamkeys=false
-					@lrs.sampler_showadvanced=false
-					@lrs.sintegrator_showadvanced=false
-					@lrs.pixelfilter_showadvanced=false
+					@lrs.fleximage_displayinterval = 8
+					@lrs.fleximage_haltspp = 1
+					@lrs.fleximage_halttime = 0
 					
-					@lrs.sampler_type='lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples=256
-					@lrs.sampler_lowdisc_pixelsampler='hilbert'
+					@lrs.useparamkeys = false
+					@lrs.sampler_show_advanced = false
+					@lrs.sintegrator_show_advanced = false
+					@lrs.pixelfilter_show_advanced = false
 					
-					@lrs.sintegrator_type='distributedpath'
-					@lrs.sintegrator_distributedpath_causticsonglossy=true
-					@lrs.sintegrator_distributedpath_diffuserefractdepth=5
-					@lrs.sintegrator_distributedpath_indirectglossy=true
-					@lrs.sintegrator_distributedpath_directsamples=1
-					@lrs.sintegrator_distributedpath_diffuserefractsamples=1
-					@lrs.sintegrator_distributedpath_glossyreflectdepth=2
-					@lrs.sintegrator_distributedpath_causticsondiffuse=false
-					@lrs.sintegrator_distributedpath_directsampleall=true
-					@lrs.sintegrator_distributedpath_indirectdiffuse=true
-					@lrs.sintegrator_distributedpath_specularreflectdepth=3
-					@lrs.sintegrator_distributedpath_diffusereflectsamples=1
-					@lrs.sintegrator_distributedpath_glossyreflectsamples=1
-					@lrs.sintegrator_distributedpath_glossyrefractdepth=5
-					@lrs.sintegrator_distributedpath_diffusereflectdepth=2
-					@lrs.sintegrator_distributedpath_indirectsamples=1
-					@lrs.sintegrator_distributedpath_indirectsampleall=false
-					@lrs.sintegrator_distributedpath_glossyrefractsamples=1
-					@lrs.sintegrator_distributedpath_directdiffuse=true
-					@lrs.sintegrator_distributedpath_directglossy=true
-					@lrs.sintegrator_distributedpath_strategy='auto'
-					@lrs.sintegrator_distributedpath_specularrefractdepth=5
+					@lrs.sampler_type = 'lowdiscrepancy'
+					@lrs.sampler_lowdisc_pixelsamples = 256
+					@lrs.sampler_lowdisc_pixelsampler = 'hilbert'
 					
-					@lrs.pixelfilter_type='mitchell'
-					@lrs.pixelfilter_mitchell_sharp=0.333 
-					@lrs.pixelfilter_mitchell_xwidth=2.0 
-					@lrs.pixelfilter_mitchell_ywidth=2.0 
-					@lrs.pixelfilter_mitchell_optmode='slider'
+					@lrs.sintegrator_type = 'distributedpath'
+					@lrs.sintegrator_distributedpath_diffuserefractdepth = 5
+					@lrs.sintegrator_distributedpath_indirectglossy = true
+					@lrs.sintegrator_distributedpath_directsamples = 1
+					@lrs.sintegrator_distributedpath_diffuserefractsamples = 1
+					@lrs.sintegrator_distributedpath_glossyreflectdepth = 2
+					@lrs.sintegrator_distributedpath_directsampleall = true
+					@lrs.sintegrator_distributedpath_indirectdiffuse = true
+					@lrs.sintegrator_distributedpath_specularreflectdepth = 3
+					@lrs.sintegrator_distributedpath_diffusereflectsamples = 1
+					@lrs.sintegrator_distributedpath_glossyreflectsamples = 1
+					@lrs.sintegrator_distributedpath_glossyrefractdepth = 5
+					@lrs.sintegrator_distributedpath_diffusereflectdepth = 2
+					@lrs.sintegrator_distributedpath_indirectsamples = 1
+					@lrs.sintegrator_distributedpath_indirectsampleall = false
+					@lrs.sintegrator_distributedpath_glossyrefractsamples = 1
+					@lrs.sintegrator_distributedpath_directdiffuse = true
+					@lrs.sintegrator_distributedpath_directglossy = true
+					@lrs.sintegrator_distributedpath_strategy = 'auto'
+					@lrs.sintegrator_distributedpath_specularrefractdepth = 5
+					
+					@lrs.pixelfilter_type = 'mitchell'
+					@lrs.pixelfilter_mitchell_sharpness = 0.333333
+					@lrs.pixelfilter_mitchell_xwidth = 1.5 
+					@lrs.pixelfilter_mitchell_ywidth = 1.5 
+					@lrs.pixelfilter_mitchell_supersample = true
 				when 'E'
 					SU2LUX.dbg_p 'set preset E Anim - Distributed/GI very high Q'
-					@lrs.film_displayinterval=8
-					@lrs.haltspp=1
-					@lrs.halttime=0
-					@lrs.useparamkeys=false
-					@lrs.sampler_showadvanced=false
-					@lrs.sintegrator_showadvanced=false
-					@lrs.pixelfilter_showadvanced=false
+					@lrs.fleximage_displayinterval = 8
+					@lrs.fleximage_haltspp = 1
+					@lrs.fleximage_halttime = 0
 					
-					@lrs.sampler_type='lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples=512
-					@lrs.sampler_lowdisc_pixelsampler='hilbert'
+					@lrs.useparamkeys = false
+					@lrs.sampler_show_advanced = false
+					@lrs.sintegrator_show_advanced = false
+					@lrs.pixelfilter_show_advanced = false
 					
-					@lrs.sintegrator_type='distributedpath'
-					@lrs.sintegrator_distributedpath_causticsonglossy=true
-					@lrs.sintegrator_distributedpath_diffuserefractdepth=5
-					@lrs.sintegrator_distributedpath_indirectglossy=true
-					@lrs.sintegrator_distributedpath_directsamples=1
-					@lrs.sintegrator_distributedpath_diffuserefractsamples=1
-					@lrs.sintegrator_distributedpath_glossyreflectdepth=2
-					@lrs.sintegrator_distributedpath_causticsondiffuse=false
-					@lrs.sintegrator_distributedpath_directsampleall=true
-					@lrs.sintegrator_distributedpath_indirectdiffuse=true
-					@lrs.sintegrator_distributedpath_specularreflectdepth=3
-					@lrs.sintegrator_distributedpath_diffusereflectsamples=1
-					@lrs.sintegrator_distributedpath_glossyreflectsamples=1
-					@lrs.sintegrator_distributedpath_glossyrefractdepth=5
-					@lrs.sintegrator_distributedpath_diffusereflectdepth=2
-					@lrs.sintegrator_distributedpath_indirectsamples=1
-					@lrs.sintegrator_distributedpath_indirectsampleall=false
-					@lrs.sintegrator_distributedpath_glossyrefractsamples=1
-					@lrs.sintegrator_distributedpath_directdiffuse=true
-					@lrs.sintegrator_distributedpath_directglossy=true
-					@lrs.sintegrator_distributedpath_strategy='auto'
-					@lrs.sintegrator_distributedpath_specularrefractdepth=5
+					@lrs.sampler_type = 'lowdiscrepancy'
+					@lrs.sampler_lowdisc_pixelsamples = 512
+					@lrs.sampler_lowdisc_pixelsampler = 'hilbert'
 					
-					@lrs.pixelfilter_type='mitchell'
-					@lrs.pixelfilter_mitchell_sharp=0.333 
-					@lrs.pixelfilter_mitchell_xwidth=2.0 
-					@lrs.pixelfilter_mitchell_ywidth=2.0 
-					@lrs.pixelfilter_mitchell_optmode='slider'
-			end #end case
+					@lrs.sintegrator_type = 'distributedpath'
+					@lrs.sintegrator_distributedpath_diffuserefractdepth = 5
+					@lrs.sintegrator_distributedpath_indirectglossy = true
+					@lrs.sintegrator_distributedpath_directsamples = 1
+					@lrs.sintegrator_distributedpath_diffuserefractsamples = 1
+					@lrs.sintegrator_distributedpath_glossyreflectdepth = 2
+					@lrs.sintegrator_distributedpath_directsampleall = true
+					@lrs.sintegrator_distributedpath_indirectdiffuse = true
+					@lrs.sintegrator_distributedpath_specularreflectdepth = 3
+					@lrs.sintegrator_distributedpath_diffusereflectsamples = 1
+					@lrs.sintegrator_distributedpath_glossyreflectsamples = 1
+					@lrs.sintegrator_distributedpath_glossyrefractdepth = 5
+					@lrs.sintegrator_distributedpath_diffusereflectdepth = 2
+					@lrs.sintegrator_distributedpath_indirectsamples = 1
+					@lrs.sintegrator_distributedpath_indirectsampleall = false
+					@lrs.sintegrator_distributedpath_glossyrefractsamples = 1
+					@lrs.sintegrator_distributedpath_directdiffuse = true
+					@lrs.sintegrator_distributedpath_directglossy = true
+					@lrs.sintegrator_distributedpath_strategy = 'auto'
+					@lrs.sintegrator_distributedpath_specularrefractdepth = 5
+					
+					@lrs.pixelfilter_type = 'mitchell'
+					@lrs.pixelfilter_mitchell_sharpness = 0.333333
+					@lrs.pixelfilter_mitchell_xwidth = 1.5 
+					@lrs.pixelfilter_mitchell_ywidth = 1.5 
+					@lrs.pixelfilter_mitchell_supersample = true
+
+				when 'F'
+					@lrs.fleximage_displayinterval = 15
+					@lrs.fleximage_haltspp = 0
+					@lrs.fleximage_halttime = 0
+					
+					@lrs.useparamkeys = false
+					@lrs.sampler_show_advanced = false
+					@lrs.sintegrator_show_advanced = false
+					@lrs.pixelfilter_show_advanced = false
+					
+					@lrs.sampler_type = 'lowdiscrepancy'
+					@lrs.sampler_lowdisc_pixelsamples = 16
+					@lrs.sampler_lowdisc_pixelsampler = 'hilbert'
+					
+					@lrs.sintegrator_type = 'exphotonmap'
+					@lrs.sintegrator_exphoton_finalgather = true
+					@lrs.sintegrator_exphoton_finalgathersamples = 32
+					@lrs.sintegrator_exphoton_gatherangle = 10.0
+					@lrs.sintegrator_exphoton_maxdepth = 5
+					@lrs.sintegrator_exphoton_maxphotondepth = 10
+					@lrs.sintegrator_exphoton_maxphotondist = 0.1
+					@lrs.sintegrator_exphoton_nphotonsused = 50
+					@lrs.sintegrator_exphoton_causticphotons = 20000
+					@lrs.sintegrator_exphoton_directphotons = 200000
+					@lrs.sintegrator_exphoton_indirectphotons = 200000
+					@lrs.sintegrator_exphoton_radiancephotons = 200000
+					@lrs.sintegrator_exphoton_renderingmode = 'directlighting'
+					@lrs.sintegrator_exphoton_rrcontinueprob = 0.65
+					@lrs.sintegrator_exphoton_rrstrategy = 'efficiency'
+					@lrs.sintegrator_exphoton_photonmapsfile = ''
+					@lrs.sintegrator_exphoton_shadow_ray_count = 1
+					@lrs.sintegrator_exphoton_strategy = 'auto'
+					
+					@lrs.pixelfilter_type = 'gaussian'
+				when 'G'
+					@lrs.fleximage_displayinterval = 15
+					@lrs.fleximage_haltspp = 1
+					@lrs.fleximage_halttime = 0
+					
+					@lrs.useparamkeys = false
+					@lrs.sampler_show_advanced = false
+					@lrs.sintegrator_show_advanced = false
+					@lrs.pixelfilter_show_advanced = false
+					
+					@lrs.sampler_type = 'lowdiscrepancy'
+					@lrs.sampler_lowdisc_pixelsamples = 256
+					@lrs.sampler_lowdisc_pixelsampler = 'hilbert'
+					
+					@lrs.sintegrator_type = 'exphotonmap'
+					@lrs.sintegrator_exphoton_finalgather = true
+					@lrs.sintegrator_exphoton_finalgathersamples = 32
+					@lrs.sintegrator_exphoton_gatherangle = 10.0
+					@lrs.sintegrator_exphoton_maxdepth = 5
+					@lrs.sintegrator_exphoton_maxphotondepth = 10
+					@lrs.sintegrator_exphoton_maxphotondist = 0.1
+					@lrs.sintegrator_exphoton_nphotonsused = 50
+					@lrs.sintegrator_exphoton_causticphotons = 1000000
+					@lrs.sintegrator_exphoton_directphotons = 200000
+					@lrs.sintegrator_exphoton_indirectphotons = 200000
+					@lrs.sintegrator_exphoton_radiancephotons = 200000
+					@lrs.sintegrator_exphoton_renderingmode = 'directlighting'
+					@lrs.sintegrator_exphoton_rrcontinueprob = 0.65
+					@lrs.sintegrator_exphoton_rrstrategy = 'efficiency'
+					@lrs.sintegrator_exphoton_photonmapsfile = ''
+					@lrs.sintegrator_exphoton_shadow_ray_count = 1
+					@lrs.sintegrator_exphoton_strategy = 'auto'
+					
+					@lrs.pixelfilter_type = 'gaussian'
+				end #end case
 			self.sendDataFromSketchup()
 		} #end action callback preset
 		
@@ -513,6 +642,8 @@ class LuxrenderSettingsEditor
 			case params.to_s
 				when "new_export_file_path"
 					SU2LUX.new_export_file_path
+				when "load_env_image"
+					SU2LUX.load_env_image
 			end #end case
 		} #end action callback open_dialog
 
@@ -584,7 +715,11 @@ class LuxrenderSettingsEditor
 			# SU2LUX.dbg_p cmd
 			@settings_dialog.execute_script(cmd)
 		#############################
-		
+		when "use_plain_color"
+			radio_id = @lrs.use_plain_color
+			p radio_id
+			cmd = "$('##{radio_id}').attr('checked', true)"
+			@settings_dialog.execute_script(cmd)
 		
 		######### -- other -- #############
 		else

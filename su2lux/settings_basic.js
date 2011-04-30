@@ -127,6 +127,7 @@ $(document).ready(
 			}
 		);
 		
+		
 		$("#settings_panel input[name=use_plain_color]:radio").click(
 			function()
 			{
