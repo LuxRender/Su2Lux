@@ -202,7 +202,7 @@ class MeshCollector
 		ext=".jpg" if ext.upcase[0]!=46 # 46 = dot
 		s=name+ext
 		#s=@textures_prefix+@model_name+@os_separator+s
-		s=SU2LUX.PREFIX_TEXTURES+@model_name+"/"+s
+		s=SU2LUX::PREFIX_TEXTURES+@model_name+"/"+s
 		p "texture name "+s
 		return s
 	end # END get_texture_name

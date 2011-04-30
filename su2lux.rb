@@ -43,65 +43,6 @@ module SU2LUX
 	SUFFIX_OBJECT = "-geom.lxo"
 	SUFFIX_VOLUME = "-vol.lxv"
 
-	############### START OF POSSIBLE MAC SECTION ###############
-
-	##
-	#
-	##
-	def SU2LUX.on_mac?
-		return (Object::RUBY_PLATFORM =~ /mswin/i) ? FALSE : ((Object::RUBY_PLATFORM =~ /darwin/i) ? TRUE : :other)
-	end # END on_mac?
-
-	##
-	#
-	##
-	def SU2LUX.find_default_folder
-		folder = ENV["USERPROFILE"]
-		folder = File.expand_path("~") if on_mac?
-		return folder
-	end # END find_default_folder
-
-	##
-	#
-	##
-	def SU2LUX.get_luxrender_filename
-		filename = "luxrender.exe"
-		filename = "Luxrender.app/Contents/MacOS/Luxrender" if on_mac?
-		return filename
-	end # END get_luxrender_filename
-
-	##
-	#
-	##
-	def SU2LUX.search_mac_luxrender
-		luxrender_folder = []
-		if on_mac?
-			start_folder = "/Applications"
-			#start_folder = "C:\\Program Files"
-			applications = Dir.entries(start_folder)
-			applications.each { |app|
-				luxrender_folder.push app if app =~ /luxrender/i
-			}
-			if luxrender_folder.length > 1
-				paths = luxrender_folder.join("|")
-				input = UI.inputbox(["folder"], [luxrender_folder[0]], [paths], "Choose Luxrender folder")
-				luxrender_folder = input[0] if input
-			elsif luxrender_folder.length == 1
-				luxrender_folder = luxrender_folder[0]
-			else
-				return nil
-			end
-		end
-		if luxrender_folder.empty?
-			folder = nil
-		else
-			folder = start_folder + @os_separator + luxrender_folder
-		end
-		return folder
-	end # END search_mac_luxrender
-
-	############### END OF POSSIBLE MAC SECTION ###############
-	
 	##
 	# prints a message in the Ruby console only when in debug mode
 	##
@@ -114,23 +55,24 @@ module SU2LUX
 		end
 	end
 
-#Changed Windows separator from "\/" to "\\"
-#@os_separator = (ENV['OS'] =~ /windows/i) ? "\\" : "/" # directory separator for Windows : OS X
+	##
+	#
+	##
+	def SU2LUX.get_os
+		return (Object::RUBY_PLATFORM =~ /mswin/i) ? :windows : ((Object::RUBY_PLATFORM =~ /darwin/i) ? :mac : :other)
+	end # END get_os
 
 	##
 	# variables initializazion
 	##
 	def SU2LUX.initialize_variables
+	
+		os = OSSpecific.new
+		@os_specific_vars = os.get_variables 
+
+		@luxrender_filename = @os_specific_vars["luxrender_filename"]
 		@luxrender_path = "" #needs to go with luxrender settings
-		
-		if on_mac? #group the mac initializations together: making porting easier
-			@luxrender_filename = "Luxrender.app/Contents/MacOS/Luxrender"
-			@os_separator = "/" 
-			#there are probably more
-		else
-			@luxrender_filename = "luxrender.exe"
-			@os_separator = "\\"
-		end
+		@os_separator = @os_specific_vars["path_separator"]
 	end # END initialize_variables
 
 	##
@@ -208,6 +150,7 @@ module SU2LUX
 		le.export_textures(out_mat)
 		out_mat.close
 		le.write_textures
+		@count_tri = le.count_tri
 	end # END export
 
 	##
@@ -327,6 +270,7 @@ module SU2LUX
 	##
 	#
 	##
+	#TODO: try to write better code for the function
 	def SU2LUX.get_luxrender_path
 		find_luxrender = true
 		path = ENV['LUXRENDER_ROOT']
@@ -347,9 +291,10 @@ module SU2LUX
 			end
 		end
 		
-		mac_path = SU2LUX.search_mac_luxrender
-		if ( ! mac_path.nil?)
-			luxrender_path = mac_path + @os_separator + @luxrender_filename
+		os = OSSpecific.new
+		path = os.search_multiple_installations
+		if ( ! path.nil?)
+			luxrender_path = path + @os_separator + @luxrender_filename
 			if (SU2LUX.luxrender_path_valid?(luxrender_path))
 				path=File.dirname(__FILE__) + @os_separator + CONFIG_FILE
 				path_file = File.new(path, "w")
@@ -375,6 +320,22 @@ module SU2LUX
 			return nil
 		end 
 	end #END get_luxrender_path
+
+	##
+	#
+	##
+	def SU2LUX.find_default_folder
+		folder = @os_specific_vars["default_save_folder"]
+		return folder
+	end # END find_default_folder
+
+	##
+	#
+	##
+	def SU2LUX.get_luxrender_filename
+		filename = @os_specific_vars["luxrender_filename"]
+		return filename
+	end # END get_luxrender_filename
 
 	##
 	#
@@ -553,6 +514,16 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 end # END class SU2LUX_app_observer
 
 if( not file_loaded?(__FILE__) )
+
+	case SU2LUX.get_os
+		when :mac
+			load File.join(SU2LUX::PLUGIN_FOLDER, "MacSpecific.rb")
+		when :windows
+			load File.join(SU2LUX::PLUGIN_FOLDER, "WindowsSpecific.rb")
+		when :other
+			UI.messagebox("Unknown operating system: contact developer to add support for it")
+	end
+
 	SU2LUX.initialize_variables
 
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderSettings.rb")

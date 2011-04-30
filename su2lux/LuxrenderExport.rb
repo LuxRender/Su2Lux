@@ -1,5 +1,5 @@
 class LuxrenderExport
-
+	attr_reader :count_tri
 	##
 	#
 	##
@@ -433,7 +433,7 @@ class LuxrenderExport
 			polymesh=(ft[3]==true) ? ft[0].mesh(5) : ft[0].mesh(6)
 			trans = ft[1]
 			trans_inverse = trans.inverse
-			default_mat.push (ft[0].material==nil)
+			default_mat.push(ft[0].material==nil)
 			distorted_uv.push ft[2]
 			mat_dir.push ft[3]
 
@@ -663,7 +663,7 @@ class LuxrenderExport
 		
 		if (@copy_textures == true and @model_textures!={})
 
-			if FileTest.exist? (@path_textures+@os_separator+SU2LUX::PREFIX_TEXTURES+@model_name)
+			if FileTest.exist?(@path_textures+@os_separator+SU2LUX::PREFIX_TEXTURES+@model_name)
 			else
 				Dir.mkdir(@path_textures+@os_separator+SU2LUX::PREFIX_TEXTURES+@model_name)
 			end
