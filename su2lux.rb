@@ -407,6 +407,29 @@ module SU2LUX
 	##
 	#
 	##
+	def SU2LUX.change_luxrender_path
+		luxrender_path = UI.openpanel("Locate Luxrender", "", "")
+		@luxrender_path = nil if luxrender_path.nil?
+		if (luxrender_path && SU2LUX.luxrender_path_valid?(luxrender_path))
+			path=File.dirname(__FILE__) + @os_separator + CONFIG_FILE
+			path_file = File.new(path, "w")
+			path_file.write(luxrender_path)
+			path_file.close
+		end
+		message = ""
+		if SU2LUX.luxrender_path_valid?(luxrender_path)
+			@luxrender_path = luxrender_path
+			message = "New path for LuxRender is : #{@luxrender_path}"
+		else
+			@luxrender_path = nil
+			message = "Invalid or no path selected."
+		end
+		result = UI.messagebox(message,MB_OK)
+	end
+
+	##
+	#
+	##
 	def SU2LUX.find_default_folder
 		folder = @os_specific_vars["default_save_folder"]
 		return folder

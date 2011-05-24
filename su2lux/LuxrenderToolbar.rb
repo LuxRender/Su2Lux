@@ -4,8 +4,9 @@ def create_toolbar
 	main_menu.add_item("Export Copy") {(SU2LUX.export_copy)}
 	main_menu.add_item("Settings") { (SU2LUX.show_settings_editor)}
 	main_menu.add_item("Material Editor") {(SU2LUX.show_material_editor)}
+	main_menu.add_item("Change LuxRender path") {(SU2LUX.change_luxrender_path)}
 	main_menu.add_item("About") {(SU2LUX.about)}
-
+	
 	toolbar = UI::Toolbar.new("Luxrender")
 
 	cmd_render = UI::Command.new("Render"){(SU2LUX.export_dialog)}

@@ -13,10 +13,12 @@
 <body>
 
 	<div id="presets">
-		Presets:<select id="preset">
-			<option value='custom'>Custom</option><!--show it if change settings-->
+		<label for="preset">Presets:</label>
+		<select id="preset">
+			<option value='custom'>Custom</option>
 			<option value='0'>0 Preview - Global Illumination</option>
 			<option value='0b'>0b Preview - Direct Lighting</option>
+			<option value="0c">0c Preview - Photon Mapping</option>
 			<option value='1'>1 Final - MLT/Bidir Path Tracing (interior) (recommended)</option>
 			<option value='2'>2 Final - MLT/Path Tracing (exterior)</option>
 			<option value='5'>5 Progressive - Bidir Path Tracing (interior)</option>
@@ -26,7 +28,9 @@
 			<option value='B'>B Anim - Distributed/GI low Q</option>
 			<option value='C'>C Anim - Distributed/GI medium Q</option>
 			<option value='D'>D Anim - Distributed/GI high Q</option>
-		<option value='E'>E Anim - Distributed/GI very high Q</option>
+			<option value='E'>E Anim - Distributed/GI very high Q</option>
+			<option value='F'>F Anim - Photon Mapping/Low Q</option>
+			<option value='G'>G Anim - Photon Mapping/High Q</option>
 		</select>
 	</div>
 
@@ -150,30 +154,31 @@
 				<input type='text' id="env_rotate_z" size="4">
 			</div> -->
 			<div class="sunsky" id="sunsky">
-				<p class="header2">Sky</p>
+				<p class="header2">Physical sky properties</p>
 				<label for="environment_sky_lightgroup">lightgroup</label>
 				<input type='text' id="environment_sky_lightgroup" size="10">
 				<label for="environment_sky_gain">gain</label>
 				<input type='text' id="environment_sky_gain" size="10">
 				<label for="environment_sky_turbidity">turbidity</label>
-				<input type='text' id="environment_sky_turbidity" size="10">
-				<p class="header2">Sun</p>
+				<input type='text' id="environment_sky_turbidity" size="3">
+				<p class="header2">Sun properties</p>
 				<label for="environment_sun_lightgroup">lightgroup</label>
 				<input type='text' id="environment_sun_lightgroup" size="10">
 				<label for="environment_sun_gain">gain</label>
 				<input type='text' id="environment_sun_gain" size="10">
 				<label for="environment_sun_turbidity">turbidity</label>
-				<input type='text' id="environment_sun_turbidity" size="10">
+				<input type='text' id="environment_sun_turbidity" size="3">
 				<label for="environment_sun_relsize">relative size</label>
-				<input type='text' id="environment_sun_relsize" size="10">
+				<input type='text' id="environment_sun_relsize" size="3">
 			</div>
 			<div class="infinite" id="infinite">
-				<p class="header2">Generic settings</p>
+				<p class="header2">Image map properties</p>
 				<label for="environment_infinite_lightgroup">lightgroup</label>
 				<input type='text' id="environment_infinite_lightgroup" size="10">
 				<label for="environment_infinite_gain">gain</label>
 				<input type='text' id="environment_infinite_gain" size="10">
 				<br>
+				<label for="environment_infinite_mapping">Environment map type</label>
 				<select id="environment_infinite_mapping">
 					<option value="latlong">latlong</option>
 					<option value="angular">angular</option>
@@ -182,9 +187,24 @@
 				<label for="environment_infinite_gamma">gamma</label>
 				<input type='text' id="environment_infinite_gamma" size="10">
 				<br>
+				<br>
+				Filename
+				<br>
 				<label for="environment_infinite_mapname">map file</label>
-				<input type='text' id="environment_infinite_mapname" size="10">
-				<p class="header2">Sun</p>
+				<input type='text' id="environment_infinite_mapname" size="35" title="Choose an image map to use as a background">
+				<input type="button" id="map_file_path_browse" value="Browse" title="Open image file selector">
+				
+				<p class="header2">Background color</p>
+				<label>
+					<input type="radio" name="use_plain_color" value="sketchup_color" id="sketchup_color">
+					Use Sketchup Color
+				</label>
+				<label  title="Set this option for night scenes">
+					<input type="radio" name="use_plain_color" value="no_color" id="no_color" title="Set this option for night scenes">
+					Set background to black
+				</label>
+				
+				<p class="header2">Sun properties</p>
 				<label for="use_environment_infinite_sun">add sun</label>
 				<input type="checkbox" id="use_environment_infinite_sun">
 				<div class="collapse">
@@ -193,9 +213,9 @@
 					<label for="environment_infinite_sun_gain">gain</label>
 					<input type='text' id="environment_infinite_sun_gain" size="10">
 					<label for="environment_infinite_sun_turbidity">turbidity</label>
-					<input type='text' id="environment_infinite_sun_turbidity" size="10">
+					<input type='text' id="environment_infinite_sun_turbidity" size="3">
 					<label for="environment_infinite_sun_relsize">relative size</label>
-					<input type='text' id="environment_infinite_sun_relsize" size="10">
+					<input type='text' id="environment_infinite_sun_relsize" size="3">
 				</div>
 			</div>
 		</div>
@@ -538,7 +558,7 @@
 			</label>
 		</div>
 
-		<p class="header">Filter</p>
+		<p class="header">Pixel Filter</p>
 		<div class="collapse">
 			<label for="pixelfilter_type">filter type:</label>
 			<select id="pixelfilter_type">
@@ -980,7 +1000,7 @@
 			</div>
 		</div>
 		
-		<p class="header">Image settings</p>
+		<p class="header">Image resolution</p>
 		<div class="collapse">
 			<label for="fleximage_xresolution">Width&nbsp;</label>
 			<input type="text" id="fleximage_xresolution" size="5">
@@ -1012,12 +1032,6 @@
 			</select>
 			<input type="button" id="current_view" value="Current view">
 			<input type="button" id="flip_dim" value="Flip dimensions">
-			<br>
-			<br>
-			<b>Path for exported scene file: </b><!--<a id="export_file_path"></a>-->
-			<br>
-			<input type="text" id="export_file_path" size="66">
-			<input type="button" id="export_file_path_browse" value="Browse">
 		</div>
 		
 		<p class="header">System</p>
@@ -1029,6 +1043,12 @@
 				<option value="normal">Normal</option>
 				<option value="abovenormal">High</option>
 			</select>
+			<br>
+			<br>
+			<b>Path for exported scene file: </b><!--<a id="export_file_path"></a>-->
+			<br>
+			<input type="text" id="export_file_path" size="46">
+			<input type="button" id="export_file_path_browse" value="Browse">
 		</div>
 
 		<br>

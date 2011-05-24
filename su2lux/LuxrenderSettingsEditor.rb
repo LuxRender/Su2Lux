@@ -30,7 +30,7 @@ class LuxrenderSettingsEditor
 		pref_key = "LuxrenderSettingsEditor"
 		@settings_dialog = UI::WebDialog.new("Luxrender Render Settings", true, pref_key, 520, 500, 10, 10, true)
 		@settings_dialog.max_width = 520
-		setting_html_path = Sketchup.find_support_file("settings_basic.html" , "Plugins/"+SU2LUX::PLUGIN_FOLDER)
+		setting_html_path = Sketchup.find_support_file("settings.html" , "Plugins/"+SU2LUX::PLUGIN_FOLDER)
 		@settings_dialog.set_file(setting_html_path)
 		
 		@lrs=LuxrenderSettings.new
