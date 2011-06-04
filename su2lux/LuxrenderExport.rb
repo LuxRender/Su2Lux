@@ -12,9 +12,11 @@ class LuxrenderExport
 		@os_separator=os_separator
 
 		@path_textures=File.dirname(@export_file_path)
+		@has_portals = false
 	end # END initialize
 
 	def reset
+		@has_portals = false
 		@materials = {}
 		@fm_materials = {}
 		@count_faces = 0
@@ -700,12 +702,16 @@ class LuxrenderExport
 				out.puts "\t\"float gain\" [#{"%.6f" %(@lrs.environment_sky_gain)}]"
 				out.puts "\t\"float turbidity\" [#{"%.6f" %(@lrs.environment_sky_turbidity)}]"
 				out.puts "\t\"vector sundir\" [#{"%.6f" %(sun_direction.x)} #{"%.6f" %(sun_direction.y)} #{"%.6f" %(sun_direction.z)}]"
+				out.puts "\tPortalInstance \"Portal_Shape\"" if @has_portals == true
+				out.puts "AttributeEnd" + "\n"
+				out.puts "AttributeBegin"
 				out.puts "\tLightGroup \"#{@lrs.environment_sun_lightgroup}\""
 				out.puts "\tLightSource \"sun\""
 				out.puts "\t\"float gain\" [#{"%.6f" %(@lrs.environment_sun_gain)}]"
 				out.puts "\t\"float relsize\" [#{"%.6f" %(@lrs.environment_sun_relsize)}]"
 				out.puts "\t\"float turbidity\" [#{"%.6f" %(@lrs.environment_sun_turbidity)}]"
 				out.puts "\t\"vector sundir\" [#{"%.6f" %(sun_direction.x)} #{"%.6f" %(sun_direction.y)} #{"%.6f" %(sun_direction.z)}]"
+				out.puts "\tPortalInstance \"Portal_Shape\"" if @has_portals == true
 			when 'infinite'
 				out.puts "\tLightGroup \"#{@lrs.environment_infinite_lightgroup}\""
 				out.puts "\tLightSource \"infinitesample\""
@@ -725,6 +731,7 @@ class LuxrenderExport
 					out.puts "\t\"float relsize\" [#{"%.6f" %(@lrs.environment_infinite_sun_relsize)}]"
 					out.puts "\t\"float turbidity\" [#{"%.6f" %(@lrs.environment_infinite_sun_turbidity)}]"
 					out.puts "\t\"vector sundir\" [#{"%.6f" %(sun_direction.x)} #{"%.6f" %(sun_direction.y)} #{"%.6f" %(sun_direction.z)}]"
+					out.puts "\tPortalInstance \"Portal_Shape\"" if @has_portals == true
 				end
 		end
 		out.puts "AttributeEnd"
@@ -899,7 +906,8 @@ class LuxrenderExport
 		 # "float power" [100.000000]
 		 # "float efficacy" [17.000000]
 		 # "float gain" [1.000000]
-			case luxrender_mat.type
+		mesh_type = 'Shape "trianglemesh" "integer indices" ['	
+		 case luxrender_mat.type
 				# when "matte", "glass"
 					# out.puts "NamedMaterial \""+luxrender_mat.name+"\""
 				when "light"
@@ -908,13 +916,18 @@ class LuxrenderExport
 					out.puts "\"float power\" [#{"%.6f" %(luxrender_mat.light_power)}]"
 					out.puts "\"float efficacy\" [#{"%.6f" %(luxrender_mat.light_efficacy)}]"
 					out.puts "\"float gain\" [#{"%.6f" %(luxrender_mat.light_gain)}]"
+				when "portal"
+					# mesh_type = 'PortalShape "trianglemesh" "integer indices" ['	
+					out.puts "ObjectBegin \"Portal_Shape\""
+					@has_portals = true
+					SU2LUX.dbg_p mesh_type
 				else
 					out.puts "NamedMaterial \""+luxrender_mat.name+"\""
 					SU2LUX.dbg_p "NAME: " + luxrender_mat.name
 			end
 		# end
 		
-		out.puts 'Shape "trianglemesh" "integer indices" ['
+		out.puts mesh_type
 		for mesh in meshes
 				mirrored_tmp = mirrored[i]
 			mat_dir_tmp = mat_dir[i]
@@ -970,6 +983,10 @@ class LuxrenderExport
 			i += 1
 		end
 		out.puts ']'
+		
+		if luxrender_mat.type == "portal"
+			out.puts "ObjectEnd"
+		end
 		
 		@exp_default_uvs=true
 		no_texture_uvs=(!has_texture and @exp_default_uvs==true)
@@ -1031,7 +1048,7 @@ class LuxrenderExport
 		materials.each { |mat|
 				luxrender_mat = LuxrenderMaterial.new(mat)
 				SU2LUX.dbg_p luxrender_mat.name
-				export_mat(luxrender_mat, out)
+				export_mat(luxrender_mat, out) unless luxrender_mat.type == "portal"
 		}
 	end # END export_used_materials
 

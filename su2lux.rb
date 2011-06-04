@@ -141,20 +141,7 @@ module SU2LUX
 
 		le=LuxrenderExport.new(@export_file_path,@os_separator)
 		le.reset
-		out = File.new(@export_file_path,"w")
-		le.export_global_settings(out)
-		le.export_camera(model.active_view, out)
-		le.export_film(out)
-		le.export_render_settings(out)
-		entity_list=model.entities
-		out.puts 'WorldBegin'
-		le.export_light(out)
-		
 		file_basename = File.basename(@export_file_path, SCENE_EXTENSION)
-		out.puts "Include \"" + file_basename + SUFFIX_MATERIAL + "\"\n\n"
-		out.puts "Include \"" + file_basename + SUFFIX_OBJECT + "\"\n\n"
-		out.puts 'WorldEnd'
-		out.close
 		
 		file_dirname = File.dirname(@export_file_path)
 		file_fullname = file_dirname + @os_separator + file_basename
@@ -169,6 +156,20 @@ module SU2LUX
 		le.export_used_materials(materials, out_mat)
 		# le.export_textures(out_mat)
 		out_mat.close
+
+		out = File.new(@export_file_path,"w")
+		le.export_global_settings(out)
+		le.export_camera(model.active_view, out)
+		le.export_film(out)
+		le.export_render_settings(out)
+		entity_list=model.entities
+		out.puts 'WorldBegin'
+		
+		out.puts "Include \"" + file_basename + SUFFIX_MATERIAL + "\"\n\n"
+		out.puts "Include \"" + file_basename + SUFFIX_OBJECT + "\"\n\n"
+		le.export_light(out)
+		out.puts 'WorldEnd'
+		out.close
 		le.write_textures
 		@count_tri = le.count_tri
 	end # END export
