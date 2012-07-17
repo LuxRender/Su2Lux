@@ -61,8 +61,16 @@ class LuxrenderMaterial
 		'film' => 200,
 		'filmindex' => 1.5,
 		'nk_preset' => '',
+		'carpaint_name' => 'ford f8',
 		'energyconserving' => true,
 		'bumpmap' => 0.0001,
+
+		'dm_scheme' => 'microdisplacement',
+		'dm_normalsmooth' => false,
+		'dm_subdivl' => '0',
+		'dm_scale' => 0.1,
+		'dm_offset' => 0,
+		'displacement' => 1.000000,
 
 		'light_L' => 'blackbody',
 		'light_temperature' => 6500.0,
@@ -87,6 +95,7 @@ class LuxrenderMaterial
 		'use_dispersive_refraction' => false,
 		'use_thin_film_coating' => false,
 		'use_bump' => false,
+		'use_displacement' => false,
 		# 'use_bump_texture' => false,
 	}
 
@@ -102,7 +111,7 @@ class LuxrenderMaterial
 		@@settings[key + "wrap"] = "repeat"
 		@@settings[key + "channel"] = "mean" if (type == "float")
 		@@settings[key + "filename"] = ""
-		@@settings[key + "gamma"] = 2.2
+		@@settings[key + "gamma"] = 1.0
 		@@settings[key + "gain"] = 1.0
 		@@settings[key + "filtertype"] = "bilinear"
 		@@settings[key + "mapping"] = "uv"
@@ -161,6 +170,7 @@ class LuxrenderMaterial
 		lux_image_texture("", "film", "imagemap", "float")
 		lux_image_texture("", "filmindex", "imagemap", "float")
 		lux_image_texture("", "bump", "imagemap", "float")
+		lux_image_texture("", "dm", "imagemap", "float")
 		
 		singleton_class = (class << self; self; end)
 		@model=Sketchup.active_model
@@ -396,6 +406,21 @@ class LuxrenderMaterial
 			end
 		end	
 		return has_bump
+	end
+	
+	##
+	#
+	##
+	def has_displacement?
+		has_displacement = false
+		if (self.dm_texturetype != 'none')
+			if (self.dm_texturetype == 'sketchup')
+				has_displacement = true if (self.kd_texturetype == 'sketchup')
+			elsif (self.dm_texturetype == 'imagemap')
+				has_displacement = true if (not self.dm_imagemap_filename.empty?)
+			end
+		end	
+		return has_displacement
 	end
 	
 	##

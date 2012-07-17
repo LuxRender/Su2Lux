@@ -906,7 +906,8 @@ class LuxrenderExport
 		 # "float power" [100.000000]
 		 # "float efficacy" [17.000000]
 		 # "float gain" [1.000000]
-		mesh_type = 'Shape "trianglemesh" "integer indices" ['	
+		mesh_type = 'Shape "trianglemesh" ' 
+		mesh_begin= '"integer indices" ['	
 		 case luxrender_mat.type
 				# when "matte", "glass"
 					# out.puts "NamedMaterial \""+luxrender_mat.name+"\""
@@ -928,6 +929,20 @@ class LuxrenderExport
 		# end
 		
 		out.puts mesh_type
+
+		# Exporting displacement map
+
+		if luxrender_mat.use_displacement
+			out.puts "\"string subdivscheme\" [\""+luxrender_mat.dm_scheme+"\"]"
+			out.puts "\"bool dmnormalsmooth\" [\"#{luxrender_mat.dm_normalsmooth}\"]"
+			out.puts "\"integer nsubdivlevels\" [#{luxrender_mat.dm_subdivl}]"
+			out.puts "\"string displacementmap\" [\""+luxrender_mat.name+"::displacementmap\"]"
+			out.puts "\"float dmscale\" [#{"%.6f" %(luxrender_mat.dm_scale)}]"
+			out.puts "\"float dmoffset\" [#{"%.6f" %(luxrender_mat.dm_offset)}]"
+		end
+
+		out.puts mesh_begin
+
 		for mesh in meshes
 				mirrored_tmp = mirrored[i]
 			mat_dir_tmp = mat_dir[i]
@@ -1086,6 +1101,14 @@ class LuxrenderExport
 			when "matte"
 				pre, post = self.export_diffuse_component(mat, pre, post)
 				pre, post = self.export_sigma(mat, pre, post)
+			when "carpaint"
+				pre, post = self.export_carpaint_name(mat, pre, post)
+				if (!mat.carpaint_name)
+					pre, post = self.export_diffuse_component(mat, pre, post)
+				end
+			when "velvet"
+				pre, post = self.export_diffuse_component(mat, pre, post)
+				pre, post = self.export_sigma(mat, pre, post)
 			when "glossy"
 				pre, post = self.export_diffuse_component(mat, pre, post)
 				pre, post = self.export_specular_component(mat, pre, post)
@@ -1147,6 +1170,9 @@ class LuxrenderExport
 		# if (mat.use_bump)
 			pre, post = self.export_bump(mat, pre, post)
 		# end
+		 if (mat.use_displacement)
+			pre, post = self.export_displacement(mat, pre, post)
+		end
 		if (mat.type == "light")
 			out.puts post
 		else
@@ -1219,6 +1245,18 @@ class LuxrenderExport
 			following += "\t" + "\"color Ks\" [#{material.specular_tos}]" + "\n"
 		else
 			preceding, following = self.export_texture(material, "ks", "color", before, after)
+		end
+		return [before + preceding, after + following]
+	end
+	
+	##
+	#
+	##
+	def export_carpaint_name(material, before, after)
+		preceding = ""
+		following = ""
+		if (material.carpaint_name)
+			following += "\t" + "\"string name\" [\"#{material.carpaint_name}\"]" + "\n"
 		end
 		return [before + preceding, after + following]
 	end
@@ -1363,6 +1401,18 @@ class LuxrenderExport
 	##
 	#
 	##
+	def export_displacement(material, before, after)
+		preceding = ""
+		following = ""
+		if (material.has_texture?('dm'))
+			preceding, following = self.export_texture(material, "dm", "float", before, after)
+		end
+		return [before + preceding, after]
+	end
+
+	##
+	#
+	##	
 	def export_mesh_light(material)
 		case material.light_L
 			when "blackbody"
@@ -1379,6 +1429,9 @@ class LuxrenderExport
 		following = ""
 		preceding += "Texture \"#{material.name}::#{type_str}\" \"#{type}\" \"imagemap\"" + "\n"
 		preceding += "\t" + "\"string wrap\" [\"#{material.send(mat_type + "_imagemap_wrap")}\"]" + "\n"
+			if (mat_type=='dm')
+			preceding += "\t" + "\"string channel\" [\"#{material.send(mat_type + "_imagemap_channel")}\"]" + "\n"
+			end
 		case material.send(mat_type + "_texturetype")
 			when "sketchup"
 				if (@model_textures.has_key?(material.name))
@@ -1417,9 +1470,12 @@ class LuxrenderExport
 			when 'bump'
 				type_str = "bumpmap"
 				type_str2 = "bumpmap"
+			when 'dm'
+				type_str = "displacementmap"
+				type_str2 = "dm_imagemap_uscale"
 			when 'matte_sigma'
 				type_str = "sigma"
-				type_str = "matte_sigma"
+				type_str2 = "matte_sigma"
 			when 'ks'
 				type_str = "Ks"
 				type_str2 = "specular_tos"
@@ -1444,6 +1500,9 @@ class LuxrenderExport
 			when 'v_exponent'
 				type_str = 'vroughness'
 				type_str2 = 'vroughness'
+			when 'carpaint_name'
+				type_str = 'carpaint_name'
+				type_str2 = 'name'
 			else
 				type_str = type_str2 = mat_type
 		end

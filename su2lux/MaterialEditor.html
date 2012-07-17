@@ -38,10 +38,12 @@
 				<option value="shinymetal">Shiny Metal</option>
 				<option value="mattetranslucent">Matte Translucent</option>
 				<option value="glossytranslucent">Glossy Translucent</option>
+	<option value="carpaint">Carpaint</option>
+                <option value="velvet">Velvet</option>
 				<option value="light">Light</option>
 				<option value="portal">Portal</option>
 			</select>
-			<div id="diffuse" class="matte glossy glossytranslucent">
+			<div id="diffuse" class="matte glossy glossytranslucent velvet carpaint">
 				<p class="header2">Diffuse</p>
 				<label for="kd_R">Red</label>
 				<input type='text' id="kd_R" size="6">
@@ -60,6 +62,23 @@
 					<input type="button" id="kd_browse_map" value="Load">
 				</span> <!-- END diffuse_texture -->
 			</div> <!-- END diffuse -->
+
+<div id="carpaints" class="carpaint">
+<p class="header2">Type</p>
+<label for="carpaint_name">Name</label>
+<select id="carpaint_name">
+<option value="">Custom</option>
+<option value="ford f8">Ford F8</option>
+<option value="polaris silber">Polaris Silber</option>
+<option value="opel titan">Opel Titan</option>
+<option value="bmw339">BMW 339</option>
+<option value="2k acrylack">Acrylack</option>
+<option value="white">White</option>
+<option value="blue">Blue</option>
+<option value="blue matte">Blue Matte</option>
+</select>
+</div>
+
 			<div id="specular" class="glossy shinymetal glossytranslucent">
 				<p class="header2">Specular</p>
 				<!-- 
@@ -102,7 +121,7 @@
 					<input type="button" id="kr_browse_map" value="Load">
 				</span> <!-- END diffuse_texture -->
 			</div> <!-- END reflection -->
-			<div id="transmission" class="glass roughglass mattetranslucent glossytranslucent">
+			<div id="transmission" class="glass glass2 roughglass mattetranslucent glossytranslucent">
 				<p class="header2">Transmission</p>
 				<label for="kt_R">Red</label>
 				<input type='text' id="kt_R" size="6">
@@ -121,6 +140,7 @@
 					<input type="button" id="kt_browse_map" value="Load">
 				</span> <!-- END diffuse_texture -->
 			</div> <!-- END transmission -->
+            
 			<div id="Oren-Nayar" class="matte mattetranslucent">
 				<p class="header2">Oren-Nayar</p>
 				<label for="matte_sigma">Sigma</label>
@@ -145,7 +165,7 @@
 					<option value="silver">Silver</option>
 					<option value=""></option>
 				</select>
-			</div> <!-- END matal -->
+			</div> <!-- END metal -->
 			<div id="exponent_div" class="glossy metal roughglass shinymetal glossytranslucent">
 				<p class="header2">Exponent</p>
 				<label for="u_exponent">U Value</label>
@@ -285,7 +305,7 @@
 				<label for="energyconserving">Enable/Disable</label>
 				<input type="checkbox" id="energyconserving">
 			</div> <!-- END asperity --> 
-			<div id="bump" class="matte glossy glass roughglass metal mirror shinymetal mattetranslucent glossytranslucent">
+			<div id="bump" class="matte glossy glass roughglass metal mirror shinymetal mattetranslucent glossytranslucent velvet">
 				<p class="header2">Bump</p>
 <!--				<label for="use_bump">Enable/Disable</label>
 				<input type="checkbox" id="use_bump">
@@ -303,6 +323,38 @@
 							<input type="button" id="bump_browse_map" value="Load">
 						</span>
 			</div> <!-- END Bump -->
+			<div id="displacement" class="matte glossy shinymetal glossytranslucent roughglass velvet glass glass2 carpaint">
+				<p class="header2">Displacement Map</p>
+				<label for="use_displacement">Enable/Disable</label>
+				<input type="checkbox" id="use_displacement">
+				<div class="collapse_check">
+					<label for="dm_scheme">Subdivision Scheme</label>
+					<select id="dm_scheme">
+						<option value="microdisplacement">Microdisplacement</option>
+						<option value="loop">Subdivision loop</option>
+					</select>
+					<br>
+					<label for="dm_normalsmooth">Normal Smooth</label>
+					<input type="checkbox" id="dm_normalsmooth"><br>
+					<label for="dm_subdivl">Subdiv levels</label>
+					<input type='text' id="dm_subdivl" size="6"><br>
+					<label for="dm_scale">DM Scale</label>
+					<input type='text' id="dm_scale" size="6"> 
+					<label for="dm_offset">DM Offset</label>
+					<input type='text' id="dm_offset" size="6"><br>             
+					<label for="dm_texturetype">Texture</label>
+					<select id="dm_texturetype">
+						<option value="none">None</option>
+						<option value="sketchup">Sketchup Texture</option>
+						<option value="imagemap">Image Map</option>
+					</select>
+					<span class="imagemap">
+						<input type="button" id="dm_browse_map" value="Load">
+					</span> <!-- END diffuse_texture -->
+					<input type="hidden" id="dispmap" value="1">
+				</div>
+			</div> <!-- END displacement map -->
+
 			<div class="light">
 				<label for="light_L">Texture</label>
 				<select id="light_L">
