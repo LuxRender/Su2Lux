@@ -21,7 +21,7 @@ class LuxrenderTextureEditor
 
 	
 	def initialize(texture_data, lux_parameter)
-		@texture_editor_dialog = UI::WebDialog.new("Luxrender Texture Editor", true, "LuxrenderTextureEditor", 900, 500, 900, 400, true)
+		@texture_editor_dialog = UI::WebDialog.new("LuxRender Texture Editor", true, "LuxrenderTextureEditor", 900, 500, 900, 400, true)
 		texture_editor_dialog_path = Sketchup.find_support_file("TextureEditor.html", "Plugins/su2lux")
 		@texture_editor_dialog.max_width = 800
 		@texture_editor_dialog.set_file(texture_editor_dialog_path)
@@ -62,14 +62,13 @@ class LuxrenderTextureEditor
 		} #end action callback open_dialog
 		
 		@texture_editor_dialog.add_action_callback('material_changed') { |dialog, material_name|
-			materials = Sketchup.active_model.materials
+			puts "material_changed"
+            materials = Sketchup.active_model.materials
 			@current = self.find(material_name)
-			SU2LUX.dbg_p "material_changed: #{materials.current.name}"
+			SU2LUX.dbg_p "texture editor reports that material has changed: #{materials.current.name}"
 			if (material_name != materials.current.name)
 				materials.current = materials[material_name] if ( ! @current.nil?)
 			end
-			# updateSettingValue("type")
-			# self.sendDataFromSketchup()
 		}
 		
 		@texture_editor_dialog.add_action_callback("reset_to_default") {|dialog, params|
@@ -138,6 +137,7 @@ class LuxrenderTextureEditor
 	#
 	##	
 	def show
+        SU2LUX.dbg_p "running texture editor show function"
 		@texture_editor_dialog.show_modal{refresh()}
 	end
 
@@ -145,6 +145,7 @@ class LuxrenderTextureEditor
 	#
 	##
 	def refresh()
+        SU2LUX.dbg_p "running texture editor refresh function"
 		self.sendDataFromSketchup()
 	end
 	

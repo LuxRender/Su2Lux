@@ -19,6 +19,13 @@ function checkbox_expander(id)
 		$("#" + id).next(".collapse").hide();
 	}
 }
+
+function checkbox_one(id){
+	if($("#" + id).attr("checked") == true){
+		alert($("#environment_infinite_rotatez").attr("value"));}
+}
+
+
 $(document).ready(
 	function()
 	{
@@ -124,6 +131,7 @@ $(document).ready(
 			{
 				window.location = 'skp:param_generate@' + this.id + '=' + $(this).attr('checked');
 				checkbox_expander(this.id)
+				checkbox_one(this.id)
 			}
 		);
 		
@@ -211,6 +219,15 @@ $(document).ready(
 				window.location = 'skp:open_dialog@new_export_file_path'
 			}
 		)
+                
+        $("#export_luxrender_path_browse").click(
+            function()
+            {
+                window.location = 'skp:open_dialog@change_luxpath'
+
+            }
+        ) 
+                  
 		
 		$("#map_file_path_browse").click(
 			function()
@@ -265,6 +282,9 @@ $(document).ready(
 				window.location = 'skp:set_image_size@' + width + 'x' + height + 'xfalse';
 			}
 		);
+                  
+
+                  
 		
 		$("#save_to_model").click(
 			function()

@@ -7,6 +7,7 @@
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="su2lux.js"></script>
 
+<link href="common.css" type="text/css" rel="stylesheet">
 <link href="settings.css" type="text/css" rel="stylesheet">
  
 </head>
@@ -193,7 +194,17 @@
 				<label for="environment_infinite_mapname">map file</label>
 				<input type='text' id="environment_infinite_mapname" size="35" title="Choose an image map to use as a background">
 				<input type="button" id="map_file_path_browse" value="Browse" title="Open image file selector">
-				
+				<br>
+				<br>
+				Rotate Image map
+				<br>
+				<label for="environment_infinite_rotatex">X-Axis</label>
+				<input type='text' id="environment_infinite_rotatex" size="2">&nbsp;
+				<label for="environment_infinite_rotatey">Y-Axis</label>
+				<input type='text' id="environment_infinite_rotatey" size="2">&nbsp;
+				<label for="environment_infinite_rotatez">Z-Axis</label>
+				<input type='text' id="environment_infinite_rotatez" size="2">&nbsp;
+				Degrees
 				<p class="header2">Background color</p>
 				<label>
 					<input type="radio" name="use_plain_color" value="sketchup_color" id="sketchup_color">
@@ -242,6 +253,8 @@
 				<input type='text' id="sampler_random_pixelsamples" size="10">
 			</div>
 			<div class="metropolis" id="metropolis">
+                <label for="sampler_metropolis_noiseaware">Noise aware</label>
+				<input type="checkbox" id="sampler_metropolis_noiseaware"><br>
 				<label for="sampler_show_advanced">Advanced properties</label>
 				<input type="checkbox" id="sampler_show_advanced">
 				<div class ="basic">
@@ -640,7 +653,9 @@
 			<select id="film_type">
 				<option value="fleximage">fleximage</option>
 			</select>
-			<p class="header2">Output options</p>
+            <p class="header2">Output options</p>
+            <label for="fleximage_outlierrejection_k">Fireflies rejection</label>
+            <input type='text' id="fleximage_outlierrejection_k" size="4"><br>
 			<label for="fleximage_haltspp">halt spp</label>
 			<input type='text' id="fleximage_haltspp" size="4">
 			<label for="fleximage_halttime">halt time</label>
@@ -876,11 +891,6 @@
 			<input type="checkbox" id="fleximage_write_resume_flm">
 			<label for="fleximage_restart_resume_flm">Restart/resume</label>
 			<input type="checkbox" id="fleximage_restart_resume_flm">
-			<p class="header2">Rejection options</p>
-			<label for="fleximage_reject_warmup">Warmup</label>
-			<input type='text' id="fleximage_reject_warmup" size="4">
-			<label for="fleximage_debug">Debug</label>
-			<input type="checkbox" id="fleximage_debug">
 			<p class="header2">Color space management</p>
 			<label for="fleximage_use_preset">Preset</label>
 			<input type="checkbox" id="fleximage_use_preset">
@@ -1043,12 +1053,25 @@
 				<option value="normal">Normal</option>
 				<option value="abovenormal">High</option>
 			</select>
+            <br>
+            <br>
+            <label for="geomexport">Geometry file format:</label>
+			<select id="geomexport">
+				<option value="ply">PLY</option>
+				<option value="lxo">LXO</option>
+			</select>
 			<br>
 			<br>
-			<b>Path for exported scene file: </b><!--<a id="export_file_path"></a>-->
+			Scene file export path:
 			<br>
 			<input type="text" id="export_file_path" size="46">
 			<input type="button" id="export_file_path_browse" value="Browse">
+            <br>
+            Path to LuxRender:
+            <br>
+            <input type="text" id="export_luxrender_path" size="46">
+            <input type="button" id="export_luxrender_path_browse" value="Browse">
+             
 		</div>
 
 		<br>

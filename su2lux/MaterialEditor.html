@@ -2,29 +2,33 @@
 
 <html>
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>SU2LUX Texture Editor</title>
 
 <script type="text/javascript" src="jquery.js"></script>
-<script type="text/javascript" src="MaterialEditor.js"></script>
+<script type="text/javascript" src="MaterialEditor.js"  charset="UTF-8"></script>
 
+<link href="common.css" type="text/css" rel="stylesheet">
 <link href="MaterialEditor.css" type="text/css" rel="stylesheet">
  
 </head>
 <body>
 	<div id="settings_panel">
 		<div id="material_management">
-			<p class="header">Material presets management</p>
-			<label for="material_name">Name </label>
+			<label for="material_name2">Material</label>
 			<select id="material_name">
-				<option value="bogus">bogus</option>
+				<option value="bogus">not initialized</option>
 			</select>
-			<br>
+			<br><br>
+			<!-- <br>
 			<input type="button" id="preset_load" value="Load">
 			<input type="button" id="preset_save" value="Save">
-			<input type="button" id="preset_delete" value="Delete">
+			<input type="button" id="preset_delete" value="Delete"> /-->
 		</div>
 		<p class="header">+ Material preview</p>
-		<div class="collapse" id="preview">
+        <div class="collapse" id="preview">
+        <img src="empty_preview.png" id="preview_image">
+        <input type="button" id="update_material_preview" value="refresh"> 
 		</div>
 		<p class="header">+ Material properties</p>
 		<div class="collapse" id="material_type">
@@ -38,53 +42,90 @@
 				<option value="shinymetal">Shiny Metal</option>
 				<option value="mattetranslucent">Matte Translucent</option>
 				<option value="glossytranslucent">Glossy Translucent</option>
-	<option value="carpaint">Carpaint</option>
-                <option value="velvet">Velvet</option>
+            <option value="carpaint">Carpaint</option>
+            <option value="velvet">Velvet</option>
 				<option value="light">Light</option>
 				<option value="portal">Portal</option>
+				<option value="mix">Mix</option>
+				<option value="null">Null</option>
 			</select>
-			<div id="diffuse" class="matte glossy glossytranslucent velvet carpaint">
-				<p class="header2">Diffuse</p>
-				<label for="kd_R">Red</label>
-				<input type='text' id="kd_R" size="6">
-				<label for="kd_G">Green</label>
-				<input type='text' id="kd_G" size="6">
-				<label for="kd_B">Blue</label>
-				<input type='text' id="kd_B" size="6">
-				<br>
-				<label for="kd_texturetype">Texture</label>
-				<select id="kd_texturetype">
+			<!-- mix -->
+			   <div id="Oren-Nayar" class="mix">
+				<p class="header2">Choose Materials</p>
+				<label for="material_list1">Material 1</label>
+				<select id="material_list1">
+					<option value="bogus">not initialized</option>
+				</select>&nbsp;
+				<label for="material_list2">Material 2</label>
+				<select id="material_list2">
+					<option value="bogus">not initialized</option>
+				</select><br /> 
+				<label for="mix_amount">Mix Amount</label>
+				<input type="text" id="mix_amount" size="6">&nbsp;&nbsp;
+				<p class="header2">Create Alpha Texture</p>
+				<label for="skmix_texturetype">Texture</label>
+				<select id="skmix_texturetype">
 					<option value="none">None</option>
 					<option value="sketchup">Sketchup Texture</option>
-<!--					<option value="imagemap">Image Map</option> -->
 				</select>
 				<span class="imagemap">
-					<input type="button" id="kd_browse_map" value="Load">
+					<input type="button" id="skmix_browse_map" value="Load">
 				</span> <!-- END diffuse_texture -->
+				<label for="mapmix_texturetype">Texture</label>
+				<select id="mapmix_texturetype">
+					<option value="none">None</option>
+					<option value="imagemap">Image Map</option>
+				</select>
+				<span class="imagemap">
+					<input type="button" id="mapmix_browse_map" value="Load">
+				</span> <!-- END diffuse_texture -->
+			</div>
+			<!-- mix ends -->
+            <div id="diffuse" class="matte glossy glossytranslucent velvet carpaint ">
+                
+                <p class="header2">Diffuse</p>
+        
+                <div class="panelcontent">
+				<label for="kd_R" class="kdr">Red</label>
+				<input type='text' id="kd_R" size="6" class="kdrvalue">
+				<label for="kd_G" class="kdg">Green</label>
+				<input type='text' id="kd_G" size="6" class="kdgvalue">
+				<label for="kd_B" class="kdb">Blue</label>
+				<input type='text' id="kd_B" size="6" class="kdbvalue">
+				<label for="kd_texturetype" class="texturelabel">Texture</label>
+				<select id="kd_texturetype" class="texturedropdown">
+					<option value="none">None</option>
+					<option value="sketchup">Sketchup Texture</option>
+                    <option value="imagemap">Image Map</option>
+				</select>
+				<span class="imagemap">
+					<input type="button" id="kd_browse_map" value="Load" class="textureloadbutton">
+				</span>
+                <table id="swatch_diffuse">
+                    <tr><td id="diffuse_swatch" class="swatch" width=64 height=64></td></tr>
+                </table>
+                </div> <!-- END panelcontent -->
+                
 			</div> <!-- END diffuse -->
 
-<div id="carpaints" class="carpaint">
-<p class="header2">Type</p>
-<label for="carpaint_name">Name</label>
-<select id="carpaint_name">
-<option value="">Custom</option>
-<option value="ford f8">Ford F8</option>
-<option value="polaris silber">Polaris Silber</option>
-<option value="opel titan">Opel Titan</option>
-<option value="bmw339">BMW 339</option>
-<option value="2k acrylack">Acrylack</option>
-<option value="white">White</option>
-<option value="blue">Blue</option>
-<option value="blue matte">Blue Matte</option>
-</select>
-</div>
+            <div id="carpaints" class="carpaint">
+                <p class="header2">Type</p>
+                <label for="carpaint_name">Name</label>
+                <select id="carpaint_name">
+                    <option value="">Custom</option>
+                    <option value="ford f8">Ford F8</option>
+                    <option value="polaris silber">Polaris Silber</option>
+                    <option value="opel titan">Opel Titan</option>
+                    <option value="bmw339">BMW 339</option>
+                    <option value="2k acrylack">Acrylack</option>
+                    <option value="white">White</option>
+                    <option value="blue">Blue</option>
+                    <option value="blue matte">Blue Matte</option>
+                </select>
+            </div>
 
 			<div id="specular" class="glossy shinymetal glossytranslucent">
 				<p class="header2">Specular</p>
-				<!-- 
-				<input type="button" id="get_diffuse_color" value="Get diffuse color">
-				<br>
-				-->
 				<label for="ks_R">Red</label>
 				<input type='text' id="ks_R" size="6">
 				<label for="ks_G">Green</label>
@@ -102,44 +143,59 @@
 					<input type="button" id="ks_browse_map" value="Load">
 				</span> <!-- END diffuse_texture -->
 			</div> <!-- END specular -->
-			<div id="reflection" class="glass roughglass mirror shinymetal mattetranslucent">
-				<p class="header2">Reflection</p>
-				<label for="kr_R">Red</label>
-				<input type='text' id="kr_R" size="6">
-				<label for="kr_G">Green</label>
-				<input type='text' id="kr_G" size="6">
-				<label for="kr_B">Blue</label>
-				<input type='text' id="kr_B" size="6">
-				<br>
-				<label for="kr_texturetype">Texture</label>
-				<select id="kr_texturetype">
-					<option value="none">None</option>
-					<option value="sketchup">Sketchup Texture</option>
-					<option value="imagemap">Image Map</option>
-				</select>
-				<span class="imagemap">
-					<input type="button" id="kr_browse_map" value="Load">
-				</span> <!-- END diffuse_texture -->
-			</div> <!-- END reflection -->
-			<div id="transmission" class="glass glass2 roughglass mattetranslucent glossytranslucent">
+            
+            
+            <div id="transmission" class="glass glass2 roughglass mattetranslucent glossytranslucent">
 				<p class="header2">Transmission</p>
-				<label for="kt_R">Red</label>
-				<input type='text' id="kt_R" size="6">
-				<label for="kt_G">Green</label>
-				<input type='text' id="kt_G" size="6">
-				<label for="kt_B">Blue</label>
-				<input type='text' id="kt_B" size="6">
-				<br>
-				<label for="kt_texturetype">Texture</label>
-				<select id="kt_texturetype">
-					<option value="none">None</option>
-					<option value="sketchup">Sketchup Texture</option>
-					<option value="imagemap">Image Map</option>
-				</select>
-				<span class="imagemap">
-					<input type="button" id="kt_browse_map" value="Load">
-				</span> <!-- END diffuse_texture -->
+                <div class="panelcontent">
+                    <label for="kt_R" class="kdr">Red</label>
+                    <input type='text' id="kt_R" size="6" class="kdrvalue">
+                    <label for="kt_G" class="kdg">Green</label>
+                    <input type='text' id="kt_G" size="6" class="kdgvalue">
+                <label for="kt_B" class="kdb">Blue</label>
+                <input type='text' id="kt_B" size="6" class="kdbvalue">
+                <label for="kt_texturetype" class="texturelabel">Texture</label>
+                <select id="kt_texturetype" class="texturedropdown">
+                    <option value="none">None</option>
+                    <option value="sketchup">Sketchup Texture</option>
+                    <option value="imagemap">Image Map</option>
+                </select>
+                <span class="imagemap">
+                    <input type="button" id="kt_browse_map" value="Load" class="textureloadbutton">
+                        </span>
+                <table id="swatch_diffuse">
+                    <tr><td id="transmission_swatch" class="swatch" width=64 height=64></td></tr>
+                </table>
+                </div> <!-- END panelcontent -->
+                
 			</div> <!-- END transmission -->
+			<div id="reflection" class="glass roughglass mirror shinymetal mattetranslucent">
+                <p class="header2">Reflection</p>
+                
+                <div class="panelcontent">
+                    <label for="kr_R" class="kdr">Red</label>
+                    <input type='text' id="kr_R" size="6" class="kdrvalue">
+                    <label for="kr_G" class="kdg">Green</label>
+                    <input type='text' id="kr_G" size="6" class="kdgvalue">
+                    <label for="kr_B" class="kdb">Blue</label>
+                    <input type='text' id="kr_B" size="6" class="kdbvalue">
+                    <label for="kr_texturetype" class="texturelabel">Texture</label>
+                    <select id="kr_texturetype" class="texturedropdown">
+                        <option value="none">None</option>
+                        <option value="sketchup">Sketchup Texture</option>
+                        <option value="imagemap">Image Map</option>
+                    </select>
+                    <span class="imagemap">
+                        <input type="button" id="kr_browse_map" value="Load" class="textureloadbutton">
+                            </span>
+                    
+                    <table id="swatch_diffuse">
+                        <tr><td id="reflection_swatch" class="swatch" width=64 height=64></td></tr>
+                    </table>
+                </div> <!-- END panelcontent -->
+
+			</div> <!-- END reflection -->
+			
             
 			<div id="Oren-Nayar" class="matte mattetranslucent">
 				<p class="header2">Oren-Nayar</p>
@@ -155,6 +211,7 @@
 					<input type="button" id="matte_sigma_browse_map" value="Load">
 				</span> <!-- END diffuse_texture -->
 			</div> <!-- END Oren-Nayar -->
+            
 			<div id="nk" class="metal">
 				<label for="nk_preset">Name </label>
 				<select id="nk_preset">
@@ -163,7 +220,6 @@
 					<option value="copper">Copper</option>
 					<option value="gold">Gold</option>
 					<option value="silver">Silver</option>
-					<option value=""></option>
 				</select>
 			</div> <!-- END metal -->
 			<div id="exponent_div" class="glossy metal roughglass shinymetal glossytranslucent">
@@ -212,39 +268,50 @@
 				<input type="checkbox" id="multibounce">
 			</div> <!-- END asperity --> 
 			<div id="absorption" class="glossy glossytranslucent">
-				<p class="header2">Absorption</p>
-				<label for="use_absorption">Enable/Disable</label>
+				
+                <p class="header2">Absorption</p>
+				
+                <label for="use_absorption">Enable/Disable</label>
 				<input type="checkbox" id="use_absorption">
-				<div class="collapse_check">
-					<label for="ka_R">Red</label>
-					<input type='text' id="ka_R" size="6">
-					<label for="ka_G">Green</label>
-					<input type='text' id="ka_G" size="6">
-					<label for="ka_B">Blue</label>
-					<input type='text' id="ka_B" size="6">
-					<br>
-					<label for="ka_texturetype">Texture</label>
-					<select id="ka_texturetype">
-						<option value="none">None</option>
-						<option value="sketchup">Sketchup Texture</option>
-						<option value="imagemap">Image Map</option>
-					</select>
-					<span class="imagemap">
-						<input type="button" id="ka_browse_map" value="Load">
-					</span> <!-- END diffuse_texture -->
-					<br>
-					<label for="ka_d">Depth</label>
+				
+                    
+                <div class="collapse_check">
+                    <label for="ka_d">Depth</label>
 					<input type='text' id="ka_d" size="6">
-					<label for="ka_d_texturetype">Texture</label>
-					<select id="ka_d_texturetype">
-						<option value="none">None</option>
-						<option value="sketchup">Sketchup Texture</option>
-						<option value="imagemap">Image Map</option>
-					</select>
-					<span class="imagemap">
+                    <label for="ka_d_texturetype">Depth Texture</label>
+                    <select id="ka_d_texturetype">
+                        <option value="none">None</option>
+                        <option value="sketchup">Sketchup Texture</option>
+                        <option value="imagemap">Image Map</option>
+                    </select>
+                        <span class="imagemap">
 						<input type="button" id="ka_d_browse_map" value="Load">
-					</span> <!-- END diffuse_texture -->
+                        </span>
+                    
+                    <div class="panelcontent">
+                    <label for="ka_R" class="kdr">Red</label>
+                    <input type='text' id="ka_R" size="6" class="kdrvalue">
+                    <label for="ka_G" class="kdg">Green</label>
+                    <input type='text' id="ka_G" size="6" class="kdgvalue">
+                    <label for="ka_B" class="kdb">Blue</label>
+                    <input type='text' id="ka_B" size="6" class="kdbvalue">
+                    <label for="ka_texturetype" class="texturelabel">Texture</label>
+                    <select id="ka_texturetype" class="texturedropdown">
+                    <option value="none">None</option>
+                    <option value="sketchup">Sketchup Texture</option>
+                    <option value="imagemap">Image Map</option>
+                    </select>
+                    <span class="imagemap">
+                    <input type="button" id="ka_d_browse_map" value="Load" class="textureloadbutton">
+                    </span>
+                    <table id="swatch_diffuse">
+                    <tr><td id="absorption_swatch" class="swatch" width=64 height=64></td></tr>
+                    </table>
+                    </div> <!-- END panelcontent -->
+                        
 				</div>
+                    
+                    
 			</div> <!-- END absorption> -->
 			<div id="architectural_glass" class="glass">
 				<br>
@@ -305,7 +372,7 @@
 				<label for="energyconserving">Enable/Disable</label>
 				<input type="checkbox" id="energyconserving">
 			</div> <!-- END asperity --> 
-			<div id="bump" class="matte glossy glass roughglass metal mirror shinymetal mattetranslucent glossytranslucent velvet">
+			<div id="bump" class="matte glossy glass roughglass metal mirror shinymetal mattetranslucent glossytranslucent velvet ">
 				<p class="header2">Bump</p>
 <!--				<label for="use_bump">Enable/Disable</label>
 				<input type="checkbox" id="use_bump">
@@ -323,7 +390,7 @@
 							<input type="button" id="bump_browse_map" value="Load">
 						</span>
 			</div> <!-- END Bump -->
-			<div id="displacement" class="matte glossy shinymetal glossytranslucent roughglass velvet glass glass2 carpaint">
+			<div id="displacement" class="matte glossy shinymetal glossytranslucent roughglass velvet glass glass2 carpaint ">
 				<p class="header2">Displacement Map</p>
 				<label for="use_displacement">Enable/Disable</label>
 				<input type="checkbox" id="use_displacement">

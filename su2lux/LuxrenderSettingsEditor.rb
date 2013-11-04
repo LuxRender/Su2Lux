@@ -28,18 +28,18 @@ class LuxrenderSettingsEditor
 	def initialize
 
 		pref_key = "LuxrenderSettingsEditor"
-		@settings_dialog = UI::WebDialog.new("Luxrender Render Settings", true, pref_key, 520, 500, 10, 10, true)
+		@settings_dialog = UI::WebDialog.new("LuxRender Settings Editor", true, pref_key, 520, 500, 10, 10, true)
 		@settings_dialog.max_width = 520
 		setting_html_path = Sketchup.find_support_file("settings.html" , "Plugins/"+SU2LUX::PLUGIN_FOLDER)
 		@settings_dialog.set_file(setting_html_path)
-		
+        # @settings_dialog.set_on_close { @presets[@lrad["preset"].value].save} # taken from Juicyfruit version, but @presets does not exist
 		@lrs=LuxrenderSettings.new
 		
 		##
 		#
 		##
 		@settings_dialog.add_action_callback("param_generate") {|dialog, params|
-				SU2LUX.dbg_p params
+				SU2LUX.dbg_p "settings editor param_generate"
 				pair = params.split("=")
 				key = pair[0]		   
 				value = pair[1]
@@ -259,7 +259,8 @@ class LuxrenderSettingsEditor
 					
 					@lrs.sampler_type = 'metropolis'
 					@lrs.sampler_metropolis_strength = 0.6
-					@lrs.sampler_metropolis_largemutationprob = 0.4
+                    @lrs.sampler_metropolis_largemutationprob = 0.4
+                    @lrs.sampler_metropolis_noiseaware = true
 					@lrs.sampler_metropolis_maxconsecrejects = 512
 					@lrs.sampler_metropolis_usevariance = false
 					
@@ -286,7 +287,8 @@ class LuxrenderSettingsEditor
 					
 					@lrs.sampler_type = 'metropolis'
 					@lrs.sampler_metropolis_strength = 0.6
-					@lrs.sampler_metropolis_largemutationprob = 0.4
+                    @lrs.sampler_metropolis_largemutationprob = 0.4
+                    @lrs.sampler_metropolis_noiseaware = true
 					@lrs.sampler_metropolis_maxconsecrejects = 512
 					@lrs.sampler_metropolis_usevariance  = false
 					
@@ -643,9 +645,13 @@ class LuxrenderSettingsEditor
 					SU2LUX.new_export_file_path
 				when "load_env_image"
 					SU2LUX.load_env_image
+                when "change_luxpath"
+                    SU2LUX.change_luxrender_path
 			end #end case
 		} #end action callback open_dialog
 
+ 
+        
 		@settings_dialog.add_action_callback("save_to_model") {|dialog, params|
 			@lrs.save_to_model
 		}
@@ -696,7 +702,7 @@ class LuxrenderSettingsEditor
 			
 		#### -- export_file_path slash change -- ####
 		when "export_file_path"
-		SU2LUX.dbg_p new_value
+            SU2LUX.dbg_p new_value
 			new_value.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
 			new_value.gsub!(/\\/, '/') if new_value.include?('\\')
 			cmd="$('##{id}').val('#{new_value}');" #different asignment method

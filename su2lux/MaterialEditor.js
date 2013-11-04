@@ -1,4 +1,4 @@
-function expand_section(sender_id, section_id, closed_sign, opened_sign) {
+function expand_section(sender_id, section_id, closed_sign, opened_sign) {  // user interface: closes/opens panels
 	text = sender_id.text();
 	the_sign = text.substr(0, 1);
 	if (the_sign == closed_sign) {
@@ -10,27 +10,18 @@ function expand_section(sender_id, section_id, closed_sign, opened_sign) {
 	$(sender_id).next(section_id).slideToggle(300);
 }
 
-function checkbox_expander(id)
+function checkbox_expander(id)      // user interface, switches between basic and advanced options (not currently in use)
 {
 	if ($("#" + id).attr("checked"))
 	{
-		// if (id.match("use_architectural")) {
-			// $("#thin_film_coating").hide();
-			// $("#dispersive_refraction").hide();
-		// }
 		if (id.match("show_advanced") || id.match("_use_")) {
 			$("#" + id).nextAll(".basic").hide();
 			$("#" + id).nextAll(".advanced").show();
 		}
 		$("#" + id).next(".collapse_check").show();
-		// $("#" + id).next(".collapse").children("#focus_type").change();
 	}
 	else if ($("#" + id).attr("checked") == false)
 	{
-		// if (id.match("use_architectural")) {
-			// $("#thin_film_coating").show();
-			// $("#dispersive_refraction").show();
-		// }
 		if (id.match("show_advanced") || id.match("_use_")) {
 			$("#" + id).nextAll(".basic").show();
 			$("#" + id).nextAll(".advanced").hide();
@@ -39,15 +30,62 @@ function checkbox_expander(id)
 	}
 }
 
-$(document).ready(
-	function() {
+
+function startactivemattype(){
+    // loaded on opening SketchUp on OS X, on showing material dialog on Windows // triggered by window.location = 'skp:show_continued@'
+		if ($("#material_name").val() == "bogus"){
+			//alert ("not initialized");
+			window.location = 'skp:start_refresh@' + this.id;
+			window.location = 'skp:active_mat_type@'; 	// shows options for current material's material type
+		}
+		// todo: if material type is default, run param_generate function
+
+	}
 	
+	
+function startmaterialchanged() {
+    window.location = 'skp:material_changed@' + this.value;
+}
+
+function flowtest(){
+    alert ("working");
+}
+    
+function update_RGB(fieldR,fieldG,fieldB,colorr,colorg,colorb){
+    // alert (fieldR);
+    // alert (colorr);
+    $(fieldR).val(colorr);
+    $(fieldG).val(colorg);
+    $(fieldB).val(colorb);
+}
+
+function show_load_buttons(){
+    //alert ("running show_load_buttons function");
+    var theelements = $("[id*='_texturetype']");
+    //alert (theelements.length);
+    for (var i=0;i<theelements.length;i++){
+        if (theelements[i].value=="imagemap"){
+            $(theelements[i]).next(".imagemap").show(); // shows  <span class="imagemap">
+        }
+    }
+}
+
+$(document).ready(
+		
+    function() {
+        // alert ("document ready");            
+		
+		$("#type").nextAll().hide(); // hides irrelevant material properties
+		
+		window.location = 'skp:show_continued@'
+        
+		
 		$("#settings_panel select, :text").change(
 			function()
 			{
 				window.location = 'skp:param_generate@' + this.id+'='+this.value
 			}
-		);
+		)
 		
 		$(":checkbox").click(
 			function()
@@ -55,22 +93,22 @@ $(document).ready(
 				window.location = 'skp:param_generate@' + this.id + '=' + $(this).attr('checked');
 				checkbox_expander(this.id)
 			}
-		);
-		
-		$("#material_name").change(
-			function() {
-				window.location = 'skp:material_changed@' + this.value;
-				$("#type").change();
-			}
-		);
+		)
 
 		$("#type").change(
 			function() {
-				$(this).nextAll().hide();
+				$(this).nextAll().hide();                 
 				$(this).nextAll("." + this.value).show();
 				window.location = 'skp:type_changed@' + this.value;
 			}
-		);
+		)
+        
+        $("#material_name").change(
+            function() {
+				// alert (this.value);
+                window.location = 'skp:material_changed@' + this.value;
+            }
+        )
 		
 		$("#settings_panel p.header").click(
 			function()
@@ -79,19 +117,16 @@ $(document).ready(
 				$(this).next("div.collapse").find("select").change();
 				// checkbox_expander("use_diffuse_texture");
 				$("input:checkbox").each(function(index, element) { checkbox_expander(element.id) } );
-				
-				// node = $(this).next("div.collapse").children("#accelerator_type").attr("value");
-				// $(this).next("div.collapse").children("#accelerator_type").siblings("#" + node).show();
 			}
-		);
-		
-		// $("#settings_panel #type").change(
-			// function()
-			// {
-				// $(this).nextAll().hide();
-				// $(this).nextAll("." + this.value).show();
-			// }
-		// );
+		)
+                  
+            $("td.swatch").click(
+            function()
+            {
+                // alert (this.id)
+                window.location = 'skp:open_color_picker@' + this.id;
+            }
+        )
 		
 		$('select[id$="_imagemap_filtertype"]').change(
 			function()
@@ -99,15 +134,15 @@ $(document).ready(
 				$(this).nextAll().hide();
 				$(this).nextAll("." + this.value).show();
 			}
-		);
+		)
 		
 		$('select[id$="_texturetype"]').change(
 			function()
 			{
 				$(this).next().hide();
-				$(this).next("." + this.value).show();
+				$(this).next("." + this.value).show(); // shows load button
 			}
-		);
+		)
 		
 		$('input[id$="_browse"]').click(
 			function()
@@ -134,21 +169,21 @@ $(document).ready(
 			{
 				window.location = 'skp:get_diffuse_color'
 			}
-		);
+		)
 		
 		$("#save_to_model").click(
 			function()
 			{
 				window.location = 'skp:save_to_model';
 			}
-		);
+		)
 		
 		$("#reset").click(
 			function()
 			{
 				window.location = 'skp:reset_to_default';
 			}
-		);
+		)
 		
 		$('input[id="update_changes"]').click(
 			function()
@@ -163,152 +198,18 @@ $(document).ready(
 				window.location = 'skp:cancel_changes';
 			}
 		)
-		
-		// $("#imagemap_uvset").change(
-			// function()
-			// {
-				// window.location = 'skp:param_generate@' + this.id+'='+this.value
-			// }
-		// );
+        
+        $('input[id="update_material_preview"]').click(
+            function()
+            {
+                window.location = 'skp:update_material_preview';
+            }
+        )
 		
 	}		
-);
+)
 
 
-// //TODO add spinner plugin for number input field 
-// function checkbox_expander(id)
-// {
-	// if ($("#" + id).attr("checked"))
-	// {
-		// if (id.match("show_advanced") || id.match("_use_")) {
-			// $("#" + id).nextAll(".basic").hide();
-			// $("#" + id).nextAll(".advanced").show();
-		// }
-		// $("#" + id).next(".collapse").show();
-		// $("#" + id).next(".collapse").children("#focus_type").change();
-	// }
-	// else if ($("#" + id).attr("checked") == false)
-	// {
-		// if (id.match("show_advanced") || id.match("_use_")) {
-			// $("#" + id).nextAll(".basic").show();
-			// $("#" + id).nextAll(".advanced").hide();
-		// }
-		// $("#" + id).next(".collapse").hide();
-	// }
-// }
 
-// $(document).ready(
-	// function()
-	// {
-		// $(".collapse").hide();
-		// $(".collapse2").hide();
-		// $(".advanced").hide();
-		// window.location = 'skp:set_material_list';
-	
-		// $("#settings_panel select, :text").change(
-			// function()
-			// {
-				// window.location = 'skp:param_generate@' + this.id+'='+this.value+'|'+"material_name="+$("#material_name").attr("value");
-			// }
-		// );
-		
-		// $("#settings_panel #type").change(
-			// function()
-			// {
-				// $(this).nextAll().hide();
-				// $(this).nextAll("." + this.value).show();
-			// }
-		// );
-		
-		// $(":checkbox").click(
-			// function()
-			// {
-				// window.location = 'skp:param_generate@' + this.id + '=' + $(this).attr('checked');
-				// checkbox_expander(this.id)
-			// }
-		// );
-		
-		// $("#settings_panel input[name=use_plain_color]:radio").click(
-			// function()
-			// {
-				// window.location = 'skp:param_generate@' + this.name + '=' + this.value;
-			// }
-		// );
-		
-		// $("#settings_panel p.header").click(
-			// function()
-			// {
-				// node = $(this).next("div.collapse").children("#accelerator_type").attr("value");
-				// $(this).next("div.collapse").children("#accelerator_type").siblings("#" + node).show();
-				// node = $(this).next("div.collapse").children("#sintegrator_type").attr("value");
-				// $(this).next("div.collapse").children("#sintegrator_type").siblings("#" + node).show();
-				// node = $(this).next("div.collapse").children("#camera_type").change();
-				// node = $(this).next("div.collapse").children("#environment_light_type").change();
-				// node = $(this).next("div.collapse").children("#sampler_type").change();
-				// node = $(this).next("div.collapse").children("#pixelfilter_type").change();
-				// node = $(this).next("div.collapse").children("#fleximage_tonemapkernel").change();
-				// node = $(this).next("div.collapse").find("#sintegrator_path_rrstrategy").change();
-				// node = $(this).next("div.collapse").find("#sintegrator_exphoton_rrstrategy").change();
-				// node = $(this).next("div.collapse").find("#fleximage_write_exr_compressiontype").change();
-				// node = $(this).next("div.collapse").find("#fleximage_write_exr_zbuf_normalizationtype").change();
-				// node = $(this).next("div.collapse").find("#fleximage_linear_camera_type").change();
-				
-				// //TODO: expand all checkbox
-				// checkbox_expander("fleximage_write_exr")
-				// checkbox_expander("fleximage_write_png")
-				// checkbox_expander("fleximage_write_tga")
-				// checkbox_expander("fleximage_use_preset")
-				
-				// var name = $(this).text();
-				// var the_sign = name.substr(0, 1);
-				// if (the_sign == "+") {
-					// name = name.replace(the_sign, "-");
-				// } else if (the_sign == "-") {
-					// name = name.replace(the_sign, "+");
-				// }
-				// $(this).html(name);
-				// $(this).next("div.collapse").slideToggle(300);
-				// // node = $(this).next("div.collapse").children("#environment_light_type").attr("value");
-				// // $(this).next("div.collapse").children("#environment_light_type").siblings("#" + node).show();
-			// }
-		// );
-				
-		// $("#settings_panel p.header2").click(
-			// function()
-			// {
-				// node = $(this).next("div.collapse2").children("#accelerator_type").attr("value");
-				// $(this).next("div.collapse2").children("#accelerator_type").siblings("#" + node).show();
-				// node = $(this).next("div.collapse2").children("#sintegrator_type").attr("value");
-				// $(this).next("div.collapse2").children("#sintegrator_type").siblings("#" + node).show();
-// //				node = $(this).next("div.collapse2").children("#camera_type").change();
-				// $(this).next("div.collapse2").slideToggle(300);
-				// // node = $(this).next("div.collapse").children("#environment_light_type").attr("value");
-				// // $(this).next("div.collapse").children("#environment_light_type").siblings("#" + node).show();
-			// }
-		// );
-				
-		// // $("#settings_panel #sintegrator_type").change(
-			// // function()
-			// // {
-				// // //alert("#"+this.value);
-				// // nodes = $(this).nextAll().hide();
-				// // nodes = $(this).nextAll("#" + this.value).show();
-			// // }
-		// // );
-		
-		// $("#save_to_model").click(
-			// function()
-			// {
-				// window.location = 'skp:save_to_model';
-			// }
-		// );
-		
-		// $("#reset").click(
-			// function()
-			// {
-				// window.location = 'skp:reset_to_default';
-			// }
-		// );
-		
-	// }
-// );
+
+

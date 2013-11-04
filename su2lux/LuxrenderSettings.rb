@@ -30,7 +30,6 @@ class LuxrenderSettings
 	# Camera
 	###
 		'camera_type' => 'perspective',
-		
 		'hither'=> 0.1,
 		'yon' => 100,  
 		'shutteropen' => 0.0,
@@ -44,7 +43,7 @@ class LuxrenderSettings
 		'distribution' => 'uniform',
 		'power' => 1,
 		'blades' => 6,
-
+    
 		'camera_scale' => 7.31, #seems to work only in Blender
 		'use_clipping' => false, #GUI
 		'use_dof_bokeh'=>false, #GUI
@@ -69,6 +68,9 @@ class LuxrenderSettings
 		'environment_infinite_gain' => 1.0,
 		'environment_infinite_mapping' => 'latlong',
 		'environment_infinite_mapname' => '',
+		'environment_infinite_rotatex' => 0,
+		'environment_infinite_rotatey' => 0,
+		'environment_infinite_rotatez' => 0,
 		'environment_infinite_gamma' => 1.0,
 		'environment_sky_lightgroup' => 'sky',
 		'environment_sky_gain' => 1.0,
@@ -96,7 +98,6 @@ class LuxrenderSettings
 		'pixelfilter_show_advanced_sinc' => false, #GUI
 		'pixelfilter_show_advanced_triangle' => false, #GUI
 		'pixelfilter_type' => 'mitchell',
-		
 		'pixelfilter_mitchell_sharpness' => 0.333333, #Basic GUI
 		'pixelfilter_mitchell_optmode' => 'manual', #TODO: change to slider ##unused in Sketchup
 		'pixelfilter_mitchell_xwidth' => 2.0, 
@@ -121,12 +122,12 @@ class LuxrenderSettings
 	##
 		'sampler_show_advanced'=>false,
 		'sampler_type'=>'metropolis',
-		
 		'sampler_random_pixelsamples' => 4,
 		'sampler_random_pixelsampler' => 'vegas',
 		'sampler_lowdisc_pixelsamples' => 4,
 		'sampler_lowdisc_pixelsampler' => 'vegas',
-		'sampler_metropolis_strength' => 0.6, #Basic GUI
+        'sampler_metropolis_strength' => 0.6, #Basic GUI
+        'sampler_metropolis_noiseaware' => true,
 		'sampler_metropolis_largemutationprob' => 0.4,
 		'sampler_metropolis_maxconsecrejects' => 512,
 		'sampler_metropolis_usevariance'=> false,
@@ -138,7 +139,6 @@ class LuxrenderSettings
 	##
 		'sintegrator_show_advanced' => true, #GUI
 		'sintegrator_type' => 'bidirectional',
-
 		'sintegrator_bidir_show_advanced' => false, #GUI
 		'sintegrator_bidir_bounces' => 16, #Basic GUI
 		'sintegrator_bidir_eyedepth' => 8,
@@ -147,14 +147,11 @@ class LuxrenderSettings
 		'sintegrator_bidir_lightthreshold' => 0.0,
 		'sintegrator_bidir_strategy' => 'auto',
 		'sintegrator_bidir_debug' => 'false',
-		
-
 		'sintegrator_direct_show_advanced' => false,
 		'sintegrator_direct_bounces' => 5, #Basic GUI
 		'sintegrator_direct_maxdepth' => 5,
 		'sintegrator_direct_shadow_ray_count' => 1,
 		'sintegrator_direct_strategy' => 'auto',
-		
 		'sintegrator_distributedpath_directsampleall' => true,
 		'sintegrator_distributedpath_directsamples' => 1,
 		'sintegrator_distributedpath_indirectsampleall' => false,
@@ -185,7 +182,6 @@ class LuxrenderSettings
 		'sintegrator_distributedpath_glossyrefractreject_threshold' => 10.0,
 		
 		'sintegrator_exphoton_show_advanced' => false,
-		
 		'sintegrator_exphoton_finalgather' => true,
 		'sintegrator_exphoton_finalgathersamples' => 32,
 		'sintegrator_exphoton_gatherangle' => 10.0,
@@ -210,14 +206,12 @@ class LuxrenderSettings
 		'sintegrator_exphoton_dbg_enable_radiancemap' => false,
 
 		'sintegrator_igi_show_advanced' => false,
-		
 		'sintegrator_igi_maxdepth' => 5,
 		'sintegrator_igi_mindist' => 0.1,
 		'sintegrator_igi_nsets' => 4,
 		'sintegrator_igi_nlights' => 64,
 
 		'sintegrator_path_show_advanced' => false,
-		
 		'sintegrator_path_include_environment' => true,
 		'sintegrator_path_bounces' => 10, #Basic GUI
 		'sintegrator_path_maxdepth' => 10,
@@ -268,7 +262,6 @@ class LuxrenderSettings
 		'fleximage_filename' => "SU2LUX_rendered_image",
 		'fleximage_writeinterval' => 60,
 		'fleximage_displayinterval' => 12,
-		'fleximage_reject_warmup' => 64,
 		'fleximage_outlierrejection_k' => 0,
 		'fleximage_debug' => false,
 		'fleximage_haltspp' => -1,
@@ -333,13 +326,28 @@ class LuxrenderSettings
 		#grid properties
 		'grid_refineimmediately' => false,
 	# END Accelerator
-
+    
+    
+    ##
+    # Color Swatches
+    ##
+    'swatch_list' => ['diffuse_swatch','reflection_swatch','transmission_swatch','absorption_swatch'],
+    'diffuse_swatch' => ['kd_R','kd_G','kd_B'],
+    'reflection_swatch' => ['kr_R','kr_G','kr_B'],
+    'transmission_swatch' => ['kt_R','kt_G','kt_B'],
+    'absorption_swatch' => ['ka_R','ka_G','ka_B'],
+    
+    
 	##
 	# Other
 	##
 		'useparamkeys' => false,
 		'export_file_path' => "",
-		'priority' => 'low'
+        'export_luxrender_path' => "",
+        'geomexport' => 'ply',
+		'priority' => 'low',
+        'copy_textures' => true,
+        'colorpicker' => "diffuse_swatch",
 	}
 
 	##
@@ -347,7 +355,8 @@ class LuxrenderSettings
 	##
 	def LuxrenderSettings::ui_refreshable?(id)
 		ui_refreshable_settings = [
-			'export_file_path',
+            'export_file_path',
+            'export_luxrender_path',
 			'environment_infinite_mapname'
 		]
 		if ui_refreshable_settings.include?(id)

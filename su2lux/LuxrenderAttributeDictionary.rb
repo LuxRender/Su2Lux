@@ -91,6 +91,13 @@ class LuxrenderAttributeDictionary
 			puts @@dictionaries[k].each{|kk,vv| puts "#{kk}=>#{vv}"}
 		}
 	end
-
+	
+	def LuxrenderAttributeDictionary::list_properties()
+		puts @@dictionary.length
+		theproperties = @@dictionary.keys
+		theproperties.each{|kk,vv|
+			puts ("#{kk} #{vv}")
+		}
+	end
 	
 end #END class Luxrender_Attribute_dictionary

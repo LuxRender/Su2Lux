@@ -1,18 +1,19 @@
 class LuxrenderExport
 	attr_reader :count_tri
 	attr_reader :used_materials
-	##
-	#
-	##
+    
 	def initialize(export_file_path,os_separator)
 		@lrs=LuxrenderSettings.new
 		@export_file_path=export_file_path
 		@model_name=File.basename(@export_file_path)
 		@model_name=@model_name.split(".")[0]
+        @instance_name = 0
 		@os_separator=os_separator
-
 		@path_textures=File.dirname(@export_file_path)
 		@has_portals = false
+        @mat_step = 0 # monitors export progress
+        @current_step = 0
+        @total_step = 0
 	end # END initialize
 
 	def reset
@@ -25,24 +26,17 @@ class LuxrenderExport
 		@scale = 0.0254
 		@count_tri = 0
 		@model_textures={}
+        @instance_name = 0
 		@lrs.fleximage_xresolution = Sketchup.active_model.active_view.vpwidth unless @lrs.fleximage_xresolution
 		@lrs.fleximage_yresolution = Sketchup.active_model.active_view.vpheight unless @lrs.fleximage_yresolution
 	end #END reset
-		
-	##
-	#
-	##
+
 	def export_global_settings(out)
-		out.puts "# Lux Render Scene File"
-		out.puts "# Exported by SU2LUX 0.1-devel"
+		out.puts "# LuxRender Scene File"
+		out.puts "# Exported by SU2LUX 0.28-devel"
 		out.puts "# Global Information"
 	end # END export_global_settings
 
-		# -----------Extract the camera parameters of the current view ------------------------------------
-
-	##
-	#
-	##
 	def export_camera(view, out)
 		# @lrs=LuxrenderSettings.new
 
@@ -53,7 +47,6 @@ class LuxrenderExport
 
 		out_user_target = "%12.6f" %(user_target.x.to_m.to_f) + " " + "%12.6f" %(user_target.y.to_m.to_f) + " " + "%12.6f" %(user_target.z.to_m.to_f)
 		out_user_up = "%12.6f" %(user_up.x) + " " + "%12.6f" %(user_up.y) + " " + "%12.6f" %(user_up.z)
-
 		out.puts "LookAt"
 		out.puts "%12.6f" %(user_eye.x.to_m.to_f) + " " + "%12.6f" %(user_eye.y.to_m.to_f) + " " + "%12.6f" %(user_eye.z.to_m.to_f)
 		out.puts out_user_target
@@ -77,7 +70,7 @@ class LuxrenderExport
 			when "orthographic"
 				camera_scale = @lrs.camera_scale
 				# out.puts "Camera \"#{@lrs.camera_type}\""
-				# No more scale parameter exporting due to Lux complainig for it
+				# No more scale parameter exporting due to LuxRender complaining about it
 				# out.puts "	\"float scale\" [%.6f" %(@lrs.camera_scale) + "]"
 			when "environment"
 				# out.puts "Camera \"#{@lrs.camera_type}\""
@@ -119,9 +112,6 @@ class LuxrenderExport
 		out.print "\n"
 	end # END export_camera
 
-	##
-	#
-	##
 	def compute_fov(xres, yres)
 		camera = Sketchup.active_model.active_view.camera
 		fov_vertical = camera.fov
@@ -146,9 +136,6 @@ class LuxrenderExport
 		return fov
 	end # END compute_fov
 
-	##
-	#
-	##
 	def compute_screen_window
 		cam_shiftX = @lrs.shiftX.to_f
 		cam_shiftY = @lrs.shiftY.to_f
@@ -161,9 +148,6 @@ class LuxrenderExport
 		end
 	end # END compute_screen_window
 
-	##
-	#
-	##
 	def export_film(out)
 		out.puts "Film \"fleximage\""
 		percent = @lrs.fleximage_resolution_percent.to_i / 100.0
@@ -254,8 +238,7 @@ class LuxrenderExport
 		flm = @lrs.fleximage_restart_resume_flm ? "true" : "false"
 		out.puts "\t\"bool restart_resume_flm\" [\"#{flm}\"]\n"
 		out.puts "\t\"string filename\" [\"#{@lrs.fleximage_filename}\"]"
-		out.puts "\t\"integer reject_warmup\" [#{@lrs.fleximage_reject_warmup.to_i}]"
-		dbg = @lrs.fleximage_debug ? "true" : "false"
+        dbg = @lrs.fleximage_debug ? "true" : "false"
 		out.puts "\t\"bool debug\" [\"#{dbg}\"]\n"
 		if (@lrs.fleximage_use_preset)
 		SU2LUX.dbg_p @lrs.fleximage_colorspace_preset
@@ -400,9 +383,6 @@ class LuxrenderExport
 		# out.puts "\t\"bool useparamkeys\" [\"#{flm}\"]\n"
 	end # END export_film
 
-	##
-	#
-	##
 	def get_exposure(type, shutterStr, fpsStr)
 		if (type == 'photo')
 			fps = 1
@@ -419,9 +399,7 @@ class LuxrenderExport
 		end
 		return exp
 	end
-	##
-	#
-	##
+
 	def export_render_settings(out)
 		out.puts export_surface_integrator
 		out.puts export_filter
@@ -431,9 +409,6 @@ class LuxrenderExport
 		out.puts "\n"
 	end # END export_render_settings
 
-	##
-	#
-	##
 	def export_filter
 		filter = "\n"
 		filter += "PixelFilter \"#{@lrs.pixelfilter_type}\"\n"
@@ -489,10 +464,7 @@ class LuxrenderExport
 		end
 		return filter
 	end #END export_filter
-	
-	##
-	#
-	##
+
 	def export_sampler
 		sampler = "\n"
 		sampler += "Sampler \"#{@lrs.sampler_type}\"\n"
@@ -505,6 +477,8 @@ class LuxrenderExport
 					sampler += "\t\"bool usevariance\" [\"#{usevariance}\"]\n"
 				else
 					sampler += "\t\"float largemutationprob\" [#{"%.6f" %(1 - @lrs.sampler_metropolis_strength.to_f)}]\n"
+                    noiseaware = @lrs.sampler_metropolis_noiseaware ? "true" : "false"
+					sampler += "\t\"bool noiseaware\" [\"#{noiseaware}\"]\n"
 				end
 			when "lowdiscrepancy"
 				sampler += "\t\"string pixelsampler\" [\"#{@lrs.sampler_lowdisc_pixelsampler}\"]\n"
@@ -518,9 +492,6 @@ class LuxrenderExport
 		return sampler
 	end #END export_sampler
 
-	##
-	#
-	##
 	def export_surface_integrator
 		integrator = "\n"
 		integrator += "SurfaceIntegrator \"#{@lrs.sintegrator_type}\"\n"
@@ -651,10 +622,7 @@ class LuxrenderExport
 		return integrator
 		
 	end #END export_surface_integrator
-	
-	##
-	#
-	##
+
 	def export_accelerator
 		accel = "\n"
 		accel += "Accelerator \"#{@lrs.accelerator_type}\"\n"
@@ -675,9 +643,7 @@ class LuxrenderExport
 		end
 		return accel
 	end
-	##
-	#
-	##
+
 	def export_volume_integrator
 		volume = "\n"
 		volume += "VolumeIntegrator \"#{@lrs.volume_integrator_type}\"\n"
@@ -689,11 +655,18 @@ class LuxrenderExport
 		end
 		return volume
 	end
-	##
-	#
-	##
+
 	def export_light(out)
 		sun_direction = Sketchup.active_model.shadow_info['SunDirection']
+		out.puts "TransformBegin"
+		case @lrs.environment_light_type
+			when 'infinite'
+				if ( ! @lrs.environment_infinite_mapname.strip.empty?)
+					out.puts "\tRotate #{@lrs.environment_infinite_rotatex} 1 0 0" 
+					out.puts "\tRotate #{@lrs.environment_infinite_rotatey} 0 1 0"
+					out.puts "\tRotate #{@lrs.environment_infinite_rotatez} 0 0 1"
+				end
+		end
 		out.puts "AttributeBegin"
 		case @lrs.environment_light_type
 			when 'sunsky'
@@ -735,63 +708,132 @@ class LuxrenderExport
 				end
 		end
 		out.puts "AttributeEnd"
+		out.puts "TransformEnd"
 	end # END export_light
 
-	##
-	#
-	##
 	def export_mesh(out)
-		mc=MeshCollector.new(@model_name,@os_separator)
+		mc=LuxrenderMeshCollector.new(@model_name,@os_separator,SU2LUX::PREFIX_TEXTURES,true)
 		mc.collect_faces(Sketchup.active_model.entities, Geom::Transformation.new)
 		@materials=mc.materials
-		@fm_materials=mc.fm_materials
+		@fm_materials=mc.fm_materials # face me component materials
 		# @used_materials = @materials.merge(@fm_materials)
 		@model_textures=mc.model_textures
 		@texturewriter=mc.texturewriter
 		@count_faces=mc.count_faces
 		@current_mat_step = 1
 		p 'export faces'
-		export_faces(out)
+		export_faces(out,[])
 		p 'export fmfaces'
-		export_fm_faces(out)
+		export_fm_faces(out,[])
+        
+        # the instances we deferred also need to be exported
+        mc.deferred_instances.each { | key , value |
+            p "key: #{key} -> #{value.length}"
+            imc=LuxrenderMeshCollector.new(@model_name,@os_separator,SU2LUX::PREFIX_TEXTURES,false) #do not defer a second time
+            definition  = Sketchup.active_model.definitions.select { | d | d.class == Sketchup::ComponentDefinition && d.name.eql?(key) }
+            if ! definition.empty?
+                p "Executing collect_faces for: #{definition[0].name} ->  #{@instance_name}"
+                imc.collect_faces(definition[0].entities, Geom::Transformation.new)
+                keep_materials = 	@materials
+                keep_fm_materials = @fm_materials
+                keep_textures = @model_textures
+                @materials=imc.materials
+                @fm_materials=imc.fm_materials
+                @model_textures=imc.model_textures
+                @texturewriter=imc.texturewriter
+                @count_faces=imc.count_faces
+                @current_mat_step = 1
+                ## keep totals alive
+                @materials = @materials.merge(keep_materials)
+                @fm_materials = @fm_materials.merge(keep_fm_materials)
+                @model_textures = @model_textures.merge(keep_textures)
+                export_faces(out,value)
+                export_fm_faces(out,value)
+            end
+        }
 	end # END export_mesh
 
-	##
-	#
-	##
-	def export_faces(out)
+	def export_preview_material(preview_path,generated_lxm_file,currentmaterialname,currentmaterial,texture_path,luxmat)
+		puts "running preview export function"
+		puts preview_path,generated_lxm_file,currentmaterialname,currentmaterial,texture_path,luxmat
+		
+		# prepare texture paths
+		emptyprefix = String.new
+		outputfolder= @model_name + "/textures"
+
+		# check for textures folder in temporary location, create if missing
+		outputfolder_temp= preview_path+"/LuxRender"
+		Dir.mkdir(outputfolder_temp) unless File.exists?(outputfolder_temp)
+		outputfolder_temp= outputfolder_temp+"/textures"
+		Dir.mkdir(outputfolder_temp) unless File.exists?(outputfolder_temp)
+		
+		# create temporary group and face, apply current material
+		luxmat_group = Sketchup.active_model.entities.add_group
+		pt1 = [-3,-3,-3]
+		pt2 = [-3, -3, -4]
+		pt3 = [-3, -4, -3]
+		luxmat_face = luxmat_group.entities.add_face pt1, pt2, pt3
+		puts "assigning material to temporary face, using material ", currentmaterial
+		luxmat_face.material = currentmaterial
+		luxmat_group.material = currentmaterial
+		
+		# create MeshCollector, store used material's textures
+		mcpre=LuxrenderMeshCollector.new(outputfolder,@os_separator,emptyprefix,false)
+		mcpre.collect_faces(luxmat_group, Geom::Transformation.new)
+		@model_textures=mcpre.model_textures
+		@texturewriter=mcpre.texturewriter
+		@materials=mcpre.materials
+		
+		# get SketchUp material texture
+		if (currentmaterial.texture)
+			texturefilepath = currentmaterial.texture.filename
+			trimmedfilename = texturefilepath.gsub("\\", "")
+			trimmedfilename = trimmedfilename.gsub("/", "")
+			if (texturefilepath == trimmedfilename) # texture is built-in texture
+				puts "exporting SketchUp texture to preview texture folder"
+				@texturewriter.load (luxmat_face, true)
+				@texturewriter.write_all (preview_path+texture_path+"/", false)
+			else # texture is loaded from file
+				texture_name=mcpre.get_texture_name(currentmaterialname,currentmaterial)
+				puts "copying material preview texture from:", texturefilepath
+				outputpath = preview_path+texture_path+"/"+File.basename(texture_name)  # last part was File.basename(texturefilepath) 
+				texturefilepath = sanitize_path(texturefilepath)
+				FileUtils.copy_file(texturefilepath, outputpath)
+			end
+		end
+		
+		# write data to file
+		export_mat(luxmat, generated_lxm_file)
+		
+		# delete temporary group
+		Sketchup.active_model.entities.erase_entities luxmat_group
+		puts "end of preview export function"
+	end
+
+	def export_faces(out,is_instance)
 		@materials.each{|mat,value|
 			if (value!=nil and value!=[])
-				export_face(out,mat,false)
+				export_face(out,mat,false,is_instance)
 				@materials[mat]=nil
 			end}
 		@materials={}
 	end # END export_faces
 
-	##
-	#
-	##
-	def export_fm_faces(out)
+	def export_fm_faces(out,is_instance)
 		@fm_materials.each{|mat,value|
 			if (value!=nil and value!=[])
-				export_face(out,mat,true)
+				export_face(out,mat,true,is_instance)
 				@fm_materials[mat]=nil
 			end}
 		@fm_materials={}
 	end # END export_fm_faces
 
-	##
-	#
-	##
 	def point_to_vector(p)
 		Geom::Vector3d.new(p.x,p.y,p.z)
 	end # END point_to_vector
 
-	##
-	#
-	##
-	def export_face(out,mat,fm_mat)
-		p 'export face'
+	def export_face(out,mat,fm_mat,is_instance)
+        p 'export face' # this function runs once for each material
 		meshes = []
 		polycount = 0
 		pointcount = 0
@@ -818,37 +860,22 @@ class LuxrenderExport
 		 end
 		
 		matname="FM_"+matname if fm_mat
-
-		#if mat
-		 #  matname = mat.display_name
-			# p "matname="+matname
-			# matname=matname.gsub(/[<>]/, '*')
-			# if mat.texture
-			# has_texture = true
-			# end
-		 #else
-			# matname = "Default"
-		 #end
-		
-		#matname="FM_"+matname if fm_mat
-			
-		#Introduced by SJ
+        
 		total_mat = @materials.length + @fm_materials.length
-		mat_step = " [" + @current_mat_step.to_s + "/" + total_mat.to_s + "]"
+		@mat_step = " [" + @current_mat_step.to_s + "/" + total_mat.to_s + "]"
 		@current_mat_step += 1
 
-		total_step = 4
+		@total_step = 4
 		if (has_texture and @clay==false) or @exp_default_uvs==true
-			total_step += 1
+			@total_step += 1
 		end
-		current_step = 1
-		rest = export.length*total_step
-		Sketchup.set_status_text("Converting Faces to Meshes: " + matname + mat_step + "...[" + current_step.to_s + "/" + total_step.to_s + "]" + " #{rest}")
-		#####
+		@current_step = 1
+		@rest = export.length*@total_step
+		Sketchup.set_status_text("Converting Faces to Meshes: " + matname + @mat_step + "...[" + @current_step.to_s + "/" + @total_step.to_s + "]" + " #{@rest}")
 		
 		for ft in export
-			Sketchup.set_status_text("Converting Faces to Meshes: " + matname + mat_step + "...[" + current_step.to_s + "/" + total_step.to_s + "]" + " #{rest}") if (rest%500==0)
-			rest-=1
+			Sketchup.set_status_text("Converting Faces to Meshes: " + matname + @mat_step + "...[" + @current_step.to_s + "/" + @total_step.to_s + "]" + " #{@rest}") if (@rest%500==0)
+			@rest-=1
 		
 			polymesh=(ft[3]==true) ? ft[0].mesh(5) : ft[0].mesh(6)
 			trans = ft[1]
@@ -885,296 +912,515 @@ class LuxrenderExport
 			pointcount=pointcount + polymesh.count_points
 		end
 		
-		startindex = 0
+		# startindex = 0 # commented out when integrating ply/instance export
 		
 		# Exporting vertices
 		#has_texture = false
-		current_step += 1
+		@current_step += 1
+        
+        luxrender_mat=LuxrenderMaterial.new(mat)
+        luxrender_name=luxrender_mat.name
+		
+        if is_instance.empty?
+            out.puts 'AttributeBegin'
+            output_material(mat, out,luxrender_mat)
+        else
+            out.puts "ObjectBegin \"instance_#{@instance_name}\""
+        end
+        
+        geometrytype = @lrs.geomexport()
+        if ( geometrytype=="ply" ) # Write ply filename for all materials
+            puts "using .ply export"
+            subfolder = "/SU2LUX_geometry/"
+            ply_path_base = File.dirname(@export_file_path) + subfolder
+            Dir.mkdir(ply_path_base) unless File.exists?(ply_path_base)
+            
+            if mat.class==String
+                puts "using string"
+                ply_path=ply_path_base + @instance_name.to_s + '_' + mat+'.ply'
+                else
+                puts "using mat.name"
+                ply_path=ply_path_base + @instance_name.to_s + '_' + luxrender_name +'.ply' # mat.name was mat.display_name
+            end
+            output_ply_geometry(ply_path, meshes, mirrored, mat_dir, @rest, has_texture, matname, pointcount, polycount, default_mat, distorted_uv, (!has_texture and @exp_default_uvs==true), false)
+            puts "ply path: ", ply_path
+            out.puts "Shape \"plymesh\""
+            out.puts "\"string filename\" [\"#{ply_path}\"]\n"
+            
+        else # write lxo geometry
+            output_inline_geometry(out, meshes, mirrored, mat_dir, @rest, has_texture, matname, luxrender_mat)
+            puts "writing inline geometry"
+            @exp_default_uvs=true
+            no_texture_uvs=(!has_texture and @exp_default_uvs==true)
+            if has_texture or no_texture_uvs
+                output_inline_uv(out, meshes, has_texture, matname, mat_dir, default_mat, distorted_uv, (!has_texture and @exp_default_uvs==true), luxrender_mat)
+            end
+        end
+        
+        export_displacement_textures(mat, out, luxrender_mat)
+        
+        if is_instance.empty?
+            out.puts "AttributeEnd\n\n"
+        else
+            out.puts 'ObjectEnd'
+            is_instance.each { | i_trans |
+                out.puts "AttributeBegin #instance_#{@instance_name}"
+                m=i_trans.to_a
+                out.print "Transform [ #{m[0]} #{m[1]} #{m[2]} #{m[3]} #{m[4]} #{m[5]} #{m[6]} #{m[7]} #{m[8]} #{m[9]} #{m[10]} #{m[11]} #{m[12]*@scale} #{m[13]*@scale} #{m[14]*@scale} #{m[15]} ] \n"
+                output_material(mat, out, luxrender_mat)
+                out.puts "ObjectInstance \"instance_#{@instance_name}\""
+                out.puts "AttributeEnd #instance_#{@instance_name}"
+            }
+        end
+        #Exporting Material
+        @instance_name += 1
+    end
+        
+    def output_ply_geometry(ply_path, meshes, mirrored, mat_dir, rest, has_texture, matname, pointcount, polycount, default_mat, distorted_uv, no_texture_uvs, binary)
+        startindex = 0
+        i=0
+        
+        ply_file=File.new(ply_path,"w")
+        ply_file << "ply\n"
+        if ( binary == true)
+            ply_file << "format binary_little_endian 1.0\n"
+            else
+            ply_file << "format ascii 1.0\n"
+        end
+        ply_file << "comment created by SU2Lux " << Time.new << "\n"
+        ply_file << "element vertex #{pointcount}\n"
+        ply_file << "property float x\n"
+        ply_file << "property float y\n"
+        ply_file << "property float z\n"
+        ply_file << "property float nx\n"
+        ply_file << "property float ny\n"
+        ply_file << "property float nz\n"
+        ply_file << "property float s\n"
+        ply_file << "property float t\n"
+        
+        ply_file << "element face #{polycount}\n"
+        #ply_file << "property list uint8 int32\n"
+        ply_file << "property list uchar uint vertex_indices\n"
+        ply_file << "end_header\n"
+        
+        for mesh in meshes
+            mat_dir_tmp = mat_dir[i]
+            dir=(no_texture_uvs) ? true : mat_dir[i]
+            for p in (1..mesh.count_points)
+                if default_mat[i] and @model_textures[matname]!=nil
+                    mat_texture=(@model_textures[matname][5]).texture
+                    texsize = Geom::Point3d.new(mat_texture.width, mat_texture.height, 1)
+                    else
+                    texsize = Geom::Point3d.new(1,1,1)
+                end
+                
+                textsize=Geom::Point3d.new(20,20,20) if no_texture_uvs
+                
+                if distorted_uv[i]!=nil
+                    uvHelp=distorted_uv[i]
+                    #UV-Photomatch-Bugfix Stefan Jaensch 2009-08-25 (transformation applied)
+                    uv=uvHelp.get_front_UVQ(mesh.point_at(p).transform!(trans_inverse)) if mat_dir[i]==true
+                    uv=uvHelp.get_back_UVQ(mesh.point_at(p).transform!(trans_inverse)) if mat_dir[i]==false
+                    else
+                    uv = [mesh.uv_at(p,dir).x/texsize.x, mesh.uv_at(p,dir).y/texsize.y, mesh.uv_at(p,dir).z/texsize.z]
+                end
+              
+                pos = mesh.point_at(p).to_a
+                norm = mesh.normal_at(p)
+                norm.reverse! if mat_dir_tmp==false
+                if ( binary != true)
+                    ply_file << "#{"%.6f" %(pos[0]*@scale)} #{"%.6f" %(pos[1]*@scale)} #{"%.6f" %(pos[2]*@scale)} #{"%.4f" %(norm.x)} #{"%.4f" %(norm.y)} #{"%.4f" %(norm.z)} #{"%.4f" %(uv.x)} #{"%.4f" %(-uv.y+1)}\n"
+                    else
+                    ply_file << [pos[0]*@scale, pos[1]*@scale, pos[2]*@scale, norm.x, norm.y, norm.z, uv.x, (-uv.y+1)].pack('e*.')
+                end
+            end
+        end
+        
+        for mesh in meshes
+            mirrored_tmp = mirrored[i]
+            mat_dir_tmp = mat_dir[i]
+            for poly in mesh.polygons
+                v1 = (poly[0]>=0?poly[0]:-poly[0])+startindex
+                v2 = (poly[1]>=0?poly[1]:-poly[1])+startindex
+                v3 = (poly[2]>=0?poly[2]:-poly[2])+startindex
+                if !mirrored_tmp
+                    if mat_dir_tmp==true
+                        out_a = [ 3, v1-1, v2-1, v3-1 ]
+                        else
+                        out_a = [ 3, v1-1, v3-1, v2-1 ]
+                    end
+                    else
+                    if mat_dir_tmp==true
+                        out_a = [ 3, v2-1, v1-1, v3-1 ]
+                        else
+                        out_a = [ 3, v2-1, v3-1, v1-1 ]
+                    end
+                end		
+                if ( binary == true)
+                    ply_file << out_a.pack('CVVV')
+                    else
+                    ply_file << "3 #{out_a[1]} #{out_a[2]} #{out_a[3]} \n"
+                end 	
+                @count_tri = @count_tri + 1
+            end
+            startindex = startindex + mesh.count_points
+            i+=1
+        end
+        ply_file.close
+    end
+    
+    def output_inline_geometry(out, meshes, mirrored, mat_dir, rest, has_texture, matname, luxrender_mat)
+        startindex = 0
+        i=0
+		mesh_type = 'Shape "trianglemesh" '
+        mesh_begin= '"integer indices" ['
+        out.puts mesh_type
+        out.puts mesh_begin
+        for mesh in meshes
+            mirrored_tmp = mirrored[i]
+            mat_dir_tmp = mat_dir[i]
+            for poly in mesh.polygons
+                v1 = (poly[0]>=0?poly[0]:-poly[0])+startindex
+                v2 = (poly[1]>=0?poly[1]:-poly[1])+startindex
+                v3 = (poly[2]>=0?poly[2]:-poly[2])+startindex
+                #out.print "#{v1-1} #{v2-1} #{v3-1}\n"
+                if !mirrored_tmp
+                    if mat_dir_tmp==true
+                        out.print "#{v1-1} #{v2-1} #{v3-1}\n"
+                        else
+                        out.print "#{v1-1} #{v3-1} #{v2-1}\n"
+                    end
+                    else
+                    if mat_dir_tmp==true
+                        out.print "#{v2-1} #{v1-1} #{v3-1}\n"
+                        else
+                        out.print "#{v2-1} #{v3-1} #{v1-1}\n"
+                    end
+                end
+                
+                @count_tri = @count_tri + 1
+            end
+            startindex = startindex + mesh.count_points
+            i+=1
+        end
+        out.puts ']'
 		
 		
-		out.puts 'AttributeBegin'
-		i=0
-		
-		# if mat.class==String
-			# out.puts "NamedMaterial \""+mat+"\""
-		# else
-		luxrender_mat=LuxrenderMaterial.new(mat)
-		#Exporting faces indices
-		#light
-		# LightGroup "default"
-		# AreaLightSource "area" "texture L" ["material_name:light:L"]
-		 # "float power" [100.000000]
-		 # "float efficacy" [17.000000]
-		 # "float gain" [1.000000]
-		mesh_type = 'Shape "trianglemesh" ' 
-		mesh_begin= '"integer indices" ['	
-		 case luxrender_mat.type
-				# when "matte", "glass"
-					# out.puts "NamedMaterial \""+luxrender_mat.name+"\""
-				when "light"
-					out.puts "LightGroup \"default\""
-					out.puts "AreaLightSource \"area\" \"texture L\" [\"#{luxrender_mat.name}:light:L\"]"
-					out.puts "\"float power\" [#{"%.6f" %(luxrender_mat.light_power)}]"
-					out.puts "\"float efficacy\" [#{"%.6f" %(luxrender_mat.light_efficacy)}]"
-					out.puts "\"float gain\" [#{"%.6f" %(luxrender_mat.light_gain)}]"
-				when "portal"
-					# mesh_type = 'PortalShape "trianglemesh" "integer indices" ['	
-					out.puts "ObjectBegin \"Portal_Shape\""
-					@has_portals = true
-					SU2LUX.dbg_p mesh_type
-				else
-					out.puts "NamedMaterial \""+luxrender_mat.name+"\""
-					SU2LUX.dbg_p "NAME: " + luxrender_mat.name
-			end
-		# end
-		
-		out.puts mesh_type
-
-		# Exporting displacement map
-
-		if luxrender_mat.use_displacement
-			out.puts "\"string subdivscheme\" [\""+luxrender_mat.dm_scheme+"\"]"
-			out.puts "\"bool dmnormalsmooth\" [\"#{luxrender_mat.dm_normalsmooth}\"]"
-			out.puts "\"integer nsubdivlevels\" [#{luxrender_mat.dm_subdivl}]"
-			out.puts "\"string displacementmap\" [\""+luxrender_mat.name+"::displacementmap\"]"
-			out.puts "\"float dmscale\" [#{"%.6f" %(luxrender_mat.dm_scale)}]"
-			out.puts "\"float dmoffset\" [#{"%.6f" %(luxrender_mat.dm_offset)}]"
-		end
-
-		out.puts mesh_begin
-
-		for mesh in meshes
-				mirrored_tmp = mirrored[i]
-			mat_dir_tmp = mat_dir[i]
-			for poly in mesh.polygons
-				v1 = (poly[0]>=0?poly[0]:-poly[0])+startindex
-				v2 = (poly[1]>=0?poly[1]:-poly[1])+startindex
-				v3 = (poly[2]>=0?poly[2]:-poly[2])+startindex
-				#out.print "#{v1-1} #{v2-1} #{v3-1}\n"
-				if !mirrored_tmp
-					if mat_dir_tmp==true
-						out.print "#{v1-1} #{v2-1} #{v3-1}\n"
-					else
-						out.print "#{v1-1} #{v3-1} #{v2-1}\n"
-					end
-				else
-					if mat_dir_tmp==true
-						out.print "#{v2-1} #{v1-1} #{v3-1}\n"
-					else
-						out.print "#{v2-1} #{v3-1} #{v1-1}\n"
-					end
-				end		
-			
-			@count_tri = @count_tri + 1
-			end
-			startindex = startindex + mesh.count_points
-			i+=1
-		end
-		out.puts ']'
-		
-		
-		#Exporting verticies  points
-		out.puts '"point P" ['
-		for mesh in meshes
-			for p in (1..mesh.count_points)
-				pos = mesh.point_at(p).to_a
-				out.print "#{"%.6f" %(pos[0]*@scale)} #{"%.6f" %(pos[1]*@scale)} #{"%.6f" %(pos[2]*@scale)}\n"
-			end
-		end
-		out.puts ']'
-		
-		i=0
-		#Exporting normals
-		out.puts '"normal N" ['
-		for mesh in meshes
-			Sketchup.set_status_text("Material being exported: " + matname + mat_step + "...[" + current_step.to_s + "/" + total_step.to_s + "]" + " - Normals " + " #{rest}") if rest%500==0
-			rest -= 1
-			mat_dir_tmp = mat_dir[i]
-			for p in (1..mesh.count_points)
-				norm = mesh.normal_at(p)
-				norm.reverse! if mat_dir_tmp==false
-					out.print "#{"%.4f" %(norm.x)} #{"%.4f" %(norm.y)} #{"%.4f" %(norm.z)}\n"
-			end
-			i += 1
-		end
-		out.puts ']'
-		
-		if luxrender_mat.type == "portal"
+        #Exporting vertices
+        out.puts '"point P" ['
+        for mesh in meshes
+            for p in (1..mesh.count_points)
+                pos = mesh.point_at(p).to_a
+                out.print "#{"%.6f" %(pos[0]*@scale)} #{"%.6f" %(pos[1]*@scale)} #{"%.6f" %(pos[2]*@scale)}\n"
+            end
+        end
+        out.puts ']'
+        
+        i=0
+        #Exporting normals
+        out.puts '"normal N" ['
+        for mesh in meshes
+            Sketchup.set_status_text("Material being exported: " + matname + @mat_step + "...[" + @current_step.to_s + "/" + @total_step.to_s + "]" + " - Normals " + " #{@rest}") if @rest%500==0
+            @rest -= 1
+            mat_dir_tmp = mat_dir[i]
+            for p in (1..mesh.count_points)
+                norm = mesh.normal_at(p)
+                norm.reverse! if mat_dir_tmp==false
+                out.print "#{"%.4f" %(norm.x)} #{"%.4f" %(norm.y)} #{"%.4f" %(norm.z)}\n"
+            end
+            i += 1
+        end
+        out.puts ']'
+        
+        if luxrender_mat.type == "portal"
 			out.puts "ObjectEnd"
 		end
-		
-		@exp_default_uvs=true
+        
+        @exp_default_uvs=true
 		no_texture_uvs=(!has_texture and @exp_default_uvs==true)
-		
-		if has_texture
-			current_step += 1
-			i = 0
-			#Exporting uv-coordinates
-			out.puts '"float uv" ['
-			for mesh in meshes
-				#SU2KT.status_bar("Material being exported: " + matname + mat_step + "...[" + current_step.to_s + "/" + total_step.to_s + "]" + " - UVs " + " #{rest}") if rest%500==0
-				rest -= 1
+    end
+    
+    def output_inline_uv(out, meshes, has_texture, matname, mat_dir, default_mat, distorted_uv, no_texture_uvs, luxrender_mat)
+        if has_texture
+    		@current_step += 1
+            
+            i = 0
+            #Exporting uv-coordinates
+            out.puts '"float uv" ['
+            for mesh in meshes
+                #SU2KT.status_bar("Material being exported: " + matname + mat_step + "...[" + @current_step.to_s + "/" + @total_step.to_s + "]" + " - UVs " + " #{@rest}") if @rest%500==0
+                @rest -= 1
+                    
+                dir=(no_texture_uvs) ? true : mat_dir[i]
+                
+                for p in (1 .. mesh.count_points)
+                    if default_mat[i] and @model_textures[matname]!=nil
+                        mat_texture=(@model_textures[matname][5]).texture
+                        texsize = Geom::Point3d.new(mat_texture.width, mat_texture.height, 1)
+                    else
+                        texsize = Geom::Point3d.new(1,1,1)
+                    end
 
-				dir=(no_texture_uvs) ? true : mat_dir[i]
+                    textsize=Geom::Point3d.new(20,20,20) if no_texture_uvs
 
-				for p in (1 .. mesh.count_points)
-
-					if default_mat[i] and @model_textures[matname]!=nil
-						mat_texture=(@model_textures[matname][5]).texture
-						texsize = Geom::Point3d.new(mat_texture.width, mat_texture.height, 1)
-					else
-						texsize = Geom::Point3d.new(1,1,1)
-					end
-
-					textsize=Geom::Point3d.new(20,20,20) if no_texture_uvs
-
-					if distorted_uv[i]!=nil
-						uvHelp=distorted_uv[i]
-						#UV-Photomatch-Bugfix Stefan Jaensch 2009-08-25 (transformation applied)
-						uv=uvHelp.get_front_UVQ(mesh.point_at(p).transform!(trans_inverse)) if mat_dir[i]==true
-						uv=uvHelp.get_back_UVQ(mesh.point_at(p).transform!(trans_inverse)) if mat_dir[i]==false
-					else
-						uv = [mesh.uv_at(p,dir).x/texsize.x, mesh.uv_at(p,dir).y/texsize.y, mesh.uv_at(p,dir).z/texsize.z]
-					end
-						out.print "#{"%.4f" %(uv.x)} #{"%.4f" %(-uv.y+1)}\n"
-				end
-				i += 1
-			end
-			out.puts ']'
+                    if distorted_uv[i]!=nil
+                        uvHelp=distorted_uv[i]
+                        #UV-Photomatch-Bugfix Stefan Jaensch 2009-08-25 (transformation applied)
+                        uv=uvHelp.get_front_UVQ(mesh.point_at(p).transform!(trans_inverse)) if mat_dir[i]==true
+                        uv=uvHelp.get_back_UVQ(mesh.point_at(p).transform!(trans_inverse)) if mat_dir[i]==false
+                        else
+                        uv = [mesh.uv_at(p,dir).x/texsize.x, mesh.uv_at(p,dir).y/texsize.y, mesh.uv_at(p,dir).z/texsize.z]
+                    end
+                    out.print "#{"%.4f" %(uv.x)} #{"%.4f" %(-uv.y+1)}\n"
+                end
+                i += 1
+            end
+            out.puts ']'
+            # out.puts 'AttributeEnd'
+        else
+            saved_uvs = luxrender_mat.get_uv(1)
+            if saved_uvs
+                out.puts '"float uv" ['
+                saved_uvs.each { |uv|
+                    out.puts "#{"%.4f" %(uv.x)} #{"%.4f" %(-uv.y+1)}"
+                }
+                out.puts ']'
+                # out.puts 'AttributeEnd'
+            end
+        end
+    end
+	
+	def sanitize_path(original_path)
+		if (ENV['OS'] =~ /windows/i)
+			sanitized_path = original_path.unpack('U*').pack('C*') # converts string to ISO-8859-1
 		else
-			saved_uvs = luxrender_mat.get_uv(1)
-			if saved_uvs
-				out.puts '"float uv" ['
-				saved_uvs.each { |uv|
-					out.puts "#{"%.4f" %(uv.x)} #{"%.4f" %(-uv.y+1)}"
-				}
-				out.puts ']'
-			end
+			sanitized_path = original_path
 		end
-		
-		out.puts 'AttributeEnd'
-		#Exporting Material
-	end # END export_face
-
-	##
-	#
-	##
+	end
+	
+    def output_material (mat, out,luxrender_mat)
+        puts "running output_material"
+        case luxrender_mat.type
+        when "light"
+            out.puts "LightGroup \""+luxrender_mat.name+"\""
+            out.puts "AreaLightSource \"area\" \"texture L\" [\"#{luxrender_mat.name}:light:L\"]"
+            out.puts "\"float power\" [#{"%.6f" %(luxrender_mat.light_power)}]"
+            out.puts "\"float efficacy\" [#{"%.6f" %(luxrender_mat.light_efficacy)}]"
+            out.puts "\"float gain\" [#{"%.6f" %(luxrender_mat.light_gain)}]"
+        when "portal"
+            out.puts "ObjectBegin \"Portal_Shape\""
+            @has_portals = true
+        else
+			matname_converted = sanitize_path(luxrender_mat.name)
+            out.puts "NamedMaterial \"" + matname_converted + "\""
+        end # end case
+        # out.puts mesh_type # commented out for .ply export, should be moved for .lxo export?
+    end
+        
+    def export_displacement_textures (mat, out, luxrender_mat)
+        puts "exporting displacement map"
+        if luxrender_mat.use_displacement
+            puts "running displacement"
+            out.puts "\"string subdivscheme\" [\""+luxrender_mat.dm_scheme+"\"]"
+            out.puts "\"bool dmnormalsmooth\" [\"#{luxrender_mat.dm_normalsmooth}\"]"
+            out.puts "\"integer nsubdivlevels\" [#{luxrender_mat.dm_subdivl}]"
+            out.puts "\"string displacementmap\" [\""+luxrender_mat.name+"::displacementmap\"]"
+            out.puts "\"float dmscale\" [#{"%.6f" %(luxrender_mat.dm_scale)}]"
+            out.puts "\"float dmoffset\" [#{"%.6f" %(luxrender_mat.dm_offset)}]"
+        end 
+    end
+	
 	def export_used_materials(materials, out)
 		materials.each { |mat|
-				luxrender_mat = LuxrenderMaterial.new(mat)
-				SU2LUX.dbg_p luxrender_mat.name
-				export_mat(luxrender_mat, out) unless luxrender_mat.type == "portal"
+            luxrender_mat = LuxrenderMaterial.new(mat)
+            SU2LUX.dbg_p luxrender_mat.name
+            export_mat(luxrender_mat, out) unless luxrender_mat.type == "portal"
 		}
-	end # END export_used_materials
+	end
 
-	##
-	#
-	##
-	def export_textures(out)
-		@model_textures.each { |key,value|
-		export_texture(key,value[4],out)
-		}
-	end # END export_textures
+	def export_texture(material, mat_type, type, before, after)
+		# SU2LUX.dbg_p "exporting additional texture channels"
+		type_str, type_str2 = self.texture_parameters_from_type(mat_type)
+		preceding = ""
+		following = ""
+		preceding += "Texture \"#{material.name}::#{type_str}\" \"#{type}\" \"imagemap\"" + "\n"
+		preceding += "\t" + "\"string wrap\" [\"#{material.send(mat_type + "_imagemap_wrap")}\"]" + "\n"
+        if (mat_type=='dm')
+			preceding += "\t" + "\"string channel\" [\"#{material.send(mat_type + "_imagemap_channel")}\"]" + "\n"
+        end
+		case material.send(mat_type + "_texturetype")
+			when "sketchup"
+            if (@model_textures.has_key?(material.name))
+                filename = @model_textures[material.name][4]
+				
+				
+				else
+                return [preceding, following]
+            end
+            preceding += "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
+			when "imagemap"
+			
+			imagemap_filename = sanitize_path(material.send(mat_type + "_imagemap_filename"))
+            preceding += "\t" + "\"string filename\" [\"#{imagemap_filename}\"]" + "\n"
+		end
+		preceding += "\t" + "\"float gamma\" [#{material.send(mat_type + "_imagemap_gamma")}]" + "\n"
+		preceding += "\t" + "\"float gain\" [#{material.send(mat_type + "_imagemap_gain")}]" + "\n"
+		preceding += "\t" + "\"string filtertype\" [\"#{material.send(mat_type + "_imagemap_filtertype")}\"]" + "\n"
+		preceding += "\t" + "\"string mapping\" [\"#{material.send(mat_type + "_imagemap_mapping")}\"]" + "\n"
+		preceding += "\t" + "\"float uscale\" [#{"%.6f" %(material.send(mat_type + "_imagemap_uscale"))}]" + "\n"
+		preceding += "\t" + "\"float vscale\" [#{"%.6f" %(material.send(mat_type + "_imagemap_vscale"))}]" + "\n"
+		preceding += "\t" + "\"float udelta\" [#{"%.6f" %(material.send(mat_type + "_imagemap_udelta"))}]" + "\n"
+		preceding += "\t" + "\"float vdelta\" [#{"%.6f" %(material.send(mat_type + "_imagemap_vdelta"))}]" + "\n"
+		preceding += "Texture \"#{material.name}::#{type_str}.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{material.name}::#{type_str}\"] \"#{type} tex2\" [#{material.send(type_str2)}]" + "\n"
+		following += "\t" + "\"texture #{type_str}\" [\"#{material.name}::#{type_str}.scale\"]" + "\n"
+		return [preceding, following]
+	end
+	
+#mix
+	def export_mixtexture(material, mat_type, type, before, after)
+		# SU2LUX.dbg_p "exporting additional texture channels"
+		type_str, type_str2 = self.texture_parameters_from_type(mat_type)
+		preceding = ""
+		following = ""
+		before = ""
+		before += "Texture \"#{material.name}#{type_str}\" \"#{type}\" \"imagemap\"" + "\n"
+		before += "\t" + "\"string wrap\" [\"#{material.send(mat_type + "_imagemap_wrap")}\"]" + "\n"
 
-	##
-	#
-	##
-	def export_texture(texture_name,texture_path,out)
-		out.puts "\Texture \""+texture_name+"\" \"color\" \"imagemap\" \"string filename\" [\""+texture_path+ "\"]"
-		out.puts "MakeNamedMaterial \"" + texture_name + "\""
-		out.puts "\"string type\" [\"matte\"]"
-		out.puts "\"texture Kd\" [\""+texture_name+"\"]"
-	end # END export_texture
+		case material.send(mat_type + "_texturetype")
+			when "sketchup"
+            if (@model_textures.has_key?(material.name))
+                filename = @model_textures[material.name][4]
+				else
+                return [preceding, following]
+            end
+           
+				before += "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
+				preceding += "Texture \"#{material.name}::Kd.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{material.name}::Kd\"] \"#{type} tex2\" [0.63999999 0.63999999 0.63999999]" + "\n"      
+            preceding += "MakeNamedMaterial \"#{material.name} figura\" "+ "\n"
+				preceding += "\t" + "\"string type\" [\"matte\"]"+ "\n"
+				preceding += "\t" + "\"texture Kd\" [\"#{material.name}::Kd.scale\"]" + "\n"
+				preceding += "\t" + "\"float sigma\" [0.0]" + "\n\n"
+			when "imagemap"
+			#after += "Texture \"#{material.name}\" \"#{type}\" \"imagemap\"" + "\n"
+			#after += "\t" + "\"string wrap\" [\"#{material.send(mat_type + "_imagemap_wrap")}\"]" + "\n"
+			imagemap_filename = sanitize_path(material.send(mat_type + "_imagemap_filename"))
+         before += "\t" + "\"string filename\" [\"#{imagemap_filename}\"]" + "\n"
+			preceding += "Texture \"#{material.name}.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{material.name}\"] \"#{type} tex2\" [1]" + "\n"
+			
+         following += "\t" + "\"string namedmaterial1\" [\"#{material.name} figura\"]"+ "\n"
+         following += "\t" + "\"string namedmaterial2\" [\"#{material.name} null\"]"+ "\n"
+         following += "\t" + "\"texture amount\" [\"#{material.name}.scale\"]"+ "\n"
+		end
+		before += "\t" + "\"float gamma\" [#{material.send(mat_type + "_imagemap_gamma")}]" + "\n"
+		before += "\t" + "\"float gain\" [#{material.send(mat_type + "_imagemap_gain")}]" + "\n"
+		before += "\t" + "\"string filtertype\" [\"#{material.send(mat_type + "_imagemap_filtertype")}\"]" + "\n"
+		#preceding += "\t" + "\"string mapping\" [\"#{material.send(mat_type + "_imagemap_mapping")}\"]" + "\n"
 
-	##
-	#
-	##
+			return [before + preceding, after + following]
+	end
+#mix end
+
 	def export_mat(mat, out)
-	# TODO
 		SU2LUX.dbg_p "export_mat"
-		out.puts "# Material '" + mat.name + "'"
-		heading = "MakeNamedMaterial \"#{mat.name}\"" + "\n"
+        SU2LUX.dbg_p (mat.name)
+		
+		# convert mat.name 
+		matname_conv = sanitize_path(mat.name)
+		
+		out.puts "# Material '" + matname_conv + "'"
+		heading = "MakeNamedMaterial \"#{matname_conv}\"" + "\n"
 		heading += "\t" + "\"string type\" [\"#{mat.type}\"]" + "\n"
 		pre = ""
 		post = ""
 		case mat.type
+		#mix
+			when "null"
+            pre, post = self.export_null(mat, pre, post)
+			when "mix"
+            pre, post = self.export_mix(mat, pre, post)
+		#mix end
 			when "matte"
-				pre, post = self.export_diffuse_component(mat, pre, post)
-				pre, post = self.export_sigma(mat, pre, post)
+            pre, post = self.export_diffuse_component(mat, pre, post)
+            pre, post = self.export_sigma(mat, pre, post)
 			when "carpaint"
-				pre, post = self.export_carpaint_name(mat, pre, post)
-				if (!mat.carpaint_name)
-					pre, post = self.export_diffuse_component(mat, pre, post)
-				end
+            pre, post = self.export_carpaint_name(mat, pre, post)
+            if (!mat.carpaint_name)
+                pre, post = self.export_diffuse_component(mat, pre, post)
+            end
 			when "velvet"
-				pre, post = self.export_diffuse_component(mat, pre, post)
-				pre, post = self.export_sigma(mat, pre, post)
+            pre, post = self.export_diffuse_component(mat, pre, post)
+            #pre, post = self.export_sigma(mat, pre, post)
 			when "glossy"
-				pre, post = self.export_diffuse_component(mat, pre, post)
-				pre, post = self.export_specular_component(mat, pre, post)
-				pre, post = self.export_exponent(mat, pre, post)
-				pre, post = self.export_IOR(mat, pre, post)
-				if (mat.use_absorption)
-					pre, post = self.export_absorption_component(mat, pre, post)
-				end
-				multibounce = mat.multibounce ? "true": "false"
-				post += "\t" + "\"bool multibounce\" [\"#{multibounce}\"]" + "\n"
+            pre, post = self.export_diffuse_component(mat, pre, post)
+            pre, post = self.export_specular_component(mat, pre, post)
+            pre, post = self.export_exponent(mat, pre, post)
+            pre, post = self.export_IOR(mat, pre, post)
+            if (mat.use_absorption)
+                pre, post = self.export_absorption_component(mat, pre, post)
+            end
+            multibounce = mat.multibounce ? "true": "false"
+            post += "\t" + "\"bool multibounce\" [\"#{multibounce}\"]" + "\n"
 			when "glass"
-				pre, post = self.export_reflection_component(mat, pre, post)
-				pre, post = self.export_transmission_component(mat, pre, post)
-				pre, post = self.export_IOR(mat, pre, post)
-				architectural = mat.use_architectural ? "true" : "false"
-				post += "\t" + "\"bool architectural\" [\"#{architectural}\"]" + "\n"
-				if ( ! mat.use_architectural)
-					if (mat.use_thin_film_coating)
-						pre, post = self.export_thin_film(mat, pre, post)
-					end
-					if (mat.use_dispersive_refraction)
-						pre, post = self.export_dispersive_refraction(mat, pre, post)
-					end
-				end
+            pre, post = self.export_reflection_component(mat, pre, post)
+            pre, post = self.export_transmission_component(mat, pre, post)
+            pre, post = self.export_IOR(mat, pre, post)
+            architectural = mat.use_architectural ? "true" : "false"
+            post += "\t" + "\"bool architectural\" [\"#{architectural}\"]" + "\n"
+            if ( ! mat.use_architectural)
+                if (mat.use_thin_film_coating)
+                    pre, post = self.export_thin_film(mat, pre, post)
+                end
+                if (mat.use_dispersive_refraction)
+                    pre, post = self.export_dispersive_refraction(mat, pre, post)
+                end
+            end
 			when "roughglass"
-				pre, post = self.export_reflection_component(mat, pre, post)
-				pre, post = self.export_transmission_component(mat, pre, post)
-				pre, post = self.export_IOR(mat, pre, post)
-				pre, post = self.export_dispersive_refraction(mat, pre, post)
+            pre, post = self.export_reflection_component(mat, pre, post)
+            pre, post = self.export_transmission_component(mat, pre, post)
+            pre, post = self.export_IOR(mat, pre, post)
+            pre, post = self.export_dispersive_refraction(mat, pre, post)
 			when "metal"
-				pre, post = self.export_nk(mat, pre, post)
-				pre, post = self.export_exponent(mat, pre, post)
+            pre, post = self.export_nk(mat, pre, post)
+            pre, post = self.export_exponent(mat, pre, post)
 			when "shinymetal"
-				pre, post = self.export_reflection_component(mat, pre, post)
-				pre, post = self.export_specular_component(mat, pre, post)
-				pre, post = self.export_exponent(mat, pre, post)
-				pre, post = self.export_thin_film(mat, pre, post)
+            pre, post = self.export_reflection_component(mat, pre, post)
+            pre, post = self.export_specular_component(mat, pre, post)
+            pre, post = self.export_exponent(mat, pre, post)
+            if (mat.use_thin_film_coating)
+                pre, post = self.export_thin_film(mat, pre, post)
+            end
 			when "mirror"
-				pre, post = self.export_reflection_component(mat, pre, post)
-				pre, post = self.export_thin_film(mat, pre, post)
-			when "mattetranslucent"
-				pre, post = self.export_reflection_component(mat, pre, post)
-				pre, post = self.export_transmission_component(mat, pre, post)
-				energyconserving = mat.energyconserving ? "true": "false"
-				post += "\t" + "\"bool energyconserving\" [\"#{energyconserving}\"]" + "\n"
-				pre, post = self.export_sigma(mat, pre, post)
+            pre, post = self.export_reflection_component(mat, pre, post)
+            if (mat.use_thin_film_coating)
+                pre, post = self.export_thin_film(mat, pre, post)
+			end
+            when "mattetranslucent"
+            pre, post = self.export_reflection_component(mat, pre, post)
+            pre, post = self.export_transmission_component(mat, pre, post)
+            energyconserving = mat.energyconserving ? "true": "false"
+            post += "\t" + "\"bool energyconserving\" [\"#{energyconserving}\"]" + "\n"
+            pre, post = self.export_sigma(mat, pre, post)
 			when "glossytranslucent"
-				pre, post = self.export_diffuse_component(mat, pre, post)
-				pre, post = self.export_transmission_component(mat, pre, post)
-				pre, post = self.export_specular_component(mat, pre, post)
-				pre, post = self.export_exponent(mat, pre, post)
-				pre, post = self.export_IOR(mat, pre, post)
-				pre, post = self.export_absorption_component(mat, pre, post)
-				multibounce = mat.multibounce ? "true": "false"
-				post += "\t" + "\"bool multibounce\" [\"#{multibounce}\"]" + "\n"
+            pre, post = self.export_diffuse_component(mat, pre, post)
+            pre, post = self.export_transmission_component(mat, pre, post)
+            pre, post = self.export_specular_component(mat, pre, post)
+            pre, post = self.export_exponent(mat, pre, post)
+            pre, post = self.export_IOR(mat, pre, post)
+            pre, post = self.export_absorption_component(mat, pre, post)
+            multibounce = mat.multibounce ? "true": "false"
+            post += "\t" + "\"bool multibounce\" [\"#{multibounce}\"]" + "\n"
 			when "light"
-				post += self.export_mesh_light(mat)
+            post += self.export_mesh_light(mat)
 		end
 		# if (mat.use_bump)
-			pre, post = self.export_bump(mat, pre, post)
+        pre, post = self.export_bump(mat, pre, post)
 		# end
-		 if (mat.use_displacement)
+        if (mat.use_displacement)
+            puts "mat.use_displacement is true"
 			pre, post = self.export_displacement(mat, pre, post)
 		end
 		if (mat.type == "light")
-			out.puts post
+			out.puts post	
 		else
 			out.puts pre if (pre != "")
 			out.puts heading
@@ -1182,16 +1428,65 @@ class LuxrenderExport
 		end
 		out.puts("\n")
 	end # END export_mat
+ 
+	def write_textures
+		puts ("using LuxrenderExport write_textures function")
+		
+		if (@lrs.copy_textures == true and @model_textures!={})
+            
+			if FileTest.exist?(@path_textures+@os_separator+SU2LUX::PREFIX_TEXTURES+@model_name)
+                else
+				Dir.mkdir(@path_textures+@os_separator+SU2LUX::PREFIX_TEXTURES+@model_name)
+			end
+            
+			tw=@texturewriter
+			p @texturewriter
+			number=@model_textures.length
+			count=1
+            puts "@model_textures.length: ", number
+			@model_textures.each do |key, value|
+				Sketchup.set_status_text("Exporting texture "+count.to_s+"/"+number.to_s)
+				SU2LUX.dbg_p  "model_textures key, value:"
+				SU2LUX.dbg_p  key
+				SU2LUX.dbg_p  value
+				if value[1].class== Sketchup::Face
+                    puts "about to write texture with following values:"
+                    puts value[1]
+                    puts value[2]
+                    puts (@path_textures+@os_separator+value[4])
+                    return_val0 = tw.load value[1], value[2]
+					return_val = tw.write value[1], value[2], (@path_textures+@os_separator+value[4]) # face, face side, output path
+					p 'path: '+@path_textures+@os_separator+value[4]
+					p return_val
+					p 'write texture1'
+                else
+					tw.write value[1], (@path_textures+@os_separator+value[4])
+					p 'write texture2'
+				end
+				count+=1
+			end
+            
+			status='ok' #TODO
+            
+			if status
+                stext = "SU2LUX: " + (count-1).to_s + " textures and model"
+                else
+				stext = "An error occured when exporting textures. Model"
+			end
+			@texturewriter=nil
+			@model_textures=nil
+            else
+			stext = "Model"
+		end
+        
+		return stext
+        
+	end # END write_textures
 
-	##
-	#
-	##
 	def export_diffuse_component(material, before, after)
 		preceding = ""
 		following = ""
-		# if ( ! material.use_diffuse_texture)
 		if ( not material.has_texture?("kd"))
-			# preceding = ""
 			following += "\t" + "\"color Kd\" [#{material.color_tos}]" + "\n"
 		else
 			preceding += "Texture \"#{material.name}::Kd\" \"color\" \"imagemap\"" + "\n"
@@ -1199,13 +1494,14 @@ class LuxrenderExport
 			case material.kd_texturetype
 				when "sketchup"
 					if (@model_textures.has_key?(material.name))
-						filename = @model_textures[material.name][4]
+						filename = sanitize_path(@model_textures[material.name][4])
 					else
 						return [before, after]
 					end
 					preceding += "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
 				when "imagemap"
-					preceding += "\t" + "\"string filename\" [\"#{material.kd_imagemap_filename}\"]" + "\n"
+					imagemapfilepath = sanitize_path(material.kd_imagemap_filename)
+					preceding += "\t" + "\"string filename\" [\"#{imagemapfilepath}\"]" + "\n"
 			end
 			preceding += "\t" + "\"float gamma\" [#{material.kd_imagemap_gamma}]" + "\n"
 			preceding += "\t" + "\"float gain\" [#{material.kd_imagemap_gain}]" + "\n"
@@ -1215,15 +1511,12 @@ class LuxrenderExport
 				preceding += "Texture \"#{material.name}::Kd.scale\" \"color\" \"scale\" \"texture tex1\" [\"#{material.name}::Kd\"] \"color tex2\" [#{material.color_tos}]" + "\n"
 				following += "\t" + "\"texture Kd\" [\"#{material.name}::Kd.scale\"]" + "\n"
 			else
-				following += "\t" + "\"texture Kd\" [\"#{material.name}\"]" + "\n"
+				following += "\t" + "\"texture Kd\" [\"#{material.name}::Kd\"]" + "\n"
 			end
 		end
 		return [before + preceding, after + following]
 	end
-	
-	##
-	#
-	##
+
 	def export_sigma(material, before, after)
 		preceding = ""
 		following = ""
@@ -1234,10 +1527,7 @@ class LuxrenderExport
 		end
 		return [before + preceding, after + following]
 	end
-	
-	##
-	#
-	##
+
 	def export_specular_component(material, before, after)
 		preceding = ""
 		following = ""
@@ -1248,10 +1538,34 @@ class LuxrenderExport
 		end
 		return [before + preceding, after + following]
 	end
-	
-	##
-	#
-	##
+#mix
+	def export_null(material, before, after)
+		preceding = ""
+		following = ""
+		#following += "\t" + "\"string type\" [\"null\"]"+ "\n\n"
+
+		return [before + preceding, after + following]
+	end
+	def export_mix(material, before, after)
+		preceding = ""
+		following = ""
+		if ( ! material.has_texture?("skmix"))
+			following += "\t" + "\"string namedmaterial1\" [\"#{material.material_list1}\"]" + "\n"	
+			following += "\t" + "\"string namedmaterial2\" [\"#{material.material_list2}\"]" + "\n"
+			following += "\t" + "\"float amount\" [#{"%.6f" %(material.mix_amount)}]" + "\n"
+		else
+			#before += "# Material \"#{material.name} null\""
+			before += "MakeNamedMaterial \"#{material.name} null\" "+ "\n"
+			before += "\t" + "\"string type\" [\"null\"]"+ "\n\n"
+			preceding_t, following_t = self.export_mixtexture(material, "skmix", "color", before, after)
+			preceding, following = self.export_mixtexture(material, "mapmix", "float", before, after)
+			preceding = preceding_t+ preceding
+			following = following_t + following
+			
+		end
+		return [before + preceding, after + following]
+	end
+#mix end
 	def export_carpaint_name(material, before, after)
 		preceding = ""
 		following = ""
@@ -1260,10 +1574,7 @@ class LuxrenderExport
 		end
 		return [before + preceding, after + following]
 	end
-	
-	##
-	#
-	##
+
 	def export_exponent(material, before, after)
 		preceding = ""
 		following = ""
@@ -1281,10 +1592,7 @@ class LuxrenderExport
 		end
 		return [before + preceding, after + following]
 	end
-	
-	##
-	#
-	##
+
 	def export_IOR(material, before, after)
 		preceding = ""
 		following = ""
@@ -1295,10 +1603,7 @@ class LuxrenderExport
 		end
 		return [before + preceding, after + following]
 	end
-	
-	##
-	#
-	##
+
 	def export_absorption_component(material, before, after)
 		preceding = ""
 		following = ""
@@ -1314,10 +1619,7 @@ class LuxrenderExport
 		end
 		return [before + preceding, after + following]
 	end
-	
-	##
-	#
-	##
+
 	def export_nk(material, before, after)
 		preceding = ""
 		following = ""
@@ -1325,9 +1627,6 @@ class LuxrenderExport
 		return [before + preceding, after + following]
 	end
 
-	##
-	#
-	##
 	def export_reflection_component(material, before, after)
 		preceding = ""
 		following = ""
@@ -1339,9 +1638,6 @@ class LuxrenderExport
 		return [before + preceding, after + following]
 	end
 
-	##
-	#
-	##
 	def export_transmission_component(material, before, after)
 		preceding = ""
 		following = ""
@@ -1352,11 +1648,9 @@ class LuxrenderExport
 		end
 		return [before + preceding, after + following]
 	end
-	
-	##
-	#
-	##
+
 	def export_thin_film(material, before, after)
+        puts "exporting thin film"
 		preceding = ""
 		following = ""
 		if ( ! material.has_texture?('film'))
@@ -1371,10 +1665,7 @@ class LuxrenderExport
 		end
 		return [before + preceding, after + following]
 	end
-	
-	##
-	#
-	##
+
 	def export_dispersive_refraction(material, before, after)
 		preceding = ""
 		following = ""
@@ -1385,10 +1676,7 @@ class LuxrenderExport
 		end
 		return [before + preceding, after + following]
 	end
-	
-	##
-	#
-	##
+
 	def export_bump(material, before, after)
 		preceding = ""
 		following = ""
@@ -1398,67 +1686,23 @@ class LuxrenderExport
 		return [before + preceding, after + following]
 	end
 
-	##
-	#
-	##
 	def export_displacement(material, before, after)
 		preceding = ""
 		following = ""
 		if (material.has_texture?('dm'))
+            puts ("material.has_texture? dm is true")
 			preceding, following = self.export_texture(material, "dm", "float", before, after)
 		end
 		return [before + preceding, after]
 	end
 
-	##
-	#
-	##	
 	def export_mesh_light(material)
 		case material.light_L
 			when "blackbody"
 				following = "Texture \"" + material.name + ":light:L\" \"color\" \"blackbody\" \"float temperature\" [#{material.light_temperature}]" + "\n"
 		end
 	end
-	
-	##
-	#
-	##
-	def export_texture(material, mat_type, type, before, after)
-		type_str, type_str2 = self.texture_parameters_from_type(mat_type)
-		preceding = ""
-		following = ""
-		preceding += "Texture \"#{material.name}::#{type_str}\" \"#{type}\" \"imagemap\"" + "\n"
-		preceding += "\t" + "\"string wrap\" [\"#{material.send(mat_type + "_imagemap_wrap")}\"]" + "\n"
-			if (mat_type=='dm')
-			preceding += "\t" + "\"string channel\" [\"#{material.send(mat_type + "_imagemap_channel")}\"]" + "\n"
-			end
-		case material.send(mat_type + "_texturetype")
-			when "sketchup"
-				if (@model_textures.has_key?(material.name))
-					filename = @model_textures[material.name][4]
-				else
-					return [preceding, following]
-				end
-				preceding += "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
-			when "imagemap"
-				preceding += "\t" + "\"string filename\" [\"#{material.send(mat_type + "_imagemap_filename")}\"]" + "\n"
-		end
-		preceding += "\t" + "\"float gamma\" [#{material.send(mat_type + "_imagemap_gamma")}]" + "\n"
-		preceding += "\t" + "\"float gain\" [#{material.send(mat_type + "_imagemap_gain")}]" + "\n"
-		preceding += "\t" + "\"string filtertype\" [\"#{material.send(mat_type + "_imagemap_filtertype")}\"]" + "\n"
-		preceding += "\t" + "\"string mapping\" [\"#{material.send(mat_type + "_imagemap_mapping")}\"]" + "\n"
-		preceding += "\t" + "\"float uscale\" [#{"%.6f" %(material.send(mat_type + "_imagemap_uscale"))}]" + "\n"
-		preceding += "\t" + "\"float vscale\" [#{"%.6f" %(material.send(mat_type + "_imagemap_vscale"))}]" + "\n"
-		preceding += "\t" + "\"float udelta\" [#{"%.6f" %(material.send(mat_type + "_imagemap_udelta"))}]" + "\n"
-		preceding += "\t" + "\"float vdelta\" [#{"%.6f" %(material.send(mat_type + "_imagemap_vdelta"))}]" + "\n"
-		preceding += "Texture \"#{material.name}::#{type_str}.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{material.name}::#{type_str}\"] \"#{type} tex2\" [#{material.send(type_str2)}]" + "\n"
-		following += "\t" + "\"texture #{type_str}\" [\"#{material.name}::#{type_str}.scale\"]" + "\n"
-		return [preceding, following]
-	end
 
-	##
-	#
-	##
 	def texture_parameters_from_type(mat_type)
 		case mat_type
 			when 'kd'
@@ -1500,6 +1744,14 @@ class LuxrenderExport
 			when 'v_exponent'
 				type_str = 'vroughness'
 				type_str2 = 'vroughness'
+#mix
+			when 'skmix'
+				type_str = '::Kd'
+				type_str2 = 'skmixstrtwo'
+			when 'mapmix'
+				type_str = ''
+				type_str2 = 'mapmixstrtwo'	
+#mix end				
 			when 'carpaint_name'
 				type_str = 'carpaint_name'
 				type_str2 = 'name'
@@ -1509,53 +1761,4 @@ class LuxrenderExport
 		return [type_str, type_str2]
 	end
 	
-	##
-	#
-	##
-	def write_textures
-		@copy_textures=true #TODO add in settings export
-		
-		if (@copy_textures == true and @model_textures!={})
-
-			if FileTest.exist?(@path_textures+@os_separator+SU2LUX::PREFIX_TEXTURES+@model_name)
-			else
-				Dir.mkdir(@path_textures+@os_separator+SU2LUX::PREFIX_TEXTURES+@model_name)
-			end
-
-			tw=@texturewriter
-			p @texturewriter
-			number=@model_textures.length
-			count=1
-			@model_textures.each do |key, value|
-				Sketchup.set_status_text("Exporting texture "+count.to_s+"/"+number.to_s)
-				if value[1].class== Sketchup::Face
-					p value[1]
-					return_val = tw.write value[1], value[2], (@path_textures+@os_separator+value[4])
-					p 'path: '+@path_textures+@os_separator+value[4]
-					p return_val
-					p 'write texture1'
-				else
-					tw.write value[1], (@path_textures+@os_separator+value[4])
-					p 'write texture2'
-				end
-				count+=1
-			end
-
-			status='ok' #TODO
-
-			if status
-			stext = "SU2LUX: " + (count-1).to_s + " textures and model"
-			else
-				stext = "An error occured when exporting textures. Model"
-			end
-			@texturewriter=nil
-			@model_textures=nil
-		else
-			stext = "Model"
-		end
-
-		return stext
-
-	end # END write_textures
-
-end # END class LuxrenderEXport
+end # END class LuxrenderExport

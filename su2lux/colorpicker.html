@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+ <title>Farbtastic</title>
+ <script type="text/javascript" src="jquery.js"></script>
+ <script type="text/javascript" src="farbtastic.js"></script>
+ <link rel="stylesheet" href="common.css" type="text/css" />
+ <link rel="stylesheet" href="farbtastic.css" type="text/css" />
+ <script type="text/javascript" charset="utf-8">
+  $(document).ready(function() {
+    $('#picker').farbtastic('#color');
+  });
+ </script>
+</head>
+<body>
+
+<form action="" style="" height="260px" height: 260px>
+<div id="picker"></div>
+<div class="form-item" id="invisibleform"><label for="color">&nbsp;</label>
+<input type="text" id="color" name="color" value="#123456" /></div>
+</form>
+
+
+</body>
+</html>

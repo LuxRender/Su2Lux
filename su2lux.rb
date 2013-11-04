@@ -13,27 +13,25 @@
 # http://www.gnu.org/copyleft/lesser.txt.
 #-----------------------------------------------------------------------------
 # Name         : su2lux.rb
-# Description  : Model exporter and material editor for Luxrender http://www.luxrender.net
-# Menu Item    : Plugins\Luxrender Exporter
+# Description  : Model exporter and material editor for LuxRender http://www.luxrender.net
+# Menu Item    : Plugins\LuxRender Exporter
 # Authors      : Alexander Smirnov (aka Exvion)  e-mail: exvion@gmail.com
 #                Mimmo Briganti (aka mimhotep)
-#                Initialy based on SU exporters: SU2KT by Tomasz Marek, Stefan Jaensch,Tim Crandall, 
+#                Initially based on SU exporters: SU2KT by Tomasz Marek, Stefan Jaensch,Tim Crandall, 
 #                SU2POV by Didier Bur and OGRE exporter by Kojack
 # Usage        : Copy script to PLUGINS folder in SketchUp folder, run SU, go to Plugins\Luxrender exporter
 # Date         : 2010-02-01
 # Type         : Exporter
-# Version      : 0.1 dev
-
-
+# Version      : 0.2 dev
 
 require 'sketchup.rb'
+require 'su2lux/fileutils.rb'
 
 module SU2LUX
 
-# Module constants
+    # Module constants
 	CONFIG_FILE = "luxrender_path.txt"
-	DEBUG = true #duplicated
-	DEFAULT_FOLDER = "Luxrender_export" #unused
+	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
 	PLUGIN_FOLDER = "su2lux"
 	PREFIX_TEXTURES = "TX_"
@@ -83,6 +81,7 @@ module SU2LUX
 		return (Object::RUBY_PLATFORM =~ /mswin/i) ? :windows : ((Object::RUBY_PLATFORM =~ /darwin/i) ? :mac : :other)
 	end # END get_os
 
+
 	##
 	# variables initializazion
 	##
@@ -90,27 +89,35 @@ module SU2LUX
 	
 		os = OSSpecific.new
 		@os_specific_vars = os.get_variables 
-
 		@lrs= LuxrenderSettings.new
 		@luxrender_filename = @os_specific_vars["luxrender_filename"]
 		#TODO: check if the following variables needs to be a module variable
 		@luxrender_path = "" #needs to go with luxrender settings
+        @luxconsole_executable = @os_specific_vars["luxconsole_filename"]
 		@os_separator = @os_specific_vars["path_separator"]
+        @material_preview_path = @os_specific_vars["material_preview_path"]
+
+		
+        # create folder and files needed for material preview
+        Dir.mkdir(@material_preview_path) unless File.exists?(@material_preview_path)
+        required_files = ["preview.lxs01","preview.lxs02","preview.lxs03","ansi.txt"]
+        for required_file_name in required_files
+            old_path = File.dirname(File.expand_path(__FILE__)) + "\/su2lux\/" + required_file_name
+            new_path = os.get_variables["material_preview_path"] + required_file_name
+            FileUtils.copy_file(old_path,new_path) unless File.exists?(new_path)
+        end
+        
 	end # END initialize_variables
 
 	##
-	# resetting values of all istance variables
+	# resetting values of all instance variables
 	##
 	def SU2LUX.reset_variables
-		@animation=false #check_meaning
-		@copy_textures = true #duplicated/unused here
 		@exp_distorted = false
-		@export_full_frame=false #check_meaning
-		@luxrender_path = SU2LUX.get_luxrender_path #see initialize variables
-		@model_textures={} #duplicated/unused here
-		@texturewriter=Sketchup.create_texture_writer #duplicated
+        # puts "starting @luxrender_path from reset_variables function"
+		@model_textures={} 
+		@texturewriter=Sketchup.create_texture_writer
 		@selected=false
-
 		@components = {} #unused
 		@export_materials = true #unused
 		@export_meshes = true #unused
@@ -138,11 +145,11 @@ module SU2LUX
 		entities = model.active_entities
 		selection = model.selection
 		materials = model.materials
-
+		@luxrender_path = SU2LUX.get_luxrender_path
+		
 		le=LuxrenderExport.new(@export_file_path,@os_separator)
 		le.reset
-		file_basename = File.basename(@export_file_path, SCENE_EXTENSION)
-		
+		file_basename = File.basename(@export_file_path, SCENE_EXTENSION)		
 		file_dirname = File.dirname(@export_file_path)
 		file_fullname = file_dirname + @os_separator + file_basename
 		
@@ -154,7 +161,6 @@ module SU2LUX
 		#Exporting all materials
 		out_mat = File.new(file_fullname + SUFFIX_MATERIAL, "w")
 		le.export_used_materials(materials, out_mat)
-		# le.export_textures(out_mat)
 		out_mat.close
 
 		out = File.new(@export_file_path,"w")
@@ -285,7 +291,7 @@ module SU2LUX
 				#### --- awful hack --- 1.0 #####
 				@lrs.export_file_path = @export_file_path
 				#####################
-					
+                # puts "starting luxrender_path from new_export_file_path function"
 				@luxrender_path = SU2LUX.get_luxrender_path
 			end
 			return true #user has selected a path
@@ -379,7 +385,9 @@ module SU2LUX
 		path = os.search_multiple_installations
 		if ( ! path.nil?)
 			luxrender_path = path + @os_separator + @luxrender_filename
+            # puts "about to check if path is valid..."
 			if (SU2LUX.luxrender_path_valid?(luxrender_path))
+                # puts "path is valid"
 				path=File.dirname(__FILE__) + @os_separator + CONFIG_FILE
 				path_file = File.new(path, "w")
 				path_file.write(luxrender_path)
@@ -389,7 +397,7 @@ module SU2LUX
 		end
 		
 		if (find_luxrender == true)
-			luxrender_path = UI.openpanel("Locate Luxrender", "", "")
+			luxrender_path = UI.openpanel("Locate LuxRender", "", "")
 			return nil if luxrender_path.nil?
 			if (luxrender_path && SU2LUX.luxrender_path_valid?(luxrender_path))
 				path=File.dirname(__FILE__) + @os_separator + CONFIG_FILE
@@ -409,7 +417,7 @@ module SU2LUX
 	#
 	##
 	def SU2LUX.change_luxrender_path
-		luxrender_path = UI.openpanel("Locate Luxrender", "", "")
+		luxrender_path = UI.openpanel("Locate LuxRender", "", "")
 		@luxrender_path = nil if luxrender_path.nil?
 		if (luxrender_path && SU2LUX.luxrender_path_valid?(luxrender_path))
 			path=File.dirname(__FILE__) + @os_separator + CONFIG_FILE
@@ -424,8 +432,11 @@ module SU2LUX
 		else
 			@luxrender_path = nil
 			message = "Invalid or no path selected."
+            result = UI.messagebox(message,MB_OK)
 		end
-		result = UI.messagebox(message,MB_OK)
+        # update path in settings windo
+        cmd = "document.getElementById('export_luxrender_path').value='" + @luxrender_path + "'"
+        @settings_editor.settings_dialog.execute_script(cmd)
 	end
 
 	##
@@ -461,7 +472,7 @@ module SU2LUX
 		export_text="Model & Lights saved in file:\n"
 		#export_text="Selection saved in file:\n" if @selected==true
 		if ask_render
-			result=UI.messagebox(export_text + @export_file_path +  " \n\nOpen exported model in Luxrender?",MB_YESNO)
+			result=UI.messagebox(export_text + @export_file_path +  " \n\nOpen exported model in LuxRender?",MB_YESNO)
 		else
 			result=UI.messagebox(export_text + @export_file_path,MB_OK)
 		end
@@ -473,14 +484,15 @@ module SU2LUX
 ##
 def SU2LUX.luxrender_path_valid?(luxrender_path)
 	(! luxrender_path.nil? and File.exist?(luxrender_path) and (File.basename(luxrender_path).upcase.include?("LUXRENDER")))
-	#check if the path to Luxrender is valid
+	#check if the path to LuxRender is valid
 end #END luxrender_path_valid?
   
 	##
 	#
 	##
 	def SU2LUX.launch_luxrender
-		@luxrender_path = SU2LUX.get_luxrender_path if @luxrender_path.nil?
+        # puts "starting get_luxrender_path from launch_luxrender function"
+        @luxrender_path = SU2LUX.get_luxrender_path if @luxrender_path.nil?
 		return if @luxrender_path.nil?
 		Dir.chdir(File.dirname(@luxrender_path))
 		export_path = "#{@export_file_path}"
@@ -503,11 +515,11 @@ end #END luxrender_path_valid?
 		path=SU2LUX.get_luxrender_path
 		return nil if not path
 		root=File.dirname(path)
-		c_path=File.join(root,"luxconsole.exe")
-
+		c_path=File.join(root,@luxconsole_executable)
 		if FileTest.exist?(c_path)
 			return c_path
-		else		
+		else
+            UI.messagebox("cannot find luxconsole")
 			return nil
 		end
 	end # END get_luxrender_console_path
@@ -523,10 +535,27 @@ end #END luxrender_path_valid?
 	#
 	##
 	def SU2LUX.show_material_editor
-		if not @material_editor
+		puts "showing @material editor: ", @material_editor
+        
+		if @material_editor
+            SU2LUX.dbg_p "reusing existing material editor"
+        else
+            SU2LUX.dbg_p "creating new material editor"
 			@material_editor=LuxrenderMaterialEditor.new
 		end
-		@material_editor.show
+        @material_editor.set_material_list
+		if @material_editor.visible?
+			puts "hiding material editor"
+			@material_editor.hide
+		else
+			puts "showing material editor"
+			@material_editor.show
+			puts "setting active material"
+			
+			Sketchup.active_model.materials.current = Sketchup.active_model.materials.current 
+			puts "done setting active material"
+		end
+		
 	end # END show_material_editor
 
 	##
@@ -536,7 +565,8 @@ end #END luxrender_path_valid?
 		if not @material_editor
 			@material_editor=LuxrenderMaterialEditor.new
 		end
-	end # END show_material_editor
+		return @material_editor
+	end # END create_material_editor
 
 	##
 	#
@@ -553,13 +583,14 @@ end #END luxrender_path_valid?
 	#
 	##
 	def SU2LUX.about
-		UI.messagebox("SU2LUX version 0.1-dev 29th January 2010
-	SketchUp Exporter to Luxrender
-	Authors: Alexander Smirnov (aka Exvion); Mimmo Briganti (aka mimhotep)
-	E-mail: exvion@gmail.com; 
-
+		UI.messagebox("SU2LUX version 0.29-dev 21 July 2013
+	SketchUp Exporter to LuxRender
+                      Authors: Alexander Smirnov (aka Exvion); Mimmo Briganti (aka mimhotep); Abel Groenewolt (aka pistepilvi); Martijn Berger (aka Juicyfruit)
+    
+    SU2LUX makes use of the jQuery library and the Farbtastic color picker.
+                      
 	For further information please visit
-	Luxrender Website & Forum - www.luxrender.net" , MB_MULTILINE , "SU2LUX - Sketchup Exporter to Luxrender")
+	LuxRender Website & Forum - www.luxrender.net" , MB_MULTILINE , "SU2LUX - Sketchup Exporter to LuxRender")
 	end # END
 
 	##
@@ -630,28 +661,29 @@ end # END class SU2LUX_view_observer
 
 class SU2LUX_app_observer < Sketchup::AppObserver
 	def onNewModel(model)
-		SU2LUX.create_observers
+		SU2LUX.initialize_variables
 		@lrs = LuxrenderSettings.new
-		@lrs.reset
+		loaded = @lrs.load_from_model
+		@lrs.reset unless loaded    
 		@lrs.fleximage_xresolution = Sketchup.active_model.active_view.vpwidth
 		@lrs.fleximage_yresolution = Sketchup.active_model.active_view.vpheight
-
+		
 		settings_editor = SU2LUX.get_editor("settings")
-		# @lrs.camera_scale = nil
 		if (settings_editor && settings_editor.visible?)
 			settings_editor.setValue("xresolution", @lrs.fleximage_xresolution)
 			settings_editor.setValue("yresolution", @lrs.fleximage_yresolution)
 			settings_editor.close
-			# settings_editor.setValue("camera_scale", @lrs.camera_scale)
 		end
+
+		Sketchup.active_model.materials.current = Sketchup.active_model.materials[0]
+		SU2LUX.create_material_editor
 		material_editor = SU2LUX.get_editor("material")
-		if (material_editor && material_editor.visible?)
-			material_editor.close
-		end
-		for mat in model.materials
-			luxmat = LuxrenderMaterial.new(mat)
-			luxmat.reset
-		end
+		material_editor.materials_skp_lux = Hash.new
+		material_editor.current = nil
+		material_editor.refresh
+
+		SU2LUX.create_observers	
+		
 	end # END onNewModel
 
 	def onOpenModel(model)
@@ -661,21 +693,31 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 		if(settings_editor && settings_editor.visible?)
 			settings_editor.close
 		end
-		material_editor = SU2LUX.get_editor("material")
-		if (material_editor && material_editor.visible?)
-			material_editor.close
-		end
+
 		# loaded = LuxrenderAttributeDictionary.load_from_model(@lrs.dictionary_name)
-		loaded = @lrs.load_from_model
+		
+                      
+        loaded = @lrs.load_from_model
 		@lrs.reset unless loaded
+                      
+        SU2LUX.create_material_editor
+        material_editor = SU2LUX.get_editor("material")
+        material_editor.materials_skp_lux = Hash.new
+        material_editor.current = nil
+                    
 		for mat in model.materials
 			luxmat = LuxrenderMaterial.new(mat)
 			loaded = luxmat.load_from_model
-			luxmat.reset unless loaded
+            #luxmat.reset unless loaded
+            material_editor.materials_skp_lux[mat] = luxmat
 		end
-		SU2LUX.create_material_editor
-		material_editor = SU2LUX.get_editor("material")
-		material_editor.refresh
+              
+        material_editor.refresh
+		if (material_editor.visible?)
+			material_editor.close
+		end
+		puts "running onOpenModel, about to run refresh material_editor"
+
 	end
 	
 end # END class SU2LUX_app_observer
@@ -692,34 +734,42 @@ end
 
 class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 	def onMaterialSetCurrent(materials, material)
-		SU2LUX.dbg_p "onMaterialSetCurrent: #{material.name}"
 		material_editor = SU2LUX.get_editor("material")
-		if (material_editor)
-			luxmat = LuxrenderMaterial.new(material)
-			material_editor.set_current(luxmat.name)
-			material_editor.current = luxmat
-			if (material_editor.visible?)
-				material_editor.sendDataFromSketchup
-				material_editor.fire_event("#type", "change", "")
+		SU2LUX.dbg_p "onMaterialSetCurrent triggered by material #{material.name}"
+		
+		current_mat = material #Sketchup.active_model.materials.current
+		# puts "current_mat", current_mat
+		
+		if (Sketchup.active_model.materials.include? current_mat)
+			if material_editor.materials_skp_lux.include?(current_mat)
+				material_editor.current = material_editor.materials_skp_lux[current_mat]
+				puts "onMaterialSetCurrent reusing LuxRender material "
+			else
+				material_editor.refresh()
+			
+				#material_editor.current = LuxrenderMaterial.new(current_mat)
+				#material_editor.materials_skp_lux[current_mat] = material_editor.current 
+				#puts "onMaterialSetCurrent creating new LuxRender material" # , material_editor.current
 			end
+			material_editor.set_current(material_editor.current.name) # sets name of current material in dropdown, updates swatches
+			material_editor.sendDataFromSketchup
+			material_editor.fire_event("#type", "change", "")
+			material_editor.load_preview_image()
+		else
+			puts "current material is not used"
 		end
 	end
 	
-	def onMaterialAdd(materials, material)
-		SU2LUX.create_material_editor
-		material_editor = SU2LUX.get_editor("material")
-		material_editor.refresh() if (material_editor);
-		SU2LUX.dbg_p "onMaterialAdd"
-		# material_editor.set_material_list() if (material_editor)
-		# luxmat = LuxrenderMaterial.new(material)
-		# material_editor.set_current(luxmat.name) if (material_editor)
+    def onMaterialAdd(materials, material)
+        puts "onMaterialAdd added material: ", material.name
+		# adding a material will set it current, onMaterialSetCurrent will take over
 	end
 
-	def onMaterialRemove(materials, material)
+    def onMaterialRemove(materials, material)
+        SU2LUX.dbg_p "onMaterialRemove"
 		SU2LUX.create_material_editor
-		material_editor = SU2LUX.get_editor("material")
+        material_editor = SU2LUX.get_editor("material")
 		material_editor.refresh() if (material_editor);
-		SU2LUX.dbg_p "onMaterialRemove"
 		# material_editor.set_material_list() if (material_editor)
 		# luxmat = LuxrenderMaterial.new(material)
 		# material_editor.set_current(luxmat.name) if (material_editor)
@@ -727,31 +777,67 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 	
 	def onMaterialChange(materials, material)
 		material_editor = SU2LUX.get_editor("material")
-		if (material_editor)
-			luxmat = material_editor.find(material.name)
-			luxmat.color = material.color
-			material_editor.updateSettingValue("matte_kd_R")
-			material_editor.updateSettingValue("matte_kd_G")
-			material_editor.updateSettingValue("matte_kd_B")
+        if (material_editor && material_editor.materials_skp_lux.include?(material))
+            # test if material name exists; if not, follow name_changed logic
+            material_editor.matname_changed = true
+            material_editor.materials_skp_lux.values.each{|luxmat|
+                # puts luxmat.name_string, material.name, luxmat.name_string==material.name
+                if luxmat.name_string==material.name
+                  material_editor.matname_changed = false
+                end
+            }
+            puts "@matname_changed: ", material_editor.matname_changed
+            
+			## deal with material name change
+            if (material_editor.matname_changed == true)
+                puts "onMaterialChange triggered by material name change"
+                material_editor.current.name_string = material.name.to_s
+                material_editor.matname_changed = false
+                material_editor.set_material_list()
+                material_editor.set_current(material_editor.current.name)
+            
+			## deal with other material changes
+            else 
+                puts "onMaterialChange triggered by changes in SU2LUX material editor"
+                luxmaterial = material_editor.materials_skp_lux[material]
+                      
+                # update material diffuse color as SketchUp material color may have changed
+                luxmaterial.color = material.color
+                colorarray = [luxmaterial.color["red"],luxmaterial.color["green"],luxmaterial.color["blue"]]
+                luxmaterial.kt_R = colorarray[0]
+                luxmaterial.kt_G = colorarray[1]
+                luxmaterial.kt_B = colorarray[2]
 
-			if material.texture
-				texture_name = material.texture.filename
-				texture_name.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
-				texture_name.gsub!(/\\/, '/') if texture_name.include?('\\')
-				luxmat.kd_imagemap_Sketchup_filename = texture_name
-				luxmat.kd_texturetype = 'sketchup'
-				luxmat.use_diffuse_texture = true
-			else
-				luxmat.kd_imagemap_Sketchup_filename = ''
-				if (luxmat.kd_texturetype == 'sketchup')
-					luxmat.kd_texturetype = 'none'
-					luxmat.use_diffuse_texture = false
-				end
-			end
-			material_editor.updateSettingValue("kd_imagemap_Sketchup_filename")
-			material_editor.updateSettingValue("kd_texturetype")
-			material_editor.updateSettingValue("use_diffuse_texture")
-		end
+                if material.texture
+                    puts "material has a texture"
+                    texture_name = material.texture.filename
+                    texture_name.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
+                    texture_name.gsub!(/\\/, '/') if texture_name.include?('\\')
+                    luxmaterial.kd_imagemap_Sketchup_filename = texture_name
+                    luxmaterial.kd_texturetype = 'sketchup' if (luxmaterial.kd_texturetype != 'imagemap')
+                    luxmaterial.use_diffuse_texture = true
+                      # todo: in case of Image Map, show Load button # Abel 2013
+                else
+                    luxmaterial.kd_imagemap_Sketchup_filename = ''
+                    if (luxmaterial.kd_texturetype == 'sketchup') # todo: check if non-sketchup texture is being used
+                        luxmaterial.kd_texturetype = 'none'
+                        luxmaterial.current.use_diffuse_texture = false
+                    end
+                end
+                      
+                if material_editor.materials_skp_lux[material] == material_editor.current
+                      puts "modified material is current"
+                      material_editor.updateSettingValue("kd_imagemap_Sketchup_filename")
+                      material_editor.updateSettingValue("kd_texturetype")
+                      material_editor.updateSettingValue("use_diffuse_texture")
+                      material_editor.material_editor_dialog.execute_script("update_RGB('#kt_R','#kt_G','#kt_B','#{colorarray[0]}','#{colorarray[1]}','#{colorarray[2]}')")
+                      material_editor.material_editor_dialog.execute_script("update_RGB('#kd_R','#kd_G','#kd_B','#{colorarray[0]}','#{colorarray[1]}','#{colorarray[2]}')")
+                      material_editor.update_swatches()
+                else
+                      puts "modified material is not current"
+                end
+            end
+        end
 	end
 	
 end
@@ -773,42 +859,35 @@ if( not file_loaded?(__FILE__) )
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderMaterial.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderMaterialEditor.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderTextureEditor.rb")
-	load File.join(SU2LUX::PLUGIN_FOLDER, "MeshCollector.rb")
+	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderMeshCollector.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderExport.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderToolbar.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "SU2LUX_UV.rb")
-  # load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderPrimatives.rb")
-  
-	SU2LUX.initialize_variables
 
-  create_toolbar()
+	SU2LUX.initialize_variables
+    
+    create_toolbar()
 	create_context_menu()
-  
-	#observers
-	SU2LUX.create_observers
-	$SU2LUX_app_observer = SU2LUX_app_observer.new
-	Sketchup.add_observer($SU2LUX_app_observer)
-	# $SU2LUX_view_observer = SU2LUX_view_observer.new
-	# Sketchup.active_model.active_view.add_observer($SU2LUX_view_observer)
-	# $SU2LUX_rendering_options_observer = SU2LUX_rendering_options_observer.new
-	# Sketchup.active_model.rendering_options.add_observer($SU2LUX_rendering_options_observer)
-	# $SU2LUX_materials_observer = SU2LUX_materials_observer.new
-	# Sketchup.active_model.materials.add_observer($SU2LUX_materials_observer)
-	
-	#The following code is needed because the AppObserver methods are not called when a Sketchup scene
-	#is loaded by double clicking on it
-	#TODO: insert the following code into a function
+  	
+	Sketchup.active_model.materials.current = Sketchup.active_model.materials[0]
+
 	@lrs = LuxrenderSettings.new
 	loaded = @lrs.load_from_model
-	@lrs.reset unless loaded
+	@lrs.reset unless loaded                      
 	for mat in Sketchup.active_model.materials
 		luxmat = LuxrenderMaterial.new(mat)
 		loaded = luxmat.load_from_model
 		luxmat.reset unless loaded
 	end
+	
 	SU2LUX.create_material_editor
 	material_editor = SU2LUX.get_editor("material")
+    SU2LUX.dbg_p "material editor created, now starting refresh function"
 	material_editor.refresh
+	#observers
+	$SU2LUX_app_observer = SU2LUX_app_observer.new
+	Sketchup.add_observer($SU2LUX_app_observer)
+	SU2LUX.create_observers	
 end
 
 

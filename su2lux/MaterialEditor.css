@@ -1,47 +1,24 @@
-body {
-	overflow: hidden;
-	font-family: Verdana, Arial, Helvetica, sans-serif;
-	font-size: 12px;
-	background: #444444;
-	color: #eeeeee;
-}
-
 .header {
-	padding: 5px 10px;
+	padding: 5px 0px 5px 5px;
 	cursor: pointer;
 	position: relative;
 	background-color: #bf8040;/*#c67700; /*#d77f00;*/
-	margin: 1px;
+	margin: 1px 0px;
 }
 
-.header2 {
-	padding: 5px 10px;
-	background-color: #b2c6c9;/*#c67700; /*#d77f00;*/
-	color: #000000;
-	cursor: pointer;
-	position: relative;
-	margin: 15px 20px 15px 1px;
-}
-
-.header3 {
-	padding: 2px 10px;
-	background-color: #d1c6d6;/*#c67700; /*#d77f00;*/
-	color: #000000;
-	cursor: pointer;
-	position: relative;
-	margin: 1px 20px 1px 1px;
+#material_management {
+	padding: 10px 10px 0px 10px
 }
 
 #settings_panel {
-	border: 2px solid #eeeeee;
-	margin-top: 10px;
-	padding: 3px;
+	border: 0px solid #eeeeee;
+	margin-top: 0px;
+	padding: 0px;
 }
 
 .collapse {
-	display:none;
-	margin: 0 0 0 15px;
-	padding: 6px;
+	margin: 0 0 0 0px;
+	padding: 8px 0px 0px 6px;
 }
    
 .collapse_check {
@@ -76,8 +53,83 @@ input#get_diffuse_color {
 	margin-left: 5px;
 }
 
+.panelcontent{
+    position: relative;
+}
+
+#diffuse {
+    position: relative;
+}
+
+.kdr {
+    position: absolute;
+    left: 80px;
+    top: 7px;
+}
+
+.kdg {
+    position: absolute;
+    left: 80px;
+    top: 30px;
+}
+
+.kdb {
+    position: absolute;
+    left: 80px;
+    top: 53px;
+}
+
+.kdrvalue{
+    position: absolute;
+    left: 135px;
+    top: 4px;
+}
+
+.kdgvalue{
+    position: absolute;
+    left: 135px;
+    top: 27px;
+}
+
+.kdbvalue{
+    position: absolute;
+    left: 135px;
+    top: 50px;
+}
+
+.texturelabel{
+    position: absolute;
+    left: 219px;
+    top: 7px;
+}
+
+.texturedropdown{
+    position: absolute;
+    left: 215px;
+    top: 27px;
+}
+
+.textureloadbutton{
+    position: absolute;
+    left: 215px;
+    top: 50px;
+}
+
 #flip_dim {
 	width: 169px;
+}
+
+.swatch {
+    border: 1px solid black;
+    background-color: #ffffff;
+}
+
+#swatch_diffuse{
+    margin: 5px 0px 0px 0px;
+}
+
+.swatch{
+    margin: 5px 0px 0px 0px;
 }
 
 #fleximage_xresolution, #fleximage_yresolution {
@@ -87,7 +139,12 @@ input#get_diffuse_color {
 }
 
 #preview {
-	height: 150px;
+	height: 120px;
+}
+
+
+.imagemap{
+    display:none;
 }
 
 #imagemap_right {

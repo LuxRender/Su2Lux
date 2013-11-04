@@ -20,21 +20,22 @@
 
 class LuxrenderMaterial
 
-	attr_reader :dict, :mat
+	attr_reader :dict, :mat, :swatch_channels
+    attr_accessor :name_string
 	alias_method :dictionary_name, :dict
 	
 	@@settings=
 	{
-		'type' => "matte",
+		'type' => "glossy",
 		'kd_imagemap_Sketchup_filename' => '',
-
+        'SKPcolor' => "Color(164, 211, 108, 255)",
 		'kd_R' => 0.64,
 		'kd_G' => 0.64,
 		'kd_B' => 0.64,
 
-		'ks_R' => 0.5,
-		'ks_G' => 0.5,
-		'ks_B' => 0.5,
+		'ks_R' => 0.1,
+		'ks_G' => 0.1,
+		'ks_B' => 0.1,
 
 		'ka_R' => 0.0,
 		'ka_G' => 0.0,
@@ -52,7 +53,11 @@ class LuxrenderMaterial
 		'v_exponent' => 50,
 		'uroughness' => 0.1,
 		'vroughness' => 0.1,
-
+#mix
+		'mix_amount' => 0.5000,
+		'material_list1' => '',
+		'material_list2' => '',
+#mix end
 		'matte_sigma' => 0.0,
 		'ka_d' => 0.0,
 		'IOR_index' => 1.5,
@@ -96,9 +101,8 @@ class LuxrenderMaterial
 		'use_thin_film_coating' => false,
 		'use_bump' => false,
 		'use_displacement' => false,
-		# 'use_bump_texture' => false,
 	}
-
+    
 	##
 	#
 	##
@@ -150,13 +154,26 @@ class LuxrenderMaterial
 	#
 	##
 	def initialize(su_material)
-		@mat = su_material
+        if su_material.class == String
+            if Sketchup.active_model.materials[su_material].class == Sketchup::Material
+                @mat = Sketchup.active_model.materials[su_material]
+            else
+                puts "could not find material #{su_material}"
+                @mat = Sketchup.active_model.materials[0]
+            end
+        else
+            @mat=su_material
+        end
 		@uvs = {}
 		
 		lux_image_texture("", "kd", "imagemap", "color")
 		lux_image_texture("matte", "sigma", "imagemap", "float")
 		lux_image_texture("", "ks", "imagemap", "color")
 		lux_image_texture("", "ka", "imagemap", "color")
+		#mix
+		lux_image_texture("", "skmix", "imagemap", "float")
+		lux_image_texture("", "mapmix", "imagemap", "float")
+		#mix end
 		lux_image_texture("", "u_exponent", "imagemap", "float")
 		lux_image_texture("", "v_exponent", "imagemap", "float")
 		lux_image_texture("", "uroughness", "imagemap", "float")
@@ -172,18 +189,19 @@ class LuxrenderMaterial
 		lux_image_texture("", "bump", "imagemap", "float")
 		lux_image_texture("", "dm", "imagemap", "float")
 		
+        # puts "LuxrenderMaterial.rb self object: ", self # returns #<LuxrenderMaterial:........>
+        @name_string = su_material.name.to_s
 		singleton_class = (class << self; self; end)
 		@model=Sketchup.active_model
 		@view=@model.active_view
-		# @dict="luxrender_materials"
-		# TEST
 		@dict = mat.name
+        # puts "singleton_class inspect ",singleton_class.inspect
 		singleton_class.module_eval do
 
-			define_method("[]") do |key| 
+			define_method("[]") do |key|  # method [] for <LuxrenderMaterial:........>
 				value = @@settings[key]
 				return LuxrenderAttributeDictionary.get_attribute(@dict, key, value)
-			end
+            end
 			
 			@@settings.each do |key, value|
 				######## -- get any attribute -- #######
@@ -192,12 +210,14 @@ class LuxrenderMaterial
 				case key
 					when LuxrenderMaterial::ui_refreshable?(key)# set ui_refreshable
 						define_method("#{key}=") do |new_value|
-						LuxrenderAttributeDictionary.set_attribute(@dict, key, new_value)
-						settings_editor = SU2LUX.get_editor("material")
-						settings_editor.updateSettingValue(key) if settings_editor
-					end
-					else # set other
-						define_method("#{key}=") { |new_value| LuxrenderAttributeDictionary.set_attribute(@dict, key, new_value) }
+                            LuxrenderAttributeDictionary.set_attribute(@dict, key, new_value)
+                            material_editor = SU2LUX.get_editor("material")
+                            material_editor.updateSettingValue(key) if material_editor
+                        end
+					else # not ui_refreshable
+						define_method("#{key}=") { |new_value|
+                            LuxrenderAttributeDictionary.set_attribute(@dict, key, new_value)
+                        }
 				end #end case
 			end #end settings.each
 		end #end module_eval
@@ -243,8 +263,9 @@ class LuxrenderMaterial
 	#
 	##
 	def name
-		return mat.display_name.delete("[<>]")  #replaces <> characters with *
+        # puts mat.display_name.delete("[<>]")
 		# return mat.display_name.gsub(/[<>]/, '*')  #replaces <> characters with *
+		return mat.display_name.delete("[<>]")  #replaces <> characters with *
 	end
   
 	##
@@ -262,7 +283,7 @@ class LuxrenderMaterial
 		color['red'] = self.kd_R
 		color['green'] = self.kd_G
 		color['blue'] = self.kd_B
-		# color = [self.kd_R, self.kd_G, self.kd_B]
+        return color
 	end
 
 	##
@@ -288,10 +309,19 @@ class LuxrenderMaterial
 	def RGB_color
 		scale = 255
 		rgb = []
+        # puts "self: ", self
+        # puts "self.color: ", self.color
+        # puts "self.color[\'red\']: ", self.color['red']
 		for c in self.color
-			rgb.push((c.to_f * scale).to_i)
+			puts "c: ", c
+            rgb.push((c.to_f * scale).to_i)
 		end
-		return rgb
+		#self.color.each do |key, value|
+        #    puts "iterating"
+        #    puts key
+        #    puts value
+        #end
+        return rgb
 	end
 
 	##
