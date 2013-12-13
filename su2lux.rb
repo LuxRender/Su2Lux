@@ -15,14 +15,15 @@
 # Name         : su2lux.rb
 # Description  : Model exporter and material editor for LuxRender http://www.luxrender.net
 # Menu Item    : Plugins\LuxRender Exporter
-# Authors      : Alexander Smirnov (aka Exvion)  e-mail: exvion@gmail.com
+# Authors      : Abel Groenewolt
+#                Alexander Smirnov (aka Exvion)  e-mail: exvion@gmail.com
 #                Mimmo Briganti (aka mimhotep)
 #                Initially based on SU exporters: SU2KT by Tomasz Marek, Stefan Jaensch,Tim Crandall, 
 #                SU2POV by Didier Bur and OGRE exporter by Kojack
-# Usage        : Copy script to PLUGINS folder in SketchUp folder, run SU, go to Plugins\Luxrender exporter
-# Date         : 2010-02-01
+# Usage        : Copy script to PLUGINS folder in SketchUp folder, run SketchUp, go to Plugins\LuxRender exporter
+# Date         : 2013-12-13
 # Type         : Exporter
-# Version      : 0.2 dev
+# Version      : 0.30 dev
 
 require 'sketchup.rb'
 require 'su2lux/fileutils.rb'
@@ -358,83 +359,42 @@ module SU2LUX
 	end # END new_export_file_path
 
 	##
-	#
+	#   get LuxRender path, prompt user if it hasn't been defined
 	##
-	#TODO: try to write better code for the function
 	def SU2LUX.get_luxrender_path
-		find_luxrender = true
-		path = ENV['LUXRENDER_ROOT']
-		if ( ! path.nil?)
-			luxrender_path = path + @os_separator + @luxrender_filename
-			if (File.exists?(luxrender_path))
-				find_luxrender = false
-			end
+		storedpath = Sketchup.read_default("SU2LUX","luxrenderpath")
+		if (storedpath.nil?)
+			# prompt user for path
+			storedpath = UI.openpanel("Locate LuxRender", "", "")
+			Sketchup.write_default("SU2LUX", "luxrenderpath", storedpath.unpack('H*')[0])
+        else
+            # convert path back to usable form
+            storedpath = storedpath.to_a.pack('H*')
 		end
-		
-		if (find_luxrender == true)
-			path=File.dirname(__FILE__) + @os_separator + CONFIG_FILE
-			if File.exist?(path)
-				path_file = File.open(path, "r")
-				luxrender_path = path_file.read
-				path_file.close
-				find_luxrender = false
-			end
-		end
-		
-		os = OSSpecific.new
-		path = os.search_multiple_installations
-		if ( ! path.nil?)
-			luxrender_path = path + @os_separator + @luxrender_filename
-            # puts "about to check if path is valid..."
-			if (SU2LUX.luxrender_path_valid?(luxrender_path))
-                # puts "path is valid"
-				path=File.dirname(__FILE__) + @os_separator + CONFIG_FILE
-				path_file = File.new(path, "w")
-				path_file.write(luxrender_path)
-				path_file.close
-				find_luxrender = false
-			end
-		end
-		
-		if (find_luxrender == true)
-			luxrender_path = UI.openpanel("Locate LuxRender", "", "")
-			return nil if luxrender_path.nil?
-			if (luxrender_path && SU2LUX.luxrender_path_valid?(luxrender_path))
-				path=File.dirname(__FILE__) + @os_separator + CONFIG_FILE
-				path_file = File.new(path, "w")
-				path_file.write(luxrender_path)
-				path_file.close
-			end
-		end
-		if SU2LUX.luxrender_path_valid?(luxrender_path)
-			return luxrender_path
-		else
-			return nil
-		end 
+		return storedpath
 	end #END get_luxrender_path
 
 	##
 	#
 	##
-	def SU2LUX.change_luxrender_path
-		luxrender_path = UI.openpanel("Locate LuxRender", "", "")
-		@luxrender_path = nil if luxrender_path.nil?
-		if (luxrender_path && SU2LUX.luxrender_path_valid?(luxrender_path))
-			path=File.dirname(__FILE__) + @os_separator + CONFIG_FILE
-			path_file = File.new(path, "w")
-			path_file.write(luxrender_path)
-			path_file.close
-		end
+	def SU2LUX.change_luxrender_path 
+		# set path
+		providedpath = UI.openpanel("Locate LuxRender", "", "")
+		# provide feedback in popup window
 		message = ""
-		if SU2LUX.luxrender_path_valid?(luxrender_path)
-			@luxrender_path = luxrender_path
+		if SU2LUX.luxrender_path_valid?(providedpath)
+			@luxrender_path = providedpath
+			Sketchup.write_default("SU2LUX", "luxrenderpath", providedpath.unpack('H*')[0])
 			message = "New path for LuxRender is : #{@luxrender_path}"
+            # result = UI.messagebox(message,MB_OK)
 		else
 			@luxrender_path = nil
-			message = "Invalid or no path selected."
+			message = "No valid path selected."
             result = UI.messagebox(message,MB_OK)
-		end
-        # update path in settings windo
+		end	
+		# store settings
+		@lrs.export_luxrender_path = @luxrender_path
+        # update path in settings window
         cmd = "document.getElementById('export_luxrender_path').value='" + @luxrender_path + "'"
         @settings_editor.settings_dialog.execute_script(cmd)
 	end
@@ -501,9 +461,10 @@ end #END luxrender_path_valid?
 		 command_line = "start \"max\" \/#{@lrs.priority} \"#{@luxrender_path}\" \"#{export_path}\""
 		 puts command_line
 		 system(command_line)
-		 else
+        else
+            fullpath = @luxrender_path + @os_specific_vars["file_appendix"]
 			Thread.new do
-				system(`#{@luxrender_path} "#{export_path}"`)
+				system(`#{fullpath} "#{export_path}"`)
 			end
 		end
 	end # END launch_luxrender
@@ -583,7 +544,7 @@ end #END luxrender_path_valid?
 	#
 	##
 	def SU2LUX.about
-		UI.messagebox("SU2LUX version 0.29-dev 21 July 2013
+		UI.messagebox("SU2LUX version 0.30-dev 13 December 2013
 	SketchUp Exporter to LuxRender
                       Authors: Alexander Smirnov (aka Exvion); Mimmo Briganti (aka mimhotep); Abel Groenewolt (aka pistepilvi); Martijn Berger (aka Juicyfruit)
     

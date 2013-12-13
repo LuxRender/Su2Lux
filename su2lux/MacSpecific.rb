@@ -10,6 +10,7 @@ class OSSpecific
 		@variables = {
 			"default_save_folder" => File.expand_path("~"),
 			"luxrender_filename" => "LuxRender.app/Contents/MacOS/luxrender",
+            "file_appendix" => "/Contents/MacOS/luxrender",
             "luxconsole_filename" => "luxconsole",
 			"path_separator" => "/",
 			"material_preview_path" => File.expand_path("~/Library/Application\ Support")+"\/LuxRender/"
