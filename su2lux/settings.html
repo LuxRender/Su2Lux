@@ -50,90 +50,85 @@
 				<label for="focal_length">focal length:</label>
 				<input type='text' id="focal_length" size="10">
 			</div>
-			
-			<div id="scale_view" class="orthographic">
+			 
+			<!-- the scale parameter is not currently used; this should be reimplemented in such a way
+                 that the user can either specify an exact scale (image size in meters) or use the current 3d view scale
+                <div id="scale_view" class="orthographic">
 				<label for="camera_scale">scale:</label>
 				<input type='text' id="camera_scale" size="4">
-			</div>
-			
+			</div> -->
 			<div id="near_far_clipping_block" class="perspective orthographic environment">
 				<p class="header2">Near-Far clipping</p>
-				<div class="collapse2">
+				
 					<label for="use_clipping">On/Off</label>
 					<input type="checkbox" id="use_clipping">
 					<div class="collapse">
 						start:<input type='text' id="hither" size="10">
 						end:<input type='text' id="yon" size="10">
 					</div>
-				</div>
+				
 			</div> <!-- END near_far_clipping_block -->
 			
 			<div id="dof_bokeh_block" class="perspective orthographic">
 				<p class="header2">DOF & Bokeh</p>
-				<div class="collapse2">
-					<label for="use_dof_bokeh">On/Off</label>
-					<input type="checkbox" id="use_dof_bokeh">
-					<div class="collapse">
-						Focus type: <select id="focus_type">
-							<option value="autofocus">Autofocus</option>
-							<option value="manual">Manual</option>
-						</select>
-						<span class="autofocus">
-							<label for="autofocus">Autofocus</label>
-							<input type="checkbox" id="autofocus">
-						</span>
-						<span class="manual">
-							<label for="focaldistance">Manual</label>
-							<input type='text' id="focaldistance" size="10">
-						</span>
-						<br>
-						Distribution <select id="distribution">
-							<option value="uniform">Uniform</option>
-							<option value="exponential">Exponential</option>
-							<option value="inverse exponential">Inverse Exponential</option>
-							<option value="gaussian">Gaussian</option>
-							<option value="inverse gaussian">Inverse Gaussian</option>
-						</select>
-						Blades: <input type='text' id="blades" size="10">
-						Power: <input type='text' id="power" size="10">
-					</div>
-				</div>
+                <label for="use_dof_bokeh">On/Off</label>
+                <input type="checkbox" id="use_dof_bokeh">
+                <div class="collapse">
+                    Focus type: <select id="focus_type">
+                        <option value="autofocus">Autofocus</option>
+                        <option value="manual">Manual</option>
+                    </select>
+                    <span class="autofocus">
+                        <label for="autofocus">Autofocus</label>
+                        <input type="checkbox" id="autofocus">
+                    </span>
+                    <span class="manual">
+                        <label for="focaldistance">Manual</label>
+                        <input type='text' id="focaldistance" size="10">
+                    </span>
+                    <br>
+                    Distribution <select id="distribution">
+                        <option value="uniform">Uniform</option>
+                        <option value="exponential">Exponential</option>
+                        <option value="inverse exponential">Inverse Exponential</option>
+                        <option value="gaussian">Gaussian</option>
+                        <option value="inverse gaussian">Inverse Gaussian</option>
+                    </select>
+                    Blades: <input type='text' id="blades" size="10">
+                    Power: <input type='text' id="power" size="10">
+                </div>
 			</div> <!-- END dof_bokeh_block -->
 			
-			<div id="architectural_block" class="perspective orthographic">
+			<div id="architectural_block" class="perspective"> <!-- removed for orthographic view, shift can be more easily set in 3d view -->
 				<p class="header2">Architectural (Lens Shift) & Aspect Ratio</p>
-				<div class="collapse2">
-					<label for="use_architectural">On/Off</label>
-					<input type="checkbox" id="use_architectural">
-					<div class="collapse">
-						<label for="shiftX">Shift X</label>
-						<input type='text' id="shiftX" size="10">
-						<label for="shiftY">Shift Y</label>
-						<input type='text' id="shiftY" size="10">
-						<br>
-						<label for="use_ratio">Use custom aspect ratio</label>
-						<input type="checkbox" id="use_ratio">
-						<div class ="collapse">
-							Aspect ratio<input type='text' id="frameaspectratio" size="10">
-						</div>
-					</div>
-				</div>
+                <label for="use_architectural">On/Off</label>
+                <input type="checkbox" id="use_architectural">
+                <div class="collapse">
+                    <label for="shiftX">Shift X</label>
+                    <input type='text' id="shiftX" size="10">
+                    <label for="shiftY">Shift Y</label>
+                    <input type='text' id="shiftY" size="10">
+                    <br>
+                    <label for="use_ratio">Use custom aspect ratio</label>
+                    <input type="checkbox" id="use_ratio">
+                    <div class ="collapse">
+                        Aspect ratio<input type='text' id="frameaspectratio" size="10">
+                    </div>
+                </div>
 			</div> <!-- END architectural_block -->
 			
 			<div id="motion_blur_block" class="perspective orthographic environment">
 				<p class="header2">Motion Blur</p>
-				<div class="collapse2">
 					<label for="use_motion_blur">On/Off</label>
 					<input type="checkbox" id="use_motion_blur">
 					<div class="collapse">
-						start:<input type='text' id="shutteropen" size="10">
-						end:<input type='text' id="shutterclose" size="10">
-						Distribution <select id="shutterdistribution">
-							<option value="uniform">Uniform</option>
-							<option value="gaussian">Gaussian</option>
-						</select>
-					</div>
-				</div>
+                    start:<input type='text' id="shutteropen" size="10">
+                    end:<input type='text' id="shutterclose" size="10">
+                    Distribution <select id="shutterdistribution">
+                        <option value="uniform">Uniform</option>
+                        <option value="gaussian">Gaussian</option>
+                    </select>
+                </div>
 			</div> <!-- END motion_blur_block -->
 		</div><!-- END Camera section -->
 

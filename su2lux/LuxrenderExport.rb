@@ -54,14 +54,7 @@ class LuxrenderExport
 		out.print "\n"
 
 		camera_scale = 1.0
-		if Sketchup.active_model.active_view.camera.perspective?
-			camera_type = 'perspective'
-		else
-			camera_type = 'orthographic'
-		end
-		if @lrs.camera_type != "environment" && @lrs.camera_type != camera_type
-			@lrs.camera_type = camera_type
-		end
+        
 		out.puts "Camera \"#{@lrs.camera_type}\""
 		case @lrs.camera_type
 			when "perspective"
@@ -137,15 +130,26 @@ class LuxrenderExport
 	end # END compute_fov
 
 	def compute_screen_window
-		cam_shiftX = @lrs.shiftX.to_f
-		cam_shiftY = @lrs.shiftY.to_f
+        cam_shiftX = 0.0
+		cam_shiftY = 0.0
+        # if lens shift is on
+        if (@lrs.use_architectural)
+            cam_shiftX = @lrs.shiftX.to_f
+            cam_shiftY = @lrs.shiftY.to_f
+        end
 		ratio = @lrs.fleximage_xresolution.to_f / @lrs.fleximage_yresolution.to_f
 		inv_ratio = 1.0 / ratio
-		if (ratio > 1.0)
-			screen_window = [2 * cam_shiftX - ratio, 2 * cam_shiftX + ratio, 2 * cam_shiftY - 1.0, 2 * cam_shiftY + 1.0]
-		else
-			screen_window = [2 * cam_shiftX - 1.0, 2 * cam_shiftX + 1.0, 2 * cam_shiftY - inv_ratio, 2 * cam_shiftY + inv_ratio]
-		end
+        if (@lrs.camera_type=='orthographic')
+            imageheight = Sketchup.active_model.active_view.camera.height.to_m
+            imagewidth = ratio * imageheight
+            screen_window = [-0.5*imagewidth, 0.5*imagewidth, -0.5*imageheight, 0.5*imageheight] # lens shift not used here
+        else # perspective or environment
+            if (ratio > 1.0)
+                screen_window = [2 * cam_shiftX - ratio, 2 * cam_shiftX + ratio, 2 * cam_shiftY - 1.0, 2 * cam_shiftY + 1.0]
+            else
+                screen_window = [2 * cam_shiftX - 1.0, 2 * cam_shiftX + 1.0, 2 * cam_shiftY - inv_ratio, 2 * cam_shiftY + inv_ratio]
+            end
+        end
 	end # END compute_screen_window
 
 	def export_film(out)

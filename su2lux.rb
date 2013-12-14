@@ -599,13 +599,18 @@ class SU2LUX_view_observer < Sketchup::ViewObserver
 	def onViewChanged(view)
 		settings_editor = SU2LUX.get_editor("settings")
 		@lrs = LuxrenderSettings.new
-		if Sketchup.active_model.active_view.camera.perspective?
-			@lrs.camera_type = 'perspective'
-			# camera_type = 'perspective'
-		else
-			@lrs.camera_type = 'orthographic'
-			# camera_type = 'orthographic'
-		end
+        # if not environment:
+        if (@lrs.camera_type != 'environment')
+            if Sketchup.active_model.active_view.camera.perspective?
+			    @lrs.camera_type = 'perspective'
+			    # camera_type = 'perspective'
+		    else
+			    @lrs.camera_type = 'orthographic'
+			    # camera_type = 'orthographic'
+            end
+        end
+                      
+                      
 		if (settings_editor)
 			if (Sketchup.active_model.active_view.camera.perspective?)
 				fov = Sketchup.active_model.active_view.camera.fov

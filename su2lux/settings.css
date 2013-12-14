@@ -16,14 +16,17 @@
 	margin: 1px 0px;
 }
 
+
+.header2 {
+	cursor: default;
+}
+
 .collapse {
-	display:none;
 	margin: 0 0 0 15px;
 	padding: 6px;
 }
    
 .collapse2 {
-	display:none;
 	padding: 6px;
 }
    

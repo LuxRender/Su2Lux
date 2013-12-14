@@ -25,7 +25,7 @@ $(document).ready(
 	{
 
 		$(".collapse").hide();
-		$(".collapse2").hide();
+		//$(".collapse2").hide();
 		$(".advanced").hide();
 	
 		$("#settings_panel select, :text").change(

@@ -127,9 +127,13 @@ class LuxrenderSettingsEditor
 		##
 		#
 		##
-		@settings_dialog.add_action_callback("camera_change") { |dialog, params|
-			perspective_camera = (params == "perspective")
-			Sketchup.active_model.active_view.camera.perspective = perspective_camera if params != "environment"
+		@settings_dialog.add_action_callback("camera_change") { |dialog, cameratype|
+            puts "previous camera type:"
+            puts @lrs.camera_type
+            @lrs.camera_type = cameratype
+            if (cameratype != "environment")
+                Sketchup.active_model.active_view.camera.perspective = (cameratype=='perspective')
+            end
 		}
 		# @settings_dialog.add_action_callback("scale_view") { |dialog, params|
 			# values = params.split('x')
