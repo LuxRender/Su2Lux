@@ -474,9 +474,13 @@ end #END luxrender_path_valid?
 	##
 	def SU2LUX.get_luxrender_console_path
 		path=SU2LUX.get_luxrender_path
+        # puts "get_luxrender_path returned:"
+        # puts path
 		return nil if not path
 		root=File.dirname(path)
 		c_path=File.join(root,@luxconsole_executable)
+        # puts "c_path is:"
+        # puts c_path
 		if FileTest.exist?(c_path)
 			return c_path
 		else

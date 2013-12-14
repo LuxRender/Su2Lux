@@ -10,6 +10,7 @@ class OSSpecific
 		@variables = {
 			"default_save_folder" => ENV["USERPROFILE"],
 			"luxrender_filename" => "luxrender.exe",
+            "file_appendix" => "/Contents/MacOS/luxrender",
             "luxconsole_filename" => "luxconsole.exe",
 			"path_separator" => "\\",
 			"material_preview_path" => ENV['APPDATA']+"\\"+"LuxRender\\"

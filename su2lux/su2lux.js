@@ -20,12 +20,6 @@ function checkbox_expander(id)
 	}
 }
 
-function checkbox_one(id){
-	if($("#" + id).attr("checked") == true){
-		alert($("#environment_infinite_rotatez").attr("value"));}
-}
-
-
 $(document).ready(
 	function()
 	{
@@ -130,8 +124,7 @@ $(document).ready(
 			function()
 			{
 				window.location = 'skp:param_generate@' + this.id + '=' + $(this).attr('checked');
-				checkbox_expander(this.id)
-				checkbox_one(this.id)
+                checkbox_expander(this.id);
 			}
 		);
 		
