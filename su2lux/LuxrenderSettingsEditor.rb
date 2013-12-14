@@ -59,7 +59,7 @@ class LuxrenderSettingsEditor
 						@lrs.send(method_name, value)
 						case value
 							when "sketchup_color"
-							SU2LUX.dbg_p "use_sketchup_color"
+                                SU2LUX.dbg_p "use_sketchup_color"
 								color = Sketchup.active_model.rendering_options["BackgroundColor"]
 								red = color.red / 255.0
 								method_name = "environment_infinite_L_R" + "="
@@ -71,7 +71,7 @@ class LuxrenderSettingsEditor
 								blue = color.blue / 255.0
 								@lrs.send(method_name, blue)
 							when "no_color"
-							SU2LUX.dbg_p "use_no_color"
+                                SU2LUX.dbg_p "use_no_color"
 								method_name = "environment_infinite_L_R" + "="
 								@lrs.send(method_name, 0.0)
 								method_name = "environment_infinite_L_G" + "="
@@ -79,14 +79,19 @@ class LuxrenderSettingsEditor
 								method_name = "environment_infinite_L_B" + "="
 								@lrs.send(method_name, 0.0)
 						end
-					else
+                    else # true/false toggles
 						if (@lrs.respond_to?(key))
+                            #puts "@lrs responding"
+                            puts key
+                            puts value.to_s.downcase
 							method_name = key + "="
 							if (value.to_s.downcase == "true")
 								value = true
+                                #puts "value will be set to true"
 							end
 							if (value.to_s.downcase == "false")
 								value = false
+                                #puts "value will be set to false"
 							end
 							@lrs.send(method_name, value)
 						else

@@ -36,7 +36,7 @@ class LuxrenderSettings
 		'shutterclose' => 1.0,
 		'shutterdistribution' => 'uniform',
 		'lensradius' => 0.006250,
-		'focaldistance' => 0.0,
+		'focaldistance' => 1.0,
 		'frameaspectratio' => 1.333333,
 		'autofocus' => true,
 		'fov' => format("%.2f", Sketchup.active_model.active_view.camera.fov),#35, # not currently in use

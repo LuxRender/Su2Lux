@@ -25,8 +25,9 @@ $(document).ready(
 	{
 
 		$(".collapse").hide();
-		//$(".collapse2").hide();
+		$(".collapse2").hide();
 		$(".advanced").hide();
+        $("#firstsection").next(".collapse").show();
 	
 		$("#settings_panel select, :text").change(
 			function()
@@ -48,8 +49,8 @@ $(document).ready(
 			function()
 			{
 				$(this).nextAll("div").hide();
-				$(this).nextAll("span").hide();
-				$(this).nextAll("." + this.value).show();
+                $(this).nextAll("span").hide();
+                $(this).nextAll("." + this.value).show();
 			}
 		);
 		
@@ -122,9 +123,9 @@ $(document).ready(
 
 		$(":checkbox").click(
 			function()
-			{
-				window.location = 'skp:param_generate@' + this.id + '=' + $(this).attr('checked');
+            {   // note: changing the order of the following methods will cause synchronity issues on OS X
                 checkbox_expander(this.id);
+                window.location = 'skp:param_generate@' + this.id + '=' + $(this).attr('checked');
 			}
 		);
 		

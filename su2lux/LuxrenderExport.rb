@@ -61,10 +61,7 @@ class LuxrenderExport
 				fov = compute_fov(@lrs.fleximage_xresolution, @lrs.fleximage_yresolution)
 				out.puts "	\"float fov\" [%.6f" %(fov) + "]"
 			when "orthographic"
-				camera_scale = @lrs.camera_scale
-				# out.puts "Camera \"#{@lrs.camera_type}\""
-				# No more scale parameter exporting due to LuxRender complaining about it
-				# out.puts "	\"float scale\" [%.6f" %(@lrs.camera_scale) + "]"
+                # scale is taken into account in screenwindow declaration
 			when "environment"
 				# out.puts "Camera \"#{@lrs.camera_type}\""
 		end

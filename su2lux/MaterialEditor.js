@@ -73,7 +73,7 @@ function show_load_buttons(){
 $(document).ready(
 		
     function() {
-        // alert ("document ready");            
+        //alert ("document ready");
 		
 		$("#type").nextAll().hide(); // hides irrelevant material properties
 		

@@ -37,7 +37,7 @@
 
 
 	<div id="settings_panel">
-		<p class="header">Camera</p>
+		<p class="header" id="firstsection">Camera</p>
 		<div class="collapse">
 			Select camera type:	<select id="camera_type">
 				<option value="perspective">perspective</option>
@@ -60,43 +60,48 @@
 			<div id="near_far_clipping_block" class="perspective orthographic environment">
 				<p class="header2">Near-Far clipping</p>
 				
-					<label for="use_clipping">On/Off</label>
-					<input type="checkbox" id="use_clipping">
-					<div class="collapse">
-						start:<input type='text' id="hither" size="10">
-						end:<input type='text' id="yon" size="10">
-					</div>
+                <label for="use_clipping">On/Off</label>
+                <input type="checkbox" id="use_clipping">
+                <div class="collapse">
+                    start:<input type='text' id="hither" size="10">
+                    end:<input type='text' id="yon" size="10">
+                </div>
 				
 			</div> <!-- END near_far_clipping_block -->
 			
 			<div id="dof_bokeh_block" class="perspective orthographic">
-				<p class="header2">DOF & Bokeh</p>
-                <label for="use_dof_bokeh">On/Off</label>
+				<p class="header2">DOF + Bokeh</p>
+                <div><label for="use_dof_bokeh">On/Off</label>
                 <input type="checkbox" id="use_dof_bokeh">
+                
                 <div class="collapse">
                     Focus type: <select id="focus_type">
                         <option value="autofocus">Autofocus</option>
                         <option value="manual">Manual</option>
                     </select>
-                    <span class="autofocus">
-                        <label for="autofocus">Autofocus</label>
-                        <input type="checkbox" id="autofocus">
-                    </span>
                     <span class="manual">
-                        <label for="focaldistance">Manual</label>
+                        <label for="focaldistance">manual focal distance</label>
                         <input type='text' id="focaldistance" size="10">
                     </span>
+                    <span class="autofocus">
+                        <label for="focaldistance">auto focus</label>
+                    </span>
                     <br>
-                    Distribution <select id="distribution">
-                        <option value="uniform">Uniform</option>
-                        <option value="exponential">Exponential</option>
-                        <option value="inverse exponential">Inverse Exponential</option>
-                        <option value="gaussian">Gaussian</option>
-                        <option value="inverse gaussian">Inverse Gaussian</option>
-                    </select>
+                   
+                   
+                   Distribution <select id="distribution">
+                       <option value="uniform">Uniform</option>
+                       <option value="exponential">Exponential</option>
+                       <option value="inverse exponential">Inverse Exponential</option>
+                       <option value="gaussian">Gaussian</option>
+                       <option value="inverse gaussian">Inverse Gaussian</option>
+                   </select>
+                   
+                   
                     Blades: <input type='text' id="blades" size="10">
                     Power: <input type='text' id="power" size="10">
-                </div>
+                </div></div>
+                
 			</div> <!-- END dof_bokeh_block -->
 			
 			<div id="architectural_block" class="perspective"> <!-- removed for orthographic view, shift can be more easily set in 3d view -->
