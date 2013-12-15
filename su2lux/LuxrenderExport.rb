@@ -73,7 +73,8 @@ class LuxrenderExport
 		
 		
 		if (@lrs.use_dof_bokeh)
-			out.puts "\t\"float lensradius\" [%.6f" %(@lrs.lensradius.to_f) + "]"
+            radiusfromaperture = 0.0005 * @lrs.focal_length.to_f / @lrs.aperture.to_f
+			out.puts "\t\"float lensradius\" [%.6f" %(radiusfromaperture) + "]"
 			case @lrs.focus_type
 				when "autofocus"
 					autofocus = @lrs.autofocus ? "true" : "false"

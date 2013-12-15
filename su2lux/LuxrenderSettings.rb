@@ -36,10 +36,11 @@ class LuxrenderSettings
 		'shutterclose' => 1.0,
 		'shutterdistribution' => 'uniform',
 		'lensradius' => 0.006250,
+        'aperture' => 2.8,
 		'focaldistance' => 1.0,
 		'frameaspectratio' => 1.333333,
 		'autofocus' => true,
-		'fov' => format("%.2f", Sketchup.active_model.active_view.camera.fov),#35, # not currently in use
+		'fov' => format("%.2f", Sketchup.active_model.active_view.camera.fov), # camera angle, not currently in use
 		'distribution' => 'uniform',
 		'power' => 1,
 		'blades' => 6,
@@ -53,7 +54,7 @@ class LuxrenderSettings
 		'shiftY' => 0.0, #GUI
 		'use_ratio' => false, #GUI
 		'use_motion_blur'=>false, #GUI
-		'focal_length' => format("%.2f", Sketchup.active_model.active_view.camera.focal_length), #GUI
+		'focal_length' => format("%.5f", Sketchup.active_model.active_view.camera.focal_length), #GUI
 	# END Camera
 
 	##
