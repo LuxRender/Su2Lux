@@ -27,7 +27,7 @@ $(document).ready(
 		$(".collapse").hide();
 		$(".collapse2").hide();
 		$(".advanced").hide();
-        $("#firstsection").next(".collapse").show();
+        $("#firstsection").next(".collapse").show(); // shows camera settings by default
 	
 		$("#settings_panel select, :text").change(
 			function()

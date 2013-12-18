@@ -14,7 +14,7 @@
 </head>
 <body>
 	<div id="settings_panel">
-		<div id="material_management">
+		<div id="material_management" name="materiallist">
 			<label for="material_name2">Material</label>
 			<select id="material_name">
 				<option value="bogus">not initialized</option>
@@ -49,38 +49,46 @@
 				<option value="mix">Mix</option>
 				<option value="null">Null</option>
 			</select>
+            
 			<!-- mix -->
-			   <div id="Oren-Nayar" class="mix">
-				<p class="header2">Choose Materials</p>
-				<label for="material_list1">Material 1</label>
-				<select id="material_list1">
+			   <div id="mixmaterials" class="mix">
+                <p class="header2">Mix</p>
+                <div class="panelcontent">
+                    
+				<label for="material_list1" class=mixmat1>Material 1</label>
+				<select id="material_list1" class=mixmatlist1>
 					<option value="bogus">not initialized</option>
-				</select>&nbsp;
-				<label for="material_list2">Material 2</label>
-				<select id="material_list2">
+				</select><br />
+				<label for="material_list2" class=mixmat2>Material 2</label>
+				<select id="material_list2" class=mixmatlist2>
 					<option value="bogus">not initialized</option>
-				</select><br /> 
-				<label for="mix_amount">Mix Amount</label>
-				<input type="text" id="mix_amount" size="6">&nbsp;&nbsp;
-				<p class="header2">Create Alpha Texture</p>
-				<label for="skmix_texturetype">Texture</label>
-				<select id="skmix_texturetype">
-					<option value="none">None</option>
-					<option value="sketchup">Sketchup Texture</option>
-				</select>
-				<span class="imagemap">
-					<input type="button" id="skmix_browse_map" value="Load">
-				</span> <!-- END diffuse_texture -->
-				<label for="mapmix_texturetype">Texture</label>
-				<select id="mapmix_texturetype">
-					<option value="none">None</option>
+				</select><br />
+                
+                <label for="mx_texturetype" class=mixmattype>Mix type</label>
+                <select id="mx_texturetype" class=mixmattypelist>
+					<option value="none">Uniform</option>
+					<option value="sketchup">SketchUp texture</option>
 					<option value="imagemap">Image Map</option>
-				</select>
+				</select><br /><br /><br /><!-- line breaks create space for following interface elements -->
+                
+
+                <span class="none">
+                    <label for="mix_uniform" id="mix_uniform_label">Material 1 percentage</label>
+                    <input type='text' id="mix_uniform" size="4">
+                </span>
+				<span class="sketchup">
+					&nbsp;
+				</span>
 				<span class="imagemap">
-					<input type="button" id="mapmix_browse_map" value="Load">
-				</span> <!-- END diffuse_texture -->
+					<input type="button" id="mx_browse_map" value="Load image">
+				</span>
+                
+            
+                </div>
 			</div>
 			<!-- mix ends -->
+            
+            
             <div id="diffuse" class="matte glossy glossytranslucent velvet carpaint ">
                 
                 <p class="header2">Diffuse</p>

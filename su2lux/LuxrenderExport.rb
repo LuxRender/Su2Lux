@@ -33,7 +33,7 @@ class LuxrenderExport
 
 	def export_global_settings(out)
 		out.puts "# LuxRender Scene File"
-		out.puts "# Exported by SU2LUX 0.28-devel"
+		out.puts "# Exported by SU2LUX 0.32-devel"
 		out.puts "# Global Information"
 	end # END export_global_settings
 
@@ -1233,14 +1233,29 @@ class LuxrenderExport
     end
 	
 	def export_used_materials(materials, out)
-		materials.each { |mat|
-            luxrender_mat = LuxrenderMaterial.new(mat)
+        mateditor = SU2LUX.get_editor("material")
+		# mix materials should be last, so first we write normal materials
+        materials.each { |mat|
+            luxrender_mat = mateditor.materials_skp_lux[mat]
+            #puts ("material from hash:")
+            #puts luxrender_mat
             SU2LUX.dbg_p luxrender_mat.name
-            export_mat(luxrender_mat, out) unless luxrender_mat.type == "portal"
+            if (luxrender_mat.type != "portal" && luxrender_mat.type != "mix" )
+                export_mat(luxrender_mat, out)
+            end
+		}
+		# now write mix materials
+        materials.each { |mat|
+            luxrender_mat = mateditor.materials_skp_lux[mat]
+            SU2LUX.dbg_p luxrender_mat.name
+            if (luxrender_mat.type == "mix" )
+                export_mat(luxrender_mat, out)
+            end
 		}
 	end
 
 	def export_texture(material, mat_type, type, before, after)
+        puts "running export_texture"
 		# SU2LUX.dbg_p "exporting additional texture channels"
 		type_str, type_str2 = self.texture_parameters_from_type(mat_type)
 		preceding = ""
@@ -1254,9 +1269,8 @@ class LuxrenderExport
 			when "sketchup"
             if (@model_textures.has_key?(material.name))
                 filename = @model_textures[material.name][4]
-				
-				
 				else
+                    puts "export_texture: no texture file path found"
                 return [preceding, following]
             end
             preceding += "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
@@ -1277,54 +1291,12 @@ class LuxrenderExport
 		following += "\t" + "\"texture #{type_str}\" [\"#{material.name}::#{type_str}.scale\"]" + "\n"
 		return [preceding, following]
 	end
-	
-#mix
-	def export_mixtexture(material, mat_type, type, before, after)
-		# SU2LUX.dbg_p "exporting additional texture channels"
-		type_str, type_str2 = self.texture_parameters_from_type(mat_type)
-		preceding = ""
-		following = ""
-		before = ""
-		before += "Texture \"#{material.name}#{type_str}\" \"#{type}\" \"imagemap\"" + "\n"
-		before += "\t" + "\"string wrap\" [\"#{material.send(mat_type + "_imagemap_wrap")}\"]" + "\n"
-
-		case material.send(mat_type + "_texturetype")
-			when "sketchup"
-            if (@model_textures.has_key?(material.name))
-                filename = @model_textures[material.name][4]
-				else
-                return [preceding, following]
-            end
-           
-				before += "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
-				preceding += "Texture \"#{material.name}::Kd.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{material.name}::Kd\"] \"#{type} tex2\" [0.63999999 0.63999999 0.63999999]" + "\n"      
-            preceding += "MakeNamedMaterial \"#{material.name} figura\" "+ "\n"
-				preceding += "\t" + "\"string type\" [\"matte\"]"+ "\n"
-				preceding += "\t" + "\"texture Kd\" [\"#{material.name}::Kd.scale\"]" + "\n"
-				preceding += "\t" + "\"float sigma\" [0.0]" + "\n\n"
-			when "imagemap"
-			#after += "Texture \"#{material.name}\" \"#{type}\" \"imagemap\"" + "\n"
-			#after += "\t" + "\"string wrap\" [\"#{material.send(mat_type + "_imagemap_wrap")}\"]" + "\n"
-			imagemap_filename = sanitize_path(material.send(mat_type + "_imagemap_filename"))
-         before += "\t" + "\"string filename\" [\"#{imagemap_filename}\"]" + "\n"
-			preceding += "Texture \"#{material.name}.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{material.name}\"] \"#{type} tex2\" [1]" + "\n"
-			
-         following += "\t" + "\"string namedmaterial1\" [\"#{material.name} figura\"]"+ "\n"
-         following += "\t" + "\"string namedmaterial2\" [\"#{material.name} null\"]"+ "\n"
-         following += "\t" + "\"texture amount\" [\"#{material.name}.scale\"]"+ "\n"
-		end
-		before += "\t" + "\"float gamma\" [#{material.send(mat_type + "_imagemap_gamma")}]" + "\n"
-		before += "\t" + "\"float gain\" [#{material.send(mat_type + "_imagemap_gain")}]" + "\n"
-		before += "\t" + "\"string filtertype\" [\"#{material.send(mat_type + "_imagemap_filtertype")}\"]" + "\n"
-		#preceding += "\t" + "\"string mapping\" [\"#{material.send(mat_type + "_imagemap_mapping")}\"]" + "\n"
-
-			return [before + preceding, after + following]
-	end
-#mix end
 
 	def export_mat(mat, out)
-		SU2LUX.dbg_p "export_mat"
+		SU2LUX.dbg_p "export_mat running for material:"
         SU2LUX.dbg_p (mat.name)
+        puts "diffuse color:"
+        puts mat.color_tos
 		
 		# convert mat.name 
 		matname_conv = sanitize_path(mat.name)
@@ -1335,12 +1307,10 @@ class LuxrenderExport
 		pre = ""
 		post = ""
 		case mat.type
-		#mix
 			when "null"
             pre, post = self.export_null(mat, pre, post)
 			when "mix"
             pre, post = self.export_mix(mat, pre, post)
-		#mix end
 			when "matte"
             pre, post = self.export_diffuse_component(mat, pre, post)
             pre, post = self.export_sigma(mat, pre, post)
@@ -1540,7 +1510,7 @@ class LuxrenderExport
 		end
 		return [before + preceding, after + following]
 	end
-#mix
+
 	def export_null(material, before, after)
 		preceding = ""
 		following = ""
@@ -1548,26 +1518,33 @@ class LuxrenderExport
 
 		return [before + preceding, after + following]
 	end
+    
 	def export_mix(material, before, after)
 		preceding = ""
 		following = ""
-		if ( ! material.has_texture?("skmix"))
-			following += "\t" + "\"string namedmaterial1\" [\"#{material.material_list1}\"]" + "\n"	
-			following += "\t" + "\"string namedmaterial2\" [\"#{material.material_list2}\"]" + "\n"
-			following += "\t" + "\"float amount\" [#{"%.6f" %(material.mix_amount)}]" + "\n"
-		else
-			#before += "# Material \"#{material.name} null\""
-			before += "MakeNamedMaterial \"#{material.name} null\" "+ "\n"
-			before += "\t" + "\"string type\" [\"null\"]"+ "\n\n"
-			preceding_t, following_t = self.export_mixtexture(material, "skmix", "color", before, after)
-			preceding, following = self.export_mixtexture(material, "mapmix", "float", before, after)
-			preceding = preceding_t+ preceding
-			following = following_t + following
-			
+        mixmat1 = material.material_list1.delete("[<>]")
+        mixmat2 = material.material_list2.delete("[<>]")
+        case material.mx_texturetype
+            when "none"
+                following += "\t" + "\"string namedmaterial1\" [\"#{mixmat1}\"]" + "\n"
+                following += "\t" + "\"string namedmaterial2\" [\"#{mixmat2}\"]" + "\n"
+                mixamount = 1 - material.mix_uniform.to_f / 100
+                mixamountstring = mixamount.to_s
+                following += "\t" + "\"float amount\" [" + mixamountstring +"]" + "\n"
+            when "sketchup"
+                preceding, following = self.export_texture(material, 'mx', 'float', before, after)
+                #following += "\t" + "\"texture amount\" [" + "\"#{material.name}::Mx.scale\"" + "]" + "\n"
+                following += "\t" + "\"string namedmaterial1\" [\"#{mixmat1}\"]" + "\n"
+                following += "\t" + "\"string namedmaterial2\" [\"#{mixmat2}\"]" + "\n"
+            when "imagemap"
+                preceding, following = self.export_texture(material, 'mx', 'float', before, after)
+                #following += "\t" + "\"texture amount\" [" + "\"#{material.name}::Mx.scale\"" + "]" + "\n"
+                following += "\t" + "\"string namedmaterial1\" [\"#{mixmat1}\"]" + "\n"
+                following += "\t" + "\"string namedmaterial2\" [\"#{mixmat2}\"]" + "\n"
 		end
 		return [before + preceding, after + following]
 	end
-#mix end
+
 	def export_carpaint_name(material, before, after)
 		preceding = ""
 		following = ""
@@ -1746,14 +1723,9 @@ class LuxrenderExport
 			when 'v_exponent'
 				type_str = 'vroughness'
 				type_str2 = 'vroughness'
-#mix
-			when 'skmix'
-				type_str = '::Kd'
+			when 'mx'
+				type_str = 'amount'
 				type_str2 = 'skmixstrtwo'
-			when 'mapmix'
-				type_str = ''
-				type_str2 = 'mapmixstrtwo'	
-#mix end				
 			when 'carpaint_name'
 				type_str = 'carpaint_name'
 				type_str2 = 'name'

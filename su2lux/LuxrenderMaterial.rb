@@ -53,11 +53,11 @@ class LuxrenderMaterial
 		'v_exponent' => 50,
 		'uroughness' => 0.1,
 		'vroughness' => 0.1,
-#mix
-		'mix_amount' => 0.5000,
+        #mix
+		'mix_uniform' => 50.0,
 		'material_list1' => '',
 		'material_list2' => '',
-#mix end
+        #mix end
 		'matte_sigma' => 0.0,
 		'ka_d' => 0.0,
 		'IOR_index' => 1.5,
@@ -142,6 +142,7 @@ class LuxrenderMaterial
 			"ka_d_imagemap_filename",
 			"kr_imagemap_filename",
 			"kt_imagemap_filename",
+			"mx_imagemap_filename",
 		]
 		if ui_refreshable_settings.include?(id)
 			return id
@@ -170,10 +171,7 @@ class LuxrenderMaterial
 		lux_image_texture("matte", "sigma", "imagemap", "float")
 		lux_image_texture("", "ks", "imagemap", "color")
 		lux_image_texture("", "ka", "imagemap", "color")
-		#mix
-		lux_image_texture("", "skmix", "imagemap", "float")
-		lux_image_texture("", "mapmix", "imagemap", "float")
-		#mix end
+		lux_image_texture("", "mx", "imagemap", "float") # mix
 		lux_image_texture("", "u_exponent", "imagemap", "float")
 		lux_image_texture("", "v_exponent", "imagemap", "float")
 		lux_image_texture("", "uroughness", "imagemap", "float")
@@ -364,6 +362,13 @@ class LuxrenderMaterial
 	def absorption_tos
 		specular = "#{"%.6f" %(self.ka_R)} #{"%.6f" %(self.ka_G)} #{"%.6f" %(self.ka_B)}"
 	end
+
+    ##
+    #   multiplication of mix image texture
+    ##
+    def skmixstrtwo
+        returnvalue = 1.0
+    end
 
 	##
 	#

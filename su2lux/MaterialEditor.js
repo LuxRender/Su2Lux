@@ -39,16 +39,10 @@ function startactivemattype(){
 			window.location = 'skp:active_mat_type@'; 	// shows options for current material's material type
 		}
 		// todo: if material type is default, run param_generate function
-
 	}
-	
 	
 function startmaterialchanged() {
     window.location = 'skp:material_changed@' + this.value;
-}
-
-function flowtest(){
-    alert ("working");
 }
     
 function update_RGB(fieldR,fieldG,fieldB,colorr,colorg,colorb){
@@ -99,7 +93,10 @@ $(document).ready(
 			function() {
 				$(this).nextAll().hide();                 
 				$(this).nextAll("." + this.value).show();
-				window.location = 'skp:type_changed@' + this.value;
+                if (this.value=="mix"){
+                    $("#mixmattype").change();
+                }
+                window.location = 'skp:type_changed@' + this.value;
 			}
 		)
         
@@ -143,6 +140,19 @@ $(document).ready(
 				$(this).next("." + this.value).show(); // shows load button
 			}
 		)
+                  
+                  
+        $("#mx_texturetype").change(
+            function()
+            {
+                $(this).nextAll("div").hide();
+                $(this).nextAll("span").hide();
+                $(this).nextAll("." + this.value).show();
+            }
+        );
+                  
+         
+                  
 		
 		$('input[id$="_browse"]').click(
 			function()

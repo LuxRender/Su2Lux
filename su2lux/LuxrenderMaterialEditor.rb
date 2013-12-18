@@ -43,6 +43,10 @@ class LuxrenderMaterialEditor
 			lux_material = @current
 			parameters.each{ |k, v|
 				if (lux_material.respond_to?(k))
+                    puts k
+                    puts v
+                    puts "lux_material responding"
+                    puts @current
 					method_name = k + "="
 					if (v.to_s.downcase == "true")
 						v = true
@@ -158,7 +162,6 @@ class LuxrenderMaterialEditor
             updateSettingValue(@lrs.send(colorswatch)[2])
             
             update_swatches()
-            #@material_editor_dialog.execute_script('flowtest()')
         }
         
 		@material_editor_dialog.add_action_callback('start_refresh') { |dialog, param|
@@ -446,10 +449,8 @@ class LuxrenderMaterialEditor
 		end
 		
 		## update material editor contents
-		set_material_list()
-##listmat		
-			set_material_list1()
-##listmat		
+		set_material_lists
+
 		sendDataFromSketchup()
 		load_preview_image		
 		set_current(@current.name)
@@ -458,6 +459,16 @@ class LuxrenderMaterialEditor
         cmd = 'show_load_buttons()'
         @material_editor_dialog.execute_script(cmd)
 	end
+    
+    ##
+    #
+    ##
+    def set_material_lists()
+        set_material_list("material_name")  # main material list
+        set_material_list("material_list1") # mix material 1
+        set_material_list("material_list2") # mix material 2
+    end
+    
 	
 	##
 	#
@@ -468,50 +479,38 @@ class LuxrenderMaterialEditor
             update_swatches()
         end
         # todo: improve cmd to prevent issues when material names overlap (like brick, brick2)
-		cmd = "$('#material_name option:contains(#{passedname})').attr('selected', true)" 
+		# cmd = "$('#material_name option:contains(#{passedname})').attr('selected', true)" # issues with material name overlap
+        passedname = passedname.delete("[<>]")
+        cmd = "$('#material_name option').filter(function(){return ($(this).text() == \"#{passedname}\");}).attr('selected', true);"
+        
         puts cmd
 		@material_editor_dialog.execute_script(cmd)
 	end
 	
-	##
+    ##
 	#
-	##	
-	def set_material_list()
+	##
+	def set_material_list(dropdownname)
         puts "updating material dropdown list in LuxRender Material Editor"
-		cmd = "$('#material_name').empty()"
-		@material_editor_dialog.execute_script(cmd)	
-		cmd = "$('#material_name').append( $('"
+		cmd = "$('#" + dropdownname + "').empty()"
+		@material_editor_dialog.execute_script(cmd)
+		cmd = "$('#" + dropdownname +"').append( $('"
 		# puts "material list command: ", cmd
 		materials = Sketchup.active_model.materials.sort
+        #puts "whole material list (@materials_skp_lux):"
+        #puts @materials_skp_lux
 		for mat in materials
+            #puts "set_material_list running"
+            #puts mat.name
 			luxrender_mat = @materials_skp_lux[mat]
+            #puts luxrender_mat
 			# puts "adding luxrender material to material list: ", luxrender_mat
 			cmd = cmd + "<option value=\"#{luxrender_mat.original_name}\">#{luxrender_mat.name}</option>"
 		end
 		cmd = cmd + "'));"
-		@material_editor_dialog.execute_script(cmd)		
-	end
-##listmat
-	def set_material_list1()
-		arr = [1, 2]
-		for item in arr
-	      puts "updating material dropdown list in LuxRender Material Editor"
-			cmd = "$('#material_list"+item.to_s+"').empty()"
-			@material_editor_dialog.execute_script(cmd)	
-			cmd = "$('#material_list"+item.to_s+"').append( $('"
-			# puts "material list command: ", cmd
-			materials = Sketchup.active_model.materials.sort
-			for mat in materials
-				luxrender_mat = @materials_skp_lux[mat]
-				# puts "adding luxrender material to material list: ", luxrender_mat
-				cmd = cmd + "<option value=\"#{luxrender_mat.name}\">#{luxrender_mat.name}</option>"
-			end
-		cmd = cmd + "<option value="">none</option>"	
-		cmd = cmd + "'));"
 		@material_editor_dialog.execute_script(cmd)
-		end	
 	end
-##listmat
+    
 	##
 	#set parameters in inputs of settings.html
 	##

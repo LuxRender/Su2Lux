@@ -97,7 +97,6 @@ module SU2LUX
         @luxconsole_executable = @os_specific_vars["luxconsole_filename"]
 		@os_separator = @os_specific_vars["path_separator"]
         @material_preview_path = @os_specific_vars["material_preview_path"]
-
 		
         # create folder and files needed for material preview
         Dir.mkdir(@material_preview_path) unless File.exists?(@material_preview_path)
@@ -508,7 +507,7 @@ end #END luxrender_path_valid?
             SU2LUX.dbg_p "creating new material editor"
 			@material_editor=LuxrenderMaterialEditor.new
 		end
-        @material_editor.set_material_list
+        @material_editor.set_material_lists
 		if @material_editor.visible?
 			puts "hiding material editor"
 			@material_editor.hide
@@ -756,14 +755,14 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
                   material_editor.matname_changed = false
                 end
             }
-            puts "@matname_changed: ", material_editor.matname_changed
+            #puts "@matname_changed: ", material_editor.matname_changed
             
 			## deal with material name change
             if (material_editor.matname_changed == true)
                 puts "onMaterialChange triggered by material name change"
                 material_editor.current.name_string = material.name.to_s
                 material_editor.matname_changed = false
-                material_editor.set_material_list()
+                material_editor.set_material_lists()
                 material_editor.set_current(material_editor.current.name)
             
 			## deal with other material changes
@@ -849,8 +848,8 @@ if( not file_loaded?(__FILE__) )
 		loaded = luxmat.load_from_model
 		luxmat.reset unless loaded
 	end
-	
-	SU2LUX.create_material_editor
+
+	@lme = SU2LUX.create_material_editor
 	material_editor = SU2LUX.get_editor("material")
     SU2LUX.dbg_p "material editor created, now starting refresh function"
 	material_editor.refresh
