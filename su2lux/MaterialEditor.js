@@ -91,18 +91,23 @@ $(document).ready(
 
 		$("#type").change(
 			function() {
+                //alert ("type change")
 				$(this).nextAll().hide();                 
 				$(this).nextAll("." + this.value).show();
-                if (this.value=="mix"){
-                    $("#mixmattype").change();
-                }
+                //if (this.value=="mix"){
+                //    $("#mixmattype").change();
+                //}
                 window.location = 'skp:type_changed@' + this.value;
 			}
 		)
         
         $("#material_name").change(
             function() {
-				// alert (this.value);
+                //alert ($(".mixmattype".value))
+                //alert (this);
+                //if (this.value=="mix"){
+                //    $("#mixmattype").change();
+                //}
                 window.location = 'skp:material_changed@' + this.value;
             }
         )
@@ -136,6 +141,7 @@ $(document).ready(
 		$('select[id$="_texturetype"]').change(
 			function()
 			{
+                //alert (this.value)
 				$(this).next().hide();
 				$(this).next("." + this.value).show(); // shows load button
 			}

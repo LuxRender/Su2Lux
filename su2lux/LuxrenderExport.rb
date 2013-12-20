@@ -38,8 +38,6 @@ class LuxrenderExport
 	end # END export_global_settings
 
 	def export_camera(view, out)
-		# @lrs=LuxrenderSettings.new
-
 		user_camera = view.camera
 		user_eye = user_camera.eye
 		user_target=user_camera.target
@@ -47,7 +45,7 @@ class LuxrenderExport
 
 		out_user_target = "%12.6f" %(user_target.x.to_m.to_f) + " " + "%12.6f" %(user_target.y.to_m.to_f) + " " + "%12.6f" %(user_target.z.to_m.to_f)
 		out_user_up = "%12.6f" %(user_up.x) + " " + "%12.6f" %(user_up.y) + " " + "%12.6f" %(user_up.z)
-		out.puts "LookAt"
+		out.puts " LookAt"
 		out.puts "%12.6f" %(user_eye.x.to_m.to_f) + " " + "%12.6f" %(user_eye.y.to_m.to_f) + " " + "%12.6f" %(user_eye.z.to_m.to_f)
 		out.puts out_user_target
 		out.puts out_user_up
@@ -1321,7 +1319,7 @@ class LuxrenderExport
             end
 			when "velvet"
             pre, post = self.export_diffuse_component(mat, pre, post)
-            #pre, post = self.export_sigma(mat, pre, post)
+            pre, post = self.export_sigma(mat, pre, post)
 			when "glossy"
             pre, post = self.export_diffuse_component(mat, pre, post)
             pre, post = self.export_specular_component(mat, pre, post)
@@ -1533,12 +1531,10 @@ class LuxrenderExport
                 following += "\t" + "\"float amount\" [" + mixamountstring +"]" + "\n"
             when "sketchup"
                 preceding, following = self.export_texture(material, 'mx', 'float', before, after)
-                #following += "\t" + "\"texture amount\" [" + "\"#{material.name}::Mx.scale\"" + "]" + "\n"
                 following += "\t" + "\"string namedmaterial1\" [\"#{mixmat1}\"]" + "\n"
                 following += "\t" + "\"string namedmaterial2\" [\"#{mixmat2}\"]" + "\n"
             when "imagemap"
                 preceding, following = self.export_texture(material, 'mx', 'float', before, after)
-                #following += "\t" + "\"texture amount\" [" + "\"#{material.name}::Mx.scale\"" + "]" + "\n"
                 following += "\t" + "\"string namedmaterial1\" [\"#{mixmat1}\"]" + "\n"
                 following += "\t" + "\"string namedmaterial2\" [\"#{mixmat2}\"]" + "\n"
 		end

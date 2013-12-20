@@ -49,48 +49,8 @@
 				<option value="mix">Mix</option>
 				<option value="null">Null</option>
 			</select>
-            
-			<!-- mix -->
-			   <div id="mixmaterials" class="mix">
-                <p class="header2">Mix</p>
-                <div class="panelcontent">
-                    
-				<label for="material_list1" class=mixmat1>Material 1</label>
-				<select id="material_list1" class=mixmatlist1>
-					<option value="bogus">not initialized</option>
-				</select><br />
-				<label for="material_list2" class=mixmat2>Material 2</label>
-				<select id="material_list2" class=mixmatlist2>
-					<option value="bogus">not initialized</option>
-				</select><br />
-                
-                <label for="mx_texturetype" class=mixmattype>Mix type</label>
-                <select id="mx_texturetype" class=mixmattypelist>
-					<option value="none">Uniform</option>
-					<option value="sketchup">SketchUp texture</option>
-					<option value="imagemap">Image Map</option>
-				</select><br /><br /><br /><!-- line breaks create space for following interface elements -->
-                
 
-                <span class="none">
-                    <label for="mix_uniform" id="mix_uniform_label">Material 1 percentage</label>
-                    <input type='text' id="mix_uniform" size="4">
-                </span>
-				<span class="sketchup">
-					&nbsp;
-				</span>
-				<span class="imagemap">
-					<input type="button" id="mx_browse_map" value="Load image">
-				</span>
-                
-            
-                </div>
-			</div>
-			<!-- mix ends -->
-            
-            
             <div id="diffuse" class="matte glossy glossytranslucent velvet carpaint ">
-                
                 <p class="header2">Diffuse</p>
         
                 <div class="panelcontent">
@@ -100,22 +60,51 @@
 				<input type='text' id="kd_G" size="6" class="kdgvalue">
 				<label for="kd_B" class="kdb">Blue</label>
 				<input type='text' id="kd_B" size="6" class="kdbvalue">
+                    
 				<label for="kd_texturetype" class="texturelabel">Texture</label>
 				<select id="kd_texturetype" class="texturedropdown">
 					<option value="none">None</option>
 					<option value="sketchup">Sketchup Texture</option>
                     <option value="imagemap">Image Map</option>
 				</select>
+                
 				<span class="imagemap">
 					<input type="button" id="kd_browse_map" value="Load" class="textureloadbutton">
 				</span>
                 <table id="swatch_diffuse">
                     <tr><td id="diffuse_swatch" class="swatch" width=64 height=64></td></tr>
                 </table>
+            
                 </div> <!-- END panelcontent -->
                 
 			</div> <!-- END diffuse -->
 
+			<div id="specular" class="glossy shinymetal glossytranslucent">
+				<p class="header2">Specular</p>
+                
+                <div class="panelcontent">
+				<label for="ks_R" class="kdr">Red</label>
+				<input type='text' id="ks_R" size="6" class="kdrvalue">
+				<label for="ks_G" class="kdg">Green</label>
+				<input type='text' id="ks_G" size="6" class="kdgvalue">
+				<label for="ks_B" class="kdb">Blue</label>
+				<input type='text' id="ks_B" size="6" class="kdbvalue">
+				
+				<label for="ks_texturetype" class="texturelabel">Texture</label>
+				<select id="ks_texturetype" class="texturedropdown">
+					<option value="none">None</option>
+					<option value="sketchup">Sketchup Texture</option>
+					<option value="imagemap">Image Map</option>
+				</select>
+				<span class="imagemap">
+					<input type="button" id="ks_browse_map" value="Load" class="textureloadbutton">
+                </span>
+                <table id="swatch_specular">
+                        <tr><td id="specular_swatch" class="swatch" width=64 height=64></td></tr>
+                </table>
+                </div>
+			</div> <!-- END specular -->
+            
             <div id="carpaints" class="carpaint">
                 <p class="header2">Type</p>
                 <label for="carpaint_name">Name</label>
@@ -131,27 +120,45 @@
                     <option value="blue matte">Blue Matte</option>
                 </select>
             </div>
-
-			<div id="specular" class="glossy shinymetal glossytranslucent">
-				<p class="header2">Specular</p>
-				<label for="ks_R">Red</label>
-				<input type='text' id="ks_R" size="6">
-				<label for="ks_G">Green</label>
-				<input type='text' id="ks_G" size="6">
-				<label for="ks_B">Blue</label>
-				<input type='text' id="ks_B" size="6">
-				<br>
-				<label for="ks_texturetype">Texture</label>
-				<select id="ks_texturetype">
-					<option value="none">None</option>
-					<option value="sketchup">Sketchup Texture</option>
-					<option value="imagemap">Image Map</option>
-				</select>
-				<span class="imagemap">
-					<input type="button" id="ks_browse_map" value="Load">
-				</span> <!-- END diffuse_texture -->
-			</div> <!-- END specular -->
             
+			<!-- mix -->
+            <div id="mixmaterials" class="mix">
+                <p class="header2">Mix</p>
+                <div class="panelcontent">
+                    
+                    <label for="material_list1" class=mixmat1>Material 1</label>
+                    <select id="material_list1" class=mixmatlist1>
+                        <option value="bogus">not initialized</option>
+                    </select><br />
+                    <label for="material_list2" class=mixmat2>Material 2</label>
+                    <select id="material_list2" class=mixmatlist2>
+                        <option value="bogus">not initialized</option>
+                    </select><br />
+                    
+                    <label for="mx_texturetype" class=mixmatlabel>Mix type</label>
+                    <select id="mx_texturetype" class=mixmattypelist>
+                        <option value="none">Uniform</option>
+                        <option value="sketchup">SketchUp texture</option>
+                        <option value="imagemap">Image Map</option>
+                    </select><br /><br /><br /><br /><!-- line breaks create space for following interface elements -->
+                    
+                    <div class="texturefields">
+                    <span class="none">
+                        <label for="mix_uniform" id="mix_uniform_label">Material 1 percentage</label>
+                        <input type='text' id="mix_uniform" size="4">
+                            </span>
+                    <span class="sketchup">
+                        &nbsp;
+                    </span>
+                    <span class="imagemap">
+                        <input type="button" id="mx_browse_map" value="Load image">
+                    </span>
+                    </div>
+                    
+                    
+                </div>
+			</div>
+			<!-- mix ends -->
             
             <div id="transmission" class="glass glass2 roughglass mattetranslucent glossytranslucent">
 				<p class="header2">Transmission</p>

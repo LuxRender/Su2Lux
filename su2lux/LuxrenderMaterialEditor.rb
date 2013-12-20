@@ -30,6 +30,8 @@ class LuxrenderMaterialEditor
 		material_editor_dialog_path = Sketchup.find_support_file("materialeditor.html", "Plugins/su2lux")
 		@material_editor_dialog.max_width = 800
 		@material_editor_dialog.set_file(material_editor_dialog_path)
+        @collectedmixmaterials = []
+        @collectedmixmaterials_i = 0
         
         @color_picker = UI::WebDialog.new("Color Picker", false, "ColorPicker", 200, 220, 200, 350, true)
         color_picker_path = Sketchup.find_support_file("colorpicker.html", "Plugins/su2lux")
@@ -65,7 +67,6 @@ class LuxrenderMaterialEditor
                             convertedcolor = Sketchup::Color.new(red.to_i, green.to_i, blue.to_i)
                             puts convertedcolor
                             material.color = convertedcolor
-                            # todo: update color swatch
                             @lrs.diffuse_swatch[0]
                             @lrs.diffuse_swatch[1]
                             @lrs.diffuse_swatch[2]
@@ -114,7 +115,26 @@ class LuxrenderMaterialEditor
 			# reload existing material preview image
 			puts "attempting to reload image"
 			load_preview_image()
+            settexturefields(material_name)
 		}
+        
+        def settexturefields(matname) # shows and hides texture load buttons, based on material properties
+            luxmat = getluxmatfromskpname(matname)
+            channels = luxmat.texturechannels
+            #puts channels
+            for channelname in channels
+                textypename = channelname + "_texturetype" # for example "kd_texturetype"
+                
+                cmd = "$('#" + textypename + "').nextAll('span').hide();"
+                @material_editor_dialog.execute_script(cmd)
+                cmd = "$('#" + textypename + "').nextAll('div').hide();"
+                @material_editor_dialog.execute_script(cmd)
+                activetexturetype = luxmat.send(textypename)
+                cmd = "$('#" + textypename + "').nextAll('." + activetexturetype + "').show()";
+                @material_editor_dialog.execute_script(cmd)
+            end
+        end
+        
         
         @material_editor_dialog.add_action_callback('open_color_picker') { |dialog, param|
             SU2LUX.dbg_p "creating color picker window"
@@ -139,23 +159,28 @@ class LuxrenderMaterialEditor
             #puts "updating swatch:", colorswatch
             colorvars = []
             case colorswatch
-            when "diffuse_swatch"
-                puts "updating diffuse swatch"
-                @current.kd_R = rvalue
-                @current.kd_G = gvalue
-                @current.kd_B = bvalue
-            when "absorption_swatch"
-                @current.ka_R = rvalue
-                @current.ka_G = gvalue
-                @current.ka_B = bvalue
-            when "reflection_swatch"
-                @current.kr_R = rvalue
-                @current.kr_G = gvalue
-                @current.kr_B = bvalue
-            when "transmission_swatch"
-                @current.kt_R = rvalue
-                @current.kt_G = gvalue
-                @current.kt_B = bvalue
+                when "diffuse_swatch"
+                    puts "updating diffuse swatch"
+                    @current.kd_R = rvalue
+                    @current.kd_G = gvalue
+                    @current.kd_B = bvalue
+                when "specular_swatch"
+                    puts "updating specular swatch"
+                    @current.ks_R = rvalue
+                    @current.ks_G = gvalue
+                    @current.ks_B = bvalue
+                when "absorption_swatch"
+                    @current.ka_R = rvalue
+                    @current.ka_G = gvalue
+                    @current.ka_B = bvalue
+                when "reflection_swatch"
+                    @current.kr_R = rvalue
+                    @current.kr_G = gvalue
+                    @current.kr_B = bvalue
+                when "transmission_swatch"
+                    @current.kt_R = rvalue
+                    @current.kt_G = gvalue
+                    @current.kt_B = bvalue
             end
             updateSettingValue(@lrs.send(colorswatch)[0])
             updateSettingValue(@lrs.send(colorswatch)[1])
@@ -180,6 +205,28 @@ class LuxrenderMaterialEditor
 		@material_editor_dialog.add_action_callback('type_changed') { |dialog, material_type|
             SU2LUX.dbg_p ("callback: type changed")
 			print "current material: ", material_type, "\n"
+            if (material_type=="mix") # check if mix materials have been set
+                if (@current.material_list1 == '')
+                    matname0 = Sketchup.active_model.materials[0].name.delete("[<>]")
+                    puts "COMPARING NAMES:"
+                    puts matname0
+                    puts @current.name
+                    if (@current.name != matname0)
+                        @current.material_list1 = matname0
+                        @current.material_list2 = matname0
+                    else
+                        @current.material_list1 = Sketchup.active_model.materials[1].name.delete("[<>]")
+                        @current.material_list2 = Sketchup.active_model.materials[1].name.delete("[<>]")
+                    end
+                    # todo: set mix fields to material_list1 and material_list2
+                    cmd = "$('#material_list1 option').filter(function(){return ($(this).text() == '" + @current.material_list1 + "');}).attr('selected', true);"
+                    @material_editor_dialog.execute_script(cmd)
+                    cmd = "$('#material_list2 option').filter(function(){return ($(this).text() == '" + @current.material_list2 + "');}).attr('selected', true);"
+                    @material_editor_dialog.execute_script(cmd)
+                end
+            end
+            
+            
             @current.send("type=", material_type)
             # update_swatches()
 		}
@@ -225,10 +272,20 @@ class LuxrenderMaterialEditor
 			
 			texture_subfolder = "/LuxRender/textures"
 			previewExport=LuxrenderExport.new(preview_path,path_separator) # preview path should define where preview files will be stored
-			previewExport.export_preview_material(preview_path,generated_lxm_file,active_material_name_converted,active_material,texture_subfolder,@current)
+            
+            collect_mix_materials(@current) # check if the current material is a mix material; if so, recursively gather submaterials
+            puts "collected materials:"
+            puts @collectedmixmaterials
+            for prmat in @collectedmixmaterials
+                active_material = @materials_skp_lux.index(prmat)
+                active_material_name = active_material.name.delete("[<>]") # following LuxrenderMaterial.rb convention ## was Sketchup.active_model.materials.
+                active_material_name_converted = sanitize_path(active_material_name)
+                previewExport.export_preview_material(preview_path,generated_lxm_file,active_material_name_converted,active_material,texture_subfolder,prmat)
+            end
+            @collectedmixmaterials = []
+            @collectedmixmaterials_i = 0
+            
 			generated_lxm_file.close
-												
-			# previewExport.write_textures # old
 			puts "finished texture output for material preview"
 			
 			# generate preview lxs file
@@ -258,7 +315,7 @@ class LuxrenderMaterialEditor
 			@preview_lxs = preview_path+active_material_name_converted+".lxs" 
 			@filename = preview_path+active_material_name_converted+".png"
 			luxconsole_path = SU2LUX.get_luxrender_console_path()
-			@preview_renderingtime = 2  # seconds (todo: make user configurable?)  
+			@preview_renderingtime = 2  # seconds (todo: make user configurable)
 			@time_out = @preview_renderingtime + 10
 			@retry_interval = 0.5
 			@luxconsole_options = " "
@@ -324,6 +381,32 @@ class LuxrenderMaterialEditor
 			@texture_editor.show()
 		}
 	end # end initialize
+    
+    def collect_mix_materials(active_material)
+        if (@collectedmixmaterials_i > 4) # 4 levels of recursion is considered maximum sensible amount
+            puts "recursive mix material detected, aborting"
+        elsif (active_material.type=="mix")
+            puts "PROCESSING MIX MATERIAL"
+            @collectedmixmaterials_i = @collectedmixmaterials_i + 1
+            submaterial1 = getluxmatfromskpname(active_material.material_list1)
+            submaterial2 = getluxmatfromskpname(active_material.material_list2)
+            collect_mix_materials(submaterial1)
+            collect_mix_materials(submaterial2)
+            @collectedmixmaterials << active_material
+        else
+            @collectedmixmaterials << active_material
+        end
+    end
+    
+    def getluxmatfromskpname(passedmatname)
+        for mat in @materials_skp_lux.values
+            if (mat.name == passedmatname)
+                return mat
+            elsif (mat.original_name == passedmatname)
+                return mat
+            end
+        end
+    end
 	
 	def load_preview_image()
 		puts "running load_preview_image function"			
@@ -478,9 +561,8 @@ class LuxrenderMaterialEditor
         if (@current) # prevent update_swatches function from running before a luxmaterial has been created
             update_swatches()
         end
-        # todo: improve cmd to prevent issues when material names overlap (like brick, brick2)
-		# cmd = "$('#material_name option:contains(#{passedname})').attr('selected', true)" # issues with material name overlap
         passedname = passedname.delete("[<>]")
+        # show right material in material editor dropdown menu
         cmd = "$('#material_name option').filter(function(){return ($(this).text() == \"#{passedname}\");}).attr('selected', true);"
         
         puts cmd

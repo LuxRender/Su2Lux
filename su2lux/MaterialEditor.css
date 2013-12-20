@@ -127,7 +127,7 @@ input#get_diffuse_color {
     top: 27px;
 }
 
-.mixmattype{
+.mixmatlabel{
     position: absolute;
     left: 0px;
     top: 50px;
@@ -138,25 +138,14 @@ input#get_diffuse_color {
     top: 50px;
 }
 
-.none{
+
+
+
+.texturefields{
     position: absolute;
     left: 80px;
     top: 73px;
 }
-
-.sketchup{
-    position: absolute;
-    left: 80px;
-    top: 73px;
-}
-
-.imagemap{
-    position: absolute;
-    left: 80px;
-    top: 73px;
-}
-
-
 
 
 
@@ -188,6 +177,10 @@ input#get_diffuse_color {
 }
 
 #swatch_diffuse{
+    margin: 5px 0px 0px 0px;
+}
+
+#swatch_specular{
     margin: 5px 0px 0px 0px;
 }
 

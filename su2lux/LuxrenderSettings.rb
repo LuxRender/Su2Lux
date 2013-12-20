@@ -332,8 +332,9 @@ class LuxrenderSettings
     ##
     # Color Swatches
     ##
-    'swatch_list' => ['diffuse_swatch','reflection_swatch','transmission_swatch','absorption_swatch'],
+    'swatch_list' => ['diffuse_swatch','specular_swatch','reflection_swatch','transmission_swatch','absorption_swatch'],
     'diffuse_swatch' => ['kd_R','kd_G','kd_B'],
+    'specular_swatch'=> ['ks_R','ks_G','ks_B'],
     'reflection_swatch' => ['kr_R','kr_G','kr_B'],
     'transmission_swatch' => ['kt_R','kt_G','kt_B'],
     'absorption_swatch' => ['ka_R','ka_G','ka_B'],
