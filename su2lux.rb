@@ -21,9 +21,9 @@
 #                Initially based on SU exporters: SU2KT by Tomasz Marek, Stefan Jaensch,Tim Crandall, 
 #                SU2POV by Didier Bur and OGRE exporter by Kojack
 # Usage        : Copy script to PLUGINS folder in SketchUp folder, run SketchUp, go to Plugins\LuxRender exporter
-# Date         : 2013-12-13
+# Date         : 2013-12-20
 # Type         : Exporter
-# Version      : 0.30 dev
+# Version      : 0.32 dev
 
 require 'sketchup.rb'
 require 'su2lux/fileutils.rb'
@@ -547,7 +547,7 @@ end #END luxrender_path_valid?
 	#
 	##
 	def SU2LUX.about
-		UI.messagebox("SU2LUX version 0.30-dev 13 December 2013
+		UI.messagebox("SU2LUX version 0.32-dev 20 December 2013
 	SketchUp Exporter to LuxRender
                       Authors: Alexander Smirnov (aka Exvion); Mimmo Briganti (aka mimhotep); Abel Groenewolt (aka pistepilvi); Martijn Berger (aka Juicyfruit)
     
@@ -715,7 +715,6 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 				puts "onMaterialSetCurrent reusing LuxRender material "
 			else
 				material_editor.refresh()
-			
 				#material_editor.current = LuxrenderMaterial.new(current_mat)
 				#material_editor.materials_skp_lux[current_mat] = material_editor.current 
 				#puts "onMaterialSetCurrent creating new LuxRender material" # , material_editor.current
@@ -732,6 +731,16 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
     def onMaterialAdd(materials, material)
         puts "onMaterialAdd added material: ", material.name
 		# adding a material will set it current, onMaterialSetCurrent will take over
+        # except on OS X
+        if (SU2LUX.get_os == :mac)
+            puts "CREATING NEW MATERIAL"
+            material_editor = SU2LUX.get_editor("material")
+            newmaterial = material_editor.find(material.name)
+            if (material.texture)
+                newmaterial.kd_texturetype = "sketchup"
+            end
+            material_editor.refresh()
+        end
 	end
 
     def onMaterialRemove(materials, material)
@@ -785,7 +794,6 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
                     luxmaterial.kd_imagemap_Sketchup_filename = texture_name
                     luxmaterial.kd_texturetype = 'sketchup' if (luxmaterial.kd_texturetype != 'imagemap')
                     luxmaterial.use_diffuse_texture = true
-                      # todo: in case of Image Map, show Load button # Abel 2013
                 else
                     luxmaterial.kd_imagemap_Sketchup_filename = ''
                     if (luxmaterial.kd_texturetype == 'sketchup') # todo: check if non-sketchup texture is being used

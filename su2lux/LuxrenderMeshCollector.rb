@@ -130,6 +130,10 @@ class LuxrenderMeshCollector
 				else
 					mat = Sketchup.active_model.materials[SU2LUX::FRONT_FACE_MATERIAL]
 					mat = Sketchup.active_model.materials.add SU2LUX::FRONT_FACE_MATERIAL if mat.nil?
+
+                    mateditor = SU2LUX.get_editor("material")
+                    mateditor.find(SU2LUX::FRONT_FACE_MATERIAL)
+
 					front_color = Sketchup.active_model.rendering_options["FaceFrontColor"]
 					scale = 0.8 / 255.0
 					mat.color = Sketchup::Color.new(front_color.red * scale, front_color.green * scale, front_color.blue * scale)

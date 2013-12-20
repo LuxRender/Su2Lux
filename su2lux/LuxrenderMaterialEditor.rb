@@ -37,6 +37,8 @@ class LuxrenderMaterialEditor
         color_picker_path = Sketchup.find_support_file("colorpicker.html", "Plugins/su2lux")
         @color_picker.set_file(color_picker_path)
 		@texture_editor_data = {}
+        
+        @numberofluxmaterials = 0
 		
 		@material_editor_dialog.add_action_callback('param_generate') {|dialog, params|
             SU2LUX.dbg_p ("callback: param_generate")
@@ -101,6 +103,7 @@ class LuxrenderMaterialEditor
 			
 			if existingluxmat == "none"
 				puts "LuxRender material not found, creating new material"
+                #UI.messagebox ("about to run .find for material " + material_name)
 				@current = self.find(material_name) ### use only this line if testing fails
 			else
 				puts "reusing LuxRender material"
@@ -406,6 +409,7 @@ class LuxrenderMaterialEditor
                 return mat
             end
         end
+        return nil
     end
 	
 	def load_preview_image()
@@ -465,10 +469,15 @@ class LuxrenderMaterialEditor
 	# 
 	##	
 	def find(name)
-		mat = Sketchup.active_model.materials[name]
-		if mat
-			return LuxrenderMaterial.new(mat)
-		else
+        mat = Sketchup.active_model.materials[name]
+        if (getluxmatfromskpname(name))
+            return getluxmatfromskpname(name)
+        elsif (mat)
+            @numberofluxmaterials += 1
+            newluxmat = LuxrenderMaterial.new(mat)
+            @materials_skp_lux[mat] = newluxmat
+            return newluxmat
+        else
             puts "no material found for name ", name
 			return nil
 		end
@@ -497,13 +506,15 @@ class LuxrenderMaterialEditor
 	##
 	def refresh()
 		SU2LUX.dbg_p "running refresh function"
+        #UI.messagebox (Sketchup.active_model.materials.length)
 		materials = Sketchup.active_model.materials
+        
         
 		## check if LuxRender materials exist, if not, create them
 		for mat in materials
 			if !@materials_skp_lux.include?(mat) # test if LuxRender material has been created, if not, create one
-				luxmat = find(mat.name) # creates LuxRender material
-				@materials_skp_lux[mat] = luxmat  	#  add materials to hash contained processed materials
+				#UI.messagebox(mat)
+                luxmat = find(mat.name) # creates LuxRender material
 				puts "adding material #{mat.name} to material hash, creating LuxRender material"
 				luxmat.color = mat.color
 				if mat.texture
@@ -607,9 +618,7 @@ class LuxrenderMaterialEditor
 	##
 	#
 	##
-	def is_a_checkbox?(id)#much better to use objects for settings?!
-		# material = Sketchup.active_model.materials.current
-		# lux_material = LuxrenderMaterial.new(material)
+	def is_a_checkbox?(id) #much better to use objects for settings?!
 		lux_material = @current
 		if lux_material[id] == true or lux_material[id] == false
 			return id

@@ -1235,6 +1235,7 @@ class LuxrenderExport
 		# mix materials should be last, so first we write normal materials
         materials.each { |mat|
             luxrender_mat = mateditor.materials_skp_lux[mat]
+            puts luxrender_mat
             #puts ("material from hash:")
             #puts luxrender_mat
             SU2LUX.dbg_p luxrender_mat.name
