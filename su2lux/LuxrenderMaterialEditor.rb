@@ -273,7 +273,7 @@ class LuxrenderMaterialEditor
 			FileUtils.copy_file(base_file,lxm_path_8859_1)
 			generated_lxm_file = File.new(lxm_path_8859_1,"a")
 			
-			texture_subfolder = "/LuxRender/textures"
+			texture_subfolder = "LuxRender_luxdata/textures"
 			previewExport=LuxrenderExport.new(preview_path,path_separator) # preview path should define where preview files will be stored
             
             collect_mix_materials(@current) # check if the current material is a mix material; if so, recursively gather submaterials

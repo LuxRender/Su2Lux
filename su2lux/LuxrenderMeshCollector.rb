@@ -5,7 +5,7 @@ class LuxrenderMeshCollector
 	##
 	#
 	##
-	def initialize(model_name, os_separator, texprefix, instances) # texprefix added to accomodate material preview
+	def initialize(model_name, os_separator, instances)
 		@model_name = model_name
 		@os_separator = os_separator
 		@parent_mat = []
@@ -15,7 +15,6 @@ class LuxrenderMeshCollector
 		@count_faces = 0
 		@model_textures = {}
 		@texturewriter = Sketchup.create_texture_writer
-		@texprefix = texprefix 
         @instance_counter_cache = Hash.new
         @deduplicate = instances
         @deferred_instances = Hash.new
@@ -259,7 +258,6 @@ class LuxrenderMeshCollector
 		ext=".jpg" if ext.upcase[0]!=46 # 46 = dot
 		s=name+ext
 		#s=@textures_prefix+@model_name+@os_separator+s
-		s=@texprefix+@model_name+"/"+s
 #		p "texture name "+s
 		return s
 	end # END get_texture_name

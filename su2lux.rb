@@ -21,9 +21,7 @@
 #                Initially based on SU exporters: SU2KT by Tomasz Marek, Stefan Jaensch,Tim Crandall, 
 #                SU2POV by Didier Bur and OGRE exporter by Kojack
 # Usage        : Copy script to PLUGINS folder in SketchUp folder, run SketchUp, go to Plugins\LuxRender exporter
-# Date         : 2013-12-20
 # Type         : Exporter
-# Version      : 0.32 dev
 
 require 'sketchup.rb'
 require 'su2lux/fileutils.rb'
@@ -31,6 +29,8 @@ require 'su2lux/fileutils.rb'
 module SU2LUX
 
     # Module constants
+    SU2LUX_VERSION = "0.33"
+    SU2LUX_DATE = "21 December 2013"
 	CONFIG_FILE = "luxrender_path.txt"
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
@@ -41,6 +41,9 @@ module SU2LUX
 	SUFFIX_MATERIAL = "-mat.lxm"
 	SUFFIX_OBJECT = "-geom.lxo"
 	SUFFIX_VOLUME = "-vol.lxv"
+    SUFFIX_DATAFOLDER = "_luxdata"
+    GEOMETRYFOLDER = "/geometry/"
+    TEXTUREFOLDER = "/textures/"
 
 	##
 	# prints a message in the Ruby console only when in debug mode
@@ -114,7 +117,6 @@ module SU2LUX
 	##
 	def SU2LUX.reset_variables
 		@exp_distorted = false
-        # puts "starting @luxrender_path from reset_variables function"
 		@model_textures={} 
 		@texturewriter=Sketchup.create_texture_writer
 		@selected=false
@@ -126,7 +128,7 @@ module SU2LUX
 		@frame=0 #unused
 		@instanced=true #unused
 		@lights = [] #unused
-		@model_name="" #unused in this file
+		@model_name=""
 		@n_cameras=0 #unused
 		@n_pointlights=0 #unused
 		@n_spotlights=0 #unused
@@ -139,43 +141,51 @@ module SU2LUX
 	# exporting geometry, lights, materials and settings to a LuxRender file
 	##
 	def SU2LUX.export
-		#Sketchup.send_action "showRubyPanel:"
 		SU2LUX.reset_variables
 		model = Sketchup.active_model
 		entities = model.active_entities
 		selection = model.selection
 		materials = model.materials
-		@luxrender_path = SU2LUX.get_luxrender_path
-		
-		le=LuxrenderExport.new(@export_file_path,@os_separator)
+		@luxrender_path = SU2LUX.get_luxrender_path # path to LuxRender executable
+        exportpath = @lrs.export_file_path
+		      
+		le=LuxrenderExport.new(exportpath,@os_separator)
 		le.reset
-		file_basename = File.basename(@export_file_path, SCENE_EXTENSION)		
-		file_dirname = File.dirname(@export_file_path)
+		file_basename = File.basename(exportpath, SCENE_EXTENSION)
+		file_dirname = File.dirname(exportpath)
 		file_fullname = file_dirname + @os_separator + file_basename
-		
+        file_datafolder = file_fullname+SU2LUX::SUFFIX_DATAFOLDER + @os_separator
+        
+        # create scene data folder
+        if !FileTest.exist?(file_fullname+SU2LUX::SUFFIX_DATAFOLDER)
+            Dir.mkdir(file_fullname+SU2LUX::SUFFIX_DATAFOLDER)
+        end
+        
 		#Exporting geometry
-		out_geom = File.new(file_fullname + SUFFIX_OBJECT, "w")
+		out_geom = File.new(file_datafolder + file_basename  + SUFFIX_OBJECT, "w")
 		le.export_mesh(out_geom)
 		out_geom.close
 
 		#Exporting all materials
-		out_mat = File.new(file_fullname + SUFFIX_MATERIAL, "w")
+		out_mat = File.new(file_datafolder + file_basename + SUFFIX_MATERIAL, "w")
 		le.export_used_materials(materials, out_mat)
 		out_mat.close
-
-		out = File.new(@export_file_path,"w")
+        
+        # write lxs file
+		out = File.new(exportpath,"w")
 		le.export_global_settings(out)
 		le.export_camera(model.active_view, out)
 		le.export_film(out)
 		le.export_render_settings(out)
 		entity_list=model.entities
 		out.puts 'WorldBegin'
-		
-		out.puts "Include \"" + file_basename + SUFFIX_MATERIAL + "\"\n\n"
-		out.puts "Include \"" + file_basename + SUFFIX_OBJECT + "\"\n\n"
+		out.puts "Include \"" + file_basename+SU2LUX::SUFFIX_DATAFOLDER + @os_separator + file_basename + SUFFIX_MATERIAL + "\"\n\n"
+		out.puts "Include \"" + file_basename+SU2LUX::SUFFIX_DATAFOLDER + @os_separator + file_basename + SUFFIX_OBJECT + "\"\n\n"
 		le.export_light(out)
 		out.puts 'WorldEnd'
 		out.close
+        
+        # write texture files
 		le.write_textures
 		@count_tri = le.count_tri
 	end # END export
@@ -184,42 +194,44 @@ module SU2LUX
 	#	 showing the export dialog box
 	##
 	def SU2LUX.export_dialog(render=true)
+        puts "LuxRender export started, running export_dialog function"
+        
 		"""The argument: 'render' is a boolean which indicates
 		whether or not to render the lxs after it has been exported
 		"""
 		SU2LUX.remove_observers
-
-		##### --- awful hack --- 1.0 ####
-		# @lrs=LuxrenderSettings.new
-		@export_file_path = @lrs.export_file_path #shouldn't need this
-		#####################
-
 		SU2LUX.reset_variables
 		
-		#check whether file path has already been chosen
-		if @export_file_path != ""
+		# check whether file path has been set (default path is "")
+		if (@lrs.export_file_path != "")
+            puts "export_file_path was set"
 			start_time = Time.new
 			SU2LUX.export
-		#launch appropriate report window and render (according to variable: render)
+            #launch appropriate report window and render (according to variable: render)
 			if render == true
+                puts "launching luxrender"
 				result = SU2LUX.report_window(start_time, ask_render=true)
 				SU2LUX.launch_luxrender if result == 6
 			else if render == false
+                puts "not launching luxrender"
 				SU2LUX.report_window(start_time, ask_render=false)
 				end
 			end
-		#choose a new name for export file path
-		else 
+		
+		else # set new export file path
+            puts "export_file_path was not set"
 			saved = SU2LUX.new_export_file_path
 			if saved
 				start_time = Time.new
 				SU2LUX.export
 			
-			#launch appropriate report window and render (according to variable: render)
+                #launch appropriate report window and render (according to variable: render)
 				if render == true
+                    puts "export_file_path was not set, launching luxrender"
 					result = SU2LUX.report_window(start_time, ask_render=true)
 					SU2LUX.launch_luxrender if result == 6
-				else if render == false
+                else if render == false
+                    puts "export_file_path was not set, not launching luxrender"
 					SU2LUX.report_window(start_time, ask_render=false)
 					end
 				end
@@ -233,12 +245,10 @@ module SU2LUX
 	##
 	def SU2LUX.export_copy
 
-		# @lrs=LuxrenderSettings.new
-		#temporary file path for exporting copy
-		old_export_file_path = @lrs.export_file_path 
+		old_export_file_path = @lrs.export_file_path
 		
 		SU2LUX.new_export_file_path
-		SU2LUX.export_dialog(render=false) #don't bother rendering
+		SU2LUX.export_dialog(render=false) # don't render
 		
 		@lrs.export_file_path = old_export_file_path
 	end # END export_copy
@@ -249,16 +259,7 @@ module SU2LUX
 	##
 	#
 	##
-	def SU2LUX.new_export_file_path
-	"""This function browses for a new export file path and sets it in the lxs settings
-	it is currently required for the browse button in the settings panel and the button in the 
-	plugin menu.
-	"""
-		##### --- awful hack --- 1.0 ####
-		# @lrs=LuxrenderSettings.new
-		@export_file_path = @lrs.export_file_path #shouldn't need this
-		#####################
-		
+	def SU2LUX.new_export_file_path # browses for a new export file path and sets it in the lxs settings
 		model = Sketchup.active_model
 		model_filename = File.basename(model.path)
 		if model_filename.empty?
@@ -280,18 +281,10 @@ module SU2LUX
 			user_input.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
 			user_input.gsub!(/\\/, '/') if user_input.include?('\\')
 			#store file path for quick exports
-			@export_file_path = user_input
+			@lrs.export_file_path = user_input
 				
-			@lrs.export_file_path = @export_file_path
-			#would be nice to store export_file_path in luxrender preferences (attatch to skp)
-				
-			if @export_file_path == @export_file_path.chomp(SCENE_EXTENSION)
-				@export_file_path += SCENE_EXTENSION
-					
-				#### --- awful hack --- 1.0 #####
-				@lrs.export_file_path = @export_file_path
-				#####################
-                # puts "starting luxrender_path from new_export_file_path function"
+			if @lrs.export_file_path == @lrs.export_file_path.chomp(SCENE_EXTENSION)
+				@lrs.export_file_path += SCENE_EXTENSION
 				@luxrender_path = SU2LUX.get_luxrender_path
 			end
 			return true #user has selected a path
@@ -330,7 +323,7 @@ module SU2LUX
 			return true #user has selected a path
 		end
 		return false #user has not selected a path
-	end # END new_export_file_path
+	end
 
 	##
 	#
@@ -355,7 +348,7 @@ module SU2LUX
 			return true #user has selected a path
 		end
 		return false #user has not selected a path
-	end # END new_export_file_path
+	end
 
 	##
 	#   get LuxRender path, prompt user if it hasn't been defined
@@ -431,30 +424,28 @@ module SU2LUX
 		export_text="Model & Lights saved in file:\n"
 		#export_text="Selection saved in file:\n" if @selected==true
 		if ask_render
-			result=UI.messagebox(export_text + @export_file_path +  " \n\nOpen exported model in LuxRender?",MB_YESNO)
+			result=UI.messagebox(export_text + @lrs.export_file_path +  " \n\nOpen exported model in LuxRender?",MB_YESNO)
 		else
-			result=UI.messagebox(export_text + @export_file_path,MB_OK)
+			result=UI.messagebox(export_text + @lrs.export_file_path,MB_OK)
 		end
 		return result
 	end # END report_window
 
-##
-#
-##
-def SU2LUX.luxrender_path_valid?(luxrender_path)
-	(! luxrender_path.nil? and File.exist?(luxrender_path) and (File.basename(luxrender_path).upcase.include?("LUXRENDER")))
-	#check if the path to LuxRender is valid
-end #END luxrender_path_valid?
+    ##
+    #
+    ##
+    def SU2LUX.luxrender_path_valid?(luxrender_path)
+        (! luxrender_path.nil? and File.exist?(luxrender_path) and (File.basename(luxrender_path).upcase.include?("LUXRENDER")))
+    end #END luxrender_path_valid?
   
 	##
 	#
 	##
 	def SU2LUX.launch_luxrender
-        # puts "starting get_luxrender_path from launch_luxrender function"
         @luxrender_path = SU2LUX.get_luxrender_path if @luxrender_path.nil?
 		return if @luxrender_path.nil?
 		Dir.chdir(File.dirname(@luxrender_path))
-		export_path = "#{@export_file_path}"
+		export_path = "#{@lrs.export_file_path}"
 		export_path = File.join(export_path.split(@os_separator))
 		if (ENV['OS'] =~ /windows/i)
 		 command_line = "start \"max\" \/#{@lrs.priority} \"#{@luxrender_path}\" \"#{export_path}\""
@@ -547,14 +538,18 @@ end #END luxrender_path_valid?
 	#
 	##
 	def SU2LUX.about
-		UI.messagebox("SU2LUX version 0.32-dev 20 December 2013
-	SketchUp Exporter to LuxRender
-                      Authors: Alexander Smirnov (aka Exvion); Mimmo Briganti (aka mimhotep); Abel Groenewolt (aka pistepilvi); Martijn Berger (aka Juicyfruit)
+		UI.messagebox("SU2LUX, SketchUp Exporter to LuxRender
+version #{SU2LUX::SU2LUX_VERSION}, #{SU2LUX::SU2LUX_DATE}
+
+Authors:
+Alexander Smirnov (aka Exvion)
+Mimmo Briganti (aka mimhotep)
+Abel Groenewolt (aka pistepilvi)
+Martijn Berger (aka Juicyfruit)
     
-    SU2LUX makes use of the jQuery library and the Farbtastic color picker.
-                      
-	For further information please visit
-	LuxRender Website & Forum - www.luxrender.net" , MB_MULTILINE , "SU2LUX - Sketchup Exporter to LuxRender")
+SU2LUX makes use of the jQuery library and the Farbtastic color picker.
+
+For further information please visit LuxRender's Website & Forum at www.luxrender.net" , MB_MULTILINE , "SU2LUX - Sketchup Exporter to LuxRender")
 	end # END
 
 	##

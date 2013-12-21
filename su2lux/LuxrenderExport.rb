@@ -9,7 +9,6 @@ class LuxrenderExport
 		@model_name=@model_name.split(".")[0]
         @instance_name = 0
 		@os_separator=os_separator
-		@path_textures=File.dirname(@export_file_path)
 		@has_portals = false
         @mat_step = 0 # monitors export progress
         @current_step = 0
@@ -33,7 +32,7 @@ class LuxrenderExport
 
 	def export_global_settings(out)
 		out.puts "# LuxRender Scene File"
-		out.puts "# Exported by SU2LUX 0.32-devel"
+		out.puts "# Exported by SU2LUX #{SU2LUX::SU2LUX_VERSION}"
 		out.puts "# Global Information"
 	end # END export_global_settings
 
@@ -712,7 +711,7 @@ class LuxrenderExport
 	end # END export_light
 
 	def export_mesh(out)
-		mc=LuxrenderMeshCollector.new(@model_name,@os_separator,SU2LUX::PREFIX_TEXTURES,true)
+		mc=LuxrenderMeshCollector.new(@model_name,@os_separator,true)
 		mc.collect_faces(Sketchup.active_model.entities, Geom::Transformation.new)
 		@materials=mc.materials
 		@fm_materials=mc.fm_materials # face me component materials
@@ -729,7 +728,7 @@ class LuxrenderExport
         # the instances we deferred also need to be exported
         mc.deferred_instances.each { | key , value |
             p "key: #{key} -> #{value.length}"
-            imc=LuxrenderMeshCollector.new(@model_name,@os_separator,SU2LUX::PREFIX_TEXTURES,false) #do not defer a second time
+            imc=LuxrenderMeshCollector.new(@model_name,@os_separator,false) #do not defer a second time
             definition  = Sketchup.active_model.definitions.select { | d | d.class == Sketchup::ComponentDefinition && d.name.eql?(key) }
             if ! definition.empty?
                 p "Executing collect_faces for: #{definition[0].name} ->  #{@instance_name}"
@@ -758,11 +757,12 @@ class LuxrenderExport
 		puts preview_path,generated_lxm_file,currentmaterialname,currentmaterial,texture_path,luxmat
 		
 		# prepare texture paths
-		emptyprefix = String.new
-		outputfolder= @model_name + "/textures"
-
+		#outputfolder= @model_name + "/textures"
+        outputfolder = "LuxRender_luxdata/textures"
+        
+        
 		# check for textures folder in temporary location, create if missing
-		outputfolder_temp= preview_path+"/LuxRender"
+		outputfolder_temp= preview_path+"/LuxRender_luxdata"
 		Dir.mkdir(outputfolder_temp) unless File.exists?(outputfolder_temp)
 		outputfolder_temp= outputfolder_temp+"/textures"
 		Dir.mkdir(outputfolder_temp) unless File.exists?(outputfolder_temp)
@@ -778,7 +778,7 @@ class LuxrenderExport
 		luxmat_group.material = currentmaterial
 		
 		# create MeshCollector, store used material's textures
-		mcpre=LuxrenderMeshCollector.new(outputfolder,@os_separator,emptyprefix,false)
+		mcpre=LuxrenderMeshCollector.new(outputfolder,@os_separator,false)
 		mcpre.collect_faces(luxmat_group, Geom::Transformation.new)
 		@model_textures=mcpre.model_textures
 		@texturewriter=mcpre.texturewriter
@@ -931,18 +931,19 @@ class LuxrenderExport
         geometrytype = @lrs.geomexport()
         if ( geometrytype=="ply" ) # Write ply filename for all materials
             puts "using .ply export"
-            subfolder = "/SU2LUX_geometry/"
-            ply_path_base = File.dirname(@export_file_path) + subfolder
+            
+            ply_path_base = File.dirname(@export_file_path) + "/" +  File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER + SU2LUX::GEOMETRYFOLDER
             Dir.mkdir(ply_path_base) unless File.exists?(ply_path_base)
+            ply_path_relative = File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER + SU2LUX::GEOMETRYFOLDER
             
             if mat.class==String
                 puts "using string"
-                ply_path=ply_path_base + @instance_name.to_s + '_' + mat+'.ply'
+                ply_path=ply_path_relative + @instance_name.to_s + '_' + mat+'.ply'
                 else
                 puts "using mat.name"
-                ply_path=ply_path_base + @instance_name.to_s + '_' + luxrender_name +'.ply' # mat.name was mat.display_name
+                ply_path=ply_path_relative + @instance_name.to_s + '_' + luxrender_name +'.ply' # mat.name was mat.display_name
             end
-            output_ply_geometry(ply_path, meshes, mirrored, mat_dir, @rest, has_texture, matname, pointcount, polycount, default_mat, distorted_uv, (!has_texture and @exp_default_uvs==true), false)
+            output_ply_geometry((File.dirname(@export_file_path)+"/"+ply_path), meshes, mirrored, mat_dir, @rest, has_texture, matname, pointcount, polycount, default_mat, distorted_uv, (!has_texture and @exp_default_uvs==true), false)
             puts "ply path: ", ply_path
             out.puts "Shape \"plymesh\""
             out.puts "\"string filename\" [\"#{ply_path}\"]\n"
@@ -1266,18 +1267,18 @@ class LuxrenderExport
         end
 		case material.send(mat_type + "_texturetype")
 			when "sketchup"
-            if (@model_textures.has_key?(material.name))
-                filename = @model_textures[material.name][4]
+                if (@model_textures.has_key?(material.name))
+                    filename = @model_textures[material.name][4]
+                    filename = File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER + SU2LUX::TEXTUREFOLDER + filename
 				else
                     puts "export_texture: no texture file path found"
-                return [preceding, following]
-            end
-            preceding += "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
+                    return [preceding, following]
+                end
+                preceding += "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
 			when "imagemap"
-			
-			imagemap_filename = sanitize_path(material.send(mat_type + "_imagemap_filename"))
-            preceding += "\t" + "\"string filename\" [\"#{imagemap_filename}\"]" + "\n"
-		end
+                imagemap_filename = sanitize_path(material.send(mat_type + "_imagemap_filename"))
+                preceding += "\t" + "\"string filename\" [\"#{imagemap_filename}\"]" + "\n"
+        end
 		preceding += "\t" + "\"float gamma\" [#{material.send(mat_type + "_imagemap_gamma")}]" + "\n"
 		preceding += "\t" + "\"float gain\" [#{material.send(mat_type + "_imagemap_gain")}]" + "\n"
 		preceding += "\t" + "\"string filtertype\" [\"#{material.send(mat_type + "_imagemap_filtertype")}\"]" + "\n"
@@ -1405,10 +1406,10 @@ class LuxrenderExport
 		
 		if (@lrs.copy_textures == true and @model_textures!={})
             
-			if FileTest.exist?(@path_textures+@os_separator+SU2LUX::PREFIX_TEXTURES+@model_name)
-                else
-				Dir.mkdir(@path_textures+@os_separator+SU2LUX::PREFIX_TEXTURES+@model_name)
-			end
+            
+            tex_path_base = File.dirname(@export_file_path) + "/" +  File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER + SU2LUX::TEXTUREFOLDER
+            Dir.mkdir(tex_path_base) unless File.exists?(tex_path_base)
+            tex_path_relative = File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER + SU2LUX::TEXTUREFOLDER
             
 			tw=@texturewriter
 			p @texturewriter
@@ -1422,16 +1423,20 @@ class LuxrenderExport
 				SU2LUX.dbg_p  value
 				if value[1].class== Sketchup::Face
                     puts "about to write texture with following values:"
-                    puts value[1]
-                    puts value[2]
-                    puts (@path_textures+@os_separator+value[4])
+                    #puts value[0]
+                    #puts value[1]
+                    #puts value[2]
+                    #puts value[3]
+                    #puts value[4]
+                    #puts value[5]
+                    puts (tex_path_relative+value[4])
                     return_val0 = tw.load value[1], value[2]
-					return_val = tw.write value[1], value[2], (@path_textures+@os_separator+value[4]) # face, face side, output path
-					p 'path: '+@path_textures+@os_separator+value[4]
+					return_val = tw.write value[1], value[2], (tex_path_base+value[4]) # face, face side, output path
+					p 'path: '+tex_path_base+value[4]
 					p return_val
 					p 'write texture1'
                 else
-					tw.write value[1], (@path_textures+@os_separator+value[4])
+					tw.write value[1], (tex_path_base+@os_separator+value[4])
 					p 'write texture2'
 				end
 				count+=1
@@ -1466,9 +1471,12 @@ class LuxrenderExport
 				when "sketchup"
 					if (@model_textures.has_key?(material.name))
 						filename = sanitize_path(@model_textures[material.name][4])
+                        # add texture subfolder path
+                        filename = File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER + SU2LUX::TEXTUREFOLDER + filename
 					else
 						return [before, after]
 					end
+
 					preceding += "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
 				when "imagemap"
 					imagemapfilepath = sanitize_path(material.kd_imagemap_filename)
