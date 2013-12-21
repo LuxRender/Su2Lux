@@ -918,7 +918,9 @@ class LuxrenderExport
 		#has_texture = false
 		@current_step += 1
         
-        luxrender_mat=LuxrenderMaterial.new(mat)
+        
+        mateditor = SU2LUX.get_editor("material")
+		luxrender_mat = mateditor.materials_skp_lux[mat]
         luxrender_name=luxrender_mat.name
 		
         if is_instance.empty?
