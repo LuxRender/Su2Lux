@@ -490,18 +490,19 @@ module SU2LUX
 	#
 	##
 	def SU2LUX.show_material_editor
-		puts "showing @material editor: ", @material_editor
-        
 		if @material_editor
             SU2LUX.dbg_p "reusing existing material editor"
         else
             SU2LUX.dbg_p "creating new material editor"
 			@material_editor=LuxrenderMaterialEditor.new
 		end
+        
         @material_editor.set_material_lists
-		if @material_editor.visible?
+		
+        if @material_editor.visible?
 			puts "hiding material editor"
 			@material_editor.hide
+            @material_editor_dialog.close
 		else
 			puts "showing material editor"
 			@material_editor.show
@@ -527,11 +528,19 @@ module SU2LUX
 	#
 	##
 	def SU2LUX.show_settings_editor
+        puts "show settings editor"
+        puts @settings_editor
 		if not @settings_editor
 			@settings_editor=LuxrenderSettingsEditor.new
 		end
-		@settings_editor.show
-	end # END show_settings_editor
+        if @settings_editor.visible?
+            puts "hiding settings editor"
+            @settings_editor.close
+        else
+            puts "showing settings editor"
+            @settings_editor.show
+        end
+    end # END show_settings_editor
 
 	##
 	#
