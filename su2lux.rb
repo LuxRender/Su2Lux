@@ -527,7 +527,6 @@ module SU2LUX
 	#
 	##
 	def SU2LUX.show_settings_editor
-
 		if not @settings_editor
 			@settings_editor=LuxrenderSettingsEditor.new
 		end
@@ -558,7 +557,11 @@ For further information please visit LuxRender's Website & Forum at www.luxrende
 	def SU2LUX.get_editor(type)
 		case type
 			when "settings"
-				editor = @settings_editor
+                if @settings_editor
+                      editor = @settings_editor
+                else
+                      editor = LuxrenderSettingsEditor.new
+                end
 			when "material"
 				editor = @material_editor
 		end
@@ -851,7 +854,9 @@ if( not file_loaded?(__FILE__) )
 		loaded = luxmat.load_from_model
 		luxmat.reset unless loaded
 	end
-
+                      
+    @lrs.export_luxrender_path = Sketchup.read_default("SU2LUX","luxrenderpath").to_a.pack('H*') # copy stored executable path to settings, so it shows in settings window
+                      
 	@lme = SU2LUX.create_material_editor
 	material_editor = SU2LUX.get_editor("material")
     SU2LUX.dbg_p "material editor created, now starting refresh function"
