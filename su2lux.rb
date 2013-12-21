@@ -67,6 +67,8 @@ module SU2LUX
 		Sketchup.active_model.rendering_options.add_observer($SU2LUX_rendering_options_observer)
 		$SU2LUX_materials_observer = SU2LUX_materials_observer.new
 		Sketchup.active_model.materials.add_observer($SU2LUX_materials_observer)
+        $SU2LUX_model_observer = SU2LUX_model_observer.new
+        Sketchup.active_model.add_observer($SU2LUX_model_observer)
 	end
 
 	##
@@ -550,10 +552,11 @@ module SU2LUX
 version #{SU2LUX::SU2LUX_VERSION}, #{SU2LUX::SU2LUX_DATE}
 
 Authors:
-Alexander Smirnov (aka Exvion)
-Mimmo Briganti (aka mimhotep)
 Abel Groenewolt (aka pistepilvi)
+Alexander Smirnov (aka Exvion)
+Luke Frisken (aka lfrisken)
 Martijn Berger (aka Juicyfruit)
+Mimmo Briganti (aka mimhotep)
     
 SU2LUX makes use of the jQuery library and the Farbtastic color picker.
 
@@ -597,7 +600,22 @@ For further information please visit LuxRender's Website & Forum at www.luxrende
 	end
 	
 end # END module SU2LUX
-
+                      
+class SU2LUX_model_observer < Sketchup::ModelObserver
+    def onPreSaveModel(model)
+        # for all materials, save settings
+        mateditor = SU2LUX.get_editor("material")
+        mateditor.materials_skp_lux.each do |skpmat, luxmat|
+            luxmat.save_to_model()
+        end
+        # for settings window, save settings
+        @lrs = LuxrenderSettings.new
+        @lrs.save_to_model
+    end
+                      
+end
+                      
+                      
 class SU2LUX_view_observer < Sketchup::ViewObserver
 
 	include SU2LUX

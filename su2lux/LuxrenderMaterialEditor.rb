@@ -24,7 +24,7 @@ class LuxrenderMaterialEditor
 	
 	def initialize
 		@lrs = LuxrenderSettings.new
-		@materials_skp_lux = Hash.new
+        @materials_skp_lux = Hash.new
 		@matname_changed = false
 		@material_editor_dialog = UI::WebDialog.new("LuxRender Material Editor", true, "LuxrenderMaterialEditor", 500, 700, 900, 100, true)
 		material_editor_dialog_path = Sketchup.find_support_file("materialeditor.html", "Plugins/su2lux")

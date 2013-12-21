@@ -195,6 +195,7 @@ class LuxrenderMaterial
 		@model=Sketchup.active_model
 		@view=@model.active_view
 		@dict = mat.name
+        
         # puts "singleton_class inspect ",singleton_class.inspect
 		singleton_class.module_eval do
 

@@ -416,9 +416,10 @@ class LuxrenderSettings
 	end #END load_from_model
 	
 	def save_to_model
-		Sketchup.active_model.start_operation "SU2LUX settings saved"
+        puts "saving settings to sketchup file"
+		Sketchup.active_model.start_operation "SU2LUX settings saved" # start undo operation block
 		LuxrenderAttributeDictionary.save_to_model(@dict)
-		Sketchup.active_model.commit_operation
+		Sketchup.active_model.commit_operation # end undo operation block
 	end #END load_from_model
 	
 	def get_names
