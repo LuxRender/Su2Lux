@@ -27,8 +27,23 @@
 		</div>
 		<p class="header">+ Material preview</p>
         <div class="collapse" id="preview">
-        <img src="empty_preview.png" id="preview_image">
-        <input type="button" id="update_material_preview" value="refresh"> 
+            <div class="panelcontent">
+                <input type="button" id="update_material_preview" value="refresh">
+                <select id="previewsize">
+                    <option value="70">small</option>
+                    <option value="100">medium</option>
+                    <option value="140">large</option>
+                    <option value="200">extra large</option>
+                </select>
+                <select id="previewtime">
+                    <option value="1">1 second</option>
+                    <option value="2">2 seconds</option>
+                    <option value="4">4 seconds</option>
+                    <option value="8">8 seconds</option>
+                    <option value="16">16 seconds</option>
+                </select>
+                <img src="empty_preview.png" id="preview_image" height=100>
+            </div>
 		</div>
 		<p class="header">+ Material properties</p>
 		<div class="collapse" id="material_type">

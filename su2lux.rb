@@ -500,11 +500,11 @@ module SU2LUX
 		end
         
         @material_editor.set_material_lists
-		
+
         if @material_editor.visible?
 			puts "hiding material editor"
 			@material_editor.hide
-            @material_editor_dialog.close
+            #@material_editor_dialog.close
 		else
 			puts "showing material editor"
 			@material_editor.show
@@ -514,6 +514,12 @@ module SU2LUX
 			puts "done setting active material"
 		end
 		
+    # set preview section height (OS X; for Windows this gets done in refresh function)
+    setdivheightcmd = 'setpreviewheight(' + @lrs.preview_size.to_s + ',' + @lrs.preview_time.to_s + ')'
+    puts setdivheightcmd
+    @material_editor.material_editor_dialog.execute_script(setdivheightcmd)
+        
+        
 	end # END show_material_editor
 
 	##
@@ -634,7 +640,6 @@ class SU2LUX_view_observer < Sketchup::ViewObserver
             end
         end
                       
-                      
 		if (settings_editor)
 			if (Sketchup.active_model.active_view.camera.perspective?)
 				fov = Sketchup.active_model.active_view.camera.fov
@@ -690,7 +695,6 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 
 		# loaded = LuxrenderAttributeDictionary.load_from_model(@lrs.dictionary_name)
 		
-                      
         loaded = @lrs.load_from_model
 		@lrs.reset unless loaded
                       

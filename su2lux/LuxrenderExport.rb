@@ -758,9 +758,7 @@ class LuxrenderExport
 		puts preview_path,generated_lxm_file,currentmaterialname,currentmaterial,texture_path,luxmat
 		
 		# prepare texture paths
-		#outputfolder= @model_name + "/textures"
         outputfolder = "LuxRender_luxdata/textures"
-        
         
 		# check for textures folder in temporary location, create if missing
 		outputfolder_temp= preview_path+"/LuxRender_luxdata"

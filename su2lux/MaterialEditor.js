@@ -38,11 +38,25 @@ function startactivemattype(){
 			window.location = 'skp:start_refresh@' + this.id;
 			window.location = 'skp:active_mat_type@'; 	// shows options for current material's material type
 		}
-		// todo: if material type is default, run param_generate function
 	}
 	
 function startmaterialchanged() {
     window.location = 'skp:material_changed@' + this.value;
+}
+
+function setpreviewheight(previewsize,previewtime){
+    // image and element size
+    $("#preview").height(previewsize+10)
+    $("#preview_image").height(previewsize)
+    
+    // dropdown values
+    $("#previewtime").val(previewtime)
+    $("#previewsize").val(previewsize)
+    
+    // preview button location
+    verticalposition = previewsize - 20
+    $("#update_material_preview").css('top',verticalposition+'px')
+    
 }
     
 function update_RGB(fieldR,fieldG,fieldB,colorr,colorg,colorb){
@@ -157,7 +171,22 @@ $(document).ready(
             }
         );
                   
-         
+        
+        $('#previewsize').change(
+            function()
+            {
+                //alert(this.value);
+                window.location = 'skp:previewsize@' + this.value;
+            }
+        )
+                  
+        $('#previewtime').change(
+            function()
+            {
+                //alert(this.value);
+                window.location = 'skp:previewtime@' + this.value;
+            }
+        )
                   
 		
 		$('input[id$="_browse"]').click(

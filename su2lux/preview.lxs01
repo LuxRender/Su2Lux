@@ -33,8 +33,6 @@ Camera "perspective"
 	"float fov" [25.5]
 
 Film "fleximage"
-	"integer xresolution" [100]
-	"integer yresolution" [100]
 	"float gamma" [2.200000000000000]
 	"float colorspace_white" [0.314275000000000 0.329411000000000]
 	"float colorspace_red" [0.630000000000000 0.340000000000000]
@@ -57,7 +55,6 @@ Film "fleximage"
 	"integer displayinterval" [1]
 	"integer writeinterval" [180]
 	"integer flmwriteinterval" [900]
-	"integer halttime" [5]
 	"float haltthreshold" [0.02]
 	"integer tilecount" [0]
 	"string tonemapkernel" ["linear"]
@@ -65,3 +62,7 @@ Film "fleximage"
 	"float linear_fstop" [2.8]
 	"float linear_gamma" [2.200000000000000]
 	"float linear_exposure" [1.000]
+    "bool bloom_enabled" ["false"]
+	"bool glare_enabled" ["false"]
+	"bool vignetting_enabled" ["false"]
+	"bool abberation_enabled" ["false"]

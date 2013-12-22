@@ -262,6 +262,9 @@ class LuxrenderMaterialEditor
             preview_path = os.get_variables["material_preview_path"]
             path_separator = os.get_variables["path_separator"]
 		
+            settingseditor = LuxrenderSettings.new
+            previewtime = settingseditor.preview_time
+            
             active_material = @materials_skp_lux.index(@current) ## was Sketchup.active_model.materials.current  
 			active_material_name = active_material.name.delete("[<>]") # following LuxrenderMaterial.rb convention ## was Sketchup.active_model.materials.
 			active_material_name_converted = sanitize_path(active_material_name)
@@ -303,7 +306,12 @@ class LuxrenderMaterialEditor
             lxs_section_2 = File.readlines(preview_path+"preview.lxs02")
             lxs_section_3 = File.readlines(preview_path+"preview.lxs03")
             generated_lxs_file.puts (lxs_section_1)
-            generated_lxs_file.puts ("  \"string filename\" \[\""+active_material_name_converted+"\"]")
+            
+            generated_lxs_file.puts("\t\"integer xresolution\" [" + settingseditor.preview_size.to_s + "]")
+            generated_lxs_file.puts("\t\"integer yresolution\" [" + settingseditor.preview_size.to_s + "]")
+            generated_lxs_file.puts("\t\"integer halttime\" [" + settingseditor.preview_time.to_s + "]")
+            generated_lxs_file.puts ("\t\"string filename\" \[\""+active_material_name_converted+"\"]")
+            generated_lxs_file.puts ("")
             generated_lxs_file.puts ("WorldBegin")          
 			generated_lxs_file.puts ("Include \""+active_material_name_converted+".lxm\"")
             generated_lxs_file.puts (lxs_section_2)
@@ -318,8 +326,7 @@ class LuxrenderMaterialEditor
 			@preview_lxs = preview_path+active_material_name_converted+".lxs" 
 			@filename = preview_path+active_material_name_converted+".png"
 			luxconsole_path = SU2LUX.get_luxrender_console_path()
-			@preview_renderingtime = 2  # seconds (todo: make user configurable)
-			@time_out = @preview_renderingtime + 10
+			@time_out = previewtime.to_f + 5
 			@retry_interval = 0.5
 			@luxconsole_options = " "
 			pipe = IO.popen(luxconsole_path + @luxconsole_options + "\"" + @preview_lxs + "\"","r") # start rendering
@@ -327,7 +334,7 @@ class LuxrenderMaterialEditor
 			
 			# wait for rendering to get ready, then update image
 			@times_waited = 0.0
-			@d = UI.start_timer(@preview_renderingtime+1, false){ 		# sets timer one second longer than rendering time
+			@d = UI.start_timer(previewtime.to_f+1, false){ 		# sets timer one second longer than rendering time
 				file_exists = File.file? @filename
 				while (!file_exists && (@times_waited < @time_out)) 	# if no image is found, wait for file to be rendered
 					print("no image found, timing out in ", @time_out-@times_waited, " seconds\n")
@@ -335,7 +342,7 @@ class LuxrenderMaterialEditor
 					sleep 0.2
 					@times_waited += 0.2
 				end	
-				while (file_exists && ((Time.now()-File.mtime(@filename)) > @preview_renderingtime) && (@times_waited < @time_out)) 
+				while (file_exists && ((Time.now()-File.mtime(@filename)) > previewtime.to_f) && (@times_waited < @time_out))
 					puts("old preview found, waiting for update...")				# if an old image is found, wait for update
 					sleep 1
 					@times_waited += 1
@@ -344,7 +351,7 @@ class LuxrenderMaterialEditor
 					puts("preview is taking too long, aborting")
 					# UI.messagebox("The preview rendering process is taking longer than expected.")
 				end
-				if (@times_waited <= @time_out && (Time.now()-File.mtime(@filename)) < (@preview_renderingtime+@time_out))
+				if (@times_waited <= @time_out && (Time.now()-File.mtime(@filename)) < (previewtime.to_f+@time_out))
 					puts("updating preview")
 					# the file name on the following line includes ?timestamp, forcing the image to be refreshed as the link has changed
 					cmd = 'document.getElementById("preview_image").src = "' + @filename.gsub('\\', '\\\\\\\\')  + '\?' + File.mtime(@filename).to_s + '"' 
@@ -361,10 +368,25 @@ class LuxrenderMaterialEditor
 				luxmat.save_to_model
 			end
 		}
+        
+        @material_editor_dialog.add_action_callback("previewsize") {|dialog, params|
+            puts "setting preview size to " + params
+            @lrs.preview_size = params
+            
+            # update image size in interface
+            setdivheightcmd = 'setpreviewheight(' + @lrs.preview_size + ')'
+            #puts setdivheightcmd
+            @material_editor_dialog.execute_script(setdivheightcmd)
+        }
+        
+        @material_editor_dialog.add_action_callback("previewtime") {|dialog, params|
+            puts "setting preview time to " + params
+            @lrs.preview_time = params
+            
+        }
 		
 		@material_editor_dialog.add_action_callback("show_continued") {|dialog, params|
-			# todo: make this run only when the material dialog hasn't been initialised
-			@material_editor_dialog.execute_script('startactivemattype()')
+            @material_editor_dialog.execute_script('startactivemattype()')
 		}
 		
 		@material_editor_dialog.add_action_callback("texture_editor") {|dialog, params|
@@ -389,7 +411,6 @@ class LuxrenderMaterialEditor
         if (@collectedmixmaterials_i > 4) # 4 levels of recursion is considered maximum sensible amount
             puts "recursive mix material detected, aborting"
         elsif (active_material.type=="mix")
-            puts "PROCESSING MIX MATERIAL"
             @collectedmixmaterials_i = @collectedmixmaterials_i + 1
             submaterial1 = getluxmatfromskpname(active_material.material_list1)
             submaterial2 = getluxmatfromskpname(active_material.material_list2)
@@ -552,6 +573,12 @@ class LuxrenderMaterialEditor
         # for all textures, show the Load button if texture type is image map
         cmd = 'show_load_buttons()'
         @material_editor_dialog.execute_script(cmd)
+        
+        # set preview section height
+        setdivheightcmd = 'setpreviewheight(' + @lrs.preview_size.to_s + ',' + @lrs.preview_time.to_s + ')'
+        puts setdivheightcmd
+        @material_editor_dialog.execute_script(setdivheightcmd)
+        
 	end
     
     ##

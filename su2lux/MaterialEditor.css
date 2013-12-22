@@ -195,8 +195,28 @@ input#get_diffuse_color {
 }
 
 #preview {
-	height: 120px;
+	height: 130px;
 }
+
+#previewsize{
+    position: absolute;
+    left: 219px;
+    top: 0px;
+}
+
+#previewtime{
+    position: absolute;
+    left: 219px;
+    top: 24px;
+}
+
+#update_material_preview{
+    position: absolute;
+    left: 219px;
+    top: 60px;
+}
+
+
 
 
 .imagemap{
