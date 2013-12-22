@@ -3,8 +3,7 @@ class LuxrenderExport
 	attr_reader :used_materials
     
 	def initialize(export_file_path,os_separator)
-		#@lrs=LuxrenderSettings.new
-        @lrs=SU2LUX.get_editor("settings")
+		@lrs=LuxrenderSettings.new
 		@export_file_path=export_file_path
 		@model_name=File.basename(@export_file_path)
 		@model_name=@model_name.split(".")[0]
