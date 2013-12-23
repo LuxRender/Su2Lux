@@ -203,8 +203,8 @@ module SU2LUX
 		le.export_render_settings(out)
 		entity_list=model.entities
 		out.puts 'WorldBegin'
-		out.puts "Include \"" + file_basename+SU2LUX::SUFFIX_DATAFOLDER + @os_separator + file_basename + SUFFIX_MATERIAL + "\"\n\n"
-		out.puts "Include \"" + file_basename+SU2LUX::SUFFIX_DATAFOLDER + @os_separator + file_basename + SUFFIX_OBJECT + "\"\n\n"
+		out.puts "Include \"" + file_basename+SU2LUX::SUFFIX_DATAFOLDER + '/' + file_basename + SUFFIX_MATERIAL + "\"\n\n"
+		out.puts "Include \"" + file_basename+SU2LUX::SUFFIX_DATAFOLDER + '/' + file_basename + SUFFIX_OBJECT + "\"\n\n"
 		le.export_light(out)
 		out.puts 'WorldEnd'
 		out.close
