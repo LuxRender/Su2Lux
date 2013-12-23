@@ -405,6 +405,7 @@ class LuxrenderSettings
 	end #end initialize
 
 	def reset
+            puts "resetting setting editor"
 			@@settings.each do |key, value|
 				LuxrenderAttributeDictionary.set_attribute(@dict, key, value)
 			end
