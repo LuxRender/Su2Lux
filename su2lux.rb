@@ -163,6 +163,26 @@ module SU2LUX
             Dir.mkdir(file_fullname+SU2LUX::SUFFIX_DATAFOLDER)
         end
         
+        # copy textures to luxdata folder
+        if (@lrs.texexport=="all")
+                collectedtextures = []
+                puts "EXPORTING ALL TEXTURES"
+                # collect material paths
+                @material_editor.materials_skp_lux.values.each {|luxmat|
+                    for channel in luxmat.texturechannels
+                        texturepath = luxmat.send(channel+"_imagemap_filename")
+                        if (texturepath != "")
+                            collectedtextures << texturepath
+                        end
+                    end
+                }
+                destinationfolder = (file_fullname+SU2LUX::SUFFIX_DATAFOLDER)
+                for texturepath in collectedtextures.uniq
+                    puts "texture found: " + texturepath
+                    FileUtils.cp(texturepath,destinationfolder)
+                end
+        end
+        
 		#Exporting geometry
 		out_geom = File.new(file_datafolder + file_basename  + SUFFIX_OBJECT, "w")
 		le.export_mesh(out_geom)
@@ -170,14 +190,16 @@ module SU2LUX
 
 		#Exporting all materials
 		out_mat = File.new(file_datafolder + file_basename + SUFFIX_MATERIAL, "w")
-		le.export_used_materials(materials, out_mat)
+        relative_datafolder = file_basename+SU2LUX::SUFFIX_DATAFOLDER
+        puts "RELATIVE DATA FOLDER: " + relative_datafolder
+		le.export_used_materials(materials, out_mat, @lrs.texexport, relative_datafolder)
 		out_mat.close
         
         # write lxs file
 		out = File.new(exportpath,"w")
 		le.export_global_settings(out)
 		le.export_camera(model.active_view, out)
-		le.export_film(out)
+		le.export_film(out,file_basename)
 		le.export_render_settings(out)
 		entity_list=model.entities
 		out.puts 'WorldBegin'

@@ -13,6 +13,8 @@ class LuxrenderExport
         @mat_step = 0 # monitors export progress
         @current_step = 0
         @total_step = 0
+        @texexport = "skp"
+        @texfolder = ""
 	end # END initialize
 
 	def reset
@@ -147,7 +149,7 @@ class LuxrenderExport
         end
 	end # END compute_screen_window
 
-	def export_film(out)
+	def export_film(out,file_basename)
 		out.puts "Film \"fleximage\""
 		percent = @lrs.fleximage_resolution_percent.to_i / 100.0
 		xres = @lrs.fleximage_xresolution.to_i * percent
@@ -236,7 +238,7 @@ class LuxrenderExport
 		out.puts "\t\"bool write_resume_flm\" [\"#{flm}\"]\n"
 		flm = @lrs.fleximage_restart_resume_flm ? "true" : "false"
 		out.puts "\t\"bool restart_resume_flm\" [\"#{flm}\"]\n"
-		out.puts "\t\"string filename\" [\"#{@lrs.fleximage_filename}\"]"
+		out.puts "\t\"string filename\" [\"#{file_basename}\"]"
         dbg = @lrs.fleximage_debug ? "true" : "false"
 		out.puts "\t\"bool debug\" [\"#{dbg}\"]\n"
 		if (@lrs.fleximage_use_preset)
@@ -1231,16 +1233,17 @@ class LuxrenderExport
         end 
     end
 	
-	def export_used_materials(materials, out)
+	def export_used_materials(materials, out, texexport, datafolder)
         mateditor = SU2LUX.get_editor("material")
+        puts "@texexport: " + texexport
+        @texexport = texexport
+        @texfolder = datafolder
 		# mix materials should be last, so first we write normal materials
         materials.each { |mat|
             luxrender_mat = mateditor.materials_skp_lux[mat]
-            puts luxrender_mat
-            #puts ("material from hash:")
-            #puts luxrender_mat
             SU2LUX.dbg_p luxrender_mat.name
             if (luxrender_mat.type != "portal" && luxrender_mat.type != "mix" )
+                puts "exporting material " + mat.name
                 export_mat(luxrender_mat, out)
             end
 		}
@@ -1249,6 +1252,7 @@ class LuxrenderExport
             luxrender_mat = mateditor.materials_skp_lux[mat]
             SU2LUX.dbg_p luxrender_mat.name
             if (luxrender_mat.type == "mix" )
+                puts "exporting mixmaterial " + mat
                 export_mat(luxrender_mat, out)
             end
 		}
@@ -1276,7 +1280,11 @@ class LuxrenderExport
                 end
                 preceding += "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
 			when "imagemap"
-                imagemap_filename = sanitize_path(material.send(mat_type + "_imagemap_filename"))
+                if (@texexport == "all")
+                    imagemap_filename = @texfolder + "/" + File.basename(sanitize_path(material.send(mat_type + "_imagemap_filename")))
+                else
+                    imagemap_filename = sanitize_path(material.send(mat_type + "_imagemap_filename"))
+                end
                 preceding += "\t" + "\"string filename\" [\"#{imagemap_filename}\"]" + "\n"
         end
 		preceding += "\t" + "\"float gamma\" [#{material.send(mat_type + "_imagemap_gamma")}]" + "\n"
@@ -1293,12 +1301,6 @@ class LuxrenderExport
 	end
 
 	def export_mat(mat, out)
-		SU2LUX.dbg_p "export_mat running for material:"
-        SU2LUX.dbg_p (mat.name)
-        puts "diffuse color:"
-        puts mat.color_tos
-		
-		# convert mat.name 
 		matname_conv = sanitize_path(mat.name)
 		
 		out.puts "# Material '" + matname_conv + "'"
@@ -1479,7 +1481,11 @@ class LuxrenderExport
 
 					preceding += "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
 				when "imagemap"
-					imagemapfilepath = sanitize_path(material.kd_imagemap_filename)
+                    if (@texexport == "all")
+                        imagemapfilepath = @texfolder + "/" + File.basename(sanitize_path(material.kd_imagemap_filename))
+                    else
+                        imagemapfilepath = sanitize_path(material.kd_imagemap_filename)
+                    end
 					preceding += "\t" + "\"string filename\" [\"#{imagemapfilepath}\"]" + "\n"
 			end
 			preceding += "\t" + "\"float gamma\" [#{material.kd_imagemap_gamma}]" + "\n"

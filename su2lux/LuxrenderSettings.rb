@@ -344,6 +344,7 @@ class LuxrenderSettings
 	# Other
 	##
 		'useparamkeys' => false,
+        'texexport' => "skp",
 		'export_file_path' => "",
         'export_luxrender_path' => "",
         'geomexport' => 'ply',
