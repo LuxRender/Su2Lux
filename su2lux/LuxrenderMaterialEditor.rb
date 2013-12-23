@@ -245,13 +245,37 @@ class LuxrenderMaterialEditor
 		
 		@material_editor_dialog.add_action_callback("reset_to_default") {|dialog, params|
             puts ("callback: reset_to_default")
-			materials = Sketchup.active_model.materials
-			for mat in materials
-				luxmat = self.find(mat.name)
-				luxmat.reset
-			end
-			self.close
-			UI.start_timer(0.5, false) { self.show }
+			luxmat = getluxmatfromskpname(Sketchup.active_model.materials.current.name)
+            # copy settings to be saved
+            kdr, kdg, kdb = [luxmat.kd_R, luxmat.kd_G, luxmat.kd_B]
+            mattype = luxmat.type
+            textype = "none"
+            #if (luxmat.has_texture?('kd'))
+            if luxmat.respond_to?(:kd_texturetype)
+                puts "TEXTURE"
+                textype = luxmat.kd_texturetype
+            else
+                PUTS "NO TEXTURE"
+            end
+            # reset material
+            luxmat.reset
+            
+            # paste settings to be saved
+            luxmat.kd_R = kdr
+            luxmat.kd_G = kdg
+            luxmat.kd_B = kdb
+            luxmat.type = mattype
+            
+            # use jquery to set dropdown to right texture type, after that, set texture_name
+            puts "TEXTYPE: " + textype
+            if textype == "sketchup"
+                cmd = '$("#kd_texturetype").val(\'' + textype + '\')'
+                luxmat.kd_texturetype = textype
+                @material_editor_dialog.execute_script(cmd)
+            end
+            
+            # refresh material editor
+            refresh
 		}
         
 		@material_editor_dialog.add_action_callback("update_material_preview") {|dialog, params|
