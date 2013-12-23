@@ -295,7 +295,7 @@ class LuxrenderMaterialEditor
 			puts "finished texture output for material preview"
 			
 			# generate preview lxs file
-			lxs_path = preview_path+active_material_name+".lxs"
+			lxs_path = preview_path+Sketchup.active_model.title+"_"+active_material_name+".lxs"
 			lxs_path_8859_1 = sanitize_path(lxs_path)
 			
 			base_file_2 = preview_path + "ansi.txt"
@@ -310,7 +310,7 @@ class LuxrenderMaterialEditor
             generated_lxs_file.puts("\t\"integer xresolution\" [" + settingseditor.preview_size.to_s + "]")
             generated_lxs_file.puts("\t\"integer yresolution\" [" + settingseditor.preview_size.to_s + "]")
             generated_lxs_file.puts("\t\"integer halttime\" [" + settingseditor.preview_time.to_s + "]")
-            generated_lxs_file.puts ("\t\"string filename\" \[\""+active_material_name_converted+"\"]")
+            generated_lxs_file.puts ("\t\"string filename\" \[\""+Sketchup.active_model.title+"_"+active_material_name_converted+"\"]")
             generated_lxs_file.puts ("")
             generated_lxs_file.puts ("WorldBegin")          
 			generated_lxs_file.puts ("Include \""+active_material_name_converted+".lxm\"")
@@ -323,12 +323,12 @@ class LuxrenderMaterialEditor
 			generated_lxs_file.close
             
 			# start rendering preview using luxconsole
-			@preview_lxs = preview_path+active_material_name_converted+".lxs" 
-			@filename = preview_path+active_material_name_converted+".png"
+			@preview_lxs = preview_path+Sketchup.active_model.title+"_"+active_material_name_converted+".lxs"
+			@filename = preview_path+Sketchup.active_model.title+"_"+active_material_name_converted+".png"
 			luxconsole_path = SU2LUX.get_luxrender_console_path()
 			@time_out = previewtime.to_f + 5
 			@retry_interval = 0.5
-			@luxconsole_options = " "
+			@luxconsole_options = " -x "
 			pipe = IO.popen(luxconsole_path + @luxconsole_options + "\"" + @preview_lxs + "\"","r") # start rendering
             puts (luxconsole_path + @luxconsole_options + "\"" + @preview_lxs + "\"")
 			
@@ -436,7 +436,7 @@ class LuxrenderMaterialEditor
 	def load_preview_image()
 		puts "running load_preview_image function"			
 		os = OSSpecific.new
-		filename = os.get_variables["material_preview_path"] + @current.name.delete("[<>]") + ".png"
+		filename = os.get_variables["material_preview_path"] + Sketchup.active_model.title + "_" + @current.name.delete("[<>]") + ".png"
 		filename = filename.gsub('\\', '/')
 		if (File.exists?(filename))
 			puts "preview image exists, loading"
