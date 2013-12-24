@@ -84,7 +84,8 @@
 				</select>
                 
 				<span class="imagemap">
-					<input type="button" id="kd_browse_map" value="Load" class="textureloadbutton">
+                    <div id="kd_imgmapname" class="imgmapname">no image selected</div>
+					<input type="button" id="kd_browse_map" value="load image file" class="textureloadbutton">
 				</span>
                 <table id="swatch_diffuse">
                     <tr><td id="diffuse_swatch" class="swatch" width=64 height=64></td></tr>
@@ -106,13 +107,14 @@
 				<input type='text' id="ks_B" size="6" class="kdbvalue">
 				
 				<label for="ks_texturetype" class="texturelabel">Texture</label>
-				<select id="ks_texturetype" class="texturedropdown">
+				<select id="ks_texturetype" class="texturedropdown" name="ks">
 					<option value="none">None</option>
 					<option value="sketchup">Sketchup Texture</option>
 					<option value="imagemap">Image Map</option>
 				</select>
 				<span class="imagemap">
-					<input type="button" id="ks_browse_map" value="Load" class="textureloadbutton">
+                    <div id="ks_imgmapname" class="imgmapname">no image selected</div>
+					<input type="button" id="ks_browse_map" value="load image file" class="textureloadbutton">
                 </span>
                 <table id="swatch_specular">
                         <tr><td id="specular_swatch" class="swatch" width=64 height=64></td></tr>
@@ -166,6 +168,7 @@
                         &nbsp;
                     </span>
                     <span class="imagemap">
+                        <div id="mx_imgmapname" class="imgmapname">no image selected</div>
                         <input type="button" id="mx_browse_map" value="Load image">
                     </span>
                     </div>
@@ -191,7 +194,8 @@
                     <option value="imagemap">Image Map</option>
                 </select>
                 <span class="imagemap">
-                    <input type="button" id="kt_browse_map" value="Load" class="textureloadbutton">
+                    <div id="kt_imgmapname" class="imgmapname">no image selected</div>
+                    <input type="button" id="kt_browse_map" value="load image file" class="textureloadbutton">
                         </span>
                 <table id="swatch_diffuse">
                     <tr><td id="transmission_swatch" class="swatch" width=64 height=64></td></tr>
@@ -216,7 +220,8 @@
                         <option value="imagemap">Image Map</option>
                     </select>
                     <span class="imagemap">
-                        <input type="button" id="kr_browse_map" value="Load" class="textureloadbutton">
+                        <div id="kr_imgmapname" class="imgmapname">no image selected</div>
+                        <input type="button" id="kr_browse_map" value="load image file" class="textureloadbutton">
                             </span>
                     
                     <table id="swatch_diffuse">
@@ -238,7 +243,8 @@
 					<option value="imagemap">Image Map</option>
 				</select>
 				<span class="imagemap">
-					<input type="button" id="matte_sigma_browse_map" value="Load">
+                    <div id="matte_sigma_imgmapname" class="imgmapname">no image selected</div>
+					<input type="button" id="matte_sigma_browse_map" value="load image file">
 				</span> <!-- END diffuse_texture -->
 			</div> <!-- END Oren-Nayar -->
             
@@ -263,7 +269,8 @@
 					<option value="imagemap">Image Map</option>
 				</select>
 				<span class="imagemap">
-					<input type="button" id="u_exponent_browse_map" value="Load">
+                    <div id="u_exponent_imgmapname" class="imgmapname">no image selected</div>
+					<input type="button" id="u_exponent_browse_map" value="load image file">
 				</span> <!-- END u_exponent_texture -->
 				<br>
 				<label for="v_exponent">V Value</label>
@@ -275,7 +282,8 @@
 					<option value="imagemap">Image Map</option>
 				</select>
 				<span class="imagemap">
-					<input type="button" id="v_exponent_browse_map" value="Load">
+                    <div id="v_exponent_imgmapname" class="imgmapname">no image selected</div>
+					<input type="button" id="v_exponent_browse_map" value="load image file">
 				</span> <!-- END u_exponent_texture -->
 			</div> <!-- END exponent -->
 			<div id="ior" class="glass roughglass">
@@ -289,7 +297,8 @@
 					<option value="imagemap">Image Map</option>
 				</select>
 				<span class="imagemap">
-					<input type="button" id="IOR_index_browse_map" value="Load">
+                    <div id="IOR_index_imgmapname" class="imgmapname">no image selected</div>
+					<input type="button" id="IOR_index_browse_map" value="load image file">
 				</span> <!-- END diffuse_texture -->
 			</div> <!-- END ior-->
 			<div id="asperity" class="glossy glossytranslucent">
@@ -306,6 +315,27 @@
 				
                     
                 <div class="collapse_check">
+                    <div class="panelcontent">
+                    <label for="ka_R" class="kdr">Red</label><input type='text' id="ka_R" size="6" class="kdrvalue">
+                    <label for="ka_G" class="kdg">Green</label><input type='text' id="ka_G" size="6" class="kdgvalue">
+                    <label for="ka_B" class="kdb">Blue</label><input type='text' id="ka_B" size="6" class="kdbvalue">
+                    
+                    <label for="ka_texturetype" class="texturelabel">Texture</label>
+                    <select id="ka_texturetype" class="texturedropdown">
+                        <option value="none">None</option>
+                        <option value="sketchup">Sketchup Texture</option>
+                        <option value="imagemap">Image Map</option>
+                    </select>
+                    
+                    <span class="imagemap">
+                        <div id="ka_imgmapname" class="imgmapname">no image selected</div>
+                        <input type="button" id="ka_browse_map" value="load image file" class="textureloadbutton">
+                    </span>
+                    
+                    <table id="swatch_diffuse">
+                        <tr><td id="absorption_swatch" class="swatch" width=64 height=64></td></tr>
+                    </table>
+
                     <label for="ka_d">Depth</label>
 					<input type='text' id="ka_d" size="6">
                     <label for="ka_d_texturetype">Depth Texture</label>
@@ -314,30 +344,12 @@
                         <option value="sketchup">Sketchup Texture</option>
                         <option value="imagemap">Image Map</option>
                     </select>
-                        <span class="imagemap">
-						<input type="button" id="ka_d_browse_map" value="Load">
-                        </span>
-                    
-                    <div class="panelcontent">
-                    <label for="ka_R" class="kdr">Red</label>
-                    <input type='text' id="ka_R" size="6" class="kdrvalue">
-                    <label for="ka_G" class="kdg">Green</label>
-                    <input type='text' id="ka_G" size="6" class="kdgvalue">
-                    <label for="ka_B" class="kdb">Blue</label>
-                    <input type='text' id="ka_B" size="6" class="kdbvalue">
-                    <label for="ka_texturetype" class="texturelabel">Texture</label>
-                    <select id="ka_texturetype" class="texturedropdown">
-                    <option value="none">None</option>
-                    <option value="sketchup">Sketchup Texture</option>
-                    <option value="imagemap">Image Map</option>
-                    </select>
                     <span class="imagemap">
-                    <input type="button" id="ka_d_browse_map" value="Load" class="textureloadbutton">
+                        <div id="ka_d_imgmapname" class="imgmapname">no image selected</div>
+						<input type="button" id="ka_d_browse_map" value="load image file">
                     </span>
-                    <table id="swatch_diffuse">
-                    <tr><td id="absorption_swatch" class="swatch" width=64 height=64></td></tr>
-                    </table>
-                    </div> <!-- END panelcontent -->
+                    
+                    </div> <!--  END panelcontent -->
                         
 				</div>
                     
@@ -363,7 +375,8 @@
 						<option value="imagemap">Image Map</option>
 					</select>
 					<span class="imagemap">
-						<input type="button" id="film_browse_map" value="Load">
+                        <div id="kd_imgmapname" class="imgmapname">no image selected</div>
+						<input type="button" id="film_browse_map" value="load image file">
 					</span> <!-- END diffuse_texture -->
 					<br>
 					<label for="filmindex">Film IOR</label>
@@ -375,7 +388,8 @@
 						<option value="imagemap">Image Map</option>
 					</select>
 					<span class="imagemap">
-						<input type="button" id="filmindex_browse_map" value="Load">
+                        <div id="kd_imgmapname" class="imgmapname">no image selected</div>
+						<input type="button" id="filmindex_browse_map" value="load image file">
 					</span> <!-- END diffuse_texture -->
 				</div>
 			</div>
@@ -393,7 +407,8 @@
 						<option value="imagemap">Image Map</option>
 					</select>
 					<span class="imagemap">
-						<input type="button" id="cauchyb_browse_map" value="Load">
+                        <div id="kd_imgmapname" class="imgmapname">no image selected</div>
+						<input type="button" id="cauchyb_browse_map" value="load image file">
 					</span> <!-- END diffuse_texture -->
 				</div>
 			</div>
@@ -417,7 +432,8 @@
 							<option value ="imagemap">Image Map</option>
 						</select>
 						<span class="imagemap">
-							<input type="button" id="bump_browse_map" value="Load">
+                            <div id="kd_imgmapname" class="imgmapname">no image selected</div>
+							<input type="button" id="bump_browse_map" value="load image file">
 						</span>
 			</div> <!-- END Bump -->
 			<div id="displacement" class="matte mattetranslucent mix glossy metal mirror shinymetal glossytranslucent roughglass velvet glass glass2 carpaint ">
@@ -446,7 +462,8 @@
 						<option value="imagemap">Image Map</option>
 					</select>
 					<span class="imagemap">
-						<input type="button" id="dm_browse_map" value="Load">
+                        <div id="kd_imgmapname" class="imgmapname">no image selected</div>
+						<input type="button" id="dm_browse_map" value="load image file">
 					</span> <!-- END diffuse_texture -->
 					<input type="hidden" id="dispmap" value="1">
 				</div>

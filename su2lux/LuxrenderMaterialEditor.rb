@@ -75,6 +75,16 @@ class LuxrenderMaterialEditor
                             update_swatches()
 					end
 				end
+                # todo: update text if parameter ends with _texturetype
+                if (v == "imagemap")
+                        puts "updating text"
+                        textype = k.dup
+                        textype.slice!("_texturetype")
+                        #puts tempstring
+                        update_texture_name(lux_material, textype)
+                end
+                
+                
 			}
 		}
 				
@@ -196,7 +206,7 @@ class LuxrenderMaterialEditor
             SU2LUX.dbg_p "refresh called through javascript"
 			refresh()
 		}
-		
+
 		@material_editor_dialog.add_action_callback('active_mat_type') { |dialog, param| # shows the appropriate material editor panels for current material type
             SU2LUX.dbg_p ("callback: active_mat_type")
 			@materialtype = @current.type # @materialtype = LuxrenderAttributeDictionary.get_attribute(@materials_skp_lux.index(@current).name, 'type', 'default')
@@ -208,6 +218,7 @@ class LuxrenderMaterialEditor
 		@material_editor_dialog.add_action_callback('type_changed') { |dialog, material_type|
             SU2LUX.dbg_p ("callback: type changed")
 			print "current material: ", material_type, "\n"
+            update_texture_names(@current)
             if (material_type=="mix") # check if mix materials have been set
                 if (@current.material_list1 == '')
                     matname0 = Sketchup.active_model.materials[0].name.delete("[<>]")
@@ -221,7 +232,6 @@ class LuxrenderMaterialEditor
                         @current.material_list1 = Sketchup.active_model.materials[1].name.delete("[<>]")
                         @current.material_list2 = Sketchup.active_model.materials[1].name.delete("[<>]")
                     end
-                    # todo: set mix fields to material_list1 and material_list2
                     cmd = "$('#material_list1 option').filter(function(){return ($(this).text() == '" + @current.material_list1 + "');}).attr('selected', true);"
                     @material_editor_dialog.execute_script(cmd)
                     cmd = "$('#material_list2 option').filter(function(){return ($(this).text() == '" + @current.material_list2 + "');}).attr('selected', true);"
@@ -415,6 +425,9 @@ class LuxrenderMaterialEditor
 		
 		@material_editor_dialog.add_action_callback("texture_editor") {|dialog, params|
             puts ("callback: texture_editor")
+            
+            
+			         
 			lux_material = @current
 			data = params.to_s
 			method_name = data + '_texturetype'
@@ -422,11 +435,18 @@ class LuxrenderMaterialEditor
 			
 			prefix = data + '_' + texture_type + '_'
 			@texture_editor_data['texturetype'] = lux_material.send(method_name)
+            
 			['wrap', 'channel', 'filename', 'gamma', 'gain', 'filtertype', 'mapping', 'uscale',
 			 'vscale', 'udelta', 'vdelta', 'maxanisotropy', 'discardmipmaps'].each {|par|
-				@texture_editor_data[texture_type + '_' + par] = lux_material.send(prefix + par) if(lux_material.respond_to?(prefix+par))
+				@texture_editor_data[texture_type + '_' + par] = lux_material.send(prefix + par) if (lux_material.respond_to?(prefix+par))
 			}
-			@texture_editor = LuxrenderTextureEditor.new(@texture_editor_data, data)
+            
+            @texture_editor = LuxrenderTextureEditor.new(@texture_editor_data, data)
+
+            puts "sending data to texture editor:"
+            puts @texture_editor_data
+            puts data
+            
 			@texture_editor.show()
 		}
 	end # end initialize
@@ -589,14 +609,10 @@ class LuxrenderMaterialEditor
 		
 		## update material editor contents
 		set_material_lists
-
 		sendDataFromSketchup()
 		load_preview_image		
 		set_current(@current.name)
-        
-        # for all textures, show the Load button if texture type is image map
-        cmd = 'show_load_buttons()'
-        @material_editor_dialog.execute_script(cmd)
+        update_texture_names(@current)
         
         # set preview section height
         setdivheightcmd = 'setpreviewheight(' + @lrs.preview_size.to_s + ',' + @lrs.preview_time.to_s + ')'
@@ -604,6 +620,24 @@ class LuxrenderMaterialEditor
         @material_editor_dialog.execute_script(setdivheightcmd)
         
 	end
+    
+    ##
+    #
+    ##
+    
+    def update_texture_names(luxmat)
+        for textype in luxmat.texturechannels
+            update_texture_name(luxmat,textype)
+        end
+    end
+    
+    def update_texture_name(luxmat, textype)
+        filepath = File.basename(luxmat.send(textype+'_imagemap_filename'))
+        cmd = 'show_load_buttons(\'' + textype + '\',\'' + filepath + '\')'
+        puts cmd
+        @material_editor_dialog.execute_script(cmd)
+    end
+    
     
     ##
     #

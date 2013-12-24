@@ -1256,6 +1256,7 @@ class LuxrenderExport
                 export_mat(luxrender_mat, out)
             end
 		}
+        @texexport = "skp" # prevent material preview function from copying textures
 	end
 
 	def export_texture(material, mat_type, type, before, after)

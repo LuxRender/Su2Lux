@@ -67,15 +67,14 @@ function update_RGB(fieldR,fieldG,fieldB,colorr,colorg,colorb){
     $(fieldB).val(colorb);
 }
 
-function show_load_buttons(){
-    //alert ("running show_load_buttons function");
-    var theelements = $("[id*='_texturetype']");
-    //alert (theelements.length);
-    for (var i=0;i<theelements.length;i++){
-        if (theelements[i].value=="imagemap"){
-            $(theelements[i]).next(".imagemap").show(); // shows  <span class="imagemap">
+function show_load_buttons(textype,filename){
+    idname = textype + '_texturetype'
+    if ($('#'+idname).val()=="imagemap"){
+            //alert ("running show_load_buttons function");
+            $('#'+idname).next(".imagemap").show(); // shows  <span class="imagemap">
+            $('#'+textype+'_imgmapname').text(filename)
         }
-    }
+    //}
 }
 
 $(document).ready(
@@ -88,7 +87,7 @@ $(document).ready(
 		window.location = 'skp:show_continued@'
         
 		
-		$("#settings_panel select, :text").change(
+		$("#settings_panel select, :text").change( // triggered on changing dropdown menus or text fields
 			function()
 			{
 				window.location = 'skp:param_generate@' + this.id+'='+this.value
@@ -106,11 +105,8 @@ $(document).ready(
 		$("#type").change(
 			function() {
                 //alert ("type change")
-				$(this).nextAll().hide();                 
-				$(this).nextAll("." + this.value).show();
-                //if (this.value=="mix"){
-                //    $("#mixmattype").change();
-                //}
+                $(this).nextAll().hide();
+                $(this).nextAll("." + this.value).show();
                 window.location = 'skp:type_changed@' + this.value;
 			}
 		)
@@ -155,9 +151,9 @@ $(document).ready(
 		$('select[id$="_texturetype"]').change(
 			function()
 			{
-                //alert (this.value)
-				$(this).next().hide();
-				$(this).next("." + this.value).show(); // shows load button
+                $(this).next().hide();
+                $(this).next("." + this.value).show(); // shows image map interface elements
+                // note: do not add window.location methods as they will interfere with .change functions on OS X
 			}
 		)
                   
