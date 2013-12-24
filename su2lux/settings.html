@@ -233,6 +233,363 @@
 				</div>
 			</div>
 		</div>
+        
+        
+<p class="header">Film</p>
+		<div class="collapse">
+			<label for="film_type">film type</label>
+			<select id="film_type">
+				<option value="fleximage">fleximage</option>
+			</select>
+            <p class="header2">Output options</p>
+            <label for="fleximage_outlierrejection_k">Fireflies rejection</label>
+            <input type='text' id="fleximage_outlierrejection_k" size="4"><br>
+			<label for="fleximage_haltspp">halt spp</label>
+			<input type='text' id="fleximage_haltspp" size="4">
+			<label for="fleximage_halttime">halt time</label>
+			<input type='text' id="fleximage_halttime" size="4">
+			<br>
+			<label for="fleximage_displayinterval">Display interval</label>
+			<input type='text' id="fleximage_displayinterval" size="4">
+			<label for="fleximage_writeinterval">Write interval</label>
+			<input type='text' id="fleximage_writeinterval" size="4">
+			<p class="header2">Tonemapping</p>
+			<label for="fleximage_tonemap_kernel">Tonemap</label>
+			<select id="fleximage_tonemapkernel">
+				<option value="reinhard">reinhard</option>
+				<option value="linear">linear</option>
+				<option value="contrast">contrast</option>
+				<option value="maxwhite">maxwhite</option>
+			</select>
+			<label for="fleximage_premultiplyalpha">premultiply alpha</label>
+			<input type="checkbox" id="fleximage_premultiplyalpha">
+			<div class="reinhard" id="reinhard">
+				<label for="fleximage_reinhard_prescale">Prescale</label>
+				<input type='text' id="fleximage_reinhard_prescale" size="4">
+				<label for="fleximage_reinhard_postscale">Postscale</label>
+				<input type='text' id="fleximage_reinhard_postscale" size="4">
+				<label for="fleximage_reinhard_burn">Burn</label>
+				<input type='text' id="fleximage_reinhard_burn" size="4">
+			</div>
+			<div class="linear" id="linear">
+				<label for="fleximage_linear_use_preset">preset</label>
+				<input type="checkbox" id="fleximage_linear_use_preset">
+				<div class="basic">
+					<label for="fleximage_linear_sensitivity">Sensitivity</label>
+					<input type='text' id="fleximage_linear_sensitivity" size="4">
+					<label for="fleximage_linear_exposure">Exposure</label>
+					<input type='text' id="fleximage_linear_exposure" size="4">
+					<label for="fleximage_linear_fstop">F-stop</label>
+					<input type='text' id="fleximage_linear_fstop" size="4">
+				</div>
+				<div class="advanced">
+					<label for="fleximage_linear_camera_type">Camera Type</label>
+					<select id="fleximage_linear_camera_type">
+						<option value="photo">photo</option>
+						<option value="cinema">cinema</option>
+					</select>
+					<span class="photo">
+						<label for="fleximage_linear_photo_exposure">exposure</label>
+						<select id="fleximage_linear_photo_exposure">
+							<option value="1/1000">1/1000</option>
+							<option value="1/500">1/500</option>
+							<option value="1/250">1/250</option>
+							<option value="1/125">1/125</option>
+							<option value="1/60">1/60</option>
+							<option value="1/30">1/30</option>
+							<option value="1/15">1/15</option>
+							<option value="1/8">1/8</option>
+							<option value="1/4">1/4</option>
+							<option value="1/2">1/2</option>
+							<option value="1">1</option>
+						</select>
+					</span>
+					<span class="cinema">
+						<label for="fleximage_linear_cinema_exposure">exposure</label>
+						<select id="fleximage_linear_cinema_exposure">
+							<option value="45-deg">45-deg</option>
+							<option value="90-deg">90-deg</option>
+							<option value="180-deg">180-deg</option>
+							<option value="270-deg">270-deg</option>
+						</select>
+						<label for="fleximage_linear_cinema_fps">FPS</label>
+						<select id="fleximage_linear_cinema_fps">
+							<option value="">500 FPS</option>
+							<option value="">200 FPS</option>
+							<option value="">100 FPS</option>
+							<option value="">60 FPS</option>
+							<option value="">50 FPS</option>
+							<option value="">30 FPS</option>
+							<option value="">29.976 FPS</option>
+							<option value="">25 FPS</option>
+							<option value="">24 FPS</option>
+							<option value="">20 FPS</option>
+							<option value="">12 FPS</option>
+							<option value="">10 FPS</option>
+						</select>
+					</span>
+					<div class="photo cinema">
+						<label for="fleximage_linear_use_half_stop">half stop</label>
+						<input type="checkbox" id="fleximage_linear_use_half_stop">
+						<span class="basic">
+							<select id="fleximage_linear_hf_stopF">
+								<option value="128">128</option>
+								<option value="90">90</option>
+								<option value="64">64</option>
+								<option value="45">45</option>
+								<option value="32">32</option>
+								<option value="22">22</option>
+								<option value="16">16</option>
+								<option value="11">11</option>
+								<option value="6">6</option>
+								<option value="5.6">5.6</option>
+								<option value="4">4</option>
+								<option value="2.8">2.8</option>
+								<option value="2">2</option>
+								<option value="1.4">1.4</option>
+								<option value="1">1</option>
+								<option value="0.7">0.7</option>
+								<option value="0.5">0.5</option>
+							</select>
+						</span>
+						<span class="advanced">
+							<select id="fleximage_linear_hf_stopT">
+								<option value="109">109</option>
+								<option value="107">107</option>
+								<option value="54">54</option>
+								<option value="38">32</option>
+								<option value="27">27</option>
+								<option value="19">19</option>
+								<option value="13">13</option>
+								<option value="9.5">9.5</option>
+								<option value="6.7">6.7</option>
+								<option value="4.8">4.8</option>
+								<option value="3.3">3.3</option>
+								<option value="2.4">2.4</option>
+								<option value="1.7">1.7</option>
+								<option value="1.2">1.2</option>
+							</select>
+						</span>
+							<label for="fleximage_linear_iso">ISO</label>
+							<select id="fleximage_linear_iso">
+								<option value="1000">1000</option>
+								<option value="800">800</option>
+								<option value="640">640</option>
+								<option value="500">500</option>
+								<option value="400">400</option>
+								<option value="320">320</option>
+								<option value="250">250</option>
+								<option value="200">200</option>
+								<option value="160">160</option>
+								<option value="125">125</option>
+								<option value="100">100</option>
+								<option value="80">80</option>
+								<option value="64">64</option>
+								<option value="50">50</option>
+								<option value="40">40</option>
+								<option value="32">32</option>
+								<option value="25">25</option>
+								<option value="20">20</option>
+							</select>
+					</div>
+				</div>
+			</div>
+			<div class="contrast" id="contrast">
+				<label for="fleximage_contrast_ywa">ywa</label>
+				<input type='text' id="fleximage_contrast_ywa" size="4">
+			</div>
+			<div class="maxwhite" id="maxwhite">
+			</div>
+			<p class="header2">Clamping method</p>
+			<select id="fleximage_ldr_clamp_method">
+				<option value="lum">lum</option>
+				<option value="hue">hue</option>
+				<option value="cut">cut</option>
+			</select>
+			<p class="header2">EXR options</p>
+			<label for="fleximage_write_exr">OpenEXR Output</label>
+			<input type="checkbox" id="fleximage_write_exr">
+			<div class="collapse">
+				<label for="fleximage_write_exr_channels">Channels</label>
+				<select id="fleximage_write_exr_channels">
+					<option value="Y">Y</option>
+					<option value="YA">YA</option>
+					<option value="RGB">RGB</option>
+					<option value="RGBA">RGBA</option>
+				</select>
+				<label for="fleximage_write_exr_halftype">16bit half</label>
+				<input type="checkbox" id="fleximage_write_exr_halftype">
+				<select id="fleximage_write_exr_compressiontype">
+					<option value="RLE (lossless)">RLE (lossless)</option>
+					<option value="PIZ (lossless)">PIZ (lossless)</option>
+					<option value="ZIP (lossless)">ZIP (lossless)</option>
+					<option value="Pxr24">Pxr24</option>
+					<option value="None">None</option>
+				</select>
+				<br>
+				<label for="fleximage_write_exr_applyimaging">Apply Imaging/Tonemapping</label>
+				<input type="checkbox" id="fleximage_write_exr_applyimaging">
+				<span class="collapse">
+					<label for="fleximage_write_exr_gamutclamp">Gamut Clamp</label>
+					<input type="checkbox" id="fleximage_write_exr_gamutclamp">
+				</span>
+				<br>
+				<label for="fleximage_write_exr_ZBuf">ZBuf</label>
+				<input type="checkbox" id="fleximage_write_exr_ZBuf">
+				<span class="collapse">
+					<label for="fleximage_write_exr_zbuf_normalizationtype">ZBuf normalization type</label>
+					<select id="fleximage_write_exr_zbuf_normalizationtype">
+						<option value="Camera Start/End clip">Camera Start/End Clip</option>
+						<option value="Min/Max">Min/Max</option>
+						<option value="None">None</option>
+					</select>
+				</span>
+			</div>
+			<p class="header2">PNG options</p>
+			<label for="fleximage_write_png">PNG Output</label>
+			<input type="checkbox" id="fleximage_write_png">
+			<div class="collapse">
+				<label for="fleximage_write_png_channels">Channels</label>
+				<select id="fleximage_write_png_channels">
+					<option value="Y">Y</option>
+					<option value="YA">YA</option>
+					<option value="RGB">RGB</option>
+					<option value="RGBA">RGBA</option>
+				</select>
+				<label for="fleximage_write_png_16bit">16 bit</label>
+				<input type="checkbox" id="fleximage_write_png_16bit">
+				<label for="fleximage_write_png_gamutclamp">gamut clamp</label>
+				<input type="checkbox" id="fleximage_write_png_gamutclamp">
+			</div>
+			<p class="header2">TGA options</p>
+			<label for="fleximage_write_tga">TGA Output</label>
+			<input type="checkbox" id="fleximage_write_tga">
+			<div class="collapse">
+				<label for="fleximage_write_tga_channels">Channels</label>
+				<select id="fleximage_write_tga_channels">
+					<option value="Y">Y</option>
+					<option value="RGB">RGB</option>
+					<option value="RGBA">RGBA</option>
+				</select>
+				<label for="fleximage_write_tga_gamutclamp">gamut clamp</label>
+				<input type="checkbox" id="fleximage_write_tga_gamutclamp">
+			</div>
+			<p class="header2">Resuming options</p>
+			<label for="fleximage_write_resume_flm">Write/use flm</label>
+			<input type="checkbox" id="fleximage_write_resume_flm">
+			<label for="fleximage_restart_resume_flm">Restart/resume</label>
+			<input type="checkbox" id="fleximage_restart_resume_flm">
+			<p class="header2">Color space management</p>
+			<label for="fleximage_use_preset">Preset</label>
+			<input type="checkbox" id="fleximage_use_preset">
+			<div class="basic">
+				<label for="fleximage_colorspace_white_x">white X</label>
+				<input type='text' id="fleximage_colorspace_white_x" size="4">
+				<label for="fleximage_colorspace_white_y">white Y</label>
+				<input type='text' id="fleximage_colorspace_white_y" size="4">
+				<label for="fleximage_colorspace_red_x">red X</label>
+				<input type='text' id="fleximage_colorspace_red_x" size="4">
+				<label for="fleximage_colorspace_red_y">red Y</label>
+				<input type='text' id="fleximage_colorspace_red_y" size="4">
+				<label for="fleximage_colorspace_green_x">green X</label>
+				<input type='text' id="fleximage_colorspace_green_x" size="4">
+				<label for="fleximage_colorspace_green_y">green Y</label>
+				<input type='text' id="fleximage_colorspace_green_y" size="4">
+				<label for="fleximage_colorspace_blue_x">blue X</label>
+				<input type='text' id="fleximage_colorspace_blue_x" size="4">
+				<label for="fleximage_colorspace_blue_y">blue Y</label>
+				<input type='text' id="fleximage_colorspace_blue_y" size="4">
+				<label for="fleximage_gamma">Gamma</label>
+				<input type='text' id="fleximage_gamma" size="4">
+			</div>
+			<div class="advanced">
+				<select id="fleximage_colorspace_preset">
+					<option value="sRGB - HDTV (ITU-R BT.709-5)">sRGB - HDTV (ITU-R BT.709-5)</option>
+					<option value="ROMM RGB">ROMM RGB</option>
+					<option value="Adobe RGB 98">Adobe RGB 98</option>
+					<option value="Apple RGB">Apple RGB</option>
+					<option value="NTSC (FCC 1953, ITU-R BT.470-2 System M)">NTSC (FCC 1953, ITU-R BT.470-2 System M)</option>
+					<option value="NTSC (1979) (SMPTE C, SMPTE-RP 145)">NTSC (1979) (SMPTE C, SMPTE-RP 145)</option>
+					<option value="PAL/SECAM (EBU 3213, ITU-R BT.470-6)">PAL/SECAM (EBU 3213, ITU-R BT.470-6)</option>
+					<option value="CIE (1931) E">CIE (1931) E</option>
+				</select>
+				<br>
+				<p class="header3">White point</p>
+				<label for="fleximage_use_colorspace_whitepoint">Colorspace whitepoint</label>
+				<input type="checkbox" id="fleximage_use_colorspace_whitepoint">
+				<div class="basic">
+					<label for="fleximage_use_colorspace_whitepoint_preset">Preset</label>
+					<input type="checkbox" id="fleximage_use_colorspace_whitepoint_preset">
+					<div class="basic">
+						<label for="fleximage_colorspace_preset_white_x">white X</label>
+						<input type='text' id="fleximage_colorspace_preset_white_x" size="6">
+						<label for="fleximage_colorspace_preset_white_y">white Y</label>
+						<input type='text' id="fleximage_colorspace_preset_white_y" size="6">
+					</div>
+					<div class="advanced">
+						<select id="fleximage_colorspace_wp_preset">
+							<option value="A - incandescent">A - incandescent</option>
+							<option value="B - sunlight">B - sunlight</option>
+							<option value="C - daylight">C - daylight</option>
+							<option value="D50 - daylight, 5003">D50 - daylight, 5003</option>
+							<option value="D55 - daylight, 5503">D55 - daylight, 5503</option>
+							<option value="D65 - daylight, 6504">D65 - daylight, 6504</option>
+							<option value="D75 - daylight, 7504">D75 - daylight, 7504</option>
+							<option value="E - equal energy">E - equal energy</option>
+							<option value="F2 - standard fluorescent">F2 - standard fluorescent</option>
+							<option value="F7 - broadband fluorescent">F7 - broadband fluorescent</option>
+							<option value="F11 - narrow threeband fluorescent">F11 - narrow threeband fluorescent</option>
+							<option value="9300">9300</option>
+						</select>
+					</div>
+				</div>
+				<div>
+				<p class="header3">Gamma</p>
+					<label for="fleximage_use_colorspace_gamma">Colorspace gamma</label>
+					<input type="checkbox" id="fleximage_use_colorspace_gamma">
+					<span class="basic">
+						<label for="fleximage_colorspace_gamma">Gamma</label>
+						<input type='text' id="fleximage_colorspace_gamma" size="4">
+					</span>
+				</div>
+			</div>
+		</div>
+        
+        
+        <p class="header">Image resolution</p>
+		<div class="collapse">
+			<label for="fleximage_xresolution">Width&nbsp;</label>
+			<input type="text" id="fleximage_xresolution" size="5">
+			<input type="button" id="multiply_by_2" value ="Double">
+			<input type="button" id="x800" value ="800x600">
+			<input type="button" id="x1024" value="1024x768">
+			<input type="button" id="x1280" value="1280x1024">
+			<br>
+			<label for="fleximage_yresolution">Height</label>
+			<input type="text" id="fleximage_yresolution" size="5">
+			<input type="button" id="divide_by_2" value ="Half">
+			<input type="button" id="x1440" value="1440x900">
+			<input type="button" id="x1080" value="1920x1080">
+			<input type="button" id="x1920" value="1920x1200">
+			<br>
+			<label for="fleximage_resolution_percent">Scale</label>
+			<select id="fleximage_resolution_percent">
+				<option value="400">400%</option>
+				<option value="300">300%</option>
+				<option value="200">200%</option>
+				<option value="150">150%</option>
+				<option value="100">100%</option>
+				<option value="75">75%</option>
+				<option value="66">66%</option>
+				<option value="50">50%</option>
+				<option value="33">33%</option>
+				<option value="25">25%</option>
+				<option value="10">10%</option>
+			</select>
+			<input type="button" id="current_view" value="Current view">
+			<input type="button" id="flip_dim" value="Flip dimensions">
+		</div>
+        
 
 		<p class="header">Sampler</p>
 		<div class="collapse">
@@ -650,325 +1007,7 @@
 			</div>
 		</div>
 
-		<p class="header">Film</p>
-		<div class="collapse">
-			<label for="film_type">film type</label>
-			<select id="film_type">
-				<option value="fleximage">fleximage</option>
-			</select>
-            <p class="header2">Output options</p>
-            <label for="fleximage_outlierrejection_k">Fireflies rejection</label>
-            <input type='text' id="fleximage_outlierrejection_k" size="4"><br>
-			<label for="fleximage_haltspp">halt spp</label>
-			<input type='text' id="fleximage_haltspp" size="4">
-			<label for="fleximage_halttime">halt time</label>
-			<input type='text' id="fleximage_halttime" size="4">
-			<br>
-			<label for="fleximage_displayinterval">Display interval</label>
-			<input type='text' id="fleximage_displayinterval" size="4">
-			<label for="fleximage_writeinterval">Write interval</label>
-			<input type='text' id="fleximage_writeinterval" size="4">
-			<p class="header2">Tonemapping</p>
-			<label for="fleximage_tonemap_kernel">Tonemap</label>
-			<select id="fleximage_tonemapkernel">
-				<option value="reinhard">reinhard</option>
-				<option value="linear">linear</option>
-				<option value="contrast">contrast</option>
-				<option value="maxwhite">maxwhite</option>
-			</select>
-			<label for="fleximage_premultiplyalpha">premultiply alpha</label>
-			<input type="checkbox" id="fleximage_premultiplyalpha">
-			<div class="reinhard" id="reinhard">
-				<label for="fleximage_reinhard_prescale">Prescale</label>
-				<input type='text' id="fleximage_reinhard_prescale" size="4">
-				<label for="fleximage_reinhard_postscale">Postscale</label>
-				<input type='text' id="fleximage_reinhard_postscale" size="4">
-				<label for="fleximage_reinhard_burn">Burn</label>
-				<input type='text' id="fleximage_reinhard_burn" size="4">
-			</div>
-			<div class="linear" id="linear">
-				<label for="fleximage_linear_use_preset">preset</label>
-				<input type="checkbox" id="fleximage_linear_use_preset">
-				<div class="basic">
-					<label for="fleximage_linear_sensitivity">Sensitivity</label>
-					<input type='text' id="fleximage_linear_sensitivity" size="4">
-					<label for="fleximage_linear_exposure">Exposure</label>
-					<input type='text' id="fleximage_linear_exposure" size="4">
-					<label for="fleximage_linear_fstop">F-stop</label>
-					<input type='text' id="fleximage_linear_fstop" size="4">
-				</div>
-				<div class="advanced">
-					<label for="fleximage_linear_camera_type">Camera Type</label>
-					<select id="fleximage_linear_camera_type">
-						<option value="photo">photo</option>
-						<option value="cinema">cinema</option>
-					</select>
-					<span class="photo">
-						<label for="fleximage_linear_photo_exposure">exposure</label>
-						<select id="fleximage_linear_photo_exposure">
-							<option value="1/1000">1/1000</option>
-							<option value="1/500">1/500</option>
-							<option value="1/250">1/250</option>
-							<option value="1/125">1/125</option>
-							<option value="1/60">1/60</option>
-							<option value="1/30">1/30</option>
-							<option value="1/15">1/15</option>
-							<option value="1/8">1/8</option>
-							<option value="1/4">1/4</option>
-							<option value="1/2">1/2</option>
-							<option value="1">1</option>
-						</select>
-					</span>
-					<span class="cinema">
-						<label for="fleximage_linear_cinema_exposure">exposure</label>
-						<select id="fleximage_linear_cinema_exposure">
-							<option value="45-deg">45-deg</option>
-							<option value="90-deg">90-deg</option>
-							<option value="180-deg">180-deg</option>
-							<option value="270-deg">270-deg</option>
-						</select>
-						<label for="fleximage_linear_cinema_fps">FPS</label>
-						<select id="fleximage_linear_cinema_fps">
-							<option value="">500 FPS</option>
-							<option value="">200 FPS</option>
-							<option value="">100 FPS</option>
-							<option value="">60 FPS</option>
-							<option value="">50 FPS</option>
-							<option value="">30 FPS</option>
-							<option value="">29.976 FPS</option>
-							<option value="">25 FPS</option>
-							<option value="">24 FPS</option>
-							<option value="">20 FPS</option>
-							<option value="">12 FPS</option>
-							<option value="">10 FPS</option>
-						</select>
-					</span>
-					<div class="photo cinema">
-						<label for="fleximage_linear_use_half_stop">half stop</label>
-						<input type="checkbox" id="fleximage_linear_use_half_stop">
-						<span class="basic">
-							<select id="fleximage_linear_hf_stopF">
-								<option value="128">128</option>
-								<option value="90">90</option>
-								<option value="64">64</option>
-								<option value="45">45</option>
-								<option value="32">32</option>
-								<option value="22">22</option>
-								<option value="16">16</option>
-								<option value="11">11</option>
-								<option value="6">6</option>
-								<option value="5.6">5.6</option>
-								<option value="4">4</option>
-								<option value="2.8">2.8</option>
-								<option value="2">2</option>
-								<option value="1.4">1.4</option>
-								<option value="1">1</option>
-								<option value="0.7">0.7</option>
-								<option value="0.5">0.5</option>
-							</select>
-						</span>
-						<span class="advanced">
-							<select id="fleximage_linear_hf_stopT">
-								<option value="109">109</option>
-								<option value="107">107</option>
-								<option value="54">54</option>
-								<option value="38">32</option>
-								<option value="27">27</option>
-								<option value="19">19</option>
-								<option value="13">13</option>
-								<option value="9.5">9.5</option>
-								<option value="6.7">6.7</option>
-								<option value="4.8">4.8</option>
-								<option value="3.3">3.3</option>
-								<option value="2.4">2.4</option>
-								<option value="1.7">1.7</option>
-								<option value="1.2">1.2</option>
-							</select>
-						</span>
-							<label for="fleximage_linear_iso">ISO</label>
-							<select id="fleximage_linear_iso">
-								<option value="1000">1000</option>
-								<option value="800">800</option>
-								<option value="640">640</option>
-								<option value="500">500</option>
-								<option value="400">400</option>
-								<option value="320">320</option>
-								<option value="250">250</option>
-								<option value="200">200</option>
-								<option value="160">160</option>
-								<option value="125">125</option>
-								<option value="100">100</option>
-								<option value="80">80</option>
-								<option value="64">64</option>
-								<option value="50">50</option>
-								<option value="40">40</option>
-								<option value="32">32</option>
-								<option value="25">25</option>
-								<option value="20">20</option>
-							</select>
-					</div>
-				</div>
-			</div>
-			<div class="contrast" id="contrast">
-				<label for="fleximage_contrast_ywa">ywa</label>
-				<input type='text' id="fleximage_contrast_ywa" size="4">
-			</div>
-			<div class="maxwhite" id="maxwhite">
-			</div>
-			<p class="header2">Clamping method</p>
-			<select id="fleximage_ldr_clamp_method">
-				<option value="lum">lum</option>
-				<option value="hue">hue</option>
-				<option value="cut">cut</option>
-			</select>
-			<p class="header2">EXR options</p>
-			<label for="fleximage_write_exr">OpenEXR Output</label>
-			<input type="checkbox" id="fleximage_write_exr">
-			<div class="collapse">
-				<label for="fleximage_write_exr_channels">Channels</label>
-				<select id="fleximage_write_exr_channels">
-					<option value="Y">Y</option>
-					<option value="YA">YA</option>
-					<option value="RGB">RGB</option>
-					<option value="RGBA">RGBA</option>
-				</select>
-				<label for="fleximage_write_exr_halftype">16bit half</label>
-				<input type="checkbox" id="fleximage_write_exr_halftype">
-				<select id="fleximage_write_exr_compressiontype">
-					<option value="RLE (lossless)">RLE (lossless)</option>
-					<option value="PIZ (lossless)">PIZ (lossless)</option>
-					<option value="ZIP (lossless)">ZIP (lossless)</option>
-					<option value="Pxr24">Pxr24</option>
-					<option value="None">None</option>
-				</select>
-				<br>
-				<label for="fleximage_write_exr_applyimaging">Apply Imaging/Tonemapping</label>
-				<input type="checkbox" id="fleximage_write_exr_applyimaging">
-				<span class="collapse">
-					<label for="fleximage_write_exr_gamutclamp">Gamut Clamp</label>
-					<input type="checkbox" id="fleximage_write_exr_gamutclamp">
-				</span>
-				<br>
-				<label for="fleximage_write_exr_ZBuf">ZBuf</label>
-				<input type="checkbox" id="fleximage_write_exr_ZBuf">
-				<span class="collapse">
-					<label for="fleximage_write_exr_zbuf_normalizationtype">ZBuf normalization type</label>
-					<select id="fleximage_write_exr_zbuf_normalizationtype">
-						<option value="Camera Start/End clip">Camera Start/End Clip</option>
-						<option value="Min/Max">Min/Max</option>
-						<option value="None">None</option>
-					</select>
-				</span>
-			</div>
-			<p class="header2">PNG options</p>
-			<label for="fleximage_write_png">PNG Output</label>
-			<input type="checkbox" id="fleximage_write_png">
-			<div class="collapse">
-				<label for="fleximage_write_png_channels">Channels</label>
-				<select id="fleximage_write_png_channels">
-					<option value="Y">Y</option>
-					<option value="YA">YA</option>
-					<option value="RGB">RGB</option>
-					<option value="RGBA">RGBA</option>
-				</select>
-				<label for="fleximage_write_png_16bit">16 bit</label>
-				<input type="checkbox" id="fleximage_write_png_16bit">
-				<label for="fleximage_write_png_gamutclamp">gamut clamp</label>
-				<input type="checkbox" id="fleximage_write_png_gamutclamp">
-			</div>
-			<p class="header2">TGA options</p>
-			<label for="fleximage_write_tga">TGA Output</label>
-			<input type="checkbox" id="fleximage_write_tga">
-			<div class="collapse">
-				<label for="fleximage_write_tga_channels">Channels</label>
-				<select id="fleximage_write_tga_channels">
-					<option value="Y">Y</option>
-					<option value="RGB">RGB</option>
-					<option value="RGBA">RGBA</option>
-				</select>
-				<label for="fleximage_write_tga_gamutclamp">gamut clamp</label>
-				<input type="checkbox" id="fleximage_write_tga_gamutclamp">
-			</div>
-			<p class="header2">Resuming options</p>
-			<label for="fleximage_write_resume_flm">Write/use flm</label>
-			<input type="checkbox" id="fleximage_write_resume_flm">
-			<label for="fleximage_restart_resume_flm">Restart/resume</label>
-			<input type="checkbox" id="fleximage_restart_resume_flm">
-			<p class="header2">Color space management</p>
-			<label for="fleximage_use_preset">Preset</label>
-			<input type="checkbox" id="fleximage_use_preset">
-			<div class="basic">
-				<label for="fleximage_colorspace_white_x">white X</label>
-				<input type='text' id="fleximage_colorspace_white_x" size="4">
-				<label for="fleximage_colorspace_white_y">white Y</label>
-				<input type='text' id="fleximage_colorspace_white_y" size="4">
-				<label for="fleximage_colorspace_red_x">red X</label>
-				<input type='text' id="fleximage_colorspace_red_x" size="4">
-				<label for="fleximage_colorspace_red_y">red Y</label>
-				<input type='text' id="fleximage_colorspace_red_y" size="4">
-				<label for="fleximage_colorspace_green_x">green X</label>
-				<input type='text' id="fleximage_colorspace_green_x" size="4">
-				<label for="fleximage_colorspace_green_y">green Y</label>
-				<input type='text' id="fleximage_colorspace_green_y" size="4">
-				<label for="fleximage_colorspace_blue_x">blue X</label>
-				<input type='text' id="fleximage_colorspace_blue_x" size="4">
-				<label for="fleximage_colorspace_blue_y">blue Y</label>
-				<input type='text' id="fleximage_colorspace_blue_y" size="4">
-				<label for="fleximage_gamma">Gamma</label>
-				<input type='text' id="fleximage_gamma" size="4">
-			</div>
-			<div class="advanced">
-				<select id="fleximage_colorspace_preset">
-					<option value="sRGB - HDTV (ITU-R BT.709-5)">sRGB - HDTV (ITU-R BT.709-5)</option>
-					<option value="ROMM RGB">ROMM RGB</option>
-					<option value="Adobe RGB 98">Adobe RGB 98</option>
-					<option value="Apple RGB">Apple RGB</option>
-					<option value="NTSC (FCC 1953, ITU-R BT.470-2 System M)">NTSC (FCC 1953, ITU-R BT.470-2 System M)</option>
-					<option value="NTSC (1979) (SMPTE C, SMPTE-RP 145)">NTSC (1979) (SMPTE C, SMPTE-RP 145)</option>
-					<option value="PAL/SECAM (EBU 3213, ITU-R BT.470-6)">PAL/SECAM (EBU 3213, ITU-R BT.470-6)</option>
-					<option value="CIE (1931) E">CIE (1931) E</option>
-				</select>
-				<br>
-				<p class="header3">White point</p>
-				<label for="fleximage_use_colorspace_whitepoint">Colorspace whitepoint</label>
-				<input type="checkbox" id="fleximage_use_colorspace_whitepoint">
-				<div class="basic">
-					<label for="fleximage_use_colorspace_whitepoint_preset">Preset</label>
-					<input type="checkbox" id="fleximage_use_colorspace_whitepoint_preset">
-					<div class="basic">
-						<label for="fleximage_colorspace_preset_white_x">white X</label>
-						<input type='text' id="fleximage_colorspace_preset_white_x" size="6">
-						<label for="fleximage_colorspace_preset_white_y">white Y</label>
-						<input type='text' id="fleximage_colorspace_preset_white_y" size="6">
-					</div>
-					<div class="advanced">
-						<select id="fleximage_colorspace_wp_preset">
-							<option value="A - incandescent">A - incandescent</option>
-							<option value="B - sunlight">B - sunlight</option>
-							<option value="C - daylight">C - daylight</option>
-							<option value="D50 - daylight, 5003">D50 - daylight, 5003</option>
-							<option value="D55 - daylight, 5503">D55 - daylight, 5503</option>
-							<option value="D65 - daylight, 6504">D65 - daylight, 6504</option>
-							<option value="D75 - daylight, 7504">D75 - daylight, 7504</option>
-							<option value="E - equal energy">E - equal energy</option>
-							<option value="F2 - standard fluorescent">F2 - standard fluorescent</option>
-							<option value="F7 - broadband fluorescent">F7 - broadband fluorescent</option>
-							<option value="F11 - narrow threeband fluorescent">F11 - narrow threeband fluorescent</option>
-							<option value="9300">9300</option>
-						</select>
-					</div>
-				</div>
-				<div>
-				<p class="header3">Gamma</p>
-					<label for="fleximage_use_colorspace_gamma">Colorspace gamma</label>
-					<input type="checkbox" id="fleximage_use_colorspace_gamma">
-					<span class="basic">
-						<label for="fleximage_colorspace_gamma">Gamma</label>
-						<input type='text' id="fleximage_colorspace_gamma" size="4">
-					</span>
-				</div>
-			</div>
-		</div>
+
 
 		<p class="header">Accelerator</p>
 		<div class="collapse">
@@ -1012,40 +1051,7 @@
 				<input type='text' id="qbvh_skip_factor" size="4">
 			</div>
 		</div>
-		
-		<p class="header">Image resolution</p>
-		<div class="collapse">
-			<label for="fleximage_xresolution">Width&nbsp;</label>
-			<input type="text" id="fleximage_xresolution" size="5">
-			<input type="button" id="multiply_by_2" value ="Double">
-			<input type="button" id="x800" value ="800x600">
-			<input type="button" id="x1024" value="1024x768">
-			<input type="button" id="x1280" value="1280x1024">
-			<br>
-			<label for="fleximage_yresolution">Height</label>
-			<input type="text" id="fleximage_yresolution" size="5">
-			<input type="button" id="divide_by_2" value ="Half">
-			<input type="button" id="x1440" value="1440x900">
-			<input type="button" id="x1080" value="1920x1080">
-			<input type="button" id="x1920" value="1920x1200">
-			<br>
-			<label for="fleximage_resolution_percent">Scale</label>
-			<select id="fleximage_resolution_percent">
-				<option value="400">400%</option>
-				<option value="300">300%</option>
-				<option value="200">200%</option>
-				<option value="150">150%</option>
-				<option value="100">100%</option>
-				<option value="75">75%</option>
-				<option value="66">66%</option>
-				<option value="50">50%</option>
-				<option value="33">33%</option>
-				<option value="25">25%</option>
-				<option value="10">10%</option>
-			</select>
-			<input type="button" id="current_view" value="Current view">
-			<input type="button" id="flip_dim" value="Flip dimensions">
-		</div>
+
 		
 		<p class="header">System</p>
 		<div class="collapse">
