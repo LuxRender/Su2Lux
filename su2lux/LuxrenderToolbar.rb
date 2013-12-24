@@ -1,7 +1,7 @@
 def create_toolbar
 	main_menu = UI.menu("Plugins").add_submenu("LuxRender Exporter")
 	main_menu.add_item("Render") { (SU2LUX.export_dialog)}
-	main_menu.add_item("Export Scene") {(SU2LUX.export_copy)}
+	# main_menu.add_item("Export Scene") {(SU2LUX.export_copy)}
 	main_menu.add_item("Settings") { (SU2LUX.show_settings_editor)}
 	main_menu.add_item("Material Editor") {(SU2LUX.show_material_editor)}
 	# main_menu.add_item("Change LuxRender path") {(SU2LUX.change_luxrender_path)}
