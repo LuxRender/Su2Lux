@@ -23,11 +23,12 @@ function checkbox_expander(id)
 $(document).ready(
 	function()
 	{
-
 		$(".collapse").hide();
 		$(".collapse2").hide();
 		$(".advanced").hide();
-        $("#firstsection").next(".collapse").show(); // shows camera settings by default
+        $("#camera").next(".collapse").show(); // shows camera settings by default
+        $("#imageresolution").next(".collapse").show();
+        $("#system").next(".collapse").show();
 	
 		$("#settings_panel select, :text").change(
 			function()

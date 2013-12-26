@@ -55,11 +55,11 @@ class LuxrenderMaterial
 		'v_exponent' => 50,
 		'uroughness' => 0.1,
 		'vroughness' => 0.1,
-        #mix
+
 		'mix_uniform' => 50.0,
 		'material_list1' => '',
 		'material_list2' => '',
-        #mix end
+        
 		'matte_sigma' => 0.0,
 		'ka_d' => 0.0,
 		'IOR_index' => 1.5,
@@ -114,6 +114,7 @@ class LuxrenderMaterial
 		key_prefix = material_prefix + "#{name}"
 		key = "#{key_prefix}_#{texture}_"
 		@@settings[key_prefix + "_texturetype"] = "none"
+        @@settings[key + "colorize"] = false
 		@@settings[key + "wrap"] = "repeat"
 		@@settings[key + "channel"] = "mean" if (type == "float")
 		@@settings[key + "filename"] = ""
@@ -122,9 +123,9 @@ class LuxrenderMaterial
 		@@settings[key + "filtertype"] = "bilinear"
 		@@settings[key + "mapping"] = "uv"
 		@@settings[key + "uscale"] = 1.0
-		@@settings[key + "vscale"] = -1.0
+		@@settings[key + "vscale"] = 1.0
 		@@settings[key + "udelta"] = 0.0
-		@@settings[key + "vdelta"] = 1.0
+		@@settings[key + "vdelta"] = 0.0
 		@@settings[key + "maxanisotropy"] = 8.0
 		@@settings[key + "discardmipmaps"] = 0
 		# @@settings[key + "uvset"] = 0

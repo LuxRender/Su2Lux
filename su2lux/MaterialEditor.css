@@ -34,8 +34,8 @@ input[type=button] {
 	margin: 3px;
 	margin-right: 2px;
 	font-family: Verdana, Arial, Helvetica, sans-serif;
-	font-size: 10px;
-	width: 10em;
+	font-size: 12px;
+	width: 8em;
 }
 
 input#divide_by_2, input#multiply_by_2 {
@@ -65,39 +65,56 @@ input#get_diffuse_color {
     position: relative;
 }
 
+#mixmaterials{
+    height: 90px;
+}
+
+#mixfield_uniform{
+    position: absolute;
+}
+
+#mixfield_texture{
+    position: absolute;
+}
+
+#exponent_div{
+    position: relative;
+    height: 170px;
+}
+
 .kdr {
     position: absolute;
-    left: 80px;
+    left: 76px;
     top: 7px;
 }
 
 .kdg {
     position: absolute;
-    left: 80px;
+    left: 76px;
     top: 30px;
 }
 
 .kdb {
     position: absolute;
-    left: 80px;
+    left: 76px;
     top: 53px;
 }
 
 .kdrvalue{
     position: absolute;
-    left: 135px;
+    left: 120px;
     top: 4px;
 }
 
 .kdgvalue{
     position: absolute;
-    left: 135px;
+    left: 120px;
     top: 27px;
 }
 
 .kdbvalue{
     position: absolute;
-    left: 135px;
+    left: 120px;
     top: 50px;
 }
 
@@ -142,7 +159,7 @@ input#get_diffuse_color {
     top: 50px;
 }
 
-.texturefields{
+.txfields{
     position: absolute;
     left: 80px;
     top: 73px;
@@ -150,30 +167,42 @@ input#get_diffuse_color {
 
 .texturelabel{
     position: absolute;
-    left: 219px;
+    left: 200px;
     top: 7px;
 }
 
 .texturedropdown{
     position: absolute;
-    left: 275px;
+    left: 260px;
     top: 4px;
+}
+
+#kd_browse_map, #ks_browse_map{
+    width: 5em;
 }
 
 .textureloadbutton{
     position: absolute;
-    left: 215px;
+	width: 4em;
+    left: 197px;
     top: 50px;
+}
+
+.colorizesection{
+    position: absolute;
+    left: 65px;
+    top: 46px;
+    width: 120px;
 }
 
 .imgmapname{
     position: absolute;
-    left: 219px;
+    left: 200px;
     top: 31px;
 }
 
 #flip_dim {
-	width: 169px;
+	width: 174px;
 }
 
 .swatch {
@@ -223,8 +252,115 @@ input#get_diffuse_color {
 
 
 
+.parameter_label{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+}
+
+.parameter_field{
+    position: absolute;
+    left: 100px;
+    top: 0px;
+}
+
+.parameter_interface{
+    position: relative;
+    height: 82px;
+}
+
+.mix_uniform_label{
+    position: absolute;
+    left: 0px;
+    top: 28px;
+    width: 180px;
+}
+
+.mix_uniform_field{
+    position: absolute;
+    left: 145px;
+    top: 28px;
+}
+
+.texture_area_swatchfield{
+    position: absolute;
+    left: 200px;
+    top: 8px;
+}
+
+.texture_area{
+    position: absolute;
+    left: 180px;
+    top: 0px;
+}
+
+.tex_selector{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100px;
+}
+
+.tex_dropdown{
+    position: absolute;
+    left: 60px;
+    top: -3px;
+}
+
+.tex_path{
+    position: absolute;
+    left: 0px;
+    top: 24px;
+    width: 200px;
+}
+
+.tex_loadbutton{
+    position: absolute;
+    left: -3px;
+    top: 43px;
+
+#u_exponent{
+    position: absolute;
+    left: 100px;
+    top: 0px;
+}
+
+#u_exponent_texturetype{
+    position: absolute;
+    left: 240px;
+    top: 0px;
+}
+
+#u_exponent_imgmapname{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+}
+
+#v_exponent{
+    position: absolute;
+    left: 100px;
+    top: 75px;
+}
+
+#v_exponent_texturetype{
+    position: absolute;
+    left: 240px;
+    top: 75px;
+}
+
+#v_exponent_imgmapname{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+}
+
+
 
 .imagemap{
+    display:none;
+}
+.sketchup{
     display:none;
 }
 

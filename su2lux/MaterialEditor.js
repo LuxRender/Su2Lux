@@ -18,7 +18,7 @@ function checkbox_expander(id)      // user interface, switches between basic an
 			$("#" + id).nextAll(".basic").hide();
 			$("#" + id).nextAll(".advanced").show();
 		}
-		$("#" + id).next(".collapse_check").show();
+		$("#" + id).nextAll(".collapse_check").show();
 	}
 	else if ($("#" + id).attr("checked") == false)
 	{
@@ -26,7 +26,7 @@ function checkbox_expander(id)      // user interface, switches between basic an
 			$("#" + id).nextAll(".basic").show();
 			$("#" + id).nextAll(".advanced").hide();
 		}
-		$("#" + id).next(".collapse_check").hide();
+		$("#" + id).nextAll(".collapse_check").hide();
 	}
 }
 
@@ -68,13 +68,14 @@ function update_RGB(fieldR,fieldG,fieldB,colorr,colorg,colorb){
 }
 
 function show_load_buttons(textype,filename){
-    idname = textype + '_texturetype'
+    idname = textype + '_texturetype';
+    //alert (textype);
     if ($('#'+idname).val()=="imagemap"){
-            //alert ("running show_load_buttons function");
-            $('#'+idname).next(".imagemap").show(); // shows  <span class="imagemap">
-            $('#'+textype+'_imgmapname').text(filename)
-        }
-    //}
+        //alert ("running show_load_buttons function");
+        $('#'+idname).nextAll(".imagemap").show(); // shows  <span class="imagemap">
+        //$('#mixfield_imagemap').show();
+        $('#'+textype+'_imgmapname').text(filename)
+    }
 }
 
 $(document).ready(
@@ -97,8 +98,13 @@ $(document).ready(
 		$(":checkbox").click(
 			function()
 			{
-				window.location = 'skp:param_generate@' + this.id + '=' + $(this).attr('checked');
-				checkbox_expander(this.id)
+                if(this.id){
+                    window.location = 'skp:param_generate@' + this.id + '=' + $(this).attr('checked');
+                    checkbox_expander(this.id)
+                }else{ // synchronize colorize checkboxes for "sketchup" and "imagemap" types
+                    $("." + this.name).attr('checked', $(this).attr('checked'));
+                    window.location = 'skp:param_generate@' + this.name + '=' + $(this).attr('checked');
+                }
 			}
 		)
 
@@ -150,9 +156,9 @@ $(document).ready(
 		
 		$('select[id$="_texturetype"]').change(
 			function()
-			{
-                $(this).next().hide();
-                $(this).next("." + this.value).show(); // shows image map interface elements
+            {
+                $(this).nextAll().hide();
+                $(this).nextAll("." + this.value).show(); // shows image map interface elements
                 // note: do not add window.location methods as they will interfere with .change functions on OS X
 			}
 		)

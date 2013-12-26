@@ -1297,8 +1297,14 @@ class LuxrenderExport
 		preceding += "\t" + "\"float udelta\" [#{"%.6f" %(material.send(mat_type + "_imagemap_udelta"))}]" + "\n"
 		preceding += "\t" + "\"float vdelta\" [#{"%.6f" %(material.send(mat_type + "_imagemap_vdelta"))}]" + "\n"
 		preceding += "Texture \"#{material.name}::#{type_str}.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{material.name}::#{type_str}\"] \"#{type} tex2\" [#{material.send(type_str2)}]" + "\n"
-		following += "\t" + "\"texture #{type_str}\" [\"#{material.name}::#{type_str}.scale\"]" + "\n"
-		return [preceding, following]
+        
+        if (material.send( mat_type + "_imagemap_colorize") == true)
+            following += "\t" + "\"texture #{type_str}\" [\"#{material.name}::#{type_str}.scale\"]" + "\n"
+        else
+            following += "\t" + "\"texture #{type_str}\" [\"#{material.name}::#{type_str}\"]" + "\n"
+        end
+        
+        return [preceding, following]
 	end
 
 	def export_mat(mat, out)
@@ -1492,9 +1498,10 @@ class LuxrenderExport
 			preceding += "\t" + "\"float gamma\" [#{material.kd_imagemap_gamma}]" + "\n"
 			preceding += "\t" + "\"float gain\" [#{material.kd_imagemap_gain}]" + "\n"
 			preceding += "\t" + "\"string filtertype\" [\"#{material.kd_imagemap_filtertype}\"]" + "\n"
-			if (material.color['red'].to_f != 1.0 or material.color['green'].to_f != 1.0 or material.color['blue'].to_f != 1.0)
-				# color = "#{"%.6f" %(material.color[0])} #{"%.6f" %(material.color[1])} #{"%.6f" %(material.color[2])}"
-				preceding += "Texture \"#{material.name}::Kd.scale\" \"color\" \"scale\" \"texture tex1\" [\"#{material.name}::Kd\"] \"color tex2\" [#{material.color_tos}]" + "\n"
+            
+            # color = "#{"%.6f" %(material.color[0])} #{"%.6f" %(material.color[1])} #{"%.6f" %(material.color[2])}"
+			if ((material.send("kd_imagemap_colorize") == true) || (material.color['red'].to_f != 1.0 or material.color['green'].to_f != 1.0 or material.color['blue'].to_f != 1.0))
+                preceding += "Texture \"#{material.name}::Kd.scale\" \"color\" \"scale\" \"texture tex1\" [\"#{material.name}::Kd\"] \"color tex2\" [#{material.color_tos}]" + "\n"
 				following += "\t" + "\"texture Kd\" [\"#{material.name}::Kd.scale\"]" + "\n"
 			else
 				following += "\t" + "\"texture Kd\" [\"#{material.name}::Kd\"]" + "\n"

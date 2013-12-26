@@ -29,8 +29,8 @@ require 'su2lux/fileutils.rb'
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.33"
-    SU2LUX_DATE = "21 December 2013"
+    SU2LUX_VERSION = "0.34"
+    SU2LUX_DATE = "27 December 2013"
 	CONFIG_FILE = "luxrender_path.txt"
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
@@ -531,7 +531,6 @@ module SU2LUX
 			puts "showing material editor"
 			@material_editor.show
 			puts "setting active material"
-			
 			Sketchup.active_model.materials.current = Sketchup.active_model.materials.current 
 			puts "done setting active material"
 		end
@@ -772,6 +771,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 			end
 			material_editor.set_current(material_editor.current.name) # sets name of current material in dropdown, updates swatches
 			material_editor.sendDataFromSketchup
+            material_editor.settexturefields(current_mat.name)
 			material_editor.fire_event("#type", "change", "")
 			material_editor.load_preview_image()
 		else

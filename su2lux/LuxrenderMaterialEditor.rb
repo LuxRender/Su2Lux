@@ -75,12 +75,10 @@ class LuxrenderMaterialEditor
                             update_swatches()
 					end
 				end
-                # todo: update text if parameter ends with _texturetype
                 if (v == "imagemap")
                         puts "updating text"
                         textype = k.dup
                         textype.slice!("_texturetype")
-                        #puts tempstring
                         update_texture_name(lux_material, textype)
                 end
                 
@@ -97,11 +95,8 @@ class LuxrenderMaterialEditor
 		} #end action callback open_dialog
         
 		@material_editor_dialog.add_action_callback("material_changed") { |dialog, material_name|
-            puts ("callback: material_changed")
-            puts material_name
             materials = Sketchup.active_model.materials
-            puts ("current material: " + materials.current.name)
-			# material_name_8859_1 = sanitize_path(material_name)
+            puts ("callback: material_changed, changing from material " + materials.current.name + " to " + material_name)
 			
 			existingluxmat = "none"
 			@materials_skp_lux.values.each {|value| 
@@ -120,7 +115,6 @@ class LuxrenderMaterialEditor
 				@current = existingluxmat
 			end
 			
-			SU2LUX.dbg_p "new active material: #{materials.current.name}"
 			if (material_name != materials.current.name)
 				materials.current = materials[material_name] if ( ! @current.nil?)
 			end
@@ -128,22 +122,31 @@ class LuxrenderMaterialEditor
 			# reload existing material preview image
 			puts "attempting to reload image"
 			load_preview_image()
-            settexturefields(material_name)
+            puts @current.name
+            settexturefields(@current.name)
 		}
         
-        def settexturefields(matname) # shows and hides texture load buttons, based on material properties
-            luxmat = getluxmatfromskpname(matname)
+        def settexturefields(skpmatname) # shows and hides texture load buttons, based on material properties
+            puts "updating texture fields"
+            luxmat = getluxmatfromskpname(skpmatname)
             channels = luxmat.texturechannels
             #puts channels
             for channelname in channels
                 textypename = channelname + "_texturetype" # for example "kd_texturetype"
-                
                 cmd = "$('#" + textypename + "').nextAll('span').hide();"
                 @material_editor_dialog.execute_script(cmd)
                 cmd = "$('#" + textypename + "').nextAll('div').hide();"
                 @material_editor_dialog.execute_script(cmd)
                 activetexturetype = luxmat.send(textypename)
                 cmd = "$('#" + textypename + "').nextAll('." + activetexturetype + "').show()";
+                #puts cmd
+                @material_editor_dialog.execute_script(cmd)
+                
+                # set colorize checkboxes
+                colorizename = channelname + "_imagemap_colorize" # for example kd_imagemap_colorize
+                colorizeon = (@current.send(colorizename))? "true":"false"
+                cmd = "$('." + colorizename + "\').attr('checked', " + colorizeon + ");"
+                #puts cmd
                 @material_editor_dialog.execute_script(cmd)
             end
         end
@@ -574,7 +577,6 @@ class LuxrenderMaterialEditor
         #UI.messagebox (Sketchup.active_model.materials.length)
 		materials = Sketchup.active_model.materials
         
-        
 		## check if LuxRender materials exist, if not, create them
 		for mat in materials
 			if !@materials_skp_lux.include?(mat) # test if LuxRender material has been created, if not, create one
@@ -613,6 +615,8 @@ class LuxrenderMaterialEditor
 		load_preview_image		
 		set_current(@current.name)
         update_texture_names(@current)
+        puts "RUNNING REFRESH, ABOUT TO RUN settexturefields FOR MATERIAL " + @current.name
+        settexturefields(@current.name)
         
         # set preview section height
         setdivheightcmd = 'setpreviewheight(' + @lrs.preview_size.to_s + ',' + @lrs.preview_time.to_s + ')'
@@ -634,7 +638,7 @@ class LuxrenderMaterialEditor
     def update_texture_name(luxmat, textype)
         filepath = File.basename(luxmat.send(textype+'_imagemap_filename'))
         cmd = 'show_load_buttons(\'' + textype + '\',\'' + filepath + '\')'
-        puts cmd
+        #puts cmd
         @material_editor_dialog.execute_script(cmd)
     end
     
@@ -659,9 +663,9 @@ class LuxrenderMaterialEditor
         end
         passedname = passedname.delete("[<>]")
         # show right material in material editor dropdown menu
+        puts "setting active material in SU2LUX material editor dropdown"
         cmd = "$('#material_name option').filter(function(){return ($(this).text() == \"#{passedname}\");}).attr('selected', true);"
-        
-        puts cmd
+        #puts cmd
 		@material_editor_dialog.execute_script(cmd)
 	end
 	

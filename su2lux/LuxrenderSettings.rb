@@ -351,7 +351,7 @@ class LuxrenderSettings
 		'priority' => 'low',
         'copy_textures' => true,
         'colorpicker' => "diffuse_swatch",
-        'preview_size' => 100,
+        'preview_size' => 140,
         'preview_time' => 2,
 	}
 
