@@ -1232,8 +1232,15 @@ class LuxrenderExport
         if luxrender_mat.use_displacement
             puts "running displacement"
             out.puts "\"string subdivscheme\" [\""+luxrender_mat.dm_scheme+"\"]"
-            out.puts "\"bool dmnormalsmooth\" [\"#{luxrender_mat.dm_normalsmooth}\"]"
-            out.puts "\"integer nsubdivlevels\" [#{luxrender_mat.dm_subdivl}]"
+            case luxrender_mat.dm_scheme
+                when "loop"
+                    out.puts "\"bool dmnormalsmooth\" [\"#{luxrender_mat.dm_normalsmooth}\"]"
+                    out.puts "\"bool dmnormalsplit\" [\"#{luxrender_mat.dm_normalsplit}\"]"
+                    out.puts "\"bool dmsharpboundary\" [\"#{luxrender_mat.dm_sharpboundary}\"]"
+                    out.puts "\"integer nsubdivlevels\" [#{luxrender_mat.dm_subdivl}]"
+                when "microdisplacement"
+                    out.puts "\"integer nsubdivlevels\" [#{luxrender_mat.dm_microlevels}]"
+            end
             out.puts "\"string displacementmap\" [\""+luxrender_mat.name+"::displacementmap\"]"
             out.puts "\"float dmscale\" [#{"%.6f" %(luxrender_mat.dm_scale)}]"
             out.puts "\"float dmoffset\" [#{"%.6f" %(luxrender_mat.dm_offset)}]"

@@ -172,6 +172,21 @@ $(document).ready(
                 $(this).nextAll("." + this.value).show();
             }
         );
+ 
+                  
+        $("#dm_scheme").change(
+            function()
+            {
+                if (this.value=="microdisplacement"){
+                    $("#loop").hide();
+                    $("#microdisplacement").show();
+                }else{
+                    $("#loop").show();
+                    $("#microdisplacement").hide();
+                }
+            }
+        );
+        
                   
         
         $('#previewsize').change(

@@ -65,6 +65,10 @@ input#get_diffuse_color {
     position: relative;
 }
 
+#displacement{
+    height: 160px;
+}
+
 #mixmaterials{
     height: 90px;
 }
@@ -118,11 +122,9 @@ input#get_diffuse_color {
     top: 50px;
 }
 
-
 #mixmaterials {
     position: relative;
 }
-
 
 .mixmat1{
     position: absolute;
@@ -153,6 +155,7 @@ input#get_diffuse_color {
     left: 0px;
     top: 50px;
 }
+
 .mixmattypelist{
     position: absolute;
     left: 80px;
@@ -250,8 +253,6 @@ input#get_diffuse_color {
     top: 60px;
 }
 
-
-
 .parameter_label{
     position: absolute;
     left: 0px;
@@ -261,6 +262,12 @@ input#get_diffuse_color {
 .parameter_field{
     position: absolute;
     left: 100px;
+    top: 0px;
+}
+
+.parameter_field_dm{
+    position: absolute;
+    left: 50px;
     top: 0px;
 }
 
@@ -318,6 +325,7 @@ input#get_diffuse_color {
     position: absolute;
     left: -3px;
     top: 43px;
+}
 
 #u_exponent{
     position: absolute;
@@ -327,7 +335,7 @@ input#get_diffuse_color {
 
 #u_exponent_texturetype{
     position: absolute;
-    left: 240px;
+    left: 60px;
     top: 0px;
 }
 
@@ -340,13 +348,13 @@ input#get_diffuse_color {
 #v_exponent{
     position: absolute;
     left: 100px;
-    top: 75px;
+    top: 0px;
 }
 
 #v_exponent_texturetype{
     position: absolute;
-    left: 240px;
-    top: 75px;
+    left: 60px;
+    top: 0px;
 }
 
 #v_exponent_imgmapname{
@@ -355,7 +363,94 @@ input#get_diffuse_color {
     top: 0px;
 }
 
+#loop{
+    position: absolute;
+    left: 0px;
+    top: 30px;
+    width: 250px;
+}
 
+#microdisplacement{
+    display: none;
+    position: absolute;
+    left: 0px;
+    top: 30px;
+    width: 250px;
+}
+
+#dm_subdiv_label, #dm_microlevels_label{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+}
+
+#dm_scale_label{
+    position: absolute;
+    left: 0px;
+    top: 60px;
+}
+
+#dm_offset_label{
+    position: absolute;
+    left: 0px;
+    top: 90px;
+}
+
+#dm_scale{
+    position: absolute;
+    left: 120px;
+    top: 60px;
+}
+
+#dm_offset{
+    position: absolute;
+    left: 120px;
+    top: 90px;
+}
+
+#dm_subdivl, #dm_microlevels{
+    position: absolute;
+    left: 120px;
+    top: 0px;
+}
+
+#dm_normalsmooth{
+    position: absolute;
+    left: 200px;
+    top: 50px;
+}
+
+#dm_normalsplit{
+    position: absolute;
+    left: 200px;
+    top: 70px;
+}
+
+#dm_sharpboundary{
+    position: absolute;
+    left: 200px;
+    top: 90px;
+}
+
+#dm_normalsmooth_label{
+    position: absolute;
+    left: 220px;
+    top: 50px;
+    width: 100px;
+}
+#dm_normalsplit_label{
+    position: absolute;
+    left: 220px;
+    top: 70px;
+    width: 100px;
+}
+
+#dm_sharpboundary_label{
+    position: absolute;
+    left: 220px;
+    top: 90px;
+    width: 100px;
+}
 
 .imagemap{
     display:none;

@@ -32,7 +32,7 @@
                 <select id="previewsize">
                     <option value="100">small</option>
                     <option value="140">medium</option>
-                    <option value="200">extra large</option>
+                    <option value="200">large</option>
                 </select>
                 <select id="previewtime">
                     <option value="1">1 second</option>
@@ -385,53 +385,42 @@
 				<p class="header2">Thin film coating</p>
                 <input type="checkbox" id="use_thin_film_coating"><label for="use_thin_film_coating">Enable thin film coating</label>
 				<div class="collapse_check">
-                    
                     <div class="panelcontent">
-                    
-                    <div class="parameter_interface">
-					<label for="film" class="parameter_label">Film thickness</label>
-					<input type='text' id="film" size="6" class="parameter_field">
-					
-                    <div class="texture_area">
-                    <label for="film_texturetype" class="tex_selector">Texture</label>
-					<select id="film_texturetype" class="tex_dropdown">
-						<option value="none">None</option>
-						<option value="sketchup">Sketchup Texture</option>
-						<option value="imagemap">Image Map</option>
-					</select>
-                    
-					<span class="imagemap">
-                        <div id="kd_imgmapname" class="tex_path">no image selected</div>
-						<input type="button" id="film_browse_map" value="load image file" class="tex_loadbutton">
-					</span>
-                    </div>
-                    </div>
-                    
-                    
-					<div class="parameter_interface">
-					<label for="filmindex" class="parameter_label">Film IOR</label>
-					<input type='text' id="filmindex" size="6" class="parameter_field">
-                        
-                    <div class="texture_area">
-					<label for="filmindex_texturetype" class="tex_selector">Texture</label>
-					<select id="filmindex_texturetype" class="tex_dropdown">
-						<option value="none">None</option>
-						<option value="sketchup">Sketchup Texture</option>
-						<option value="imagemap">Image Map</option>
-					</select>
-                    
-					<span class="imagemap">
-                        <div id="kd_imgmapname" class="tex_path">no image selected</div>
-						<input type="button" id="filmindex_browse_map" value="load image file" class="tex_loadbutton">
-					</span>
-                    </div>
-                    </div>
-                    
-                    </div>
-				</div>
-			</div>
-            
-            
+                        <div class="parameter_interface">
+                            <label for="film" class="parameter_label">Film thickness</label>
+                            <input type='text' id="film" size="6" class="parameter_field">
+                            <div class="texture_area">
+                                <label for="film_texturetype" class="tex_selector">Texture</label>
+                                <select id="film_texturetype" class="tex_dropdown">
+                                    <option value="none">None</option>
+                                    <option value="sketchup">Sketchup Texture</option>
+                                    <option value="imagemap">Image Map</option>
+                                </select>
+                                <span class="imagemap">
+                                    <div id="kd_imgmapname" class="tex_path">no image selected</div>
+                                    <input type="button" id="film_browse_map" value="load image file" class="tex_loadbutton">
+                                </span>
+                            </div> <!-- end texture area -->
+                        </div> <!-- end parameter interface -->
+                        <div class="parameter_interface">
+                            <label for="filmindex" class="parameter_label">Film IOR</label>
+                            <input type='text' id="filmindex" size="6" class="parameter_field">
+                            <div class="texture_area">
+                                <label for="filmindex_texturetype" class="tex_selector">Texture</label>
+                                <select id="filmindex_texturetype" class="tex_dropdown">
+                                    <option value="none">None</option>
+                                    <option value="sketchup">Sketchup Texture</option>
+                                    <option value="imagemap">Image Map</option>
+                                </select>
+                                <span class="imagemap">
+                                    <div id="kd_imgmapname" class="tex_path">no image selected</div>
+                                    <input type="button" id="filmindex_browse_map" value="load image file" class="tex_loadbutton">
+                                </span>
+                            </div>
+                        </div><!-- end parameter interface -->
+                    </div> <!-- end panel content -->
+				</div> <!-- end collapse_check -->
+			</div> <!-- end thin film coating -->
             
 			<div id="dispersive_refraction"class="glass roughglass">
 				<p class="header2">Dispersive refraction</p>
@@ -452,6 +441,7 @@
 					</span>
 				</div>
 			</div>
+            
 			<div id="energy_conservation" class="mattetranslucent">
 				<p class="header2">Conserving energy</p>
 				<label for="energyconserving">Enable/Disable</label>
@@ -464,55 +454,63 @@
                     <div class="parameter_interface">
                         <label for="bumpmap" class="parameter_label">Scale (m)</label>
                         <input type='text' id="bumpmap" size="6" class="parameter_field">
-                            
                             <div class="texture_area">
-                            <label for="bump_texturetype" class="tex_selector">Texture</label>
-                            <select id="bump_texturetype" class="tex_dropdown">
-                                <option value="none">None</option>
-                                <option value="sketchup">Sketchup Texture</option>
-                                <option value ="imagemap">Image Map</option>
-                            </select>
-                            <span class="imagemap">
-                                <div id="bump_imgmapname" class="tex_path">&nbsp;</div>
-                                <input type="button" id="bump_browse_map" value="load image file" class="tex_loadbutton">
-                            </span>
+                                <label for="bump_texturetype" class="tex_selector">Texture</label>
+                                <select id="bump_texturetype" class="tex_dropdown">
+                                    <option value="none">None</option>
+                                    <option value="sketchup">Sketchup Texture</option>
+                                    <option value ="imagemap">Image Map</option>
+                                </select>
+                                <span class="imagemap">
+                                    <div id="bump_imgmapname" class="tex_path">&nbsp;</div>
+                                    <input type="button" id="bump_browse_map" value="load image file" class="tex_loadbutton">
+                                </span>
                             </div>
-                            
                     </div><!-- end parameter interface -->
                 </div><!-- end panelcontent -->
 			</div> <!-- END Bump -->
             
-			<div id="displacement" class="matte mattetranslucent mix glossy metal mirror shinymetal glossytranslucent roughglass velvet glass glass2 carpaint ">
+			<div id="displacement" class="matte mattetranslucent mix glossy metal mirror shinymetal glossytranslucent roughglass velvet glass glass2 carpaint">
 				<p class="header2">Displacement Map</p>
-				<label for="use_displacement">Enable/Disable</label>
-				<input type="checkbox" id="use_displacement">
-				<div class="collapse_check">
-					<label for="dm_scheme">Subdivision Scheme</label>
-					<select id="dm_scheme">
-						<option value="microdisplacement">Microdisplacement</option>
-						<option value="loop">Subdivision loop</option>
-					</select>
-					<br>
-					<label for="dm_normalsmooth">Normal Smooth</label>
-					<input type="checkbox" id="dm_normalsmooth"><br>
-					<label for="dm_subdivl">Subdiv levels</label>
-					<input type='text' id="dm_subdivl" size="6"><br>
-					<label for="dm_scale">DM Scale</label>
-					<input type='text' id="dm_scale" size="6"> 
-					<label for="dm_offset">DM Offset</label>
-					<input type='text' id="dm_offset" size="6"><br>             
-					<label for="dm_texturetype">Texture</label>
-					<select id="dm_texturetype">
-						<option value="none">None</option>
-						<option value="sketchup">Sketchup Texture</option>
-						<option value="imagemap">Image Map</option>
-					</select>
-					<span class="imagemap">
-                        <div id="kd_imgmapname" class="imgmapname">no image selected</div>
-						<input type="button" id="dm_browse_map" value="load image file">
-					</span>
-					<input type="hidden" id="dispmap" value="1">
-				</div>
+                <div class="panelcontent">
+				<input type="checkbox" id="use_displacement"><label for="use_displacement">Enable displacement</label>
+                <div class="collapse_check">
+                    <div class="parameter_interface">
+                        <label for="dm_scheme" class="parameter_label">Type</label>
+                        <select id="dm_scheme" class="parameter_field_dm">
+                            <option value="loop">Subdivision loop</option>
+                            <option value="microdisplacement">Microdisplacement</option>
+                        </select>
+                        <label for="dm_scale" id="dm_scale_label">Scale (m)</label>
+                        <input type='text' id="dm_scale" size="6">
+                        <label for="dm_offset" id="dm_offset_label">Offset (m)</label>
+                        <input type='text' id="dm_offset" size="6"><br>
+                        <div class="texture_area_swatchfield">
+                            <label for="dm_texturetype" class="tex_selector">Texture</label>
+                            <select id="dm_texturetype" class="tex_dropdown">
+                                <option value="none">None</option>
+                                <option value="sketchup">Sketchup Texture</option>
+                                <option value="imagemap">Image Map</option>
+                            </select>
+                            <span class="imagemap">
+                                <div id="dm_imgmapname" class="tex_path">no image selected</div>
+                                <input type="button" id="dm_browse_map" value="load image file" class="tex_loadbutton">
+                            </span>
+                        </div>
+                        <div id="loop">
+                            <input type="checkbox" id="dm_normalsmooth"><label for="dm_normalsmooth" id="dm_normalsmooth_label">Normal Smooth</label>
+                            <input type="checkbox" id="dm_normalsplit"><label for="dm_normalsplit" id="dm_normalsplit_label">Normal Split</label>
+                            <input type="checkbox" id="dm_sharpboundary"><label for="dm_sharpboundary" id="dm_sharpboundary_label">Sharp Boundary</label>
+                            <label for="dm_subdivl" id="dm_subdiv_label">Subdivision levels</label>
+                            <input type='text' id="dm_subdivl" size="6"><br>
+                        </div>
+                        <div id="microdisplacement">
+                            <label for="dm_microlevels" id="dm_microlevels_label">Divisions</label>
+                            <input type='text' id="dm_microlevels" size="6"><br>
+                        </div>
+                    </div> <!-- parameter interface -->
+                </div> <!-- collapse check -->
+				</div> <!-- panel content -->
 			</div> <!-- END displacement map -->
 
 			<div class="light">
