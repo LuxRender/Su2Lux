@@ -58,21 +58,16 @@ class LuxrenderMaterialEditor
 					if (v.to_s.downcase == "false")
 						v = false
 					end
-					lux_material.send(method_name, v)
+					lux_material.send(method_name, v) # updates values in material
 					case
 						when (k.match(/^kd_.$/) and !material.texture) # changing diffuse color, updating SketchUp material colour accordingly
+                            puts "updating color"
                             # puts "lux_material.color: ", lux_material.color # debugging
-							red = lux_material['kd_R'].to_f * 255.0
-                            green = lux_material['kd_G'].to_f * 255.0
-                            blue = lux_material['kd_B'].to_f * 255.0
-                            # puts red, green, blue
-                            convertedcolor = Sketchup::Color.new(red.to_i, green.to_i, blue.to_i)
-                            puts convertedcolor
-                            material.color = convertedcolor
-                            @lrs.diffuse_swatch[0]
-                            @lrs.diffuse_swatch[1]
-                            @lrs.diffuse_swatch[2]
-                            update_swatches()
+							red = (lux_material['kd_R'].to_f * 255.0).to_i
+                            green = (lux_material['kd_G'].to_f * 255.0).to_i
+                            blue = (lux_material['kd_B'].to_f * 255.0).to_i
+                            material.color = Sketchup::Color.new(red, green, blue)
+                            #update_swatches()
 					end
 				end
                 if (v == "imagemap")

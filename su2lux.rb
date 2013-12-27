@@ -805,6 +805,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 	end
 	
 	def onMaterialChange(materials, material)
+        puts "observer catching SketchUp material change"
 		material_editor = SU2LUX.get_editor("material")
         if (material_editor && material_editor.materials_skp_lux.include?(material))
             # test if material name exists; if not, follow name_changed logic
@@ -824,18 +825,24 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
                 material_editor.matname_changed = false
                 material_editor.set_material_lists()
                 material_editor.set_current(material_editor.current.name)
-            
-			## deal with other material changes
-            else 
-                puts "onMaterialChange triggered by changes in SU2LUX material editor"
+            else ## deal with other material changes
+                puts "onMaterialChange triggered SU2LUX material editor or SketchUp material editor"
                 luxmaterial = material_editor.materials_skp_lux[material]
-                      
-                # update material diffuse color as SketchUp material color may have changed
-                luxmaterial.color = material.color
-                colorarray = [luxmaterial.color["red"],luxmaterial.color["green"],luxmaterial.color["blue"]]
-                luxmaterial.kt_R = colorarray[0]
-                luxmaterial.kt_G = colorarray[1]
-                luxmaterial.kt_B = colorarray[2]
+                    
+                # if color has changed significantly (>1/255), update luxmat colors
+                skpR = material.color.red
+                skpG = material.color.green
+                skpB = material.color.blue
+                luxR = 255.0 * luxmaterial.kd_R.to_f
+                luxG = 255.0 * luxmaterial.kd_G.to_f
+                luxB = 255.0 * luxmaterial.kd_B.to_f
+                puts skpR, skpG, skpB, luxR, luxG, luxB
+                updateswatches = false
+                if ((skpR-luxR).abs > 1 || (skpG-luxG).abs > 1 || (skpB-luxB).abs > 1)
+                    luxmaterial.color = material.color
+                    updateswatches = true
+                    colorarray=[skpR/255.0,skpG/255.0,skpB/255.0]
+                end
 
                 if material.texture
                     puts "material has a texture"
@@ -858,8 +865,10 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
                       material_editor.updateSettingValue("kd_imagemap_Sketchup_filename")
                       material_editor.updateSettingValue("kd_texturetype")
                       material_editor.updateSettingValue("use_diffuse_texture")
-                      material_editor.material_editor_dialog.execute_script("update_RGB('#kt_R','#kt_G','#kt_B','#{colorarray[0]}','#{colorarray[1]}','#{colorarray[2]}')")
-                      material_editor.material_editor_dialog.execute_script("update_RGB('#kd_R','#kd_G','#kd_B','#{colorarray[0]}','#{colorarray[1]}','#{colorarray[2]}')")
+                      if (updateswatches == true)
+                        material_editor.material_editor_dialog.execute_script("update_RGB('#kt_R','#kt_G','#kt_B','#{colorarray[0]}','#{colorarray[1]}','#{colorarray[2]}')")
+                        material_editor.material_editor_dialog.execute_script("update_RGB('#kd_R','#kd_G','#kd_B','#{colorarray[0]}','#{colorarray[1]}','#{colorarray[2]}')")
+                      end
                       material_editor.update_swatches()
                 else
                       puts "modified material is not current"

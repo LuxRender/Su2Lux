@@ -28,7 +28,6 @@ class LuxrenderMaterial
 	{
 		'type' => "glossy",
 		'kd_imagemap_Sketchup_filename' => '',
-        'SKPcolor' => "Color(164, 211, 108, 255)",
         'texturechannels' => ["kd", "ks", "ka", "mx", "u_exponent", "v_exponent", "uroughness", "vroughness", "ka_d", "IOR_index", "kr", "kt", "cauchyb", "film", "filmindex", "bump", "dm"],
         
 		'kd_R' => 0.64,
