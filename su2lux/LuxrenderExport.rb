@@ -661,17 +661,19 @@ class LuxrenderExport
 		sun_direction = Sketchup.active_model.shadow_info['SunDirection']
 		out.puts "TransformBegin"
 		case @lrs.environment_light_type
+            when 'sunsky'
+                out.puts "\tLightGroup \"#{@lrs.environment_sky_lightgroup}\""
 			when 'infinite'
 				if ( ! @lrs.environment_infinite_mapname.strip.empty?)
 					out.puts "\tRotate #{@lrs.environment_infinite_rotatex} 1 0 0" 
 					out.puts "\tRotate #{@lrs.environment_infinite_rotatey} 0 1 0"
 					out.puts "\tRotate #{@lrs.environment_infinite_rotatez} 0 0 1"
 				end
+				out.puts "\tLightGroup \"#{@lrs.environment_infinite_lightgroup}\""
 		end
 		out.puts "AttributeBegin"
 		case @lrs.environment_light_type
 			when 'sunsky'
-				out.puts "\tLightGroup \"#{@lrs.environment_sky_lightgroup}\""
 				out.puts "\tLightSource \"sky\""
 				out.puts "\t\"float gain\" [#{"%.6f" %(@lrs.environment_sky_gain)}]"
 				out.puts "\t\"float turbidity\" [#{"%.6f" %(@lrs.environment_sky_turbidity)}]"
@@ -687,7 +689,6 @@ class LuxrenderExport
 				out.puts "\t\"vector sundir\" [#{"%.6f" %(sun_direction.x)} #{"%.6f" %(sun_direction.y)} #{"%.6f" %(sun_direction.z)}]"
 				out.puts "\tPortalInstance \"Portal_Shape\"" if @has_portals == true
 			when 'infinite'
-				out.puts "\tLightGroup \"#{@lrs.environment_infinite_lightgroup}\""
 				out.puts "\tLightSource \"infinitesample\""
 				out.puts "\t\"float gain\" [#{"%.6f" %(@lrs.environment_infinite_gain)}]"
 				if ( ! @lrs.environment_infinite_mapname.strip.empty?)
@@ -924,6 +925,9 @@ class LuxrenderExport
         luxrender_name=luxrender_mat.name
 		
         if is_instance.empty?
+            if (luxrender_mat.type == "light") # lightgroup declaration goes before attributebegin
+                out.puts "LightGroup \""+luxrender_mat.name+"\""
+            end
             out.puts 'AttributeBegin'
             output_material(mat, out,luxrender_mat)
         else
@@ -967,6 +971,9 @@ class LuxrenderExport
         else
             out.puts 'ObjectEnd'
             is_instance.each { | i_trans |
+                if (luxrender_mat.type == "light") # lightgroup declaration goes before attributebegin
+                    out.puts "LightGroup \""+luxrender_mat.name+"\""
+                end
                 out.puts "AttributeBegin #instance_#{@instance_name}"
                 m=i_trans.to_a
                 out.print "Transform [ #{m[0]} #{m[1]} #{m[2]} #{m[3]} #{m[4]} #{m[5]} #{m[6]} #{m[7]} #{m[8]} #{m[9]} #{m[10]} #{m[11]} #{m[12]*@scale} #{m[13]*@scale} #{m[14]*@scale} #{m[15]} ] \n"
@@ -1205,7 +1212,7 @@ class LuxrenderExport
         puts "running output_material"
         case luxrender_mat.type
         when "light"
-            out.puts "LightGroup \""+luxrender_mat.name+"\""
+            #out.puts "LightGroup \""+luxrender_mat.name+"\""
             out.puts "AreaLightSource \"area\" \"texture L\" [\"#{luxrender_mat.name}:light:L\"]"
             out.puts "\"float power\" [#{"%.6f" %(luxrender_mat.light_power)}]"
             out.puts "\"float efficacy\" [#{"%.6f" %(luxrender_mat.light_efficacy)}]"
