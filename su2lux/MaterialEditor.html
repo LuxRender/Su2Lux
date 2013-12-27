@@ -56,8 +56,9 @@
 				<option value="shinymetal">Shiny Metal</option>
 				<option value="mattetranslucent">Matte Translucent</option>
 				<option value="glossytranslucent">Glossy Translucent</option>
-            <option value="carpaint">Carpaint</option>
-            <option value="velvet">Velvet</option>
+                <option value="carpaint">Carpaint</option>
+                <option value="cloth">Cloth</option>
+                <option value="velvet">Velvet</option>
 				<option value="light">Light</option>
 				<option value="portal">Portal</option>
 				<option value="mix">Mix</option>
@@ -94,6 +95,153 @@
                     </div>
                 </div> <!-- END panelcontent -->
 			</div> <!-- END diffuse -->
+            
+            <div id="cloth" class="cloth">
+                <p class="header2">Cloth</p>
+                <div class="panelcontent">
+                    <div class="parameter_interface">
+                        <div id="clothtype">
+                        <label for="cl_type">Cloth type</label>
+                        <select id="cl_type">
+                            <option value="cotton_twill">Cotton Twill</option>
+                            <option value="denim">Denim</option>
+                            <option value="polyester_lining_cloth">Polyester Lining Cloth</option>
+                            <option value="silk_charmeuse">Silk, Charmeuse</option>
+                            <option value="silk_shantung">Silk, Shantung</option>
+                            <option value="wool_gabardine">Wool, Gabardine</option>
+                        </select>
+                        </div>
+                        <div id="clothrepeatx">
+                        <label for="cl_repeatu" class="parameter_label">Threads per meter, x</label>
+                        <input type='text' id="cl_repeatu" size="6" class="parameter_field_cloth">
+                        </div>
+                        <div id="clothrepeaty">
+                        <label for="cl_repeatv" class="parameter_label">Threads per meter, y</label>
+                        <input type='text' id="cl_repeatv" size="6" class="parameter_field_cloth">
+                        </div>
+                    </div>
+                    <br>
+                    Warp diffuse
+                    <br>
+                    <div class="parameter_interface">
+                        <table id="swatch_cloth_cl1kd_R">
+                        <tr><td id="cl1kd_swatch" class="swatch" width=64 height=64></td></tr>
+                        </table>
+                        <label for="cl1kd_R" class="kdr">Red</label><input type='text' id="cl1kd_R" size="6" class="kdrvalue">
+                        <label for="cl1kd_G" class="kdg">Green</label><input type='text' id="cl1kd_G" size="6" class="kdgvalue">
+                        <label for="cl1kd_B" class="kdb">Blue</label><input type='text' id="cl1kd_B" size="6" class="kdbvalue">
+                        
+                        <div class="texture_area_swatchfield">
+                        <label for="cl1kd_texturetype" class="tex_selector">Texture</label>
+                        <select id="cl1kd_texturetype" class="tex_dropdown" name="cl1kd">
+                            <option value="none">None</option>
+                            <option value="sketchup">Sketchup Texture</option>
+                            <option value="imagemap">Image Map</option>
+                        </select>
+                        <span class="sketchup">
+                            <div class="colorizesection"><input type="checkbox" class="cl1kd_imagemap_colorize" name="cl1kd_imagemap_colorize">
+                            <label for="multibounce">Colorize</label></div>
+                        </span>
+                        <span class="imagemap">
+                            <div id="cl1kd_imgmapname" class="tex_path">&nbsp;</div>
+                            <input type="button" id="cl1kd_browse_map" value="load" class="tex_loadbutton">
+                            <div class="colorizesection"><input type="checkbox" class="cl1kd_imagemap_colorize" name="cl1kd_imagemap_colorize">
+                            <label for="multibounce">Colorize</label></div>
+                        </span>
+                        </div>
+                    </div>
+                    Warp specular reflection
+                    <br>
+                    <div class="parameter_interface">
+                        <table id="swatch_cloth_cl1kd_S">
+                        <tr><td id="cl1ks_swatch" class="swatch" width=64 height=64></td></tr>
+                        </table>
+                        <label for="cl1ks_R" class="kdr">Red</label><input type='text' id="cl1ks_R" size="6" class="kdrvalue">
+                        <label for="cl1ks_G" class="kdg">Green</label><input type='text' id="cl1ks_G" size="6" class="kdgvalue">
+                        <label for="cl1ks_B" class="kdb">Blue</label><input type='text' id="cl1ks_B" size="6" class="kdbvalue">
+                        
+                        <div class="texture_area_swatchfield">
+                        <label for="cl1ks_texturetype" class="tex_selector">Texture</label>
+                        <select id="cl1ks_texturetype" class="tex_dropdown" name="cl1ks">
+                            <option value="none">None</option>
+                            <option value="sketchup">Sketchup Texture</option>
+                            <option value="imagemap">Image Map</option>
+                        </select>
+                        <span class="sketchup">
+                            <div class="colorizesection"><input type="checkbox" class="cl1ks_imagemap_colorize" name="cl1ks_imagemap_colorize">
+                            <label for="multibounce">Colorize</label></div>
+                        </span>
+                        <span class="imagemap">
+                            <div id="cl1ks_imgmapname" class="tex_path">&nbsp;</div>
+                            <input type="button" id="cl1ks_browse_map" value="load" class="tex_loadbutton">
+                            <div class="colorizesection"><input type="checkbox" class="cl1ks_imagemap_colorize" name="cl1ks_imagemap_colorize">
+                            <label for="multibounce">Colorize</label></div>
+                        </span>
+                        </div>
+                    </div>
+                    
+                    <br>
+                    Weft diffuse
+                    <br>
+                    <div class="parameter_interface">
+                        <table id="swatch_cloth_cl2kd_R">
+                        <tr><td id="cl2kd_swatch" class="swatch" width=64 height=64></td></tr>
+                        </table>
+                        <label for="cl2kd_R" class="kdr">Red</label><input type='text' id="cl2kd_R" size="6" class="kdrvalue">
+                        <label for="cl2kd_G" class="kdg">Green</label><input type='text' id="cl2kd_G" size="6" class="kdgvalue">
+                        <label for="cl2kd_B" class="kdb">Blue</label><input type='text' id="cl2kd_B" size="6" class="kdbvalue">
+                        
+                        <div class="texture_area_swatchfield">
+                        <label for="cl2kd_texturetype" class="tex_selector">Texture</label>
+                        <select id="cl2kd_texturetype" class="tex_dropdown" name="cl2kd">
+                            <option value="none">None</option>
+                            <option value="sketchup">Sketchup Texture</option>
+                            <option value="imagemap">Image Map</option>
+                        </select>
+                        <span class="sketchup">
+                            <div class="colorizesection"><input type="checkbox" class="cl2kd_imagemap_colorize" name="cl2kd_imagemap_colorize">
+                            <label for="multibounce">Colorize</label></div>
+                        </span>
+                        <span class="imagemap">
+                            <div id="cl2kd_imgmapname" class="tex_path">&nbsp;</div>
+                            <input type="button" id="cl2kd_browse_map" value="load" class="tex_loadbutton">
+                            <div class="colorizesection"><input type="checkbox" class="cl2kd_imagemap_colorize" name="cl2kd_imagemap_colorize">
+                            <label for="multibounce">Colorize</label></div>
+                        </span>
+                        </div>
+                    </div>
+                    Weft specular reflection
+                    <br>
+                    <div class="parameter_interface">
+                        <table id="swatch_cloth_cl2kd_S">
+                        <tr><td id="cl2ks_swatch" class="swatch" width=64 height=64></td></tr>
+                        </table>
+                        <label for="cl2ks_R" class="kdr">Red</label><input type='text' id="cl2ks_R" size="6" class="kdrvalue">
+                        <label for="cl2ks_G" class="kdg">Green</label><input type='text' id="cl2ks_G" size="6" class="kdgvalue">
+                        <label for="cl2ks_B" class="kdb">Blue</label><input type='text' id="cl2ks_B" size="6" class="kdbvalue">
+                        
+                        <div class="texture_area_swatchfield">
+                        <label for="cl2ks_texturetype" class="tex_selector">Texture</label>
+                        <select id="cl2ks_texturetype" class="tex_dropdown" name="cl2ks">
+                            <option value="none">None</option>
+                            <option value="sketchup">Sketchup Texture</option>
+                            <option value="imagemap">Image Map</option>
+                        </select>
+                        <span class="sketchup">
+                            <div class="colorizesection"><input type="checkbox" class="cl2ks_imagemap_colorize" name="cl2ks_imagemap_colorize">
+                            <label for="multibounce">Colorize</label></div>
+                        </span>
+                        <span class="imagemap">
+                            <div id="cl2ks_imgmapname" class="tex_path">&nbsp;</div>
+                            <input type="button" id="cl2ks_browse_map" value="load" class="tex_loadbutton">
+                            <div class="colorizesection"><input type="checkbox" class="cl2ks_imagemap_colorize" name="cl2ks_imagemap_colorize">
+                            <label for="multibounce">Colorize</label></div>
+                        </span>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div><!-- end cloth -->
 
 			<div id="specular" class="glossy shinymetal glossytranslucent">
 				<p class="header2">Specular Reflections</p>
@@ -147,7 +295,6 @@
             <div id="mixmaterials" class="mix">
                 <p class="header2">Mix</p>
                 <div class="panelcontent">
-                    
                     <div class="texture_area_swatchfield">
                         <label for="mx_texturetype" class="tex_selector">Mix type</label>
                         <select id="mx_texturetype" class="tex_dropdown">
@@ -155,7 +302,6 @@
                             <option value="sketchup">SketchUp texture</option>
                             <option value="imagemap">Image Map</option>
                         </select>
-                        
                         <span class="none">
                             <label for="mix_uniform" class="mix_uniform_label">Material 1 percentage</label>
                             <input type='text' id="mix_uniform" class="mix_uniform_field" size="4">
@@ -168,7 +314,6 @@
                             <input type="button" id="mx_browse_map" class="tex_loadbutton" value="Load image">
                         </span>
                     </div>
-                    
                     <label for="material_list1" class="mixmat1">Material 1</label>
                     <select id="material_list1" class="mixmatlist1">
                         <option value="bogus">not initialized</option>
@@ -177,7 +322,6 @@
                     <select id="material_list2" class="mixmatlist2">
                         <option value="bogus">not initialized</option>
                     </select><br />
-                    
                 </div>
 			</div>
 			<!-- mix ends -->
@@ -448,7 +592,7 @@
 				<input type="checkbox" id="energyconserving">
 			</div> <!-- END asperity -->
             
-			<div id="bump" class="matte glossy glass roughglass metal mirror shinymetal mattetranslucent glossytranslucent velvet ">
+			<div id="bump" class="matte glossy glass roughglass metal mirror shinymetal mattetranslucent glossytranslucent velvet cloth">
 				<p class="header2">Bump</p>
 				<div class="panelcontent">
                     <div class="parameter_interface">
@@ -470,7 +614,7 @@
                 </div><!-- end panelcontent -->
 			</div> <!-- END Bump -->
             
-			<div id="displacement" class="matte mattetranslucent mix glossy metal mirror shinymetal glossytranslucent roughglass velvet glass glass2 carpaint">
+			<div id="displacement" class="matte mattetranslucent mix glossy metal mirror shinymetal glossytranslucent roughglass velvet glass glass2 carpaint cloth">
 				<p class="header2">Displacement Map</p>
                 <div class="panelcontent">
 				<input type="checkbox" id="use_displacement"><label for="use_displacement">Enable displacement</label>

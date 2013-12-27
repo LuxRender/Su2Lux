@@ -67,7 +67,9 @@ class LuxrenderMaterialEditor
                             green = (lux_material['kd_G'].to_f * 255.0).to_i
                             blue = (lux_material['kd_B'].to_f * 255.0).to_i
                             material.color = Sketchup::Color.new(red, green, blue)
-                            #update_swatches()
+                        when (k.match(/_R/) || k.match (/_G/) || k.match (/_B/))
+                            puts "some other color channel"
+                            update_swatches()
 					end
 				end
                 if (v == "imagemap")
@@ -192,11 +194,26 @@ class LuxrenderMaterialEditor
                     @current.kt_R = rvalue
                     @current.kt_G = gvalue
                     @current.kt_B = bvalue
+                when "cl1kd_swatch"
+                    @current.cl1kd_R = rvalue
+                    @current.cl1kd_G = gvalue
+                    @current.cl1kd_B = bvalue
+                when "cl1ks_swatch"
+                    @current.cl1ks_R = rvalue
+                    @current.cl1ks_G = gvalue
+                    @current.cl1ks_B = bvalue
+                when "cl2kd_swatch"
+                    @current.cl2kd_R = rvalue
+                    @current.cl2kd_G = gvalue
+                    @current.cl2kd_B = bvalue
+                when "cl2ks_swatch"
+                    @current.cl2ks_R = rvalue
+                    @current.cl2ks_G = gvalue
+                    @current.cl2ks_B = bvalue     
             end
             updateSettingValue(@lrs.send(colorswatch)[0])
             updateSettingValue(@lrs.send(colorswatch)[1])
             updateSettingValue(@lrs.send(colorswatch)[2])
-            
             update_swatches()
         }
         

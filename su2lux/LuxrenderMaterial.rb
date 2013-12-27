@@ -28,7 +28,7 @@ class LuxrenderMaterial
 	{
 		'type' => "glossy",
 		'kd_imagemap_Sketchup_filename' => '',
-        'texturechannels' => ["kd", "ks", "ka", "mx", "u_exponent", "v_exponent", "uroughness", "vroughness", "ka_d", "IOR_index", "kr", "kt", "cauchyb", "film", "filmindex", "bump", "dm"],
+        'texturechannels' => ["kd", "ks", "ka", "mx", "u_exponent", "v_exponent", "uroughness", "vroughness", "cl1kd", "cl1ks", "cl2kd", "cl2ks", "ka_d", "IOR_index", "kr", "kt", "cauchyb", "film", "filmindex", "bump", "dm"],
         
 		'kd_R' => 0.64,
 		'kd_G' => 0.64,
@@ -49,6 +49,22 @@ class LuxrenderMaterial
 		'kt_R' => 1.0,
 		'kt_G' => 1.0,
 		'kt_B' => 1.0,
+        
+        'cl1kd_R' => 0.8,
+        'cl1kd_G' => 0.0,
+        'cl1kd_B' => 0.0,
+        
+        'cl1ks_R' => 0.1,
+        'cl1ks_G' => 0.1,
+        'cl1ks_B' => 0.1,
+        
+        'cl2kd_R' => 0.8,
+        'cl2kd_G' => 0.8,
+        'cl2kd_B' => 0.0,
+        
+        'cl2ks_R' => 0.1,
+        'cl2ks_G' => 0.1,
+        'cl2ks_B' => 0.1,
 
 		'u_exponent' => 50,
 		'v_exponent' => 50,
@@ -58,6 +74,10 @@ class LuxrenderMaterial
 		'mix_uniform' => 50.0,
 		'material_list1' => '',
 		'material_list2' => '',
+        
+        'cl_repeatu' => 80.0,
+        'cl_repeatv' => 80.0,
+        'cl_type' => "cotton_twill",
         
 		'matte_sigma' => 0.0,
 		'ka_d' => 0.0,
@@ -143,6 +163,12 @@ class LuxrenderMaterial
 			"ks_imagemap_filename",
 			"uroughness_imagemap_filename",
 			"vroughness_imagemap_filename",
+            
+			"cl1kd_imagemap_filename",
+			"cl1ks_imagemap_filename",
+			"cl2kd_imagemap_filename",
+			"cl2ks_imagemap_filename",
+            
 			"ka_imagemap_filename",
 			"ka_d_imagemap_filename",
 			"kr_imagemap_filename",
@@ -181,6 +207,12 @@ class LuxrenderMaterial
 		lux_image_texture("", "v_exponent", "imagemap", "float")
 		lux_image_texture("", "uroughness", "imagemap", "float")
 		lux_image_texture("", "vroughness", "imagemap", "float")
+
+		lux_image_texture("", "cl1kd", "imagemap", "color")
+		lux_image_texture("", "cl1ks", "imagemap", "color")
+		lux_image_texture("", "cl2kd", "imagemap", "color")
+		lux_image_texture("", "cl2ks", "imagemap", "color")
+
 		lux_image_texture("", "ka_d", "imagemap", "float")
 		lux_image_texture("", "IOR_index", "imagemap", "float")
 		lux_image_texture("", "kr", "imagemap", "color")
@@ -296,6 +328,27 @@ class LuxrenderMaterial
 	def color_tos
 		specular = "#{"%.6f" %(self.kd_R)} #{"%.6f" %(self.kd_G)} #{"%.6f" %(self.kd_B)}"
 	end
+    
+    def channelcolor_tos(mattype)
+        redstring = mattype+'_R'
+        greenstring = mattype+'_G'
+        bluestring = mattype+'_B'
+        returncolor = "#{"%.6f" %(self.send(redstring))} #{"%.6f" %(self.send(greenstring))} #{"%.6f" %(self.send(bluestring))}"
+    end
+    
+    def cl1kd_tos
+        channelcolor_tos('cl1kd')
+    end
+    def cl1ks_tos
+        channelcolor_tos('cl1ks')
+    end
+    def cl2kd_tos
+        channelcolor_tos('cl2kd')
+    end
+    def cl2ks_tos
+        channelcolor_tos('cl2ks')
+    end
+
 
 	##
 	#

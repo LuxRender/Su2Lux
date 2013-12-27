@@ -1345,6 +1345,12 @@ class LuxrenderExport
 			when "velvet"
             pre, post = self.export_diffuse_component(mat, pre, post)
             pre, post = self.export_sigma(mat, pre, post)
+            when "cloth"
+            pre, post = self.export_cloth_base(mat, pre, post)
+            pre, post = self.export_cloth_channel1(mat, pre, post)
+            pre, post = self.export_cloth_channel2(mat, pre, post)
+            pre, post = self.export_cloth_channel3(mat, pre, post)
+            pre, post = self.export_cloth_channel3(mat, pre, post)
 			when "glossy"
             pre, post = self.export_diffuse_component(mat, pre, post)
             pre, post = self.export_specular_component(mat, pre, post)
@@ -1362,9 +1368,6 @@ class LuxrenderExport
             architectural = mat.use_architectural ? "true" : "false"
             post += "\t" + "\"bool architectural\" [\"#{architectural}\"]" + "\n"
             if ( ! mat.use_architectural)
-                if (mat.use_thin_film_coating)
-                    pre, post = self.export_thin_film(mat, pre, post)
-                end
                 if (mat.use_dispersive_refraction)
                     pre, post = self.export_dispersive_refraction(mat, pre, post)
                 end
@@ -1381,14 +1384,8 @@ class LuxrenderExport
             pre, post = self.export_reflection_component(mat, pre, post)
             pre, post = self.export_specular_component(mat, pre, post)
             pre, post = self.export_exponent(mat, pre, post)
-            if (mat.use_thin_film_coating)
-                pre, post = self.export_thin_film(mat, pre, post)
-            end
 			when "mirror"
             pre, post = self.export_reflection_component(mat, pre, post)
-            if (mat.use_thin_film_coating)
-                pre, post = self.export_thin_film(mat, pre, post)
-			end
             when "mattetranslucent"
             pre, post = self.export_reflection_component(mat, pre, post)
             pre, post = self.export_transmission_component(mat, pre, post)
@@ -1407,6 +1404,9 @@ class LuxrenderExport
 			when "light"
             post += self.export_mesh_light(mat)
 		end
+        if (mat.use_thin_film_coating)
+            pre, post = self.export_thin_film(mat, pre, post)
+        end
 		# if (mat.use_bump)
         pre, post = self.export_bump(mat, pre, post)
 		# end
@@ -1545,6 +1545,65 @@ class LuxrenderExport
 		end
 		return [before + preceding, after + following]
 	end
+    
+    def export_cloth_base(material, before,after)
+		preceding = ""
+		following = ""
+        # add cloth type, u scale, v scale
+        following += "\t" + "\"string presetname\" [\"#{material.cl_type}\"]" + "\n"
+        following += "\t" + "\"float repeat_u\" [#{material.cl_repeatu}]" + "\n"
+        following += "\t" + "\"float repeat_v\" [#{material.cl_repeatv}]" + "\n"
+        
+        return [before + preceding, after + following]
+	end
+    
+    def export_cloth_channel1(material, before,after)
+        preceding = ""
+        following = ""
+        if ( ! material.has_texture?("cl1kd"))
+            following += "\t" + "\"color warp_Kd\" [#{material.channelcolor_tos('cl1kd')}]" + "\n"
+        else
+            preceding, following = self.export_texture(material, "cl1kd", "color", before, after)
+        end
+        return [before + preceding, after + following]
+    end
+    
+    def export_cloth_channel2(material, before,after)
+        preceding = ""
+        following = ""
+        if ( ! material.has_texture?("cl1ks"))
+            following += "\t" + "\"color warp_Ks\" [#{material.channelcolor_tos('cl1ks')}]" + "\n"
+        else
+            preceding, following = self.export_texture(material, "cl1ks", "color", before, after)
+        end
+        return [before + preceding, after + following]
+    end
+
+    def export_cloth_channel3(material, before,after)
+        preceding = ""
+        following = ""
+        
+        if ( ! material.has_texture?("cl2kd"))
+            following += "\t" + "\"color weft_Kd\" [#{material.channelcolor_tos('cl2kd')}]" + "\n"
+        else
+            preceding, following = self.export_texture(material, "cl2kd", "color", before, after)
+        end
+        return [before + preceding, after + following]
+    end
+
+    def export_cloth_channel4(material, before,after)
+        preceding = ""
+        following = ""
+        if ( ! material.has_texture?("cl2kd"))
+            following += "\t" + "\"color weft_Ks\" [#{material.channelcolor_tos('cl2ks')}]" + "\n"
+        else
+            preceding, following = self.export_texture(material, "cl2ks", "color", before, after)
+        end
+        return [before + preceding, after + following]
+    end
+
+
+
 
 	def export_null(material, before, after)
 		preceding = ""
@@ -1762,6 +1821,22 @@ class LuxrenderExport
 			when 'carpaint_name'
 				type_str = 'carpaint_name'
 				type_str2 = 'name'
+                
+            when 'cl1kd'
+                type_str = 'warp_Kd'
+                type_str2 = 'cl1kd_tos'
+            when 'cl1ks'
+                type_str = 'warp_Ks'
+                type_str2 = 'cl1ks_tos'
+            when 'cl2kd'
+                type_str = 'weft_Kd'
+                type_str2 = 'cl2kd_tos'
+            when 'cl2ks'
+                type_str = 'weft_Ks'
+                type_str2 = 'cl2ks_tos'
+                
+                
+                
 			else
 				type_str = type_str2 = mat_type
 		end

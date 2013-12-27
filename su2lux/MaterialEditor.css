@@ -61,6 +61,11 @@ input#get_diffuse_color {
     position: relative;
 }
 
+#cloth{
+    position: relative;
+    height: 520px;
+}
+
 #diffuse {
     position: relative;
 }
@@ -180,7 +185,7 @@ input#get_diffuse_color {
     top: 4px;
 }
 
-#kd_browse_map, #ks_browse_map{
+#kd_browse_map, #ks_browse_map, #cl1kd_browse_map, #cl1ks_browse_map, #cl2kd_browse_map, #cl2ks_browse_map{
     width: 5em;
 }
 
@@ -271,6 +276,12 @@ input#get_diffuse_color {
     top: 0px;
 }
 
+.parameter_field_cloth{
+    position: absolute;
+    left: 140px;
+    top: -3px;
+}
+
 .parameter_interface{
     position: relative;
     height: 82px;
@@ -318,7 +329,7 @@ input#get_diffuse_color {
     position: absolute;
     left: 0px;
     top: 24px;
-    width: 200px;
+    width: 400px;
 }
 
 .tex_loadbutton{
@@ -450,6 +461,24 @@ input#get_diffuse_color {
     left: 220px;
     top: 90px;
     width: 130px;
+}
+
+#clothtype{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+}
+#clothrepeatx{
+    position: absolute;
+    left: 0px;
+    top: 32px;
+    width: 150px;
+}
+#clothrepeaty{
+    position: absolute;
+    left: 0px;
+    top: 64px;
+    width: 150px;
 }
 
 .imagemap{
