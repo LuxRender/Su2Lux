@@ -1514,7 +1514,7 @@ class LuxrenderExport
 			preceding += "\t" + "\"string filtertype\" [\"#{material.kd_imagemap_filtertype}\"]" + "\n"
             
             # color = "#{"%.6f" %(material.color[0])} #{"%.6f" %(material.color[1])} #{"%.6f" %(material.color[2])}"
-			if ((material.send("kd_imagemap_colorize") == true) || (material.color['red'].to_f != 1.0 or material.color['green'].to_f != 1.0 or material.color['blue'].to_f != 1.0))
+			if (material.send("kd_imagemap_colorize") == true)
                 preceding += "Texture \"#{material.name}::Kd.scale\" \"color\" \"scale\" \"texture tex1\" [\"#{material.name}::Kd\"] \"color tex2\" [#{material.color_tos}]" + "\n"
 				following += "\t" + "\"texture Kd\" [\"#{material.name}::Kd.scale\"]" + "\n"
 			else
