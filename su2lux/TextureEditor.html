@@ -7,6 +7,7 @@
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="MaterialEditor.js"></script>
 
+<link href="common.css" type="text/css" rel="stylesheet">
 <link href="MaterialEditor.css" type="text/css" rel="stylesheet">
  
 </head>
@@ -14,69 +15,27 @@
 	<table>
 		<tr>
 			<td>
-				<img src="" id="imagemap_picture" width="300px" height="300px">
+				<img src="" id="imagemap_picture" width="300px">
 			</td>
 			<td>
 				<input type="button" id="imagemap_filename_browse" value="Browse">
 				<input type="text" id="imagemap_filename" size="50">
 				<br>
-				<label for="texturetype">Texture Type</label>
-				<select id="texturetype">
-					<option value="imagemap">Image Map</option>
-				</select>
-				<label for="imagemap_wrap">Wrapping mode</label>
-				<select id="imagemap_wrap">
-					<option value="black">Black</option>
-					<option value="clamp">Clamp</option>
-					<option value="repeat">Repeat</option>
-				</select>
-				<br>
-                <label for="imagemap_channel">Channel</label>
-				<select id="imagemap_channel">
-					<option value="mean">Mean</option>
-                    <option value="red">Red</option>
-                    <option value="green">Green</option>
-                    <option value="blue">Blue</option>
-                    <option value="alpha">Alpha</option>
-                    <option value="colored_mean">Colored-mean</option>
-				</select>
-				<br>
 				<label for="imagemap_gamma">Gamma</label>
 				<input type="text" id="imagemap_gamma" size="10">
-				<label for="imagemap_gain">Gain</label>
-				<input type="text" id="imagemap_gain" size="10">
 				<br>
-				<label for="imagemap_filtertype">Filter</label>
+				<label for="imagemap_filtertype">Interpolation</label>
 				<select id="imagemap_filtertype">
-					<option value="bilinear">Mipmap Bilinear</option>
-					<option value="mipmap_trilinear">Mipmap trilinear</option>
-					<option value="mipmap_ewa">Mipmap EWA</option>
-					<option value="nearest">Nearest</option>
+					<option value="bilinear">smooth</option>
+					<!-- <option value="mipmap_trilinear">Mipmap trilinear</option>
+					<option value="mipmap_ewa">Mipmap EWA</option> -->
+					<option value="nearest">sharp (nearest)</option>
 				</select>
 				<br>
-				<label for="imagemap_mapping">Mapping</label>
-				<select id="imagemap_mapping">
-<option value="spherical">Spherical</option>
-					<option value="uv">UV</option>
-					
-					<option value="cylindrical">Cylindrical</option>
-					<option value="planar">Planar</option>
-				</select>
-				<br>
-				<label for="imagemap_uscale">Scale on U</label>
-				<input type="text" id="imagemap_uscale" size="10">
-				<label for="imagemap_vscale">Scale on V</label>
+				<label for="imagemap_uscale">Tiling X</label>
+				<input type="text" id="imagemap_uscale" size="10"><br>
+				<label for="imagemap_vscale">Tiling Y</label>
 				<input type="text" id="imagemap_vscale" size="10">
-				<br>
-				<label for="imagemap_udelta">Move on U</label>
-				<input type="text" id="imagemap_udelta" size="10">
-				<label for="imagemap_vdelta">Move on V</label>
-				<input type="text" id="imagemap_vdelta" size="10">
-				<br>
-				<label for="imagemap_maxanisotropy">Max Anisotropy</label>
-				<input type="text" id="imagemap_maxanisotropy" size="10">
-				<label for="imagemap_discardmipmaps">Discard mipmaps</label>
-				<input type="text" id="imagemap_discardmipmaps" size="10">
 				<br>
 				<input type="hidden" id="imagemap_uvset" value="1">
 				<br>

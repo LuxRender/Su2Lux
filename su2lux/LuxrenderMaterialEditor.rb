@@ -438,9 +438,6 @@ class LuxrenderMaterialEditor
 		
 		@material_editor_dialog.add_action_callback("texture_editor") {|dialog, params|
             puts ("callback: texture_editor")
-            
-            
-			         
 			lux_material = @current
 			data = params.to_s
 			method_name = data + '_texturetype'

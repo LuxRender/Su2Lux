@@ -1510,6 +1510,8 @@ class LuxrenderExport
 					preceding += "\t" + "\"string filename\" [\"#{imagemapfilepath}\"]" + "\n"
 			end
 			preceding += "\t" + "\"float gamma\" [#{material.kd_imagemap_gamma}]" + "\n"
+            preceding += "\t" + "\"float uscale\" [#{"%.6f" %(material.kd_imagemap_uscale)}]" + "\n"
+            preceding += "\t" + "\"float vscale\" [#{"%.6f" %(material.kd_imagemap_vscale)}]" + "\n"
 			preceding += "\t" + "\"float gain\" [#{material.kd_imagemap_gain}]" + "\n"
 			preceding += "\t" + "\"string filtertype\" [\"#{material.kd_imagemap_filtertype}\"]" + "\n"
             

@@ -140,7 +140,7 @@ class LuxrenderMaterial
 		@@settings[key + "wrap"] = "repeat"
 		@@settings[key + "channel"] = "mean" if (type == "float")
 		@@settings[key + "filename"] = ""
-		@@settings[key + "gamma"] = 1.0
+		@@settings[key + "gamma"] = 2.2
 		@@settings[key + "gain"] = 1.0
 		@@settings[key + "filtertype"] = "bilinear"
 		@@settings[key + "mapping"] = "uv"
