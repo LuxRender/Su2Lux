@@ -78,6 +78,10 @@ input#get_diffuse_color {
     position: relative;
 }
 
+#dispersive_refraction{
+    height: 120px;
+}
+
 #displacement{
     height: 165px;
 }
@@ -284,10 +288,16 @@ input#get_diffuse_color {
     top: 0px;
 }
 
-.parameter_field_dm{
+.parameter_field{
     position: absolute;
-    left: 50px;
+    left: 100px;
     top: 0px;
+}
+
+.parameter_field_dr{
+    position: absolute;
+    left: 120px;
+    top: -3px;
 }
 
 .parameter_field_cloth{
@@ -323,6 +333,12 @@ input#get_diffuse_color {
 .texture_area{
     position: absolute;
     left: 180px;
+    top: 0px;
+}
+
+.texture_area_dr{
+    position: absolute;
+    left: 200px;
     top: 0px;
 }
 

@@ -573,21 +573,25 @@
             
 			<div id="dispersive_refraction"class="glass roughglass">
 				<p class="header2">Dispersive refraction</p>
-				<label for="use_dispersive_refraction">Enable/Disable</label>
 				<input type="checkbox" id="use_dispersive_refraction">
+				<label for="use_dispersive_refraction">Enable dispersive refraction</label>
 				<div class="collapse_check">
-					<label for="cauchyb">Cauchy coefficient</label>
-					<input type='text' id="cauchyb" size="6">
-					<label for="cauchyb_texturetype">Texture</label>
-					<select id="cauchyb_texturetype">
-						<option value="none">None</option>
-						<option value="sketchup">Sketchup Texture</option>
-						<option value="imagemap">Image Map</option>
-					</select>
-					<span class="imagemap">
-                        <div id="kd_imgmapname" class="imgmapname">no image selected</div>
-						<input type="button" id="cauchyb_browse_map" value="load image">
-					</span>
+                    <div class="panelcontent">
+                        <label for="cauchyb" class="parameter_label">Cauchy coefficient</label>
+                        <input type='text' id="cauchyb" size="6" class="parameter_field_dr">
+                        <div class="texture_area_dr">
+                            <label for="cauchyb_texturetype" class="tex_selector">Texture</label>
+                            <select id="cauchyb_texturetype" class="tex_dropdown">
+                                <option value="none">None</option>
+                                <option value="sketchup">Sketchup Texture</option>
+                                <option value="imagemap">Image Map</option>
+                            </select>
+                            <span class="imagemap">
+                                <div id="kd_imgmapname" class="tex_path">&nbsp;</div>
+                                <input type="button" id="cauchyb_browse_map" value="load image" class="tex_loadbutton">
+                            </span>
+                        </div>
+                    </div>
 				</div>
 			</div>
             
