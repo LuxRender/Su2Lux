@@ -441,7 +441,7 @@
                     </select>
                     
                     <span class="imagemap">
-                        <div id="v_exponent_imgmapname" class="tex_path">no image selected</div>
+                        <div id="v_exponent_imgmapname" class="tex_path">&nbsp;</div>
                         <input type="button" id="v_exponent_browse_map" value="load" class="tex_loadbutton">
                     </span>
                     </div>
@@ -451,20 +451,32 @@
 			</div> <!-- END glossiness / exponent -->
             
 			<div id="ior" class="glass roughglass">
-				<p class="header2">IOR</p>
-				<label for="IOR_index">Value</label>
-				<input type='text' id="IOR_index" size="6">
-				<label for="IOR_index_texturetype">Texture</label>
-				<select id="IOR_index_texturetype">
-					<option value="none">None</option>
-					<option value="sketchup">Sketchup Texture</option>
-					<option value="imagemap">Image Map</option>
-				</select>
-				<span class="imagemap">
-                    <div id="IOR_index_imgmapname" class="tex_path">no image selected</div>
-					<input type="button" id="IOR_index_browse_map" value="load image">
-				</span> <!-- END diffuse_texture -->
+				<p class="header2">Index of refraction</p>
+                <div class="panelcontent" id="IOR_interface">
+                    <div class="parameter_interface">
+                        <label for="IOR" class="parameter_label">Value</label>
+                        <input type='text' id="IOR_index" size="6" class="parameter_field">
+                        <div class="texture_area">
+                            <label for="IOR_index_texturetype" class="tex_selector">Texture</label>
+                            <select id="IOR_index_texturetype" class="tex_dropdown">
+                                <option value="none">None</option>
+                                <option value="sketchup">Sketchup Texture</option>
+                                <option value="imagemap">Image Map</option>
+                            </select>
+                            <span class="imagemap">
+                                <div id="IOR_index_imgmapname" class="tex_path">&nbsp;</div>
+                                <input type="button" id="IOR_index_browse_map" value="load image" class="tex_loadbutton">
+                            </span>
+                        </div>
+                    </div>
+                </div> <!-- end panelcontent -->
 			</div> <!-- END ior-->
+            <div id="architectural_glass" class="glass">
+				<input type="checkbox" id="use_architectural">
+				<label for="use_architectural">Architectural (no refraction)</label>
+            </div>
+            
+            
 			<div id="asperity" class="glossy glossytranslucent">
 				<p class="header2">Asperity</p>
 				<label for="multibounce">Enable/Disable</label>
@@ -517,13 +529,6 @@
                     </div> <!--  END panelcontent -->
 				</div>
 			</div> <!-- END absorption> -->
-			<div id="architectural_glass" class="glass">
-				<br>
-				<br>
-				<label for="use_architectural">Architectural</label>
-				<input type="checkbox" id="use_architectural">
-			</div>
-            
             
 			<div id="thin_film_coating" class="glass mirror shinymetal">
 				<p class="header2">Thin film coating</p>
@@ -657,21 +662,28 @@
 				</div> <!-- panel content -->
 			</div> <!-- END displacement map -->
 
-			<div class="light">
-				<label for="light_L">Texture</label>
+    <div id="light" class="light">
+        <p class="header2">Light</p>
+        <div class="panelcontent">
+				<!--<label for="light_L">Texture</label>
 				<select id="light_L">
 					<option value="blackbody">Blackbody</option>
-				</select>
-				<label for="light_temperature">Temperature</label>
-				<input type="text" id="light_temperature" size="6">
+				</select -->
+				<label for="light_temperature" class="parameter_label">Color Temperature (K)</label>
+				<input type="text" id="light_temperature" size="6" class="parameter_field_cloth">
 				<br>
-				<label for="light_power">Power</label>
+				<!-- <label for="light_power">Power</label>
 				<input type="text" id="light_power" size="6">
 				<label for="light_efficacy">Efficacy</label>
-				<input type="text" id="light_efficacy" size="6">
-				<label for="light_gain">Gain</label>
-				<input type="text" id="light_gain" size="6">
-			</div>
+				<input type="text" id="light_efficacy" size="6"> -->
+                <div id="lightgain">
+				<label for="light_gain" class="parameter_label">Gain</label>
+				<input type="text" id="light_gain" size="6" class="parameter_field_cloth">
+                </div>
+        </div>
+    </div>
+    
+    
 		</div> <!-- END material_type -->
 		<br>
 		<br>

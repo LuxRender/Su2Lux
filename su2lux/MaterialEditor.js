@@ -10,7 +10,7 @@ function expand_section(sender_id, section_id, closed_sign, opened_sign) {  // u
 	$(sender_id).next(section_id).slideToggle(300);
 }
 
-function checkbox_expander(id)      // user interface, switches between basic and advanced options (not currently in use)
+function checkbox_expander(id)      // user interface, shows and hides interface fields for current material
 {
 	if ($("#" + id).attr("checked"))
 	{
@@ -71,9 +71,7 @@ function show_load_buttons(textype,filename){
     idname = textype + '_texturetype';
     //alert (textype);
     if ($('#'+idname).val()=="imagemap"){
-        //alert ("running show_load_buttons function");
         $('#'+idname).nextAll(".imagemap").show(); // shows  <span class="imagemap">
-        //$('#mixfield_imagemap').show();
         $('#'+textype+'_imgmapname').text(filename)
     }
 }
@@ -98,7 +96,16 @@ $(document).ready(
 		$(":checkbox").click(
 			function()
 			{
-                if(this.id){
+                if(this.id=="use_architectural"){
+                    //alert ("architectural")
+                    window.location = 'skp:param_generate@' + this.id + '=' + $(this).attr('checked');
+                     if($(this).attr('checked')){
+                        $("#IOR_interface").hide()
+                     }else{
+                        $("#IOR_interface").show()
+                     }
+                }
+                else if(this.id){
                     window.location = 'skp:param_generate@' + this.id + '=' + $(this).attr('checked');
                     checkbox_expander(this.id)
                 }else{ // synchronize colorize checkboxes for "sketchup" and "imagemap" types
@@ -119,11 +126,7 @@ $(document).ready(
         
         $("#material_name").change(
             function() {
-                //alert ($(".mixmattype".value))
                 //alert (this);
-                //if (this.value=="mix"){
-                //    $("#mixmattype").change();
-                //}
                 window.location = 'skp:material_changed@' + this.value;
             }
         )

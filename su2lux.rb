@@ -772,6 +772,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 			material_editor.set_current(material_editor.current.name) # sets name of current material in dropdown, updates swatches
 			material_editor.sendDataFromSketchup
             material_editor.settexturefields(current_mat.name)
+            material_editor.showhideIOR()
 			material_editor.fire_event("#type", "change", "")
 			material_editor.load_preview_image()
 		else

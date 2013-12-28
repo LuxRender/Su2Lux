@@ -253,8 +253,6 @@ class LuxrenderMaterialEditor
                     @material_editor_dialog.execute_script(cmd)
                 end
             end
-            
-            
             @current.send("type=", material_type)
             # update_swatches()
 		}
@@ -507,6 +505,14 @@ class LuxrenderMaterialEditor
 		@material_editor_dialog.execute_script(cmd)
 	end
 	
+    def showhideIOR()
+        if @current.use_architectural == false
+            cmd = '$("#IOR_interface").show()'
+        else
+            cmd = '$("#IOR_interface").hide()'
+        end
+		@material_editor_dialog.execute_script(cmd)
+    end
 	
 	def sanitize_path(original_path)
 		if (ENV['OS'] =~ /windows/i)

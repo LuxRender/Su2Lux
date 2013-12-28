@@ -66,6 +66,14 @@ input#get_diffuse_color {
     height: 520px;
 }
 
+#light{
+    height: 60px;
+}
+
+#mix{
+    height: 60px;
+}
+
 #diffuse {
     position: relative;
 }
@@ -146,13 +154,13 @@ input#get_diffuse_color {
 .mixmat2{
     position: absolute;
     left: 0px;
-    top: 27px;
+    top: 34px;
 }
 
 .mixmatlist2{
     position: absolute;
     left: 80px;
-    top: 27px;
+    top: 34px;
 }
 
 .mixmatlabel{
@@ -236,6 +244,12 @@ input#get_diffuse_color {
 	font-size: 10px;
 }
 
+#lightgain{
+    position: absolute;
+    left: 0px;
+    top: 30px;
+}
+
 #preview {
 	height: 130px;
 }
@@ -284,7 +298,7 @@ input#get_diffuse_color {
 
 .parameter_interface{
     position: relative;
-    height: 82px;
+    height: 80px;
 }
 
 .mix_uniform_label{
@@ -297,7 +311,7 @@ input#get_diffuse_color {
 .mix_uniform_field{
     position: absolute;
     left: 145px;
-    top: 28px;
+    top: 25px;
 }
 
 .texture_area_swatchfield{
