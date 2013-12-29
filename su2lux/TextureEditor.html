@@ -8,45 +8,44 @@
 <script type="text/javascript" src="MaterialEditor.js"></script>
 
 <link href="common.css" type="text/css" rel="stylesheet">
-<link href="MaterialEditor.css" type="text/css" rel="stylesheet">
+<link href="TextureEditor.css" type="text/css" rel="stylesheet">
  
 </head>
 <body>
-	<table>
-		<tr>
-			<td>
-				<img src="" id="imagemap_picture" width="300px">
-			</td>
-			<td>
-				<input type="button" id="imagemap_filename_browse" value="Browse">
-				<input type="text" id="imagemap_filename" size="50">
-				<br>
-				<label for="imagemap_gamma">Gamma</label>
-				<input type="text" id="imagemap_gamma" size="10">
-				<br>
-				<label for="imagemap_filtertype">Interpolation</label>
-				<select id="imagemap_filtertype">
-					<option value="bilinear">smooth</option>
-					<!-- <option value="mipmap_trilinear">Mipmap trilinear</option>
-					<option value="mipmap_ewa">Mipmap EWA</option> -->
-					<option value="nearest">sharp (nearest)</option>
-				</select>
-				<br>
-				<label for="imagemap_uscale">Tiling X</label>
-				<input type="text" id="imagemap_uscale" size="10"><br>
-				<label for="imagemap_vscale">Tiling Y</label>
-				<input type="text" id="imagemap_vscale" size="10">
-				<br>
-				<input type="hidden" id="imagemap_uvset" value="1">
-				<br>
-				<br>
-				<br>
-				<br>
-				<br>
-				<input type="button" id="update_changes" value="Update">
-				<input type="button" id="cancel_changes" value="Cancel">
-			</td>
-		</tr>
-	</table>
+
+<img src="empty_texture.png" id="texture_preview" width="300px">
+
+<div id="texture_interface">
+    <div class="filename_row">
+        <input type="text" id="imagemap_filename" size="40">
+        <input type="button" id="imagemap_filename_browse" value="Browse">
+    </div>
+    <div class="parameter_row">
+        <label for="imagemap_uscale" class="parameter_name">Tiling X</label>
+        <input type="text" id="imagemap_uscale" size="10" class="parameter_field">
+    </div>
+    <div class="parameter_row">
+        <label for="imagemap_vscale" class="parameter_name">Tiling Y</label>
+        <input type="text" id="imagemap_vscale" size="10" class="parameter_field">
+    </div>
+    <div class="parameter_row">
+        <label for="imagemap_gamma" class="parameter_name">Gamma</label>
+        <input type="text" id="imagemap_gamma" size="10" class="parameter_field">
+    </div>
+    <div class="parameter_row">
+        <label for="imagemap_filtertype" class="parameter_name">Interpolation</label>
+        <select id="imagemap_filtertype" class="parameter_field">
+            <option value="bilinear">smooth</option>
+            <option value="nearest">sharp (nearest)</option>
+        </select>
+    </div>
+
+
+</div>
+
+<div id="texture_buttons">
+    <input type="button" id="update_changes" value="OK">
+    <input type="button" id="cancel_changes" value="Cancel">
+</div>
 </body>
 </html>

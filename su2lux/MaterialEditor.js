@@ -175,6 +175,15 @@ $(document).ready(
                 $(this).nextAll("." + this.value).show();
             }
         );
+                  
+        $("#imagemap_filename").change(
+            function()
+               {
+                    //alert(this.value)
+                    $("#texture_preview").attr("src", this.value);
+                    // store path for proper channel
+                }
+        )
  
                   
         $("#dm_scheme").change(

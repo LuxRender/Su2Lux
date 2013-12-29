@@ -21,9 +21,9 @@ class LuxrenderTextureEditor
 
 	
 	def initialize(texture_data, lux_parameter) # lux_parameter is texture type, for example "kd"
-		@texture_editor_dialog = UI::WebDialog.new("LuxRender Texture Editor", true, "LuxrenderTextureEditor", 600, 331, 900, 400, true)
+		@texture_editor_dialog = UI::WebDialog.new("LuxRender Texture Editor", true, "LuxrenderTextureEditor", 600, 322, 900, 400, true)
 		texture_editor_dialog_path = Sketchup.find_support_file("TextureEditor.html", "Plugins/su2lux")
-		@texture_editor_dialog.max_width = 800
+		@texture_editor_dialog.max_width = 600
 		@texture_editor_dialog.set_file(texture_editor_dialog_path)
 
 		@texture_data = texture_data
@@ -60,6 +60,8 @@ class LuxrenderTextureEditor
 			self.show_image(@texture_data[data])
 			
 		} #end action callback open_dialog
+        
+        
 		
 		@texture_editor_dialog.add_action_callback('material_changed') { |dialog, material_name|
 			puts "material_changed triggered"
@@ -98,9 +100,6 @@ class LuxrenderTextureEditor
             
             # update image path text in material editor
             material_editor.update_texture_name(lux_material, @lux_parameter)
-            
-
-            
 			self.close
 		}
 	
@@ -235,7 +234,7 @@ class LuxrenderTextureEditor
 	#
 	##
 	def show_image(path)
-		self.fire_event("#imagemap_picture", "attr", "src=#{path}")
+		self.fire_event("#texture_preview", "attr", "src=#{path}")
 		
 	end
 	
