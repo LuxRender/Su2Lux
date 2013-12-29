@@ -4,15 +4,24 @@ body {
 	background: #444444;
 	color: #eeeeee;
 	margin: 0px;
+    padding: 0px;
+}
+
+.header {
+	padding: 4px 0px 4px 8px;
+	cursor: pointer;
+	position: relative;
+	background-color: #bf8040;/*#c67700; /*#d77f00;*/
+	margin: 0px 0px 1px 0px;
 }
 
 .header2 {
-	padding: 5px 10px;
+	padding: 3px 8px;
 	background-color: #888;/*#c67700; /*#d77f00;*/
 	color: #000000;
 	cursor: pointer;
 	position: relative;
-	margin: 15px 0px 5px 0px;
+	margin: 0px 0px 1px 0px;
 }
 
 .header3 {
@@ -23,6 +32,3 @@ body {
 	position: relative;
 	margin: 1px 10px 1px 1px;
 }
-
-
-

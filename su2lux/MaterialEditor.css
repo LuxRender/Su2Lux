@@ -1,29 +1,36 @@
-.header {
-	padding: 5px 0px 5px 5px;
-	cursor: pointer;
-	position: relative;
-	background-color: #bf8040;/*#c67700; /*#d77f00;*/
-	margin: 1px 0px;
+#material_name{
+    margin: 4px, 4px;
+    padding: 10px, 10px;
 }
 
 #material_management {
-	padding: 10px 10px 0px 10px
+	padding: 6px 10px;
 }
 
 #settings_panel {
 	border: 0px solid #eeeeee;
-	margin-top: 0px;
+	margin: 0px;
 	padding: 0px;
 }
 
+#preview_image{
+    position: relative;
+	margin: 0px;
+	padding: 0px;
+    left: 8px;
+    top: 8px;
+
+}
+
 .collapse {
-	margin: 0 0 0 0px;
-	padding: 8px 0px 0px 6px;
+	margin: 0px;
+	padding: 0px;
 }
    
 .collapse_check {
 	display:none;
-	padding: 6px;
+	padding: 0px;
+    margin: 0px;
 }
 
 input[type=text]{
@@ -43,7 +50,8 @@ input#divide_by_2, input#multiply_by_2 {
 }
 
 input#save_to_model, input#reset {
-	width: 140px;
+	width: 160px;
+    margin: 3px 0px 8px 8px;
 }
 
 input#get_diffuse_color {
@@ -59,35 +67,19 @@ input#get_diffuse_color {
 
 .panelcontent{
     position: relative;
+    padding: 7px;
+    margin: 0px;
 }
 
 #cloth{
     position: relative;
-    height: 520px;
 }
 
 #light{
-    height: 60px;
-}
-
-#mix{
-    height: 60px;
 }
 
 #diffuse {
     position: relative;
-}
-
-#dispersive_refraction{
-    height: 120px;
-}
-
-#displacement{
-    height: 165px;
-}
-
-#mixmaterials{
-    height: 90px;
 }
 
 #mixfield_uniform{
@@ -100,43 +92,43 @@ input#get_diffuse_color {
 
 #exponent_div{
     position: relative;
-    height: 170px;
+    
 }
 
 .kdr {
     position: absolute;
-    left: 76px;
-    top: 7px;
+    left: 80px;
+    top: 12px;
 }
 
 .kdg {
     position: absolute;
-    left: 76px;
-    top: 30px;
+    left: 80px;
+    top: 35px;
 }
 
 .kdb {
     position: absolute;
-    left: 76px;
-    top: 53px;
+    left: 80px;
+    top: 58px;
 }
 
 .kdrvalue{
     position: absolute;
-    left: 120px;
-    top: 4px;
+    left: 122px;
+    top: 8px;
 }
 
 .kdgvalue{
     position: absolute;
-    left: 120px;
-    top: 27px;
+    left: 122px;
+    top: 31px;
 }
 
 .kdbvalue{
     position: absolute;
-    left: 120px;
-    top: 50px;
+    left: 122px;
+    top: 54px;
 }
 
 #mixmaterials {
@@ -146,25 +138,50 @@ input#get_diffuse_color {
 .mixmat1{
     position: absolute;
     left: 0px;
-    top: 4px;
+    top: 0px;
 }
 
 .mixmatlist1{
     position: absolute;
-    left: 80px;
-    top: 4px;
+    left: 92px;
+    top: -4px;
 }
 
 .mixmat2{
     position: absolute;
     left: 0px;
-    top: 34px;
+    top: 26px;
 }
 
 .mixmatlist2{
     position: absolute;
-    left: 80px;
-    top: 34px;
+    left: 92px;
+    top: 22px;
+}
+
+#mixtypes_label{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100px;
+}
+
+#mx_imgmapname{
+    position: absolute;
+    left: 96px;
+    top: 25px;
+}
+
+#mx_browse_map{
+    position: absolute;
+    left: 92px;
+    top: 46px;
+}
+
+.mixtypes_matlist{
+    position: absolute;
+    left: 92px;
+    top: -4px;
 }
 
 .mixmatlabel{
@@ -175,8 +192,15 @@ input#get_diffuse_color {
 
 .mixmattypelist{
     position: absolute;
-    left: 80px;
-    top: 50px;
+    left: 92px;
+    top: 0px;
+}
+
+
+.texture_area_mix{
+    position: absolute;
+    left: 0px;
+    top: 52px;
 }
 
 .txfields{
@@ -197,10 +221,6 @@ input#get_diffuse_color {
     top: 4px;
 }
 
-#kd_browse_map, #ks_browse_map, #cl1kd_browse_map, #cl1ks_browse_map, #cl2kd_browse_map, #cl2ks_browse_map{
-    width: 5em;
-}
-
 .textureloadbutton{
     position: absolute;
 	width: 4em;
@@ -211,7 +231,7 @@ input#get_diffuse_color {
 .colorizesection{
     position: absolute;
     left: 65px;
-    top: 46px;
+    top: 45px;
     width: 120px;
 }
 
@@ -227,20 +247,16 @@ input#get_diffuse_color {
 
 .swatch {
     border: 1px solid black;
+    margin: 0px 0px 0px 0px;
     background-color: #ffffff;
 }
 
-#swatch_diffuse{
-    margin: 5px 0px 0px 0px;
+#swatch_absorption{
+    position: absolute;
+    top: 7px;
+    left: 7px;
 }
 
-#swatch_specular{
-    margin: 5px 0px 0px 0px;
-}
-
-.swatch{
-    margin: 5px 0px 0px 0px;
-}
 
 #fleximage_xresolution, #fleximage_yresolution {
 	margin: -23px 5px 0 0;
@@ -254,26 +270,30 @@ input#get_diffuse_color {
     top: 30px;
 }
 
+#type{
+    margin: 10px;
+}
 #preview {
-	height: 130px;
+    margin: 0px;
+    padding: 0px;
 }
 
 #previewsize{
     position: absolute;
-    left: 219px;
-    top: 0px;
+    left: 286px;
+    top: 4px;
 }
 
 #previewtime{
     position: absolute;
-    left: 219px;
-    top: 24px;
+    left: 286px;
+    top: 28px;
 }
 
 #update_material_preview{
     position: absolute;
-    left: 219px;
-    top: 60px;
+    left: 286px;
+    top: 80px;
 }
 
 .parameter_label{
@@ -285,13 +305,13 @@ input#get_diffuse_color {
 .parameter_field{
     position: absolute;
     left: 100px;
-    top: 0px;
+    top: -3px;
 }
 
-.parameter_field{
+.parameter_field_dm{
     position: absolute;
-    left: 100px;
-    top: 0px;
+    left: 50px;
+    top: -3px;
 }
 
 .parameter_field_dr{
@@ -306,28 +326,59 @@ input#get_diffuse_color {
     top: -3px;
 }
 
+.parameter_field_light{
+    position: absolute;
+    left: 150px;
+    top: -3px;
+}
+
 .parameter_interface{
     position: relative;
-    height: 80px;
+    height: 78px;
+}
+
+.parameter_interface_mix{
+    position: relative;
+    height: 126px;
+}
+
+.parameter_interface_L{
+    position: relative;
+    left: -7px;
+    top: -7px;
+    height: 85px;
+    margin: 7px 0px 0px 0px;
+    padding: 0px;
+}
+
+.margin_bottom{
+    margin: 0px 0px 10px 0px;
+}
+
+.parameter_interface_displacement{
+    position: relative;
+    height: 136px;
 }
 
 .mix_uniform_label{
     position: absolute;
     left: 0px;
-    top: 28px;
+    top: 25px;
     width: 180px;
 }
 
 .mix_uniform_field{
     position: absolute;
-    left: 145px;
-    top: 25px;
+    left: 148px;
+    top: 21px;
 }
 
 .texture_area_swatchfield{
+    margin: 0px;
+    padding: 0px;
     position: absolute;
     left: 200px;
-    top: 8px;
+    top: 12px;
 }
 
 .texture_area{
@@ -342,72 +393,44 @@ input#get_diffuse_color {
     top: 0px;
 }
 
-.tex_selector{
+.tex_label_swatch{
     position: absolute;
     left: 0px;
     top: 0px;
-    width: 100px;
+}
+
+.tex_label{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 80px;
+    height: 30px;
 }
 
 .tex_dropdown{
     position: absolute;
     left: 60px;
-    top: -3px;
+    top:    -3px;
 }
 
 .tex_path{
     position: absolute;
     left: 0px;
-    top: 24px;
-    width: 400px;
+    top: 23px;
+    width: 200px;
 }
 
 .tex_loadbutton{
     position: absolute;
-    left: -3px;
-    top: 43px;
+    left: -4px;
+    top: 42px;
 }
 
-#u_exponent{
-    position: absolute;
-    left: 100px;
-    top: 0px;
-}
-
-#u_exponent_texturetype{
-    position: absolute;
-    left: 60px;
-    top: 0px;
-}
-
-#u_exponent_imgmapname{
-    position: absolute;
-    left: 0px;
-    top: 0px;
-}
-
-#v_exponent{
-    position: absolute;
-    left: 100px;
-    top: 0px;
-}
-
-#v_exponent_texturetype{
-    position: absolute;
-    left: 60px;
-    top: 0px;
-}
-
-#v_exponent_imgmapname{
-    position: absolute;
-    left: 0px;
-    top: 0px;
-}
 
 #loop{
     position: absolute;
     left: 0px;
-    top: 30px;
+    top: 44px;
     width: 250px;
 }
 
@@ -415,38 +438,38 @@ input#get_diffuse_color {
     display: none;
     position: absolute;
     left: 0px;
-    top: 30px;
+    top: 44px;
     width: 250px;
 }
 
 #dm_subdiv_label, #dm_microlevels_label{
     position: absolute;
     left: 0px;
-    top: 0px;
+    top: 2px;
 }
 
 #dm_scale_label{
     position: absolute;
     left: 0px;
-    top: 60px;
+    top: 77px;
 }
 
 #dm_offset_label{
     position: absolute;
     left: 0px;
-    top: 90px;
+    top: 108px;
 }
 
 #dm_scale{
     position: absolute;
-    left: 120px;
-    top: 60px;
+    left: 119px;
+    top: 75px;
 }
 
 #dm_offset{
     position: absolute;
     left: 120px;
-    top: 90px;
+    top: 105px;
 }
 
 #dm_subdivl, #dm_microlevels{
@@ -457,39 +480,39 @@ input#get_diffuse_color {
 
 #dm_normalsmooth{
     position: absolute;
-    left: 200px;
-    top: 50px;
+    left: 199px;
+    top: 28px;
 }
 
 #dm_normalsplit{
     position: absolute;
-    left: 200px;
-    top: 70px;
+    left: 199px;
+    top: 48px;
 }
 
 #dm_sharpboundary{
     position: absolute;
-    left: 200px;
-    top: 90px;
+    left: 199px;
+    top: 68px;
 }
 
 #dm_normalsmooth_label{
     position: absolute;
-    left: 220px;
-    top: 50px;
+    left: 219px;
+    top: 28px;
     width: 130px;
 }
 #dm_normalsplit_label{
     position: absolute;
-    left: 220px;
-    top: 70px;
+    left: 219px;
+    top: 48px;
     width: 130px;
 }
 
 #dm_sharpboundary_label{
     position: absolute;
-    left: 220px;
-    top: 90px;
+    left: 219px;
+    top: 68px;
     width: 130px;
 }
 
@@ -520,4 +543,8 @@ input#get_diffuse_color {
 
 #imagemap_right {
 	float: right;
+}
+
+#kd_browse_map, #ks_browse_map, #cl1kd_browse_map, #cl1ks_browse_map, #cl2kd_browse_map, #cl2ks_browse_map{
+    width: 5em;
 }

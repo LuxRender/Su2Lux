@@ -26,7 +26,7 @@ class LuxrenderMaterialEditor
 		@lrs = LuxrenderSettings.new
         @materials_skp_lux = Hash.new
 		@matname_changed = false
-		@material_editor_dialog = UI::WebDialog.new("LuxRender Material Editor", true, "LuxrenderMaterialEditor", 500, 700, 900, 100, true)
+		@material_editor_dialog = UI::WebDialog.new("LuxRender Material Editor", true, "LuxrenderMaterialEditor", 424, 700, 900, 100, true)
 		material_editor_dialog_path = Sketchup.find_support_file("materialeditor.html", "Plugins/su2lux")
 		@material_editor_dialog.max_width = 800
 		@material_editor_dialog.set_file(material_editor_dialog_path)
@@ -419,7 +419,6 @@ class LuxrenderMaterialEditor
         @material_editor_dialog.add_action_callback("previewsize") {|dialog, params|
             puts "setting preview size to " + params
             @lrs.preview_size = params
-            
             # update image size in interface
             setdivheightcmd = 'setpreviewheight(' + @lrs.preview_size + ')'
             #puts setdivheightcmd

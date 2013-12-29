@@ -46,7 +46,7 @@ function startmaterialchanged() {
 
 function setpreviewheight(previewsize,previewtime){
     // image and element size
-    $("#preview").height(previewsize+10)
+    $("#preview").height(previewsize+16)
     $("#preview_image").height(previewsize)
     
     // dropdown values
@@ -140,8 +140,17 @@ $(document).ready(
 				$("input:checkbox").each(function(index, element) { checkbox_expander(element.id) } );
 			}
 		)
+
+        $(".header2").click(
+            function()
+            {
+                //alert (this)
+                expand_section($(this), "div.collapse", "+", "-");
+            }
+        )
+        
                   
-            $("td.swatch").click(
+        $("td.swatch").click(
             function()
             {
                 // alert (this.id)

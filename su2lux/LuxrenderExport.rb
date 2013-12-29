@@ -1279,8 +1279,12 @@ class LuxrenderExport
 		type_str, type_str2 = self.texture_parameters_from_type(mat_type)
 		preceding = ""
 		following = ""
-		preceding += "Texture \"#{material.name}::#{type_str}\" \"#{type}\" \"imagemap\"" + "\n"
-		preceding += "\t" + "\"string wrap\" [\"#{material.send(mat_type + "_imagemap_wrap")}\"]" + "\n"
+        if (mat_type=="normal")
+            preceding += "Texture \"#{material.name}::#{type_str}\" \"#{type}\" \"normalmap\"" + "\n"
+        else
+            preceding += "Texture \"#{material.name}::#{type_str}\" \"#{type}\" \"imagemap\"" + "\n"
+		end
+        preceding += "\t" + "\"string wrap\" [\"#{material.send(mat_type + "_imagemap_wrap")}\"]" + "\n"
         if (mat_type=='dm')
 			preceding += "\t" + "\"string channel\" [\"#{material.send(mat_type + "_imagemap_channel")}\"]" + "\n"
         end
@@ -1310,9 +1314,9 @@ class LuxrenderExport
 		preceding += "\t" + "\"float vscale\" [#{"%.6f" %(material.send(mat_type + "_imagemap_vscale"))}]" + "\n"
 		preceding += "\t" + "\"float udelta\" [#{"%.6f" %(material.send(mat_type + "_imagemap_udelta"))}]" + "\n"
 		preceding += "\t" + "\"float vdelta\" [#{"%.6f" %(material.send(mat_type + "_imagemap_vdelta"))}]" + "\n"
-		preceding += "Texture \"#{material.name}::#{type_str}.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{material.name}::#{type_str}\"] \"#{type} tex2\" [#{material.send(type_str2)}]" + "\n"
-        
+
         if (material.send( mat_type + "_imagemap_colorize") == true)
+            preceding += "Texture \"#{material.name}::#{type_str}.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{material.name}::#{type_str}\"] \"#{type} tex2\" [#{material.send(type_str2)}]" + "\n"
             following += "\t" + "\"texture #{type_str}\" [\"#{material.name}::#{type_str}.scale\"]" + "\n"
         else
             following += "\t" + "\"texture #{type_str}\" [\"#{material.name}::#{type_str}\"]" + "\n"
@@ -1410,6 +1414,9 @@ class LuxrenderExport
 		# if (mat.use_bump)
         pre, post = self.export_bump(mat, pre, post)
 		# end
+        if (mat.has_normal?)
+            pre, post = self.export_normal(mat, pre, post)
+		end
         if (mat.use_displacement)
             puts "mat.use_displacement is true"
 			pre, post = self.export_displacement(mat, pre, post)
@@ -1749,12 +1756,20 @@ class LuxrenderExport
 		end
 		return [before + preceding, after + following]
 	end
-
+    
 	def export_bump(material, before, after)
 		preceding = ""
 		following = ""
 		if (material.has_texture?('bump'))
 			preceding, following = self.export_texture(material, "bump", "float", before, after)
+		end
+		return [before + preceding, after + following]
+	end
+	def export_normal(material, before, after)
+		preceding = ""
+		following = ""
+		if (material.has_texture?('normal'))
+			preceding, following = self.export_texture(material, "normal", "float", before, after)
 		end
 		return [before + preceding, after + following]
 	end
@@ -1808,6 +1823,9 @@ class LuxrenderExport
 			when 'kt'
 				type_str = "Kt"
 				type_str2 = "transmission_tos"
+            when 'normal'
+				type_str = "bumpmap"
+				type_str2 = "normalmap"
 			when 'IOR_index'
 				type_str = 'index'
 				type_str2 = 'IOR_index'

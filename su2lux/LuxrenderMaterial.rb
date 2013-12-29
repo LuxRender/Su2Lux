@@ -28,7 +28,7 @@ class LuxrenderMaterial
 	{
 		'type' => "glossy",
 		'kd_imagemap_Sketchup_filename' => '',
-        'texturechannels' => ["kd", "ks", "ka", "mx", "u_exponent", "v_exponent", "uroughness", "vroughness", "cl1kd", "cl1ks", "cl2kd", "cl2ks", "ka_d", "IOR_index", "kr", "kt", "cauchyb", "film", "filmindex", "bump", "dm"],
+        'texturechannels' => ["kd", "ks", "ka", "mx", "u_exponent", "v_exponent", "uroughness", "vroughness", "cl1kd", "cl1ks", "cl2kd", "cl2ks", "ka_d", "IOR_index", "kr", "kt", "cauchyb", "film", "filmindex", "bump", "normal", "dm"],
         
 		'kd_R' => 0.64,
 		'kd_G' => 0.64,
@@ -98,7 +98,7 @@ class LuxrenderMaterial
 		'dm_subdivl' => '2',
         'dm_microlevels' => '10',
 		'dm_scale' => 0.1,
-		'dm_offset' => 0,
+		'dm_offset' => 0.000,
 		'displacement' => 1.000000,
 
 		'light_L' => 'blackbody',
@@ -124,6 +124,7 @@ class LuxrenderMaterial
 		'use_dispersive_refraction' => false,
 		'use_thin_film_coating' => false,
 		'use_bump' => false,
+        'use_normal' => false,
 		'use_displacement' => false,
 	}
     
@@ -141,6 +142,9 @@ class LuxrenderMaterial
 		@@settings[key + "channel"] = "mean" if (type == "float")
 		@@settings[key + "filename"] = ""
 		@@settings[key + "gamma"] = 2.2
+        if(name=="normal")
+            @@settings[key + "gamma"] = 1.0
+        end
 		@@settings[key + "gain"] = 1.0
 		@@settings[key + "filtertype"] = "bilinear"
 		@@settings[key + "mapping"] = "uv"
@@ -222,6 +226,7 @@ class LuxrenderMaterial
 		lux_image_texture("", "film", "imagemap", "float")
 		lux_image_texture("", "filmindex", "imagemap", "float")
 		lux_image_texture("", "bump", "imagemap", "float")
+		lux_image_texture("", "normal", "imagemap", "float")
 		lux_image_texture("", "dm", "imagemap", "float")
 		
         # puts "LuxrenderMaterial.rb self object: ", self # returns #<LuxrenderMaterial:........>
@@ -450,6 +455,10 @@ class LuxrenderMaterial
 		transmission = [self.kt_R, self.kt_G, self.kt_B]
 	end
 
+    def normalmap
+        normalmap = [1.0, 1.0, 1.0]
+    end
+
 	##
 	#
 	##
@@ -495,11 +504,26 @@ class LuxrenderMaterial
 		if (self.bump_texturetype != 'none')
 			if (self.bump_texturetype == 'sketchup')
 				has_bump = true if (self.kd_texturetype == 'sketchup')
-			elsif (self.bump_texturetype == 'imagemap')
+            elsif (self.bump_texturetype == 'imagemap')
 				has_bump = true if (not self.bump_imagemap_filename.empty?)
 			end
-		end	
+		end
 		return has_bump
+	end
+	
+    ##
+	#
+	##
+	def has_normal?
+		has_normal = false
+		if (self.normal_texturetype != 'none')
+			if (self.normal_texturetype == 'sketchup')
+				has_normal = true if (self.kd_texturetype == 'sketchup')
+            elsif (self.normal_texturetype == 'imagemap')
+				has_normal = true if (not self.normal_imagemap_filename.empty?)
+			end
+		end
+		return has_normal
 	end
 	
 	##

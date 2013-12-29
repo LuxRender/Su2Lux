@@ -1,0 +1,61 @@
+#texture_preview{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+}
+
+#texture_interface{
+    position: absolute;
+    left: 310px;
+    top: 10px;
+}
+
+#texture_buttons{
+    position: absolute;
+    left: 310px;
+    top: 270px;
+}
+
+#imagemap_filename_browse{
+    position: absolute;
+    top: 30px;
+    left: 0px;
+}
+
+#update_changes{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+}
+
+#cancel_changes{
+    position: absolute;
+    left: 77px;
+    top: 0px;
+}
+
+.parameter_row{
+    position: relative;
+    height: 35px;
+}
+
+.filename_row{
+    position: relative;
+    height: 80px;
+}
+
+.parameter_name{
+    position: absolute;
+    left: 5px;
+    top: 0px;
+}
+
+.parameter_field{
+    position: absolute;
+    left: 100px;
+    top: -2px
+}
+
+input[type=button]{
+    width: 5.5em;
+}
