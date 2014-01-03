@@ -84,7 +84,7 @@ class LuxrenderMeshCollector
 				get_inside(e,trans,false) #e,trans,false - not FM component
 			end
 			if (e.class == Sketchup::ComponentInstance and e.layer.visible? and e.visible?)
-                # IFF advanced behavior is off do old behaviou
+                # IFF advanced behavior is off do old behaviour
                 # else only if instance has only 1 copy and instance does not contain instances do old behaviour
                 if ( @deduplicate == false || ( instances_copies(e) == 1 ||  ( !instance_is_leaf(e) ) ) )
                     get_inside(e,trans,e.definition.behavior.always_face_camera?) # e,trans, fm_component?
@@ -271,10 +271,7 @@ class LuxrenderMeshCollector
 			for v in e.vertices
 				p = v.position
 				uvHelp = get_UVHelp(e, mat_dir)
-				# uv = uvHelp.get_front_UVQ(p) if mat_dir==true
-				# uv = uvHelp.get_back_UVQ(p) if mat_dir==false
 				uvq = mat_dir ? uvHelp.get_front_UVQ(p) : uvHelp.get_back_UVQ(p)
-				# if ( uvq and ((uvq.z.to_f)*10000000).round != 10000000)
 				if ( uvq and (uvq.z.to_f - 1).abs > 1e-5)
 					distorted = true
 					break

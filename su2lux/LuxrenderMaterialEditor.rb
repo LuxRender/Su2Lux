@@ -331,7 +331,7 @@ class LuxrenderMaterialEditor
             puts @collectedmixmaterials
             for prmat in @collectedmixmaterials
                 active_material = @materials_skp_lux.index(prmat)
-                active_material_name = active_material.name.delete("[<>]") # following LuxrenderMaterial.rb convention ## was Sketchup.active_model.materials.
+                active_material_name = active_material.name.delete("[<>]") # following LuxrenderMaterial.rb convention
                 active_material_name_converted = sanitize_path(active_material_name)
                 previewExport.export_preview_material(preview_path,generated_lxm_file,active_material_name_converted,active_material,texture_subfolder,prmat)
             end
@@ -401,7 +401,10 @@ class LuxrenderMaterialEditor
 				if (@times_waited <= @time_out && (Time.now()-File.mtime(@filename)) < (previewtime.to_f+@time_out))
 					puts("updating preview")
 					# the file name on the following line includes ?timestamp, forcing the image to be refreshed as the link has changed
-					cmd = 'document.getElementById("preview_image").src = "' + @filename.gsub('\\', '\\\\\\\\')  + '\?' + File.mtime(@filename).to_s + '"' 
+                    filename = @filename.gsub('\\', '\\\\\\\\')
+                    filename.gsub!(/\#/, '	%23')
+                    puts ('loading file ' + filename)
+					cmd = 'document.getElementById("preview_image").src = "' + filename + '\?' + File.mtime(@filename).to_s + '"'
 					@material_editor_dialog.execute_script(cmd)
 				end
 			}
@@ -492,8 +495,9 @@ class LuxrenderMaterialEditor
 		filename = os.get_variables["material_preview_path"] + Sketchup.active_model.title + "_" + @current.name.delete("[<>]") + ".png"
 		filename = filename.gsub('\\', '/')
 		if (File.exists?(filename))
-			puts "preview image exists, loading"
-			cmd = 'document.getElementById("preview_image").src = "' + filename + '"'
+			puts "preview image exists, loading " + filename
+            filename.gsub!(/\#/, '	%23')
+            cmd = 'document.getElementById("preview_image").src = "' + filename + '"'
 		else
 			puts "file doesn't exist, showing default image"
 			cmd = 'document.getElementById("preview_image").src = "empty_preview.png"'

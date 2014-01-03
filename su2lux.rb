@@ -29,8 +29,8 @@ require 'su2lux/fileutils.rb'
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.35"
-    SU2LUX_DATE = "29 December 2013"
+    SU2LUX_VERSION = "0.36"
+    SU2LUX_DATE = "2 January 2014"
 	CONFIG_FILE = "luxrender_path.txt"
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"

@@ -756,8 +756,9 @@ class LuxrenderExport
 	end # END export_mesh
 
 	def export_preview_material(preview_path,generated_lxm_file,currentmaterialname,currentmaterial,texture_path,luxmat)
-		puts "running preview export function"
-		puts preview_path,generated_lxm_file,currentmaterialname,currentmaterial,texture_path,luxmat
+		puts "\n"
+        puts "running preview export function"
+		# puts preview_path,generated_lxm_file,currentmaterialname,currentmaterial,texture_path,luxmat
 		
 		# prepare texture paths
         outputfolder = "LuxRender_luxdata/textures"
@@ -773,33 +774,39 @@ class LuxrenderExport
 		pt1 = [-3,-3,-3]
 		pt2 = [-3, -3, -4]
 		pt3 = [-3, -4, -3]
-		luxmat_face = luxmat_group.entities.add_face pt1, pt2, pt3
-		puts "assigning material to temporary face, using material ", currentmaterial
+		luxmat_face = luxmat_group.entities.add_face(pt1, pt2, pt3)
+		puts "assigning material #{currentmaterial.name} to temporary face"
 		luxmat_face.material = currentmaterial
 		luxmat_group.material = currentmaterial
 		
 		# create MeshCollector, store used material's textures
 		mcpre=LuxrenderMeshCollector.new(outputfolder,@os_separator,false)
-		mcpre.collect_faces(luxmat_group, Geom::Transformation.new)
+		mcpre.collect_faces(luxmat_group, Geom::Transformation.new) # this includes adding texture to meshcollector
 		@model_textures=mcpre.model_textures
 		@texturewriter=mcpre.texturewriter
+        puts "number of files in texturewriter: " + @texturewriter.length.to_s
 		@materials=mcpre.materials
 		
 		# get SketchUp material texture
 		if (currentmaterial.texture)
-			texturefilepath = currentmaterial.texture.filename
-			trimmedfilename = texturefilepath.gsub("\\", "")
+			texturefilename = currentmaterial.texture.filename
+            puts "texture file name: " + texturefilename
+			trimmedfilename = texturefilename.gsub("\\", "")
 			trimmedfilename = trimmedfilename.gsub("/", "")
-			if (texturefilepath == trimmedfilename) # texture is built-in texture
+            puts "trimmed filename is: " + trimmedfilename
+			if (texturefilename == trimmedfilename) # texture is built-in texture
 				puts "exporting SketchUp texture to preview texture folder"
-				@texturewriter.load (luxmat_face, true)
-				@texturewriter.write_all (preview_path+texture_path+"/", false)
+                puts preview_path + texture_path
+                imageexport = @texturewriter.write_all (preview_path+texture_path+"/", false)
+                if (!imageexport) # catch missing file extension
+                    @texturewriter.write(luxmat_face, true, preview_path+texture_path+"/" + luxmat_face.material.name + ".jpg")
+                end
 			else # texture is loaded from file
 				texture_name=mcpre.get_texture_name(currentmaterialname,currentmaterial)
-				puts "copying material preview texture from:", texturefilepath
-				outputpath = preview_path+texture_path+"/"+File.basename(texture_name)  # last part was File.basename(texturefilepath) 
-				texturefilepath = sanitize_path(texturefilepath)
-				FileUtils.copy_file(texturefilepath, outputpath)
+				puts "copying material preview texture from:", texturefilename
+				outputpath = preview_path+texture_path+"/"+File.basename(texture_name)  # last part was File.basename(texturefilename)
+				texturefilename = sanitize_path(texturefilename)
+				FileUtils.copy_file(texturefilename, outputpath)
 			end
 		end
 		
