@@ -149,7 +149,13 @@ module SU2LUX
 		selection = model.selection
 		materials = model.materials
 		@luxrender_path = SU2LUX.get_luxrender_path # path to LuxRender executable
+        # todo: add .lxs if it doesn't end in .lxs
+        if File.extname(@lrs.export_file_path) != ".lxs"
+            @lrs.export_file_path += ".lxs"
+        end
+        
         exportpath = @lrs.export_file_path
+
 		      
 		le=LuxrenderExport.new(exportpath,@os_separator)
 		le.reset
