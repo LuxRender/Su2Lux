@@ -27,6 +27,11 @@ class LuxrenderSettings
 	{
 	#'name_option'=>'default_value'
 	##
+	# Settings
+	###
+        'preset' => '1',
+    
+	##
 	# Camera
 	###
 		'camera_type' => 'perspective',
@@ -61,7 +66,6 @@ class LuxrenderSettings
 	#Environment
 	##
 		'environment_light_type'=> 'sunsky',
-		
 		'environment_infinite_lightgroup' => 'infinite light',
 		'environment_infinite_L_R' => Sketchup.active_model.rendering_options["BackgroundColor"].red / 255.0, #environment color red component
 		'environment_infinite_L_G' => Sketchup.active_model.rendering_options["BackgroundColor"].green / 255.0, #environment color green component

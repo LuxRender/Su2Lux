@@ -44,6 +44,8 @@ class LuxrenderSettingsEditor
 				key = pair[0]		   
 				value = pair[1]
 				case key
+                    when "preset"
+                        puts "preset toggled"
 					when "fov"
 						Sketchup.active_model.active_view.camera.fov = value.to_f
 					when "focal_length"
@@ -158,7 +160,7 @@ class LuxrenderSettingsEditor
 			case p
 				when '0' #<option value='0'>0 Preview - Global Illumination</option> in settings.html
 					SU2LUX.dbg_p "set preset 0 Preview - Global Illumination"
-					@lrs.fleximage_displayinterval = 4
+                    @lrs.preset = '0'
 					@lrs.fleximage_haltspp = 0
 					@lrs.fleximage_halttime = 0
 					
@@ -192,14 +194,9 @@ class LuxrenderSettingsEditor
 					@lrs.sintegrator_distributedpath_specularrefractdepth = 4
 					@lrs.sintegrator_distributedpath_strategy = 'auto'
 					
-					@lrs.pixelfilter_type = 'mitchell'
-					@lrs.pixelfilter_mitchell_sharpness = 0.250 
-					@lrs.pixelfilter_mitchell_xwidth = 2.0 
-					@lrs.pixelfilter_mitchell_ywidth = 2.0 
-					@lrs.pixelfilter_mitchell_optmode = 'slider'
 				when '0b'
-					SU2LUX.dbg_p 'set preset 0b Preview - Direct Lighting'
-					@lrs.fleximage_displayinterval = 4
+                    SU2LUX.dbg_p 'set preset 0b Preview - Direct Lighting'
+                    @lrs.preset = '0b'
 					@lrs.fleximage_haltspp = 0
 					@lrs.fleximage_halttime = 0
 					
@@ -214,15 +211,9 @@ class LuxrenderSettingsEditor
 					
 					@lrs.sintegrator_type = 'directlighting'
 					@lrs.sintegrator_direct_maxdepth = 5
-
-					@lrs.pixelfilter_type = 'mitchell'
-					@lrs.pixelfilter_mitchell_sharpness = 0.333333
-					@lrs.pixelfilter_mitchell_xwidth = 1.5 
-					@lrs.pixelfilter_mitchell_ywidth = 1.5 
-					@lrs.pixelfilter_mitchell_supersample = true
 				
 				when '0c'
-					@lrs.fleximage_displayinterval = 10
+                    @lrs.preset = '0c'
 					@lrs.fleximage_haltspp = 1
 					@lrs.fleximage_halttime = 0
 					
@@ -254,10 +245,9 @@ class LuxrenderSettingsEditor
 					@lrs.sintegrator_exphoton_shadow_ray_count = 1
 					@lrs.sintegrator_exphoton_strategy = 'auto'
 
-					@lrs.pixelfilter_type = 'gaussian'
-				when '1'
+                when '1'
+                    @lrs.preset = '1'
 					SU2LUX.dbg_p 'set preset 1 Final - MLT/Bidir Path Tracing (interior) (recommended)'
-					@lrs.fleximage_displayinterval = 8
 					@lrs.fleximage_haltspp = 0
 					@lrs.fleximage_halttime = 0
 					
@@ -278,14 +268,9 @@ class LuxrenderSettingsEditor
 					@lrs.sintegrator_bidir_eyedepth = 16
 					@lrs.sintegrator_bidir_lightdepth = 16
 
-					@lrs.pixelfilter_type = 'mitchell'
-					@lrs.pixelfilter_mitchell_sharpness = 0.333333
-					@lrs.pixelfilter_mitchell_xwidth = 1.5 
-					@lrs.pixelfilter_mitchell_ywidth = 1.5 
-					@lrs.pixelfilter_mitchell_supersample = true
 				when '2'
-					SU2LUX.dbg_p 'set preset 2 Final - MLT/Path Tracing (exterior)'
-					@lrs.fleximage_displayinterval = 8
+                    SU2LUX.dbg_p 'set preset 2 Final - MLT/Path Tracing (exterior)'
+                    @lrs.preset = '2'
 					@lrs.fleximage_haltspp = 0
 					@lrs.fleximage_halttime = 0
 					
@@ -305,14 +290,9 @@ class LuxrenderSettingsEditor
 					@lrs.sintegrator_path_bounces = 10
 					@lrs.sintegrator_path_maxdepth = 10
 
-					@lrs.pixelfilter_type = 'mitchell'
-					@lrs.pixelfilter_mitchell_sharpness = 0.333333
-					@lrs.pixelfilter_mitchell_xwidth = 1.5 
-					@lrs.pixelfilter_mitchell_ywidth = 1.5 
-					@lrs.pixelfilter_mitchell_supersample = true
-				when '5'
+                when '5'
+                    @lrs.preset = '5'
 					SU2LUX.dbg_p 'set preset 5 Progressive - Bidir Path Tracing (interior)'
-					@lrs.fleximage_displayinterval = 8
 					@lrs.fleximage_haltspp = 0
 					@lrs.fleximage_halttime = 0
 					
@@ -330,14 +310,9 @@ class LuxrenderSettingsEditor
 					@lrs.sintegrator_bidir_eyedepth = 16
 					@lrs.sintegrator_bidir_lightdepth = 16
 
-					@lrs.pixelfilter_type = 'mitchell'
-					@lrs.pixelfilter_mitchell_sharpness = 0.333333
-					@lrs.pixelfilter_mitchell_xwidth = 1.5 
-					@lrs.pixelfilter_mitchell_ywidth = 1.5 
-					@lrs.pixelfilter_mitchell_supersample = true
-				when '6'
+                when '6'
+                    @lrs.preset = '6'
 					SU2LUX.dbg_p 'set preset 6 Progressive - Path Tracing (exterior)'
-					@lrs.fleximage_displayinterval = 8
 					@lrs.fleximage_haltspp = 0
 					@lrs.fleximage_halttime = 0
 					
@@ -354,14 +329,9 @@ class LuxrenderSettingsEditor
 					@lrs.sintegrator_path_bounces = 10
 					@lrs.sintegrator_path_maxdepth = 10
 					
-					@lrs.pixelfilter_type = 'mitchell'
-					@lrs.pixelfilter_mitchell_sharpness = 0.333333
-					@lrs.pixelfilter_mitchell_xwidth = 1.5 
-					@lrs.pixelfilter_mitchell_ywidth = 1.5 
-					@lrs.pixelfilter_mitchell_supersample = true
-				when '8'
+                when '8'
+                    @lrs.preset = '8'
 					SU2LUX.dbg_p 'set preset 8 Bucket - Bidir Path Tracing (interior)'
-					@lrs.fleximage_displayinterval = 8
 					@lrs.fleximage_haltspp = 0
 					@lrs.fleximage_halttime = 0
 					
@@ -379,14 +349,9 @@ class LuxrenderSettingsEditor
 					@lrs.sintegrator_bidir_eyedepth = 8
 					@lrs.sintegrator_bidir_lightdepth = 10
 					
-					@lrs.pixelfilter_type = 'mitchell'
-					@lrs.pixelfilter_mitchell_sharpness = 0.333333
-					@lrs.pixelfilter_mitchell_xwidth = 1.5 
-					@lrs.pixelfilter_mitchell_ywidth = 1.5 
-					@lrs.pixelfilter_mitchell_supersample = true
-				when '9'
+                when '9'
+                    @lrs.preset = '9'
 					SU2LUX.dbg_p 'set preset 9 Bucket - Path Tracing (exterior)'
-					@lrs.fleximage_displayinterval = 8
 					@lrs.fleximage_haltspp = 0
 					@lrs.fleximage_halttime = 0
 					
@@ -403,14 +368,9 @@ class LuxrenderSettingsEditor
 					@lrs.sintegrator_path_bounces = 8
 					@lrs.sintegrator_path_maxdepth = 8
 					
-					@lrs.pixelfilter_type = 'mitchell'
-					@lrs.pixelfilter_mitchell_sharpness = 0.333333
-					@lrs.pixelfilter_mitchell_xwidth = 1.5 
-					@lrs.pixelfilter_mitchell_ywidth = 1.5 
-					@lrs.pixelfilter_mitchell_supersample = true
-				when 'B'
+                when 'B'
+                    @lrs.preset = 'B'
 					SU2LUX.dbg_p 'set preset B Anim - Distributed/GI low Q'
-					@lrs.fleximage_displayinterval = 8
 					@lrs.fleximage_haltspp = 1
 					@lrs.fleximage_halttime = 0
 					
@@ -443,14 +403,9 @@ class LuxrenderSettingsEditor
 					@lrs.sintegrator_distributedpath_specularreflectdepth = 2
 					@lrs.sintegrator_distributedpath_specularrefractdepth = 5
 					
-					@lrs.pixelfilter_type = 'mitchell'
-					@lrs.pixelfilter_mitchell_sharpness = 0.333333
-					@lrs.pixelfilter_mitchell_xwidth = 1.5 
-					@lrs.pixelfilter_mitchell_ywidth = 1.5 
-					@lrs.pixelfilter_mitchell_supersample = true
-				when 'C'
+                when 'C'
+                    @lrs.preset = 'C'
 					SU2LUX.dbg_p 'set preset C Anim - Distributed/GI medium Q'
-					@lrs.fleximage_displayinterval = 8
 					@lrs.fleximage_haltspp = 1
 					@lrs.fleximage_halttime = 0
 					
@@ -484,14 +439,9 @@ class LuxrenderSettingsEditor
 					@lrs.sintegrator_distributedpath_strategy = 'auto'
 					@lrs.sintegrator_distributedpath_specularrefractdepth = 5
 					
-					@lrs.pixelfilter_type = 'mitchell'
-					@lrs.pixelfilter_mitchell_sharpness = 0.333333
-					@lrs.pixelfilter_mitchell_xwidth = 1.5 
-					@lrs.pixelfilter_mitchell_ywidth = 1.5 
-					@lrs.pixelfilter_mitchell_supersample = true
-				when 'D'
+                when 'D'
+                    @lrs.preset = 'D'
 					SU2LUX.dbg_p 'set preset D Anim - Distributed/GI high Q'
-					@lrs.fleximage_displayinterval = 8
 					@lrs.fleximage_haltspp = 1
 					@lrs.fleximage_halttime = 0
 					
@@ -525,14 +475,9 @@ class LuxrenderSettingsEditor
 					@lrs.sintegrator_distributedpath_strategy = 'auto'
 					@lrs.sintegrator_distributedpath_specularrefractdepth = 5
 					
-					@lrs.pixelfilter_type = 'mitchell'
-					@lrs.pixelfilter_mitchell_sharpness = 0.333333
-					@lrs.pixelfilter_mitchell_xwidth = 1.5 
-					@lrs.pixelfilter_mitchell_ywidth = 1.5 
-					@lrs.pixelfilter_mitchell_supersample = true
-				when 'E'
+                when 'E'
+                    @lrs.preset = 'E'
 					SU2LUX.dbg_p 'set preset E Anim - Distributed/GI very high Q'
-					@lrs.fleximage_displayinterval = 8
 					@lrs.fleximage_haltspp = 1
 					@lrs.fleximage_halttime = 0
 					
@@ -566,14 +511,8 @@ class LuxrenderSettingsEditor
 					@lrs.sintegrator_distributedpath_strategy = 'auto'
 					@lrs.sintegrator_distributedpath_specularrefractdepth = 5
 					
-					@lrs.pixelfilter_type = 'mitchell'
-					@lrs.pixelfilter_mitchell_sharpness = 0.333333
-					@lrs.pixelfilter_mitchell_xwidth = 1.5 
-					@lrs.pixelfilter_mitchell_ywidth = 1.5 
-					@lrs.pixelfilter_mitchell_supersample = true
-
-				when 'F'
-					@lrs.fleximage_displayinterval = 15
+                when 'F'
+                    @lrs.preset = 'F'
 					@lrs.fleximage_haltspp = 0
 					@lrs.fleximage_halttime = 0
 					
@@ -605,9 +544,8 @@ class LuxrenderSettingsEditor
 					@lrs.sintegrator_exphoton_shadow_ray_count = 1
 					@lrs.sintegrator_exphoton_strategy = 'auto'
 					
-					@lrs.pixelfilter_type = 'gaussian'
-				when 'G'
-					@lrs.fleximage_displayinterval = 15
+                when 'G'
+                    @lrs.preset = 'G'
 					@lrs.fleximage_haltspp = 1
 					@lrs.fleximage_halttime = 0
 					
@@ -638,8 +576,7 @@ class LuxrenderSettingsEditor
 					@lrs.sintegrator_exphoton_photonmapsfile = ''
 					@lrs.sintegrator_exphoton_shadow_ray_count = 1
 					@lrs.sintegrator_exphoton_strategy = 'auto'
-					
-					@lrs.pixelfilter_type = 'gaussian'
+                
 				end #end case
 			self.sendDataFromSketchup()
 		} #end action callback preset
