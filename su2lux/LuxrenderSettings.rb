@@ -261,8 +261,8 @@ class LuxrenderSettings
 		'fleximage_write_resume_flm' => false,
 		'fleximage_restart_resume_flm' => false,
 		'fleximage_filename' => "SU2LUX_rendered_image",
-		'fleximage_writeinterval' => 60,
-		'fleximage_displayinterval' => 12,
+		'fleximage_writeinterval' => 180,
+		'fleximage_displayinterval' => 20,
 		'fleximage_outlierrejection_k' => 0,
 		'fleximage_debug' => false,
 		'fleximage_haltspp' => -1,
@@ -349,6 +349,7 @@ class LuxrenderSettings
 	##
 		'useparamkeys' => false,
         'texexport' => "skp",
+		'exp_distorted' => true, # export distorted textures
 		'export_file_path' => "",
         'export_luxrender_path' => "",
         'geomexport' => 'ply',

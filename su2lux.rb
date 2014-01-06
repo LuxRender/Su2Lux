@@ -29,18 +29,19 @@ require 'su2lux/fileutils.rb'
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.36"
-    SU2LUX_DATE = "2 January 2014"
+    SU2LUX_VERSION = "0.37"
+    SU2LUX_DATE = "6 January 2014"
 	CONFIG_FILE = "luxrender_path.txt"
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
 	PLUGIN_FOLDER = "su2lux"
-	PREFIX_TEXTURES = "TX_"
 	SCENE_EXTENSION = ".lxs"
 	SCENE_NAME = "Untitled.lxs"
 	SUFFIX_MATERIAL = "-mat.lxm"
 	SUFFIX_OBJECT = "-geom.lxo"
 	SUFFIX_VOLUME = "-vol.lxv"
+    SUFFIX_DISTORTED_TEXTURE = "_SU2LUX_distort"
+    PREFIX_DISTORTED_TEXTURE = "SU2LUX_dist_tex_"
     SUFFIX_DATAFOLDER = "_luxdata"
     GEOMETRYFOLDER = "/geometry/"
     TEXTUREFOLDER = "/textures/"
@@ -118,7 +119,6 @@ module SU2LUX
 	# resetting values of all instance variables
 	##
 	def SU2LUX.reset_variables
-		@exp_distorted = false
 		@model_textures={} 
 		@texturewriter=Sketchup.create_texture_writer
 		@selected=false
@@ -193,6 +193,7 @@ module SU2LUX
         relative_datafolder = file_basename+SU2LUX::SUFFIX_DATAFOLDER
         puts "RELATIVE DATA FOLDER: " + relative_datafolder
 		le.export_used_materials(materials, out_mat, @lrs.texexport, relative_datafolder)
+        le.export_distorted_materials(out_mat, relative_datafolder) # uses materials stored in LuxrenderExport
 		out_mat.close
         
         # write lxs file
@@ -606,7 +607,7 @@ For further information please visit LuxRender's Website & Forum at www.luxrende
 		end
 		return editor
 	end # END get_editor
-
+                    
 	##
 	#
 	##
@@ -796,13 +797,10 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 	end
 
     def onMaterialRemove(materials, material)
-        SU2LUX.dbg_p "onMaterialRemove"
-		SU2LUX.create_material_editor
-        material_editor = SU2LUX.get_editor("material")
+        SU2LUX.dbg_p "onMaterialRemove triggered"
+        material_editor = SU2LUX.create_material_editor # reuses material editor if it exists
+        material_editor.materials_skp_lux.delete(material)
 		material_editor.refresh() if (material_editor);
-		# material_editor.set_material_list() if (material_editor)
-		# luxmat = LuxrenderMaterial.new(material)
-		# material_editor.set_current(luxmat.name) if (material_editor)
 	end
 	
 	def onMaterialChange(materials, material)

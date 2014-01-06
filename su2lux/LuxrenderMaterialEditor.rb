@@ -224,7 +224,7 @@ class LuxrenderMaterialEditor
 
 		@material_editor_dialog.add_action_callback('active_mat_type') { |dialog, param| # shows the appropriate material editor panels for current material type
             SU2LUX.dbg_p ("callback: active_mat_type")
-			@materialtype = @current.type # @materialtype = LuxrenderAttributeDictionary.get_attribute(@materials_skp_lux.index(@current).name, 'type', 'default')
+			@materialtype = @current.type
 			javascriptcommand = "$('#type').nextAll('.' + '" + @materialtype + "').show();"
             SU2LUX.dbg_p javascriptcommand
 			dialog.execute_script(javascriptcommand)
@@ -362,7 +362,7 @@ class LuxrenderMaterialEditor
             generated_lxs_file.puts ("WorldBegin")          
 			generated_lxs_file.puts ("Include \""+active_material_name_converted+".lxm\"")
             generated_lxs_file.puts (lxs_section_2)
-            previewExport.output_material (active_material, generated_lxs_file, @current) # writes "NamedMaterial #active_material_name.." or light definition
+            previewExport.output_material (active_material, generated_lxs_file, @current, active_material.name) # writes "NamedMaterial #active_material_name.." or light definition
             generated_lxs_file.puts (lxs_section_3)
             previewExport.export_displacement_textures (active_material, generated_lxs_file, @current)
             generated_lxs_file.puts ("AttributeEnd")
@@ -601,6 +601,7 @@ class LuxrenderMaterialEditor
 				#UI.messagebox(mat)
                 luxmat = find(mat.name) # creates LuxRender material
 				puts "adding material #{mat.name} to material hash, creating LuxRender material"
+                @materials_skp_lux[mat]=luxmat
 				luxmat.color = mat.color
 				if mat.texture
 					puts "setting texture information"
@@ -691,7 +692,7 @@ class LuxrenderMaterialEditor
 	#
 	##
 	def set_material_list(dropdownname)
-        puts "updating material dropdown list in LuxRender Material Editor"
+        puts "updating material dropdown list in LuxRender Material Editor, " + dropdownname
 		cmd = "$('#" + dropdownname + "').empty()"
 		@material_editor_dialog.execute_script(cmd)
 		cmd = "$('#" + dropdownname +"').append( $('"

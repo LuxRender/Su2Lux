@@ -22,7 +22,7 @@ class SU2LUX_UV
 					end
 					if (material.materialType > 0)
 						texture_size = Geom::Point3d.new(1, 1, 1)
-						distorted = self.texture_distorted?(entity, material, mat_dir)
+						distorted = self.texture_distorted?(entity, mat_dir)
 						for p in (1..mesh.count_points)
 							if (distorted)
 								vertex = mesh.point_at(p)
@@ -46,7 +46,7 @@ class SU2LUX_UV
 	##
 	#
 	##
-	def texture_distorted?(e, mat, mat_dir)
+	def texture_distorted?(e, mat_dir)
 		distorted = false
 		if e.valid? and e.is_a? Sketchup::Face
 			uvHelp = self.get_UVHelp(e, mat_dir)
