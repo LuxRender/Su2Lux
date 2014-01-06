@@ -84,6 +84,8 @@ class LuxrenderSettings
 		'environment_sun_gain' => 1.0,
 		'environment_sun_relsize' => 1.0,
 		'environment_sun_turbidity' => 2.2,
+        'environment_use_sun' => true,
+        'environment_use_sky' => true,
 
 		'use_environment_infinite_sun' => false, #GUI
 		'use_plain_color' => 'sketchup_color', #GUI

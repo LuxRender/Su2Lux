@@ -680,20 +680,25 @@ class LuxrenderExport
 		out.puts "AttributeBegin"
 		case @lrs.environment_light_type
 			when 'sunsky'
-				out.puts "\tLightSource \"sky\""
-				out.puts "\t\"float gain\" [#{"%.6f" %(@lrs.environment_sky_gain)}]"
-				out.puts "\t\"float turbidity\" [#{"%.6f" %(@lrs.environment_sky_turbidity)}]"
-				out.puts "\t\"vector sundir\" [#{"%.6f" %(sun_direction.x)} #{"%.6f" %(sun_direction.y)} #{"%.6f" %(sun_direction.z)}]"
-				out.puts "\tPortalInstance \"Portal_Shape\"" if @has_portals == true
-				out.puts "AttributeEnd" + "\n"
-				out.puts "AttributeBegin"
-				out.puts "\tLightGroup \"#{@lrs.environment_sun_lightgroup}\""
-				out.puts "\tLightSource \"sun\""
-				out.puts "\t\"float gain\" [#{"%.6f" %(@lrs.environment_sun_gain)}]"
-				out.puts "\t\"float relsize\" [#{"%.6f" %(@lrs.environment_sun_relsize)}]"
-				out.puts "\t\"float turbidity\" [#{"%.6f" %(@lrs.environment_sun_turbidity)}]"
-				out.puts "\t\"vector sundir\" [#{"%.6f" %(sun_direction.x)} #{"%.6f" %(sun_direction.y)} #{"%.6f" %(sun_direction.z)}]"
-				out.puts "\tPortalInstance \"Portal_Shape\"" if @has_portals == true
+                if (@lrs.environment_use_sky)
+                    out.puts "\tLightSource \"sky\""
+                    out.puts "\t\"float gain\" [#{"%.6f" %(@lrs.environment_sky_gain)}]"
+                    out.puts "\t\"float turbidity\" [#{"%.6f" %(@lrs.environment_sky_turbidity)}]"
+                    out.puts "\t\"vector sundir\" [#{"%.6f" %(sun_direction.x)} #{"%.6f" %(sun_direction.y)} #{"%.6f" %(sun_direction.z)}]"
+                    out.puts "\tPortalInstance \"Portal_Shape\"" if @has_portals == true
+                    out.puts "AttributeEnd" + "\n"
+                    
+                    out.puts "AttributeBegin"
+                end
+                if (@lrs.environment_use_sun)
+                    out.puts "\tLightGroup \"#{@lrs.environment_sun_lightgroup}\""
+                    out.puts "\tLightSource \"sun\""
+                    out.puts "\t\"float gain\" [#{"%.6f" %(@lrs.environment_sun_gain)}]"
+                    out.puts "\t\"float relsize\" [#{"%.6f" %(@lrs.environment_sun_relsize)}]"
+                    out.puts "\t\"float turbidity\" [#{"%.6f" %(@lrs.environment_sun_turbidity)}]"
+                    out.puts "\t\"vector sundir\" [#{"%.6f" %(sun_direction.x)} #{"%.6f" %(sun_direction.y)} #{"%.6f" %(sun_direction.z)}]"
+                    out.puts "\tPortalInstance \"Portal_Shape\"" if @has_portals == true
+                end
 			when 'infinite'
 				out.puts "\tLightSource \"infinitesample\""
 				out.puts "\t\"float gain\" [#{"%.6f" %(@lrs.environment_infinite_gain)}]"

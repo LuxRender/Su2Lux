@@ -153,24 +153,38 @@
 				<label for="env_rotate_z">Rotate Z:</label>
 				<input type='text' id="env_rotate_z" size="4">
 			</div> -->
+            
 			<div class="sunsky" id="sunsky">
-				<p class="header2">Physical sky properties</p>
-				<label for="environment_sky_lightgroup">lightgroup</label>
+
+
+				<p class="header2">Sun properties</p>
+                
+				<input type="checkbox" id="environment_use_sun">
+				<label for="environment_use_sun">use sun</label><br>
+                
+				<label for="environment_sun_lightgroup">light group</label>
+				<input type='text' id="environment_sun_lightgroup" size="10">
+				<label for="environment_sun_gain">gain</label>
+				<input type='text' id="environment_sun_gain" size="10">
+				<label for="environment_sun_turbidity">turbidity</label>
+				<input type='text' id="environment_sun_turbidity" size="3"><br>
+				<label for="environment_sun_relsize">relative sun size</label>
+				<input type='text' id="environment_sun_relsize" size="3"><br><br>
+                
+                
+				<input type="checkbox" id="environment_use_sky">
+				<label for="environment_use_sun">use sky</label><br>
+                
+				<label for="environment_sky_lightgroup">light group</label>
 				<input type='text' id="environment_sky_lightgroup" size="10">
 				<label for="environment_sky_gain">gain</label>
 				<input type='text' id="environment_sky_gain" size="10">
 				<label for="environment_sky_turbidity">turbidity</label>
 				<input type='text' id="environment_sky_turbidity" size="3">
-				<p class="header2">Sun properties</p>
-				<label for="environment_sun_lightgroup">lightgroup</label>
-				<input type='text' id="environment_sun_lightgroup" size="10">
-				<label for="environment_sun_gain">gain</label>
-				<input type='text' id="environment_sun_gain" size="10">
-				<label for="environment_sun_turbidity">turbidity</label>
-				<input type='text' id="environment_sun_turbidity" size="3">
-				<label for="environment_sun_relsize">relative size</label>
-				<input type='text' id="environment_sun_relsize" size="3">
+                
+
 			</div>
+            
 			<div class="infinite" id="infinite">
 				<p class="header2">Image map properties</p>
 				<label for="environment_infinite_lightgroup">lightgroup</label>
