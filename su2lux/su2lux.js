@@ -7,8 +7,8 @@ function checkbox_expander(id)
 			$("#" + id).nextAll(".basic").hide();
 			$("#" + id).nextAll(".advanced").show();
 		}
-		$("#" + id).next(".collapse").show();
-		$("#" + id).next(".collapse").children("#focus_type").change();
+		$("#" + id).nextAll(".collapse").show();
+		$("#" + id).nextAll(".collapse").children("#focus_type").change();
 	}
 	else if ($("#" + id).attr("checked") == false)
 	{
@@ -16,7 +16,7 @@ function checkbox_expander(id)
 			$("#" + id).nextAll(".basic").show();
 			$("#" + id).nextAll(".advanced").hide();
 		}
-		$("#" + id).next(".collapse").hide();
+		$("#" + id).nextAll(".collapse").hide();
 	}
 }
 

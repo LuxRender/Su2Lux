@@ -56,8 +56,8 @@
 			<div id="near_far_clipping_block" class="perspective orthographic environment">
 				<p class="header2">Near-Far clipping</p>
 				
-                <label for="use_clipping">On/Off</label>
                 <input type="checkbox" id="use_clipping">
+                    <label for="use_clipping">use clipping</label>
                 <div class="collapse">
                     start:<input type='text' id="hither" size="10">
                     end:<input type='text' id="yon" size="10">
@@ -67,8 +67,9 @@
 			
 			<div id="dof_bokeh_block" class="perspective orthographic">
 				<p class="header2">DOF + Bokeh</p>
-                <div><label for="use_dof_bokeh">On/Off</label>
+                <div>
                 <input type="checkbox" id="use_dof_bokeh">
+                <label for="use_dof_bokeh">Use depth of field</label>
                 
                 <div class="collapse">
                     Focus type: <select id="focus_type">
@@ -105,8 +106,8 @@
 			
 			<div id="architectural_block" class="perspective"> <!-- removed for orthographic view, shift can be more easily set in 3d view -->
 				<p class="header2">Architectural (Lens Shift) & Aspect Ratio</p>
-                <label for="use_architectural">On/Off</label>
                 <input type="checkbox" id="use_architectural">
+                <label for="use_architectural">Use lens shift</label>
                 <div class="collapse">
                     <label for="shiftX">Shift X</label>
                     <input type='text' id="shiftX" size="10">
@@ -122,16 +123,16 @@
 			</div> <!-- END architectural_block -->
 			
 			<div id="motion_blur_block" class="perspective orthographic environment">
-				<p class="header2">Motion Blur</p>
-					<label for="use_motion_blur">On/Off</label>
-					<input type="checkbox" id="use_motion_blur">
-					<div class="collapse">
-                    start:<input type='text' id="shutteropen" size="10">
-                    end:<input type='text' id="shutterclose" size="10">
-                    Distribution <select id="shutterdistribution">
-                        <option value="uniform">Uniform</option>
-                        <option value="gaussian">Gaussian</option>
-                    </select>
+            <p class="header2">Motion Blur</p>
+                <input type="checkbox" id="use_motion_blur">
+                <label for="use_motion_blur">Use motion blur</label>
+                <div class="collapse">
+                start:<input type='text' id="shutteropen" size="10">
+                end:<input type='text' id="shutterclose" size="10">
+                Distribution <select id="shutterdistribution">
+                    <option value="uniform">Uniform</option>
+                    <option value="gaussian">Gaussian</option>
+                </select>
                 </div>
 			</div> <!-- END motion_blur_block -->
 		</div><!-- END Camera section -->
@@ -156,12 +157,11 @@
             
 			<div class="sunsky" id="sunsky">
 
-
-				<p class="header2">Sun properties</p>
                 
 				<input type="checkbox" id="environment_use_sun">
 				<label for="environment_use_sun">use sun</label><br>
                 
+                <div class="collapse">
 				<label for="environment_sun_lightgroup">light group</label>
 				<input type='text' id="environment_sun_lightgroup" size="10">
 				<label for="environment_sun_gain">gain</label>
@@ -169,18 +169,20 @@
 				<label for="environment_sun_turbidity">turbidity</label>
 				<input type='text' id="environment_sun_turbidity" size="3"><br>
 				<label for="environment_sun_relsize">relative sun size</label>
-				<input type='text' id="environment_sun_relsize" size="3"><br><br>
-                
+				<input type='text' id="environment_sun_relsize" size="3"><br>
+                </div>
                 
 				<input type="checkbox" id="environment_use_sky">
 				<label for="environment_use_sun">use sky</label><br>
                 
+                <div class="collapse">
 				<label for="environment_sky_lightgroup">light group</label>
 				<input type='text' id="environment_sky_lightgroup" size="10">
 				<label for="environment_sky_gain">gain</label>
 				<input type='text' id="environment_sky_gain" size="10">
 				<label for="environment_sky_turbidity">turbidity</label>
 				<input type='text' id="environment_sky_turbidity" size="3">
+                </div>
                 
 
 			</div>
@@ -229,8 +231,8 @@
 				</label>
 				
 				<p class="header2">Sun properties</p>
-				<label for="use_environment_infinite_sun">add sun</label>
 				<input type="checkbox" id="use_environment_infinite_sun">
+                <label for="use_environment_infinite_sun">add sun</label>
 				<div class="collapse">
 					<label for="environment_infinite_sun_lightgroup">lightgroup</label>
 					<input type='text' id="environment_infinite_sun_lightgroup" size="10">
