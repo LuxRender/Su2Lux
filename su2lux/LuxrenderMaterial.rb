@@ -92,7 +92,7 @@ class LuxrenderMaterial
 		'filmindex' => 1.5,
 		'nk_preset' => 'aluminium',
         'metal2_preset' => 'aluminium',
-		'carpaint_name' => 'ford f8',
+		'carpaint_name' => '',
 		'energyconserving' => true,
 		'bumpmap' => 0.0001,
 

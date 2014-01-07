@@ -146,6 +146,14 @@ class LuxrenderMaterialEditor
                 #puts cmd
                 @material_editor_dialog.execute_script(cmd)
             end
+            # hide carpaint diffuse section for presets
+            if (@current.type == "carpaint" && @current.carpaint_name != "")
+                puts "hiding carpaint diffuse field"
+                hidediffusecommand = "$('#diffuse').hide();"
+                @material_editor_dialog.execute_script(hidediffusecommand)
+            else
+                puts "not hiding carpaint diffuse field"
+            end
         end
         
         
@@ -232,6 +240,9 @@ class LuxrenderMaterialEditor
 			javascriptcommand = "$('#type').nextAll('.' + '" + @materialtype + "').show();"
             SU2LUX.dbg_p javascriptcommand
 			dialog.execute_script(javascriptcommand)
+            
+
+            
 		}
 		
 		@material_editor_dialog.add_action_callback('type_changed') { |dialog, material_type|

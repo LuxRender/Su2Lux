@@ -12,7 +12,7 @@ function expand_section(sender_id, section_id, closed_sign, opened_sign) {  // u
 
 function checkbox_expander(id)      // user interface, shows and hides interface fields for current material
 {
-	if ($("#" + id).attr("checked"))
+    if ($("#" + id).attr("checked"))
 	{
 		if (id.match("show_advanced") || id.match("_use_")) {
 			$("#" + id).nextAll(".basic").hide();
@@ -29,7 +29,6 @@ function checkbox_expander(id)      // user interface, shows and hides interface
 		$("#" + id).nextAll(".collapse_check").hide();
 	}
 }
-
 
 function startactivemattype(){
     // loaded on opening SketchUp on OS X, on showing material dialog on Windows // triggered by window.location = 'skp:show_continued@'
@@ -60,14 +59,13 @@ function setpreviewheight(previewsize,previewtime){
 }
     
 function update_RGB(fieldR,fieldG,fieldB,colorr,colorg,colorb){
-    // alert (fieldR);
-    // alert (colorr);
     $(fieldR).val(colorr);
     $(fieldG).val(colorg);
     $(fieldB).val(colorb);
 }
 
 function show_load_buttons(textype,filename){
+    //alert ("show_load_buttons")
     idname = textype + '_texturetype';
     //alert (textype);
     if ($('#'+idname).val()=="imagemap"){
@@ -80,6 +78,7 @@ function show_load_buttons(textype,filename){
     } else{
         $(".metal2_custom").hide();
     }
+    
     
 }
 
@@ -140,9 +139,16 @@ $(document).ready(
                 }
 			}
 		)
-                  
-                  
-                  
+        
+         $("#carpaint_name").change(
+			function() {
+                if ($("#carpaint_name").val()==""){
+                    $("#diffuse").show();
+                } else{
+                    $("#diffuse").hide();
+                }
+			}
+		)
         
         $("#material_name").change(
             function() {
