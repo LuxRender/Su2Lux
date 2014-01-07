@@ -545,7 +545,7 @@ class LuxrenderMaterial
 		has_displacement = false
 		if (self.dm_texturetype != 'none')
 			if (self.dm_texturetype == 'sketchup')
-				has_displacement = true if (self.kd_texturetype == 'sketchup')
+				has_displacement = true if SU2LUX.get_editor("material").materials_skp_lux.index(self).texture
 			elsif (self.dm_texturetype == 'imagemap')
 				has_displacement = true if (not self.dm_imagemap_filename.empty?)
 			end

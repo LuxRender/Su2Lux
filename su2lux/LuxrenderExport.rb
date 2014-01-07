@@ -1302,10 +1302,10 @@ class LuxrenderExport
                 when "microdisplacement"
                     out.puts "\"integer nsubdivlevels\" [#{luxrender_mat.dm_microlevels}]"
             end
-            out.puts "\"string displacementmap\" [\""+luxrender_mat.name+"::displacementmap\"]"
+            out.puts "\"string displacementmap\" [\""+     @currenttexname    +"::displacementmap\"]"
             out.puts "\"float dmscale\" [#{"%.6f" %(luxrender_mat.dm_scale)}]"
             out.puts "\"float dmoffset\" [#{"%.6f" %(luxrender_mat.dm_offset)}]"
-        end 
+        end
     end
 	
 	def export_used_materials(materials, out, texexport, datafolder)
@@ -1415,7 +1415,7 @@ class LuxrenderExport
 		preceding += "\t" + "\"float udelta\" [#{"%.6f" %(material.send(mat_type + "_imagemap_udelta"))}]" + "\n"
 		preceding += "\t" + "\"float vdelta\" [#{"%.6f" %(material.send(mat_type + "_imagemap_vdelta"))}]" + "\n"
 
-        if (material.send( mat_type + "_imagemap_colorize") == true)
+        if (material.send(mat_type + "_imagemap_colorize") == true)
             preceding += "Texture \"#{@currenttexname_prefixed}::#{type_str}.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{@currenttexname_prefixed}::#{type_str}\"] \"#{type} tex2\" [#{material.send(type_str2)}]" + "\n"
             following += "\t" + "\"texture #{type_str}\" [\"#{@currenttexname_prefixed}::#{type_str}.scale\"]" + "\n"
         else
@@ -1536,7 +1536,7 @@ class LuxrenderExport
         if (mat.has_normal?)
             pre, post = self.export_normal(mat, pre, post)
 		end
-        if (mat.use_displacement)
+        if (mat.has_displacement?)
             puts "mat.use_displacement is true"
 			pre, post = self.export_displacement(mat, pre, post)
 		end
@@ -1911,7 +1911,7 @@ class LuxrenderExport
             puts ("material.has_texture? dm is true")
 			preceding, following = self.export_texture(material, "dm", "float", before, after)
 		end
-		return [before + preceding, after]
+		return [before + preceding, after] # following parts would be added to geometry, not to material definition
 	end
 
 	def export_mesh_light(material)
