@@ -514,7 +514,8 @@ class LuxrenderMaterial
 		has_bump = false
 		if (self.bump_texturetype != 'none')
 			if (self.bump_texturetype == 'sketchup')
-				has_bump = true if (self.kd_texturetype == 'sketchup')
+                # do not export if the material does not have a texture
+				has_bump = true if SU2LUX.get_editor("material").materials_skp_lux.index(self).texture
             elsif (self.bump_texturetype == 'imagemap')
 				has_bump = true if (not self.bump_imagemap_filename.empty?)
 			end
@@ -529,7 +530,7 @@ class LuxrenderMaterial
 		has_normal = false
 		if (self.normal_texturetype != 'none')
 			if (self.normal_texturetype == 'sketchup')
-				has_normal = true if (self.kd_texturetype == 'sketchup')
+				has_normal = true if SU2LUX.get_editor("material").materials_skp_lux.index(self).texture
             elsif (self.normal_texturetype == 'imagemap')
 				has_normal = true if (not self.normal_imagemap_filename.empty?)
 			end

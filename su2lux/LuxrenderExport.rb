@@ -1022,6 +1022,7 @@ class LuxrenderExport
 		end
         
         if is_instance.empty?
+            
             out.puts "AttributeEnd\n\n"
         else
             out.puts 'ObjectEnd'
@@ -1436,7 +1437,6 @@ class LuxrenderExport
             @currentfilename = sanitize_path(@model_textures[mat.name][4])
             @currenttexname = "xx_" + sanitize_path(@model_textures[mat.name][4])
             @currenttexname_prefixed = "tex" + sanitize_path(@model_textures[mat.name][4])
-            puts "IF ONLY DISTORTED, THEN USE THIS:" + @currenttexname
         else
             @currentmatname = sanitize_path(mat.name)
             if (@model_textures.has_key?(mat.name))
@@ -1451,90 +1451,88 @@ class LuxrenderExport
 		post = ""
 		case mat.type
 			when "null"
-            pre, post = self.export_null(mat, pre, post)
+                pre, post = self.export_null(mat, pre, post)
 			when "mix"
-            pre, post = self.export_mix(mat, pre, post)
+                pre, post = self.export_mix(mat, pre, post)
 			when "matte"
-            pre, post = self.export_diffuse_component(mat, pre, post)
-            pre, post = self.export_sigma(mat, pre, post)
-			when "carpaint"
-            pre, post = self.export_carpaint_name(mat, pre, post)
-            if (!mat.carpaint_name)
                 pre, post = self.export_diffuse_component(mat, pre, post)
-            end
-			when "velvet"
-            pre, post = self.export_diffuse_component(mat, pre, post)
-            pre, post = self.export_sigma(mat, pre, post)
-            when "cloth"
-            pre, post = self.export_cloth_base(mat, pre, post)
-            pre, post = self.export_cloth_channel1(mat, pre, post)
-            pre, post = self.export_cloth_channel2(mat, pre, post)
-            pre, post = self.export_cloth_channel3(mat, pre, post)
-            pre, post = self.export_cloth_channel3(mat, pre, post)
-			when "glossy"
-            pre, post = self.export_diffuse_component(mat, pre, post)
-            pre, post = self.export_specular_component(mat, pre, post)
-            pre, post = self.export_exponent(mat, pre, post)
-            pre, post = self.export_IOR(mat, pre, post)
-            if (mat.use_absorption)
-                pre, post = self.export_absorption_component(mat, pre, post)
-            end
-            multibounce = mat.multibounce ? "true": "false"
-            post += "\t" + "\"bool multibounce\" [\"#{multibounce}\"]" + "\n"
-			when "glass"
-            pre, post = self.export_reflection_component(mat, pre, post)
-            pre, post = self.export_transmission_component(mat, pre, post)
-            pre, post = self.export_IOR(mat, pre, post)
-            architectural = mat.use_architectural ? "true" : "false"
-            post += "\t" + "\"bool architectural\" [\"#{architectural}\"]" + "\n"
-            if ( ! mat.use_architectural)
-                if (mat.use_dispersive_refraction)
-                    pre, post = self.export_dispersive_refraction(mat, pre, post)
+                pre, post = self.export_sigma(mat, pre, post)
+			when "carpaint"
+                pre, post = self.export_carpaint_name(mat, pre, post)
+                if (!mat.carpaint_name)
+                    pre, post = self.export_diffuse_component(mat, pre, post)
                 end
-            end
+			when "velvet"
+                pre, post = self.export_diffuse_component(mat, pre, post)
+                pre, post = self.export_sigma(mat, pre, post)
+            when "cloth"
+                pre, post = self.export_cloth_base(mat, pre, post)
+                pre, post = self.export_cloth_channel1(mat, pre, post)
+                pre, post = self.export_cloth_channel2(mat, pre, post)
+                pre, post = self.export_cloth_channel3(mat, pre, post)
+                pre, post = self.export_cloth_channel3(mat, pre, post)
+			when "glossy"
+                pre, post = self.export_diffuse_component(mat, pre, post)
+                pre, post = self.export_specular_component(mat, pre, post)
+                pre, post = self.export_exponent(mat, pre, post)
+                pre, post = self.export_IOR(mat, pre, post)
+                if (mat.use_absorption)
+                    pre, post = self.export_absorption_component(mat, pre, post)
+                end
+                multibounce = mat.multibounce ? "true": "false"
+                post += "\t" + "\"bool multibounce\" [\"#{multibounce}\"]" + "\n"
+			when "glass"
+                pre, post = self.export_reflection_component(mat, pre, post)
+                pre, post = self.export_transmission_component(mat, pre, post)
+                pre, post = self.export_IOR(mat, pre, post)
+                architectural = mat.use_architectural ? "true" : "false"
+                post += "\t" + "\"bool architectural\" [\"#{architectural}\"]" + "\n"
+                if ( ! mat.use_architectural)
+                    if (mat.use_dispersive_refraction)
+                        pre, post = self.export_dispersive_refraction(mat, pre, post)
+                    end
+                end
 			when "roughglass"
-            pre, post = self.export_reflection_component(mat, pre, post)
-            pre, post = self.export_transmission_component(mat, pre, post)
-            pre, post = self.export_IOR(mat, pre, post)
-            pre, post = self.export_dispersive_refraction(mat, pre, post)
+                pre, post = self.export_reflection_component(mat, pre, post)
+                pre, post = self.export_transmission_component(mat, pre, post)
+                pre, post = self.export_IOR(mat, pre, post)
+                pre, post = self.export_dispersive_refraction(mat, pre, post)
 			when "metal"
-            pre, post = self.export_nk(mat, pre, post)
-            pre, post = self.export_exponent(mat, pre, post)
-            
+                pre, post = self.export_nk(mat, pre, post)
+                pre, post = self.export_exponent(mat, pre, post)
             when "metal2"
-            pre, post = self.export_metal2(mat, pre, post)
-            pre, post = self.export_exponent(mat, pre, post)
-            
+                pre, post = self.export_metal2(mat, pre, post)
+                pre, post = self.export_exponent(mat, pre, post)
 			when "shinymetal"
-            pre, post = self.export_reflection_component(mat, pre, post)
-            pre, post = self.export_specular_component(mat, pre, post)
-            pre, post = self.export_exponent(mat, pre, post)
+                pre, post = self.export_reflection_component(mat, pre, post)
+                pre, post = self.export_specular_component(mat, pre, post)
+                pre, post = self.export_exponent(mat, pre, post)
 			when "mirror"
-            pre, post = self.export_reflection_component(mat, pre, post)
+                pre, post = self.export_reflection_component(mat, pre, post)
             when "mattetranslucent"
-            pre, post = self.export_reflection_component(mat, pre, post)
-            pre, post = self.export_transmission_component(mat, pre, post)
-            energyconserving = mat.energyconserving ? "true": "false"
-            post += "\t" + "\"bool energyconserving\" [\"#{energyconserving}\"]" + "\n"
-            pre, post = self.export_sigma(mat, pre, post)
+                pre, post = self.export_reflection_component(mat, pre, post)
+                pre, post = self.export_transmission_component(mat, pre, post)
+                energyconserving = mat.energyconserving ? "true": "false"
+                post += "\t" + "\"bool energyconserving\" [\"#{energyconserving}\"]" + "\n"
+                pre, post = self.export_sigma(mat, pre, post)
 			when "glossytranslucent"
-            pre, post = self.export_diffuse_component(mat, pre, post)
-            pre, post = self.export_transmission_component(mat, pre, post)
-            pre, post = self.export_specular_component(mat, pre, post)
-            pre, post = self.export_exponent(mat, pre, post)
-            pre, post = self.export_IOR(mat, pre, post)
-            pre, post = self.export_absorption_component(mat, pre, post)
-            multibounce = mat.multibounce ? "true": "false"
-            post += "\t" + "\"bool multibounce\" [\"#{multibounce}\"]" + "\n"
+                pre, post = self.export_diffuse_component(mat, pre, post)
+                pre, post = self.export_transmission_component(mat, pre, post)
+                pre, post = self.export_specular_component(mat, pre, post)
+                pre, post = self.export_exponent(mat, pre, post)
+                pre, post = self.export_IOR(mat, pre, post)
+                pre, post = self.export_absorption_component(mat, pre, post)
+                multibounce = mat.multibounce ? "true": "false"
+                post += "\t" + "\"bool multibounce\" [\"#{multibounce}\"]" + "\n"
 			when "light"
-            post += self.export_mesh_light(mat)
+                post += self.export_mesh_light(mat)
 		end
         if (mat.use_thin_film_coating)
             pre, post = self.export_thin_film(mat, pre, post)
         end
-		# if (mat.use_bump)
-        pre, post = self.export_bump(mat, pre, post)
-		# end
+		if (mat.has_bump?)
+            pre, post = self.export_bump(mat, pre, post)
+		end
         if (mat.has_normal?)
             pre, post = self.export_normal(mat, pre, post)
 		end
@@ -1896,17 +1894,13 @@ class LuxrenderExport
 	def export_bump(material, before, after)
 		preceding = ""
 		following = ""
-		if (material.has_texture?('bump'))
-			preceding, following = self.export_texture(material, "bump", "float", before, after)
-		end
+        preceding, following = self.export_texture(material, "bump", "float", before, after)
 		return [before + preceding, after + following]
 	end
 	def export_normal(material, before, after)
 		preceding = ""
 		following = ""
-		if (material.has_texture?('normal'))
-			preceding, following = self.export_texture(material, "normal", "float", before, after)
-		end
+        preceding, following = self.export_texture(material, "normal", "float", before, after)
 		return [before + preceding, after + following]
 	end
 
