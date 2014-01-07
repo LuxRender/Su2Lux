@@ -28,7 +28,7 @@ class LuxrenderMaterial
 	{
 		'type' => "glossy",
 		'kd_imagemap_Sketchup_filename' => '',
-        'texturechannels' => ["kd", "ks", "ka", "mx", "u_exponent", "v_exponent", "uroughness", "vroughness", "cl1kd", "cl1ks", "cl2kd", "cl2ks", "ka_d", "IOR_index", "kr", "kt", "cauchyb", "film", "filmindex", "bump", "normal", "dm"],
+        'texturechannels' => ["kd", "ks", "ka", "km2", "mx", "u_exponent", "v_exponent", "uroughness", "vroughness", "cl1kd", "cl1ks", "cl2kd", "cl2ks", "ka_d", "IOR_index", "kr", "kt", "cauchyb", "film", "filmindex", "bump", "normal", "dm"],
         
 		'kd_R' => 0.64,
 		'kd_G' => 0.64,
@@ -45,10 +45,14 @@ class LuxrenderMaterial
 		'kr_R' => 1.0,
 		'kr_G' => 1.0,
 		'kr_B' => 1.0,
-
+        
 		'kt_R' => 1.0,
 		'kt_G' => 1.0,
 		'kt_B' => 1.0,
+        
+		'km2_R' => 1.0,
+		'km2_G' => 1.0,
+		'km2_B' => 1.0,
         
         'cl1kd_R' => 0.8,
         'cl1kd_G' => 0.0,
@@ -87,6 +91,7 @@ class LuxrenderMaterial
 		'film' => 200,
 		'filmindex' => 1.5,
 		'nk_preset' => 'aluminium',
+        'metal2_preset' => 'aluminium',
 		'carpaint_name' => 'ford f8',
 		'energyconserving' => true,
 		'bumpmap' => 0.0001,
@@ -165,6 +170,7 @@ class LuxrenderMaterial
 			"kd_imagemap_filename",
 			"matte_sigma_imagemap_filename",
 			"ks_imagemap_filename",
+			"km2_imagemap_filename",
 			"uroughness_imagemap_filename",
 			"vroughness_imagemap_filename",
             
@@ -206,6 +212,7 @@ class LuxrenderMaterial
 		lux_image_texture("matte", "sigma", "imagemap", "float")
 		lux_image_texture("", "ks", "imagemap", "color")
 		lux_image_texture("", "ka", "imagemap", "color")
+		lux_image_texture("", "km2", "imagemap", "color")
 		lux_image_texture("", "mx", "imagemap", "float") # mix
 		lux_image_texture("", "u_exponent", "imagemap", "float")
 		lux_image_texture("", "v_exponent", "imagemap", "float")
@@ -339,6 +346,10 @@ class LuxrenderMaterial
         greenstring = mattype+'_G'
         bluestring = mattype+'_B'
         returncolor = "#{"%.6f" %(self.send(redstring))} #{"%.6f" %(self.send(greenstring))} #{"%.6f" %(self.send(bluestring))}"
+    end
+    
+    def km2_tos
+        channelcolor_tos('km2')
     end
     
     def cl1kd_tos

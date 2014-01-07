@@ -74,6 +74,13 @@ function show_load_buttons(textype,filename){
         $('#'+idname).nextAll(".imagemap").show(); // shows  <span class="imagemap">
         $('#'+textype+'_imgmapname').text(filename)
     }
+    // show color/texture area for custom material
+    if ($("#metal2_preset").val()=="custom"){
+        $(".metal2_custom").show();
+    } else{
+        $(".metal2_custom").hide();
+    }
+    
 }
 
 $(document).ready(
@@ -123,6 +130,19 @@ $(document).ready(
                 window.location = 'skp:type_changed@' + this.value;
 			}
 		)
+                  
+        $("#metal2_preset").change(
+			function() {
+                if ($("#metal2_preset").val()=="custom"){
+                    $(".metal2_custom").show();
+                } else{
+                    $(".metal2_custom").hide();
+                }
+			}
+		)
+                  
+                  
+                  
         
         $("#material_name").change(
             function() {

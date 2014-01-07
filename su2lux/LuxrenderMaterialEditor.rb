@@ -190,6 +190,10 @@ class LuxrenderMaterialEditor
                     @current.kr_R = rvalue
                     @current.kr_G = gvalue
                     @current.kr_B = bvalue
+                when "metal2_swatch"
+                    @current.km2_R = rvalue
+                    @current.km2_G = gvalue
+                    @current.km2_B = bvalue
                 when "transmission_swatch"
                     @current.kt_R = rvalue
                     @current.kt_G = gvalue

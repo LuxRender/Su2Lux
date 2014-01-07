@@ -1500,6 +1500,11 @@ class LuxrenderExport
 			when "metal"
             pre, post = self.export_nk(mat, pre, post)
             pre, post = self.export_exponent(mat, pre, post)
+            
+            when "metal2"
+            pre, post = self.export_metal2(mat, pre, post)
+            pre, post = self.export_exponent(mat, pre, post)
+            
 			when "shinymetal"
             pre, post = self.export_reflection_component(mat, pre, post)
             pre, post = self.export_specular_component(mat, pre, post)
@@ -1776,7 +1781,6 @@ class LuxrenderExport
 			following += "\t" + "\"float uroughness\" [#{"%.6f" %(material.uroughness)}]" + "\n"
 			following += "\t" + "\"float vroughness\" [#{"%.6f" %(material.vroughness)}]" + "\n"
 		else
-		# TODO:
 			preceding_t, following_t = self.export_texture(material, "u_exponent", "float", before, after)
 			preceding, following = self.export_texture(material, "v_exponent", "float", before, after)
 			preceding = preceding_t+ preceding
@@ -1818,6 +1822,26 @@ class LuxrenderExport
 		following += "\t" + "\"string name\" [\"#{material.nk_preset}\"]" + "\n"
 		return [before + preceding, after + following]
 	end
+    
+    def export_metal2(material, before, after)
+        preceding = ""
+        following = ""
+        if (material.metal2_preset == "custom")
+            if (material.has_texture?('km2'))
+                preceding, preceding2 = self.export_texture(material, "km2", "color", before, after)
+                preceding += "\n" + "Texture \"#{@currenttexname_prefixed}::Km2_fresnel\" \"fresnel\" \"fresnelcolor\"" + "\n"
+                preceding += preceding2
+            else
+                preceding += "Texture \"#{@currenttexname_prefixed}::Km2_fresnel\" \"fresnel\" \"fresnelcolor\"" + "\n"
+                preceding += "\t" + "\"color Kr\" [#{material.km2_R} #{material.km2_G} #{material.km2_B}]" + "\n" + "\n"
+            end
+        else # preset
+            preceding += "Texture \"#{@currenttexname_prefixed}::Km2_fresnel\" \"fresnel\" \"preset\"" + "\n"
+            preceding += "\"string name\" [\"" + material.metal2_preset + "\"]" + "\n" + "\n"
+        end
+        following += "\t" + "\"texture fresnel\" [\"#{@currenttexname_prefixed}::Km2_fresnel\"]" + "\n"
+        return [before + preceding, after + following]
+    end
 
 	def export_reflection_component(material, before, after)
 		preceding = ""
@@ -1926,6 +1950,11 @@ class LuxrenderExport
 			when 'ka'
 				type_str = "Ka"
 				type_str2 = "absorption_tos"
+                
+            when 'km2'
+                type_str = "Kr"
+                type_str2 = "km2_tos"
+            
 			when 'ka_d'
 				type_str = "d"
 				type_str2 = "ka_d"
