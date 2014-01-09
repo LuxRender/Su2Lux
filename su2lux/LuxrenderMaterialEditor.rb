@@ -43,6 +43,7 @@ class LuxrenderMaterialEditor
 		@material_editor_dialog.add_action_callback('param_generate') {|dialog, params|
             SU2LUX.dbg_p ("callback: param_generate")
 			parameters = string_to_hash(params) # converts data passed by webdialog to hash
+
 			material = Sketchup.active_model.materials.current
 			lux_material = @current
 			parameters.each{ |k, v|
@@ -71,7 +72,7 @@ class LuxrenderMaterialEditor
                             puts "some other color channel"
                             update_swatches()
 					end
-				end
+                end
                 if (v == "imagemap")
                         puts "updating text"
                         textype = k.dup
@@ -151,9 +152,23 @@ class LuxrenderMaterialEditor
                 puts "hiding carpaint diffuse field"
                 hidediffusecommand = "$('#diffuse').hide();"
                 @material_editor_dialog.execute_script(hidediffusecommand)
-            else
-                puts "not hiding carpaint diffuse field"
             end
+            
+            # show proper auto alpha values
+            if (@current.aa_texturetype=="imagealpha" || @current.aa_texturetype=="imagecolor")
+                puts "SHOWING AUTO ALPHA BUTTONS"
+                #cmd = '$("#aa").nextAll(".autoalpha_image").show()';
+                 cmd = '$("#autoalpha_image_field").show()';
+                @material_editor_dialog.execute_script(cmd)
+#           else # sketchup texture
+#               puts "HIDING AUTO ALPHA BUTTONS"
+#               #       $('#aa').nextAll(".imagemap").hide();
+#               #cmd = '$("#aa").nextAll(".autoalpha_image").hide()';
+#               cmd = '$("#autoalpha_image_field").hide()';
+#
+#               @material_editor_dialog.execute_script(cmd)
+            end
+            
         end
         
         
@@ -455,14 +470,27 @@ class LuxrenderMaterialEditor
 		
 		@material_editor_dialog.add_action_callback("texture_editor") {|dialog, params|
             puts ("callback: texture_editor")
+
 			lux_material = @current
-			data = params.to_s
+            puts "params:"
+            puts params.to_s
+            data = params.to_s # for example ks
+                                   
 			method_name = data + '_texturetype'
 			texture_type = lux_material.send(method_name)
+            if (data=="aa") # autoalpha does not have a single imagemap entry, but does store its texture under that name
+                texture_type = "imagemap"
+            end
 			
 			prefix = data + '_' + texture_type + '_'
 			@texture_editor_data['texturetype'] = lux_material.send(method_name)
-            
+        
+            # temp
+           puts "lux_material, prefix:"
+           puts lux_material
+           puts prefix
+                                   
+           # end temp
 			['wrap', 'channel', 'filename', 'gamma', 'gain', 'filtertype', 'mapping', 'uscale',
 			 'vscale', 'udelta', 'vdelta', 'maxanisotropy', 'discardmipmaps'].each {|par|
 				@texture_editor_data[texture_type + '_' + par] = lux_material.send(prefix + par) if (lux_material.respond_to?(prefix+par))
@@ -672,7 +700,7 @@ class LuxrenderMaterialEditor
     def update_texture_name(luxmat, textype)
         filepath = File.basename(luxmat.send(textype+'_imagemap_filename'))
         cmd = 'show_load_buttons(\'' + textype + '\',\'' + filepath + '\')'
-        #puts cmd
+        # puts cmd
         @material_editor_dialog.execute_script(cmd)
     end
     

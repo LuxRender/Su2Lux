@@ -65,21 +65,24 @@ function update_RGB(fieldR,fieldG,fieldB,colorr,colorg,colorb){
 }
 
 function show_load_buttons(textype,filename){
+    //alert (textype)
     //alert ("show_load_buttons")
     idname = textype + '_texturetype';
-    //alert (textype);
     if ($('#'+idname).val()=="imagemap"){
         $('#'+idname).nextAll(".imagemap").show(); // shows  <span class="imagemap">
         $('#'+textype+'_imgmapname').text(filename)
     }
-    // show color/texture area for custom material
+    // autoalpha
+    if (textype=="aa"){
+        $('#aa_imgmapname').text(filename)
+    }
+    
+    // show color/texture area for custom metal2 material
     if ($("#metal2_preset").val()=="custom"){
         $(".metal2_custom").show();
     } else{
         $(".metal2_custom").hide();
     }
-    
-    
 }
 
 $(document).ready(
@@ -95,6 +98,7 @@ $(document).ready(
 		$("#settings_panel select, :text").change( // triggered on changing dropdown menus or text fields
 			function()
 			{
+                //alert ("detected!")
 				window.location = 'skp:param_generate@' + this.id+'='+this.value
 			}
 		)
@@ -197,11 +201,16 @@ $(document).ready(
             {
                 $(this).nextAll().hide();
                 $(this).nextAll("." + this.value).show(); // shows image map interface elements
+                // show auto alpha field
+                if (this.value == "imagealpha" || this.value == "imagecolor"){
+                    $("#autoalpha_image_field").show();
+                }else if (this.value == "sketchupalpha"){
+                    $("#autoalpha_image_field").hide();
+                }
                 // note: do not add window.location methods as they will interfere with .change functions on OS X
 			}
 		)
-                  
-                  
+
         $("#mx_texturetype").change(
             function()
             {
@@ -220,7 +229,6 @@ $(document).ready(
                 }
         )
  
-                  
         $("#dm_scheme").change(
             function()
             {
@@ -233,8 +241,6 @@ $(document).ready(
                 }
             }
         );
-        
-                  
         
         $('#previewsize').change(
             function()

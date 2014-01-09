@@ -343,6 +343,11 @@ input#get_diffuse_color {
     height: 78px;
 }
 
+.parameter_interface_autoalpha{
+    position: relative;
+    height: 45px;
+}
+
 #metal2_color{
     position: relative;
     top: 0px;
@@ -399,6 +404,13 @@ input#get_diffuse_color {
     left: 180px;
     top: 0px;
 }
+
+.texture_area_autoalpha{
+    position: absolute;
+    left: 140px;
+    top: -23px;
+}
+
 
 .texture_area_dr{
     position: absolute;

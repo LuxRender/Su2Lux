@@ -1302,7 +1302,9 @@ class LuxrenderExport
                 when "microdisplacement"
                     out.puts "\"integer nsubdivlevels\" [#{luxrender_mat.dm_microlevels}]"
             end
-            out.puts "\"string displacementmap\" [\""+     @currenttexname    +"::displacementmap\"]"
+            puts "IN THE MIDDLE OF EXPORT_DISPLACEMENT_TEXTURES, @currenttexname is:"
+            puts @currenttexname
+            out.puts "\"texture displacementmap\" [\""+     @currenttexname    +"::displacementmap\"]"
             out.puts "\"float dmscale\" [#{"%.6f" %(luxrender_mat.dm_scale)}]"
             out.puts "\"float dmoffset\" [#{"%.6f" %(luxrender_mat.dm_offset)}]"
         end
@@ -1425,30 +1427,8 @@ class LuxrenderExport
         return [preceding, following]
 	end
 
-	def export_mat(mat, out, distortedname, texdistorted)
-        @currentluxmat = mat
-        puts "texdistorted:" + texdistorted.to_s
-        if(distortedname && texdistorted)
-            @currentmatname = File.basename(sanitize_path(distortedname), '.*') + SU2LUX::SUFFIX_DISTORTED_TEXTURE
-            @currenttexname = distortedname
-            @currenttexname_prefixed = @currentfilename = SU2LUX::PREFIX_DISTORTED_TEXTURE + distortedname
-        elsif(distortedname)
-            @currentmatname = File.basename(sanitize_path(distortedname), '.*')
-            @currentfilename = sanitize_path(@model_textures[mat.name][4])
-            @currenttexname = "xx_" + sanitize_path(@model_textures[mat.name][4])
-            @currenttexname_prefixed = "tex" + sanitize_path(@model_textures[mat.name][4])
-        else
-            @currentmatname = sanitize_path(mat.name)
-            if (@model_textures.has_key?(mat.name))
-                @currenttexname = @currentfilename = @currenttexname_prefixed = sanitize_path(@model_textures[mat.name][4])
-            end
-        end
-        
-		out.puts "# Material '" + @currentmatname + "'"
-		heading = "MakeNamedMaterial \"#{@currentmatname}\"" + "\n"
-		heading += "\t" + "\"string type\" [\"#{mat.type}\"]" + "\n"
-		pre = ""
-		post = ""
+
+    def export_material_parameters(mat, pre, post)
 		case mat.type
 			when "null"
                 pre, post = self.export_null(mat, pre, post)
@@ -1527,6 +1507,36 @@ class LuxrenderExport
 			when "light"
                 post += self.export_mesh_light(mat)
 		end
+        return pre, post
+    end # end export_material_parameters
+
+	def export_mat(mat, out, distortedname, texdistorted)
+        @currentluxmat = mat
+        puts "texdistorted:" + texdistorted.to_s
+        if(distortedname && texdistorted)
+            @currentmatname = File.basename(sanitize_path(distortedname), '.*') + SU2LUX::SUFFIX_DISTORTED_TEXTURE
+            @currenttexname = File.basename(sanitize_path(distortedname), '.*')
+            @currenttexname_prefixed =  SU2LUX::PREFIX_DISTORTED_TEXTURE + @currenttexname
+            @currentfilename = SU2LUX::PREFIX_DISTORTED_TEXTURE + distortedname
+            
+        elsif(distortedname)
+            @currentmatname = File.basename(sanitize_path(distortedname), '.*')
+            @currentfilename = sanitize_path(@model_textures[mat.name][4])
+            @currenttexname = "xx_" + File.basename(sanitize_path(@model_textures[mat.name][4]), '.*')
+            @currenttexname_prefixed = "tex" + File.basename(sanitize_path(@model_textures[mat.name][4]), '.*')
+        else
+            @currentmatname = sanitize_path(mat.name)
+            if (@model_textures.has_key?(mat.name))
+                @currentfilename = sanitize_path(@model_textures[mat.name][4])
+                @currenttexname = @currenttexname_prefixed = File.basename(@currentfilename, '.*')
+            end
+        end
+        
+        # export main material properties
+		pre = ""
+		post = ""
+        pre, post = export_material_parameters(mat, pre, post)
+        
         if (mat.use_thin_film_coating)
             pre, post = self.export_thin_film(mat, pre, post)
         end
@@ -1537,15 +1547,78 @@ class LuxrenderExport
             pre, post = self.export_normal(mat, pre, post)
 		end
         if (mat.has_displacement?)
-            puts "mat.use_displacement is true"
 			pre, post = self.export_displacement(mat, pre, post)
 		end
+        
+        matnamecomment = "# Material '" + @currentmatname + "'"
+		matdeclaration_statement1 = "MakeNamedMaterial \"#{@currentmatname}\"" + "\n"
+		matdeclaration_statement2 = "\t" + "\"string type\" [\"#{mat.type}\"]" + "\n"
+        
 		if (mat.type == "light")
-			out.puts post	
-		else
-			out.puts pre if (pre != "")
-			out.puts heading
+            out.puts matnamecomment
 			out.puts post
+        else
+            if (mat.use_auto_alpha == true)
+                puts "explorting alpha transparency"
+                # export material as mix material
+                out.puts "# auto-alpha material for Material '" + @currentmatname + "'" + "\n"+ "\n"
+                # define null material
+                out.puts "# Material 'Mix_Null'"  + "\n"
+                out.puts "MakeNamedMaterial \"Mix_Null\"" + "\n"
+                out.puts "\t" + "\"string type\" [\"null\"]" + "\n" + "\n"
+                # define main material (with altered name) and texture
+                out.puts "# Original material texture and material definition "
+                out.puts pre
+                out.puts "# Material 'Mix_Original'"  + "\n"
+                out.puts "MakeNamedMaterial \"Mix_Original\"" + "\n"
+                out.puts matdeclaration_statement2
+                out.puts post
+                out.puts "\n" + "\n"
+                # write mix texture
+                out.puts '# Generated mix texture'
+                out.puts 'Texture "' + mat.name + '_automix::amount" "float" "imagemap"'
+                imagemap_filename = ""
+                if (mat.aa_texturetype=="sketchupalpha") ## sketchup texture
+                    if (@model_textures.has_key?(mat.name))
+                        imagemap_filename = @currentfilename
+                        imagemap_filename = File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER + SU2LUX::TEXTUREFOLDER + imagemap_filename
+                    end
+               else ## image texture
+                    if (@texexport == "all")
+                        imagemap_filename = @texfolder + "/" + File.basename(sanitize_path(mat.send("aa_imagemap_filename")))
+                    else
+                        imagemap_filename = sanitize_path(mat.send("aa_imagemap_filename"))
+                    end
+                end
+                out.puts "\t" + "\"string filename\" [\"#{imagemap_filename}\"]" + "\n"
+                out.puts "\t" + "\"float gamma\" [#{mat.send("aa_imagemap_gamma")}]" + "\n"
+                out.puts "\t" + "\"float gain\" [#{mat.send("aa_imagemap_gain")}]" + "\n"
+                out.puts "\t" + "\"string wrap\" [\"repeat\"]"
+                if (mat.aa_texturetype=="imagealpha" || mat.aa_texturetype=="sketchupalpha")
+                    out.puts "\t" + "\"string channel\" [\"alpha\"]"
+                else
+                    out.puts "\t" + "\"string channel\" [\"mean\"]"
+                end
+                out.puts "\t" + "\"string filtertype\" [\"" + mat.aa_imagemap_filtertype + "\"]" + "\n"
+                out.puts "\t" + "\"string mapping\" [\"uv\"]" + "\n"
+                out.puts "\t" + "\"float uscale\" [" + mat.aa_imagemap_uscale.to_s + "]" + "\n"
+                out.puts "\t" + "\"float vscale\" [" + mat.aa_imagemap_vscale.to_s + "]" + "\n"
+                out.puts "\t" + "\"float udelta\" [" + mat.aa_imagemap_udelta.to_s + "]" + "\n"
+                out.puts "\t" + "\"float vdelta\" [" + mat.aa_imagemap_vdelta.to_s + "]" + "\n" + "\n"
+                # define mix material with matdeclaration_statement
+                out.puts matnamecomment
+                out.puts matdeclaration_statement1
+                out.puts "\t" + "\"string type\" [\"mix\"]" + "\n"
+                out.puts "\t" + "\"texture amount\" [\"" + mat.name +  "_automix::amount\"]" + "\n"
+                out.puts "\t" + "\"string namedmaterial1\" [\"Mix_Null\"]" + "\n"
+                out.puts "\t" + "\"string namedmaterial2\" [\"Mix_Original\"]" + "\n"
+            else # export ordinary material
+                out.puts matnamecomment
+                out.puts pre if (pre != "")
+                out.puts matdeclaration_statement1
+                out.puts matdeclaration_statement2
+                out.puts post
+            end
 		end
 		out.puts("\n")
 	end # END export_mat
@@ -1944,11 +2017,9 @@ class LuxrenderExport
 			when 'ka'
 				type_str = "Ka"
 				type_str2 = "absorption_tos"
-                
             when 'km2'
                 type_str = "Kr"
                 type_str2 = "km2_tos"
-            
 			when 'ka_d'
 				type_str = "d"
 				type_str2 = "ka_d"
@@ -1976,7 +2047,6 @@ class LuxrenderExport
 			when 'carpaint_name'
 				type_str = 'carpaint_name'
 				type_str2 = 'name'
-                
             when 'cl1kd'
                 type_str = 'warp_Kd'
                 type_str2 = 'cl1kd_tos'
@@ -1989,8 +2059,6 @@ class LuxrenderExport
             when 'cl2ks'
                 type_str = 'weft_Ks'
                 type_str2 = 'cl2ks_tos'
-                
-                
                 
 			else
 				type_str = type_str2 = mat_type

@@ -21,6 +21,7 @@ class LuxrenderTextureEditor
 
 	
 	def initialize(texture_data, lux_parameter) # lux_parameter is texture type, for example "kd"
+        puts "creating new texture editor"
 		@texture_editor_dialog = UI::WebDialog.new("LuxRender Texture Editor", true, "LuxrenderTextureEditor", 600, 322, 900, 400, true)
 		texture_editor_dialog_path = Sketchup.find_support_file("TextureEditor.html", "Plugins/su2lux")
 		@texture_editor_dialog.max_width = 600
@@ -181,6 +182,9 @@ class LuxrenderTextureEditor
 	#
 	##
 	def setValue(id, value) #extend to encompass different types (textbox, anchor, slider)
+        puts "setting value:"
+        puts id
+        puts value
 		new_value=value.to_s
 		case id
 			when is_a_checkbox?(id)

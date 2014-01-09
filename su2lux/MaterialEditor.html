@@ -457,8 +457,28 @@
                 </div> <!-- end panelcontent -->
 			</div> <!-- END metal -->
             
-            
-            
+            <div id="aa" class="matte glossy glossytranslucent glass metal2 mirror mattetranslucent glossytranslucent carpaint cloth velvet">
+				<p class="header2">Alpha transparency</p>
+                <div class="panelcontent collapse">
+                    <input type="checkbox" id="use_auto_alpha" class="margin_bottom"><label for="use_auto_alpha"> Use transparency</label>
+                    <div class="collapse_check">
+                        <div class="parameter_interface_autoalpha">
+                            <div class="texture_area_autoalpha">
+                                <label for="aa_texturetype" class="tex_label">Texture</label>
+                                <select id="aa_texturetype" class="tex_dropdown">
+                                    <option value="sketchupalpha">SketchUp texture alpha</option>
+                                    <option value="imagealpha">Image map alpha</option>
+                                    <option value="imagecolor">Image map color</option>
+                                </select>
+                                <span class="imagemap" id="autoalpha_image_field">
+                                    <div id="aa_imgmapname" class="tex_path">&nbsp; temporary text</div>
+                                    <input type="button" id="aa_browse_map" value="load" class="tex_loadbutton">
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             
 			<div id="exponent_div" class="glossy metal metal2 roughglass shinymetal glossytranslucent">
@@ -506,6 +526,7 @@
                     <div class="parameter_interface">
                         <label for="IOR" class="parameter_label">Value</label>
                         <input type='text' id="IOR_index" size="6" class="parameter_field">
+                            
                         <div class="texture_area">
                             <label for="IOR_index_texturetype" class="tex_label">Texture</label>
                             <select id="IOR_index_texturetype" class="tex_dropdown">
@@ -518,6 +539,7 @@
                                 <input type="button" id="IOR_index_browse_map" value="load image" class="tex_loadbutton">
                             </span>
                         </div>
+                        
                     </div>
                 </div> <!-- end panelcontent -->
 			</div> <!-- END ior-->
@@ -533,7 +555,7 @@
                 <p class="header2">Asperity</p>
                 <div class="panelcontent collapse">
                     <input type="checkbox" id="multibounce">
-                    <label for="multibounce">Enable asperity</label>
+                    <label for="multibounce">Use asperity</label>
                 </div>
 			</div> <!-- END asperity -->
             
@@ -541,7 +563,7 @@
                 <p class="header2">Absorption</p>
                 <div class="panelcontent collapse">
                     <input type="checkbox" id="use_absorption">
-                    <label for="use_absorption">Enable absorption</label>
+                    <label for="use_absorption">Use absorption</label>
                     <div class="collapse_check">
                         
                         <div class="parameter_interface_L">
@@ -588,7 +610,7 @@
 			<div id="thin_film_coating" class="glass mirror shinymetal">
 				<p class="header2">Thin film coating</p>
                 <div class="panelcontent collapse">
-                <input type="checkbox" id="use_thin_film_coating" class="margin_bottom"><label for="use_thin_film_coating"> Enable thin film coating</label>
+                <input type="checkbox" id="use_thin_film_coating" class="margin_bottom"><label for="use_thin_film_coating"> Use thin film coating</label>
 				<div class="collapse_check">
                         <div class="parameter_interface">
                             <label for="film" class="parameter_label">Film thickness</label>
@@ -630,7 +652,7 @@
 				<p class="header2">Dispersive refraction</p>
                 <div class="panelcontent collapse">
 				<input type="checkbox" id="use_dispersive_refraction" class="margin_bottom">
-                    <label for="use_dispersive_refraction">Enable dispersive refraction</label>
+                    <label for="use_dispersive_refraction">Use dispersive refraction</label>
                     <div class="collapse_check">
                         <div class="parameter_interface">
                             <label for="cauchyb" class="parameter_label">Cauchy coefficient</label>
@@ -706,7 +728,7 @@
 			<div id="displacement" class="matte mattetranslucent mix glossy metal metal2 mirror shinymetal glossytranslucent roughglass velvet glass glass2 carpaint cloth">
 				<p class="header2">Displacement Map</p>
                 <div class="panelcontent collapse">
-				<input type="checkbox" id="use_displacement" class="margin_bottom"><label for="use_displacement"> Enable displacement</label>
+				<input type="checkbox" id="use_displacement" class="margin_bottom"><label for="use_displacement"> Use displacement</label>
                 <div class="collapse_check">
                     <div class="parameter_interface_displacement">
                         <label for="dm_scheme" class="parameter_label">Type</label>

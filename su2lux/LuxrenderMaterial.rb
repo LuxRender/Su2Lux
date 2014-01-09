@@ -28,7 +28,7 @@ class LuxrenderMaterial
 	{
 		'type' => "glossy",
 		'kd_imagemap_Sketchup_filename' => '',
-        'texturechannels' => ["kd", "ks", "ka", "km2", "mx", "u_exponent", "v_exponent", "uroughness", "vroughness", "cl1kd", "cl1ks", "cl2kd", "cl2ks", "ka_d", "IOR_index", "kr", "kt", "cauchyb", "film", "filmindex", "bump", "normal", "dm"],
+        'texturechannels' => ["kd", "ks", "ka", "km2", "mx", "u_exponent", "v_exponent", "uroughness", "vroughness", "aa", "cl1kd", "cl1ks", "cl2kd", "cl2ks", "ka_d", "IOR_index", "kr", "kt", "cauchyb", "film", "filmindex", "bump", "normal", "dm"],
         
 		'kd_R' => 0.64,
 		'kd_G' => 0.64,
@@ -125,12 +125,14 @@ class LuxrenderMaterial
 		# 'use_dispersive_refraction_texture' => false,
 		# 'use_film_texture' => false,
 		# 'use_filmindex_texture' => false,
+        'use_auto_alpha' => false,
 		'use_absorption' => false,
 		'use_dispersive_refraction' => false,
 		'use_thin_film_coating' => false,
 		'use_bump' => false,
         'use_normal' => false,
 		'use_displacement' => false,
+        # 'aa_texturetype' => 'sketchup',
 	}
     
 	##
@@ -141,8 +143,12 @@ class LuxrenderMaterial
 		material_prefix += "_" if ( ! material.empty?)
 		key_prefix = material_prefix + "#{name}"
 		key = "#{key_prefix}_#{texture}_"
-		@@settings[key_prefix + "_texturetype"] = "none"
-        @@settings[key + "colorize"] = false
+        if (name=="aa")
+            @@settings[key_prefix + "_texturetype"] = "sketchupalpha" # autoalpha does not have "none" setting
+        else
+            @@settings[key_prefix + "_texturetype"] = "none" # for example kd_texturetype
+        end
+        @@settings[key + "colorize"] = false             # for example kd_imagemap_colorize
 		@@settings[key + "wrap"] = "repeat"
 		@@settings[key + "channel"] = "mean" if (type == "float")
 		@@settings[key + "filename"] = ""
@@ -173,6 +179,7 @@ class LuxrenderMaterial
 			"km2_imagemap_filename",
 			"uroughness_imagemap_filename",
 			"vroughness_imagemap_filename",
+            "aa_imagemap_filename",
             
 			"cl1kd_imagemap_filename",
 			"cl1ks_imagemap_filename",
@@ -218,6 +225,8 @@ class LuxrenderMaterial
 		lux_image_texture("", "v_exponent", "imagemap", "float")
 		lux_image_texture("", "uroughness", "imagemap", "float")
 		lux_image_texture("", "vroughness", "imagemap", "float")
+        
+		lux_image_texture("", "aa", "imagemap", "float")
 
 		lux_image_texture("", "cl1kd", "imagemap", "color")
 		lux_image_texture("", "cl1ks", "imagemap", "color")
