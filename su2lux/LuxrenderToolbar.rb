@@ -34,14 +34,14 @@ def create_toolbar
 	toolbar.show
 end
 
-def create_context_menu
-	UI.add_context_menu_handler do |menu|
-		if( SU2LUX.selected_face_has_texture? )
-			menu.add_separator
-			uvs = SU2LUX_UV.new
-			lux_menu = menu.add_submenu("SU2LUX Add-ons")
-			su2lux_menu = lux_menu.add_submenu("UV Manager")
-			su2lux_menu.add_item("Save UV coordinates") { uvs.get_selection_uvs(1) }
-		end
-	end
-end
+#def create_context_menu
+#	UI.add_context_menu_handler do |menu|
+#		if( SU2LUX.selected_face_has_texture? )
+#			menu.add_separator
+#			uvs = SU2LUX_UV.new
+#			lux_menu = menu.add_submenu("SU2LUX Add-ons")
+#			su2lux_menu = lux_menu.add_submenu("UV Manager")
+#			su2lux_menu.add_item("Save UV coordinates") { uvs.get_selection_uvs(1) }
+#		end
+#	end
+#end

@@ -909,7 +909,7 @@ if( not file_loaded?(__FILE__) )
 	SU2LUX.initialize_variables
     
     create_toolbar()
-	create_context_menu()
+    # create_context_menu()
   	
 	Sketchup.active_model.materials.current = Sketchup.active_model.materials[0]
 
