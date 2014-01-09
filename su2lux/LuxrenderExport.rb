@@ -1302,8 +1302,6 @@ class LuxrenderExport
                 when "microdisplacement"
                     out.puts "\"integer nsubdivlevels\" [#{luxrender_mat.dm_microlevels}]"
             end
-            puts "IN THE MIDDLE OF EXPORT_DISPLACEMENT_TEXTURES, @currenttexname is:"
-            puts @currenttexname
             out.puts "\"texture displacementmap\" [\""+     @currenttexname    +"::displacementmap\"]"
             out.puts "\"float dmscale\" [#{"%.6f" %(luxrender_mat.dm_scale)}]"
             out.puts "\"float dmoffset\" [#{"%.6f" %(luxrender_mat.dm_offset)}]"

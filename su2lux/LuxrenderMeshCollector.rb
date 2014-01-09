@@ -294,8 +294,8 @@ class LuxrenderMeshCollector
 				p = v.position
 				uvHelp = get_UVHelp(e, mat_dir)
 				uvq = mat_dir ? uvHelp.get_front_UVQ(p) : uvHelp.get_back_UVQ(p)
-                puts "uvq:"
-                puts uvq
+                #puts "uvq:"
+                #puts uvq
 				if ( uvq and (uvq.z.to_f - 1).abs > 1e-5)
 					distorted = true
                     return distorted
