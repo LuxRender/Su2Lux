@@ -88,7 +88,6 @@ module SU2LUX
 		return (Object::RUBY_PLATFORM =~ /mswin/i) ? :windows : ((Object::RUBY_PLATFORM =~ /darwin/i) ? :mac : :other)
 	end # END get_os
 
-
 	##
 	# variables initializazion
 	##
@@ -98,8 +97,7 @@ module SU2LUX
 		@os_specific_vars = os.get_variables 
 		@lrs= LuxrenderSettings.new
 		@luxrender_filename = @os_specific_vars["luxrender_filename"]
-		#TODO: check if the following variables needs to be a module variable
-		@luxrender_path = "" #needs to go with luxrender settings
+		@luxrender_path = "" # todo: move to LuxrenderSettings.rb?
         @luxconsole_executable = @os_specific_vars["luxconsole_filename"]
 		@os_separator = @os_specific_vars["path_separator"]
         @material_preview_path = @os_specific_vars["material_preview_path"]
@@ -149,14 +147,12 @@ module SU2LUX
 		selection = model.selection
 		materials = model.materials
 		@luxrender_path = SU2LUX.get_luxrender_path # path to LuxRender executable
-        # todo: add .lxs if it doesn't end in .lxs
         if File.extname(@lrs.export_file_path) != ".lxs"
             @lrs.export_file_path += ".lxs"
         end
         
         exportpath = @lrs.export_file_path
 
-		      
 		le=LuxrenderExport.new(exportpath,@os_separator)
 		le.reset
 		file_basename = File.basename(exportpath, SCENE_EXTENSION)

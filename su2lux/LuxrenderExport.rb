@@ -807,7 +807,7 @@ class LuxrenderExport
 			trimmedfilename = trimmedfilename.gsub("/", "")
 			if (texturefilename == trimmedfilename) # texture is built-in texture
 				puts "exporting SketchUp texture to preview texture folder"
-                imageexport = @texturewriter.write_all (preview_path+texture_path+"/", false)
+                imageexport = @texturewriter.write_all(preview_path+texture_path+"/", false)
                 if (!imageexport) # catch missing file extension
                     @texturewriter.write(luxmat_face, true, preview_path+texture_path+"/" + luxmat_face.material.name + ".jpg")
                 end

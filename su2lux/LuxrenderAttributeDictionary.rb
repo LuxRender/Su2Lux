@@ -96,7 +96,7 @@ class LuxrenderAttributeDictionary
 		puts @@dictionary.length
 		theproperties = @@dictionary.keys
 		theproperties.each{|kk,vv|
-			puts ("#{kk} #{vv}")
+			puts "#{kk} #{vv}"
 		}
 	end
 	

@@ -40,14 +40,12 @@ class LuxrenderMaterialEditor
         
         @numberofluxmaterials = 0
         
-        # test fix for missing materials as reported for version 0.39
         for mat in Sketchup.active_model.materials
             luxmat = self.find(mat.name)
         end
-        # end test fix
 		
 		@material_editor_dialog.add_action_callback('param_generate') {|dialog, params|
-            SU2LUX.dbg_p ("callback: param_generate")
+            SU2LUX.dbg_p "callback: param_generate"
 			parameters = string_to_hash(params) # converts data passed by webdialog to hash
 
 			material = Sketchup.active_model.materials.current
@@ -74,7 +72,7 @@ class LuxrenderMaterialEditor
                             green = (lux_material['kd_G'].to_f * 255.0).to_i
                             blue = (lux_material['kd_B'].to_f * 255.0).to_i
                             material.color = Sketchup::Color.new(red, green, blue)
-                        when (k.match(/_R/) || k.match (/_G/) || k.match (/_B/))
+                        when (k.match(/_R/) || k.match(/_G/) || k.match(/_B/))
                             puts "some other color channel"
                             update_swatches()
 					end
@@ -91,7 +89,7 @@ class LuxrenderMaterialEditor
 		}
 				
 		@material_editor_dialog.add_action_callback("open_dialog") {|dialog, params|
-            SU2LUX.dbg_p ("callback: open_dialog")
+            SU2LUX.dbg_p "callback: open_dialog"
 			data = params.to_s
 			material = Sketchup.active_model.materials.current
 			lux_material = @current
@@ -256,7 +254,7 @@ class LuxrenderMaterialEditor
 		}
 
 		@material_editor_dialog.add_action_callback('active_mat_type') { |dialog, param| # shows the appropriate material editor panels for current material type
-            SU2LUX.dbg_p ("callback: active_mat_type")
+            SU2LUX.dbg_p "callback: active_mat_type"
 			@materialtype = @current.type
 			javascriptcommand = "$('#type').nextAll('.' + '" + @materialtype + "').show();"
             SU2LUX.dbg_p javascriptcommand
@@ -267,7 +265,7 @@ class LuxrenderMaterialEditor
 		}
 		
 		@material_editor_dialog.add_action_callback('type_changed') { |dialog, material_type|
-            SU2LUX.dbg_p ("callback: type changed")
+            SU2LUX.dbg_p "callback: type changed"
 			print "current material: ", material_type, "\n"
             update_texture_names(@current)
             if (material_type=="mix") # check if mix materials have been set
@@ -294,7 +292,7 @@ class LuxrenderMaterialEditor
 		}
 		
 		@material_editor_dialog.add_action_callback('get_diffuse_color') {|dialog, param|
-            SU2LUX.dbg_p ("callback: get_diffuse_color")
+            SU2LUX.dbg_p "callback: get_diffuse_color"
 			lux_material = @current
 			lux_material.specular = lux_material.color
 			updateSettingValue("ks_R")
@@ -303,7 +301,7 @@ class LuxrenderMaterialEditor
 		}
 		
 		@material_editor_dialog.add_action_callback("reset_to_default") {|dialog, params|
-            puts ("callback: reset_to_default")
+            puts "callback: reset_to_default"
 			luxmat = getluxmatfromskpname(Sketchup.active_model.materials.current.name)
             # copy settings to be saved
             kdr, kdg, kdb = [luxmat.kd_R, luxmat.kd_G, luxmat.kd_B]
@@ -338,7 +336,7 @@ class LuxrenderMaterialEditor
 		}
         
 		@material_editor_dialog.add_action_callback("update_material_preview") {|dialog, params|
-            puts ("callback: update_material_preview")
+            puts "callback: update_material_preview"
 			
 			# prepare file paths
 			os = OSSpecific.new
@@ -388,21 +386,21 @@ class LuxrenderMaterialEditor
 			lxs_section_1 = File.readlines(preview_path+"preview.lxs01")
             lxs_section_2 = File.readlines(preview_path+"preview.lxs02")
             lxs_section_3 = File.readlines(preview_path+"preview.lxs03")
-            generated_lxs_file.puts (lxs_section_1)
+            generated_lxs_file.puts lxs_section_1
             
             generated_lxs_file.puts("\t\"integer xresolution\" [" + settingseditor.preview_size.to_s + "]")
             generated_lxs_file.puts("\t\"integer yresolution\" [" + settingseditor.preview_size.to_s + "]")
             generated_lxs_file.puts("\t\"integer halttime\" [" + settingseditor.preview_time.to_s + "]")
-            generated_lxs_file.puts ("\t\"string filename\" \[\""+Sketchup.active_model.title+"_"+active_material_name_converted+"\"]")
-            generated_lxs_file.puts ("")
-            generated_lxs_file.puts ("WorldBegin")          
-			generated_lxs_file.puts ("Include \""+active_material_name_converted+".lxm\"")
-            generated_lxs_file.puts (lxs_section_2)
-            previewExport.output_material (active_material, generated_lxs_file, @current, active_material.name) # writes "NamedMaterial #active_material_name.." or light definition
-            generated_lxs_file.puts (lxs_section_3)
-            previewExport.export_displacement_textures (active_material, generated_lxs_file, @current)
-            generated_lxs_file.puts ("AttributeEnd")
-            generated_lxs_file.puts ("WorldEnd")
+            generated_lxs_file.puts("\t\"string filename\" \[\""+Sketchup.active_model.title+"_"+active_material_name_converted+"\"]")
+            generated_lxs_file.puts("")
+            generated_lxs_file.puts("WorldBegin")
+			generated_lxs_file.puts("Include \""+active_material_name_converted+".lxm\"")
+            generated_lxs_file.puts(lxs_section_2)
+            previewExport.output_material(active_material, generated_lxs_file, @current, active_material.name) # writes "NamedMaterial #active_material_name.." or light definition
+            generated_lxs_file.puts(lxs_section_3)
+            previewExport.export_displacement_textures(active_material, generated_lxs_file, @current)
+            generated_lxs_file.puts("AttributeEnd")
+            generated_lxs_file.puts("WorldEnd")
 			generated_lxs_file.close
             
 			# start rendering preview using luxconsole
@@ -447,7 +445,7 @@ class LuxrenderMaterialEditor
 		}
         
 		@material_editor_dialog.add_action_callback("save_to_model") {|dialog, params|
-            puts ("callback: save_to_model")
+            puts "callback: save_to_model"
 			materials = Sketchup.active_model.materials
 			for mat in materials
 				luxmat = self.find(mat.name)
@@ -475,7 +473,7 @@ class LuxrenderMaterialEditor
 		}
 		
 		@material_editor_dialog.add_action_callback("texture_editor") {|dialog, params|
-            puts ("callback: texture_editor")
+            puts "callback: texture_editor"
 
 			lux_material = @current
             puts "params:"
