@@ -39,6 +39,12 @@ class LuxrenderMaterialEditor
 		@texture_editor_data = {}
         
         @numberofluxmaterials = 0
+        
+        # test fix for missing materials as reported for version 0.39
+        for mat in Sketchup.active_model.materials
+            luxmat = self.find(mat.name)
+        end
+        # end test fix
 		
 		@material_editor_dialog.add_action_callback('param_generate') {|dialog, params|
             SU2LUX.dbg_p ("callback: param_generate")
