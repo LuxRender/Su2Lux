@@ -259,7 +259,7 @@ class LuxrenderSettingsEditor
 					@lrs.sampler_type = 'metropolis'
 					@lrs.sampler_metropolis_strength = 0.6
                     @lrs.sampler_metropolis_largemutationprob = 0.4
-                    @lrs.sampler_metropolis_noiseaware = true
+                    @lrs.sampler_noiseaware = true
 					@lrs.sampler_metropolis_maxconsecrejects = 512
 					@lrs.sampler_metropolis_usevariance = false
 					
@@ -282,7 +282,7 @@ class LuxrenderSettingsEditor
 					@lrs.sampler_type = 'metropolis'
 					@lrs.sampler_metropolis_strength = 0.6
                     @lrs.sampler_metropolis_largemutationprob = 0.4
-                    @lrs.sampler_metropolis_noiseaware = true
+                    @lrs.sampler_noiseaware = true
 					@lrs.sampler_metropolis_maxconsecrejects = 512
 					@lrs.sampler_metropolis_usevariance  = false
 					

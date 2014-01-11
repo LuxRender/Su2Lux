@@ -42,6 +42,7 @@ class LuxrenderMaterialEditor
         
         for mat in Sketchup.active_model.materials
             luxmat = self.find(mat.name)
+            get_skp_color(mat,luxmat)
         end
 		
 		@material_editor_dialog.add_action_callback('param_generate') {|dialog, params|
@@ -194,7 +195,6 @@ class LuxrenderMaterialEditor
             bvalue = (passedcolor[5, 2].to_i(16).to_f*1000000/255.0).round/1000000.0
             if ((@lrs.colorpicker=="diffuse_swatch" or @lrs.colorpicker=="transmission_swatch")  and !Sketchup.active_model.materials.current.texture)
                 Sketchup.active_model.materials.current.color = [rvalue,gvalue,bvalue] # material observer will update kd_R,G,B values
-                # # @current.RGB_swatch = Sketchup.active_model.materials.current.color
             end
             #puts "updating swatch:", colorswatch
             colorvars = []
@@ -447,8 +447,8 @@ class LuxrenderMaterialEditor
 		@material_editor_dialog.add_action_callback("save_to_model") {|dialog, params|
             puts "callback: save_to_model"
 			materials = Sketchup.active_model.materials
-			for mat in materials
-				luxmat = self.find(mat.name)
+			for mat5 in materials
+				luxmat = self.find(mat5.name)
 				luxmat.save_to_model
 			end
 		}
@@ -526,11 +526,11 @@ class LuxrenderMaterialEditor
     end
     
     def getluxmatfromskpname(passedmatname)
-        for mat in @materials_skp_lux.values
-            if (mat.name == passedmatname)
-                return mat
-            elsif (mat.original_name == passedmatname)
-                return mat
+        for mat7 in @materials_skp_lux.values
+            if (mat7.name == passedmatname)
+                return mat7
+            elsif (mat7.original_name == passedmatname)
+                return mat7
             end
         end
         return nil
@@ -607,6 +607,7 @@ class LuxrenderMaterialEditor
             return getluxmatfromskpname(name)
         elsif (mat)
             @numberofluxmaterials += 1
+            puts @numberofluxmaterials
             newluxmat = LuxrenderMaterial.new(mat)
             @materials_skp_lux[mat] = newluxmat
             return newluxmat
@@ -633,7 +634,23 @@ class LuxrenderMaterialEditor
 		@material_editor_dialog.close{}
 	end
     
-	
+    ##
+    #
+    ##
+    def get_skp_color(skpmat,luxmat)
+        luxmat.color = skpmat.color
+        if skpmat.texture
+            puts "setting texture information"
+            texture_name = skpmat.texture.filename
+            texture_name.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
+            texture_name.gsub!(/\\/, '/') if texture_name.include?('\\')
+            luxmat.kd_imagemap_Sketchup_filename = texture_name
+            luxmat.kd_texturetype = 'sketchup'
+            luxmat.use_diffuse_texture = true
+        end
+    end
+                           
+                           
 	##
 	#
 	##
@@ -649,18 +666,7 @@ class LuxrenderMaterialEditor
                 luxmat = find(mat.name) # creates LuxRender material
 				puts "adding material #{mat.name} to material hash, creating LuxRender material"
                 @materials_skp_lux[mat]=luxmat
-				luxmat.color = mat.color
-				if mat.texture
-					puts "setting texture information"
-					texture_name = mat.texture.filename
-					texture_name.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
-					texture_name.gsub!(/\\/, '/') if texture_name.include?('\\')
-					luxmat.kd_imagemap_Sketchup_filename = texture_name
-					luxmat.kd_texturetype = 'sketchup'
-					luxmat.use_diffuse_texture = true
-				end
-				#puts luxmat.type
-                   
+                get_skp_color(mat,luxmat)
 			else
 				puts "material #{mat.name} found in material hash, skipping LuxRender material creation"
 			end
@@ -747,10 +753,10 @@ class LuxrenderMaterialEditor
 		materials = Sketchup.active_model.materials.sort
         #puts "whole material list (@materials_skp_lux):"
         #puts @materials_skp_lux
-		for mat in materials
+		for mat4 in materials
             #puts "set_material_list running"
             #puts mat.name
-			luxrender_mat = @materials_skp_lux[mat]
+			luxrender_mat = @materials_skp_lux[mat4]
             #puts luxrender_mat
 			# puts "adding luxrender material to material list: ", luxrender_mat
 			cmd = cmd + "<option value=\"#{luxrender_mat.original_name}\">#{luxrender_mat.name}</option>"

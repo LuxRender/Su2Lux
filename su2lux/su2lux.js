@@ -84,8 +84,8 @@ $(document).ready(
 		$("#settings_panel #sampler_type").change(
 			function()
 			{
-				$(this).nextAll().hide();
-				$(this).nextAll("." + this.value).show();
+				$(this).nextAll(".samplertype").hide();
+				$(this).nextAll("#" + this.value).show();
 			}
 		);
 		

@@ -608,11 +608,12 @@
 			<label for="sampler_type">sampler type:</label>
 			<select id="sampler_type">
 				<option value="metropolis">metropolis</option>
-				<option value="erpt">erpt</option>
+				<!-- <option value="erpt">erpt</option> -->
 				<option value="lowdiscrepancy">lowdiscrepancy</option>
-				<option value="random">random</option>
-			</select>
-			<div class="random" id="random">
+				<!-- <option value="random">random</option> -->
+				<option value="sobol">sobol</option>
+			</select><br><br>
+			<div class="samplertype" id="random">
 				<select id="sampler_random_pixelsampler">
 					<option value="linear">linear</option>
 					<option value="tile">tile</option>
@@ -624,25 +625,16 @@
 				<label for="sampler_random_pixelsamples">pixel samples</label>
 				<input type='text' id="sampler_random_pixelsamples" size="10">
 			</div>
-			<div class="metropolis" id="metropolis">
-                <label for="sampler_metropolis_noiseaware">Noise aware</label>
-				<input type="checkbox" id="sampler_metropolis_noiseaware"><br>
-				<label for="sampler_show_advanced">Advanced properties</label>
-				<input type="checkbox" id="sampler_show_advanced">
-				<div class ="basic">
-					<label for="sampler_metropolis_strength">mutation strength</label>
-					<input type='text' id="sampler_metropolis_strength" size="10">
-				</div>
-				<div class ="advanced">
-					<label for="sampler_metropolis_largemutationprob">Large mutation probability</label>
-					<input type='text' id="sampler_metropolis_largemutationprob" size="10">
-					<label for="sampler_metropolis_maxconsecrejects">Max number of rejections</label>
-					<input type='text' id="sampler_metropolis_maxconsecrejects" size="10">
-					<label for="sampler_metropolis_usevariance">Use variance</label>
-					<input type="checkbox" id="sampler_metropolis_usevariance">
-				</div>
+			<div class="samplertype" id="metropolis">
+                <label for="sampler_metropolis_largemutationprob">Large mutation probability</label>
+                <input type='text' id="sampler_metropolis_largemutationprob" size="10"><br>
+                <label for="sampler_metropolis_maxconsecrejects">Max number of rejections</label>
+                <input type='text' id="sampler_metropolis_maxconsecrejects" size="10"><br>
+                <input type="checkbox" id="sampler_metropolis_usevariance">
+                <label for="sampler_metropolis_usevariance">Use variance</label>
 			</div>
-			<div class="lowdiscrepancy" id="lowdiscrepancy">
+			<div class="samplertype" id="lowdiscrepancy">
+                Pixel sampler:
 				<select id="sampler_lowdisc_pixelsampler">
 					<option value="linear">linear</option>
 					<option value="tile">tile</option>
@@ -650,14 +642,19 @@
 					<option value="vegas">vegas</option>
 					<option value="lowdiscrepancy">lowdiscrepancy</option>
 					<option value="hilbert">hilbert</option>
-				</select>
+				</select><br>
 				<label for="sampler_lowdisc_pixelsamples">pixel samples</label>
 				<input type='text' id="sampler_lowdisc_pixelsamples" size="10">
 			</div>
-			<div class="erpt" id="erpt">
+			<div class="samplertype" id="erpt">
 				<label for="sampler_erpt_chainlength">chain length</label>
 				<input type='text' id="sampler_erpt_chainlength" size="10">
 			</div>
+            <div class="samplertype" id="sobol">
+                &nbsp;
+            </div>
+            <input type="checkbox" id="sampler_noiseaware">
+            <label for="sampler_noiseaware">Noise aware</label><br>
 		</div>
 
 <p class="header" id="integrator">Integrator</p>

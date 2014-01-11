@@ -29,8 +29,8 @@ require 'su2lux/fileutils.rb'
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.39"
-    SU2LUX_DATE = "9 January 2014"
+    SU2LUX_VERSION = "0.40"
+    SU2LUX_DATE = "10 January 2014"
 	CONFIG_FILE = "luxrender_path.txt"
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
@@ -88,6 +88,7 @@ module SU2LUX
 		return (Object::RUBY_PLATFORM =~ /mswin/i) ? :windows : ((Object::RUBY_PLATFORM =~ /darwin/i) ? :mac : :other)
 	end # END get_os
 
+
 	##
 	# variables initializazion
 	##
@@ -120,21 +121,7 @@ module SU2LUX
 		@model_textures={} 
 		@texturewriter=Sketchup.create_texture_writer
 		@selected=false
-		@components = {} #unused
-		@export_materials = true #unused
-		@export_meshes = true #unused
-		@export_lights = true #unused
-		@face=0 #unused
-		@frame=0 #unused
-		@instanced=true #unused
-		@lights = [] #unused
 		@model_name=""
-		@n_cameras=0 #unused
-		@n_pointlights=0 #unused
-		@n_spotlights=0 #unused
-		@scene_export = false #unused  True when exporting a model for each scene
-		@status_prefix = ""   #unused  Identifies which scene is being processed in status bar
-		@used_materials = [] #unused
 	end # END reset_variables
   
 	##
@@ -429,15 +416,6 @@ module SU2LUX
 	##
 	#
 	##
-	def SU2LUX.get_luxrender_filename
-		# filename = @os_specific_vars["luxrender_filename"]
-		# return filename
-		return @luxrender_filename
-	end # END get_luxrender_filename
-
-	##
-	#
-	##
 	def SU2LUX.report_window(start_time, ask_render=true)
 		SU2LUX.dbg_p "SU2LUX.report_window"
 		end_time=Time.new
@@ -523,9 +501,7 @@ module SU2LUX
             SU2LUX.dbg_p "creating new material editor"
 			@material_editor=LuxrenderMaterialEditor.new
 		end
-        
         @material_editor.set_material_lists
-
         if @material_editor.visible?
 			puts "hiding material editor"
 			@material_editor.hide
@@ -537,13 +513,10 @@ module SU2LUX
 			Sketchup.active_model.materials.current = Sketchup.active_model.materials.current 
 			puts "done setting active material"
 		end
-		
     # set preview section height (OS X; for Windows this gets done in refresh function)
     setdivheightcmd = 'setpreviewheight(' + @lrs.preview_size.to_s + ',' + @lrs.preview_time.to_s + ')'
     puts setdivheightcmd
     @material_editor.material_editor_dialog.execute_script(setdivheightcmd)
-        
-        
 	end # END show_material_editor
 
 	##
@@ -638,7 +611,7 @@ class SU2LUX_model_observer < Sketchup::ModelObserver
         mateditor.materials_skp_lux.each do |skpmat, luxmat|
             luxmat.save_to_model()
         end
-        # for settings window, save settings
+        # save settings window settings
         @lrs = LuxrenderSettings.new
         @lrs.save_to_model
     end
@@ -675,7 +648,6 @@ class SU2LUX_view_observer < Sketchup::ViewObserver
 				@lrs.focal_length = focal_length
 				settings_editor.setValue("focal_length", focal_length)
 			end
-	#		settings_editor.setValue("camera_type", @lrs.camera_type)
 			settings_editor.setValue("camera_type", @lrs.camera_type)
 		end
 	end # END onViewChanged
@@ -699,12 +671,9 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 		end
 
 		Sketchup.active_model.materials.current = Sketchup.active_model.materials[0]
-		SU2LUX.create_material_editor
-		material_editor = SU2LUX.get_editor("material")
-		material_editor.materials_skp_lux = Hash.new
+		material_editor = SU2LUX.create_material_editor
 		material_editor.current = nil
 		material_editor.refresh
-
 		SU2LUX.create_observers	
 		
 	end # END onNewModel
@@ -717,28 +686,25 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 			settings_editor.close
 		end
 
-		# loaded = LuxrenderAttributeDictionary.load_from_model(@lrs.dictionary_name)
-		
         loaded = @lrs.load_from_model
 		@lrs.reset unless loaded
                       
-        SU2LUX.create_material_editor
-        material_editor = SU2LUX.get_editor("material")
+        material_editor = SU2LUX.create_material_editor
         material_editor.materials_skp_lux = Hash.new
         material_editor.current = nil
                     
 		for mat in model.materials
-			luxmat = LuxrenderMaterial.new(mat)
+			luxmat = material_editor.find(mat.name)
 			loaded = luxmat.load_from_model
-            #luxmat.reset unless loaded
+            luxmat.reset unless loaded
             material_editor.materials_skp_lux[mat] = luxmat
 		end
               
         material_editor.refresh
-		if (material_editor.visible?)
-			material_editor.close
-		end
-		puts "running onOpenModel, about to run refresh material_editor"
+        #if (material_editor.visible?)
+        #	material_editor.close
+        #end
+		puts "finished running onOpenModel"
 
 	end
 	
@@ -912,8 +878,8 @@ if( not file_loaded?(__FILE__) )
 	@lrs = LuxrenderSettings.new
 	loaded = @lrs.load_from_model
 	@lrs.reset unless loaded                      
-	for mat in Sketchup.active_model.materials
-		luxmat = LuxrenderMaterial.new(mat)
+	for mat2 in Sketchup.active_model.materials
+		luxmat = LuxrenderMaterial.new(mat2)
 		loaded = luxmat.load_from_model
 		luxmat.reset unless loaded
 	end

@@ -134,7 +134,7 @@ class LuxrenderSettings
 		'sampler_lowdisc_pixelsamples' => 4,
 		'sampler_lowdisc_pixelsampler' => 'vegas',
         'sampler_metropolis_strength' => 0.6, #Basic GUI
-        'sampler_metropolis_noiseaware' => true,
+        'sampler_noiseaware' => true,
 		'sampler_metropolis_largemutationprob' => 0.4,
 		'sampler_metropolis_maxconsecrejects' => 512,
 		'sampler_metropolis_usevariance'=> false,
@@ -417,7 +417,7 @@ class LuxrenderSettings
 	end #end initialize
 
 	def reset
-            puts "resetting setting editor"
+            puts "resetting settings editor"
 			@@settings.each do |key, value|
 				LuxrenderAttributeDictionary.set_attribute(@dict, key, value)
 			end
