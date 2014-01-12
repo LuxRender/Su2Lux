@@ -878,13 +878,15 @@ if( not file_loaded?(__FILE__) )
 	@lrs = LuxrenderSettings.new
 	loaded = @lrs.load_from_model
 	@lrs.reset unless loaded                      
-	for mat2 in Sketchup.active_model.materials
-		luxmat = LuxrenderMaterial.new(mat2)
+	for mat in Sketchup.active_model.materials
+		luxmat = LuxrenderMaterial.new(mat)
 		loaded = luxmat.load_from_model
 		luxmat.reset unless loaded
 	end
-                      
-    @lrs.export_luxrender_path = Sketchup.read_default("SU2LUX","luxrenderpath").to_a.pack('H*') # copy stored executable path to settings, so it shows in settings window
+    
+    if (Sketchup.read_default("SU2LUX","luxrenderpath"))
+                      @lrs.export_luxrender_path = Sketchup.read_default("SU2LUX","luxrenderpath").to_a.pack('H*') # copy stored executable path to settings, so it shows in settings window
+    end
                       
 	@lme = SU2LUX.create_material_editor
 	material_editor = SU2LUX.get_editor("material")
