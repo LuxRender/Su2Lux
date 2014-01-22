@@ -266,8 +266,8 @@
                     <label for="specular_scheme" class="specular_label">Specular definition: </label>
                     <select id="specular_scheme" class="specular_field">
                         <option value="specular_scheme_color">Color</option>
-                        <option value="specular_scheme_IOR">IOR</option>
-                        <!-- todo 2014: add IOR preset option -->
+                        <option value="specular_scheme_IOR">IOR, custom</option>
+                        <option value="specular_scheme_preset">IOR, preset</option>
                     </select>
                     
                     <div id="specular_scheme_color" class="parameter_interface">
@@ -321,7 +321,39 @@
                                 <label for="multibounce">Multiply</label></div>
                             </span>
                         </div>
-                            
+                    </div>
+                    
+                    <div id="specular_scheme_preset" class="parameter_interface_single">
+                        <div id="spec_IOR_interface">
+                            <label for="specular_preset" class="specular_label">Material: </label>
+                            <select id="specular_preset" class="specular_field">
+                                <option value="1.360001">Acetone</option>
+                                <option value="1.000293">Air</option>
+                                <option value="1.360002">Alcohol</option>
+                                <option value="1.345000">Beer</option>
+                                <option value="2.000000">Crystal</option>
+                                <option value="2.417000">Diamond</option>
+                                <option value="1.520000">Glass</option>
+                                <option value="1.474000">Glass, Pyrex</option>
+                                <option value="1.473000">Glycerin</option>
+                                <option value="1.494000">Honey</option>
+                                <option value="1.309000">Ice</option>
+                                <option value="1.600000">Jade</option>
+                                <option value="1.350000">Milk</option>
+                                <option value="1.530001">Nylon</option>
+                                <option value="1.530002">Pearl</option>
+                                <option value="1.488000">Plexiglass</option>
+                                <option value="1.516000">Salt</option>
+                                <option value="1.757000">Sapphire</option>
+                                <option value="1.340000">Soft drinks</option>
+                                <option value="1.607000">Topaz</option>
+                                <option value="1.000000">Vacuum</option>
+                                <option value="1.470000">Vegetable oil</option>
+                                <option value="1.363000">Vodka</option>
+                                <option value="1.332830">Water</option>
+                            </select>
+                            <div id="spec_IOR_preset_value">value goes here</div>
+                        </div>
                     </div>
                     
                     

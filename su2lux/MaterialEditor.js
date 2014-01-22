@@ -83,6 +83,7 @@ function show_load_buttons(textype,filename){
     } else{
         $(".metal2_custom").hide();
     }
+    
 }
 
 $(document).ready(
@@ -248,15 +249,27 @@ $(document).ready(
             {
                 if (this.value=="specular_scheme_IOR"){
                     $("#specular_scheme_color").hide();
+                    $("#specular_scheme_preset").hide();
                     $("#specular_scheme_IOR").show();
-                }else{
+                }else if (this.value=="specular_scheme_color"){
                     $("#specular_scheme_color").show();
+                    $("#specular_scheme_preset").hide();
+                    $("#specular_scheme_IOR").hide();
+                }else{
+                    $("#specular_scheme_color").hide();
+                    $("#specular_scheme_preset").show();
                     $("#specular_scheme_IOR").hide();
                 }
             }
         );
                   
-                  
+        $("#specular_preset").change(
+            function()
+            {
+                 $('#spec_IOR_preset_value').text(parseFloat(this.value).toFixed(3));
+            }
+        );
+            
                   
         
         $('#previewsize').change(

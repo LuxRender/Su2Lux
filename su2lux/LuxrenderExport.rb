@@ -1758,7 +1758,9 @@ class LuxrenderExport
 	def export_specular_component(material, before, after)
 		preceding = ""
 		following = ""
-        if (material.specular_scheme == "specular_scheme_IOR")
+        if (material.specular_scheme == "specular_scheme_preset")
+            following += "\t" + "\"float index\" [#{material.specular_preset}]\n"
+        elsif (material.specular_scheme == "specular_scheme_IOR")
             if ( ! material.has_texture?("spec_IOR"))
                 following += "\t" + "\"float index\" [#{material.spec_IOR}]\n"
             else

@@ -568,12 +568,19 @@ class LuxrenderMaterialEditor
         if @current.specular_scheme == "specular_scheme_IOR"
            cmd1 = '$("#specular_scheme_IOR").show()'
            cmd2 = '$("#specular_scheme_color").hide()'
-       else
+           cmd3 = '$("#specular_scheme_preset").hide()'
+       elsif @current.specular_scheme == "specular_scheme_color"
            cmd1 = '$("#specular_scheme_IOR").hide()'
            cmd2 = '$("#specular_scheme_color").show()'
+           cmd3 = '$("#specular_scheme_preset").hide()'
+       else
+           cmd1 = '$("#specular_scheme_IOR").hide()'
+           cmd2 = '$("#specular_scheme_color").hide()'
+           cmd3 = '$("#specular_scheme_preset").show()'
        end
        @material_editor_dialog.execute_script(cmd1)
        @material_editor_dialog.execute_script(cmd2)
+       @material_editor_dialog.execute_script(cmd3)
     end
                            
                            
@@ -704,7 +711,10 @@ class LuxrenderMaterialEditor
         load_preview_image # material preview image
         set_current(@current.name) # active material in material dropdown
         update_texture_names(@current) # image texture paths
-        puts "RUNNING REFRESH, ABOUT TO RUN settexturefields FOR MATERIAL " + @current.name
+        showhide_specularIOR # specular definition interface
+        showhide_displacement # displacement interface
+        update_spec_IOR() # specular IOR preset
+        puts "running refresh for material " + @current.name
         settexturefields(@current.name)
         
         # set preview section height
@@ -792,6 +802,15 @@ class LuxrenderMaterialEditor
 		materialproperties.each { |setting| updateSettingValue(setting)}
 		# SU2LUX.dbg_p "just ran sendDataFromSketchup@LuxrenderMaterialEditor"
 	end # END sendDataFromSketchup
+                           
+    ##
+    #
+    ##
+    def update_spec_IOR()
+        cmd = "$('#spec_IOR_preset_value').text(" + @current.specular_preset.to_s +  ".toFixed(3));"
+        @material_editor_dialog.execute_script(cmd)
+    end
+                           
 	
 	##
 	#

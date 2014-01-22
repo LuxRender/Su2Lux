@@ -109,6 +109,7 @@ class LuxrenderMaterial
         
         'specular_scheme' => 'specular_scheme_IOR',
         'spec_IOR' => 1.33,
+        'specular_preset' => 1.360001,
 
 		'light_L' => 'blackbody',
 		'light_temperature' => 6500.0,

@@ -29,8 +29,8 @@ require 'su2lux/fileutils.rb'
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.40"
-    SU2LUX_DATE = "10 January 2014"
+    SU2LUX_VERSION = "0.41"
+    SU2LUX_DATE = "22 January 2014"
 	CONFIG_FILE = "luxrender_path.txt"
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
@@ -724,9 +724,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 	def onMaterialSetCurrent(materials, material)
 		material_editor = SU2LUX.get_editor("material")
 		SU2LUX.dbg_p "onMaterialSetCurrent triggered by material #{material.name}"
-		
 		current_mat = material #Sketchup.active_model.materials.current
-		# puts "current_mat", current_mat
 		
 		if (Sketchup.active_model.materials.include? current_mat)
 			if material_editor.materials_skp_lux.include?(current_mat)
@@ -742,8 +740,11 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 			material_editor.sendDataFromSketchup
             material_editor.settexturefields(current_mat.name)
             material_editor.showhideIOR()
+            material_editor.showhide_displacement()
+            material_editor.showhide_specularIOR()
 			material_editor.fire_event("#type", "change", "")
 			material_editor.load_preview_image()
+            material_editor.update_spec_IOR()
 		else
 			puts "current material is not used"
 		end
@@ -871,21 +872,20 @@ if( not file_loaded?(__FILE__) )
 	SU2LUX.initialize_variables
     
     create_toolbar()
-    # create_context_menu()
   	
 	Sketchup.active_model.materials.current = Sketchup.active_model.materials[0]
 
 	@lrs = LuxrenderSettings.new
 	loaded = @lrs.load_from_model
 	@lrs.reset unless loaded                      
-	for mat in Sketchup.active_model.materials
-		luxmat = LuxrenderMaterial.new(mat)
+	for mat2 in Sketchup.active_model.materials
+		luxmat = LuxrenderMaterial.new(mat2)
 		loaded = luxmat.load_from_model
 		luxmat.reset unless loaded
 	end
-    
+                      
     if (Sketchup.read_default("SU2LUX","luxrenderpath"))
-                      @lrs.export_luxrender_path = Sketchup.read_default("SU2LUX","luxrenderpath").to_a.pack('H*') # copy stored executable path to settings, so it shows in settings window
+        @lrs.export_luxrender_path = Sketchup.read_default("SU2LUX","luxrenderpath").to_a.pack('H*') # copy stored executable path to settings, so it shows in settings window
     end
                       
 	@lme = SU2LUX.create_material_editor

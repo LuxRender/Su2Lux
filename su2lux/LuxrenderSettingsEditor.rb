@@ -84,8 +84,8 @@ class LuxrenderSettingsEditor
                     else # true/false toggles
 						if (@lrs.respond_to?(key))
                             #puts "@lrs responding"
-                            puts key
-                            puts value.to_s.downcase
+                            #puts key
+                            #puts value.to_s.downcase
 							method_name = key + "="
 							if (value.to_s.downcase == "true")
 								value = true

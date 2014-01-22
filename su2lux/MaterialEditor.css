@@ -159,6 +159,20 @@ input#get_diffuse_color {
     top: 22px;
 }
 
+
+#specular_preset{
+    position: absolute;
+    left: 70px;
+    top: -2px;
+}
+
+#spec_IOR_preset_value{
+    position: absolute;
+    left: 200px;
+    top: 0px;
+    width: 200px;
+}
+
 #mixtypes_label{
     position: absolute;
     left: 0px;
@@ -347,6 +361,11 @@ input#get_diffuse_color {
 .parameter_interface{
     position: relative;
     height: 78px;
+}
+
+.parameter_interface_single{
+    position: relative;
+    height: 30px;
 }
 
 .parameter_interface_autoalpha{
