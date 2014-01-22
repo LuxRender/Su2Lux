@@ -28,7 +28,7 @@ class LuxrenderMaterial
 	{
 		'type' => "glossy",
 		'kd_imagemap_Sketchup_filename' => '',
-        'texturechannels' => ["kd", "ks", "ka", "km2", "mx", "u_exponent", "v_exponent", "uroughness", "vroughness", "aa", "cl1kd", "cl1ks", "cl2kd", "cl2ks", "ka_d", "IOR_index", "kr", "kt", "cauchyb", "film", "filmindex", "bump", "normal", "dm"],
+        'texturechannels' => ["kd", "ks", "ka", "km2", "mx", "u_exponent", "v_exponent", "uroughness", "vroughness", "aa", "cl1kd", "cl1ks", "cl2kd", "cl2ks", "ka_d", "spec_IOR", "IOR_index", "kr", "kt", "cauchyb", "film", "filmindex", "bump", "normal", "dm"],
         
 		'kd_R' => 0.64,
 		'kd_G' => 0.64,
@@ -96,6 +96,7 @@ class LuxrenderMaterial
 		'energyconserving' => true,
 		'bumpmap' => 0.0001,
 
+
 		'dm_scheme' => 'loop',
 		'dm_normalsmooth' => true,
         'dm_normalsplit' => false,
@@ -105,6 +106,9 @@ class LuxrenderMaterial
 		'dm_scale' => 0.1,
 		'dm_offset' => 0.000,
 		'displacement' => 1.000000,
+        
+        'specular_scheme' => 'specular_scheme_IOR',
+        'spec_IOR' => 1.33,
 
 		'light_L' => 'blackbody',
 		'light_temperature' => 6500.0,
@@ -186,6 +190,9 @@ class LuxrenderMaterial
 			"cl2kd_imagemap_filename",
 			"cl2ks_imagemap_filename",
             
+            "spec_IOR_imagemap_filename",
+            "IOR_index_imagemap_filename",
+            
 			"ka_imagemap_filename",
 			"ka_d_imagemap_filename",
 			"kr_imagemap_filename",
@@ -232,9 +239,10 @@ class LuxrenderMaterial
 		lux_image_texture("", "cl1ks", "imagemap", "color")
 		lux_image_texture("", "cl2kd", "imagemap", "color")
 		lux_image_texture("", "cl2ks", "imagemap", "color")
-
-		lux_image_texture("", "ka_d", "imagemap", "float")
-		lux_image_texture("", "IOR_index", "imagemap", "float")
+        lux_image_texture("", "ka_d", "imagemap", "float")
+        lux_image_texture("", "IOR_index", "imagemap", "float")
+        lux_image_texture("", "spec_IOR", "imagemap", "float")
+        
 		lux_image_texture("", "kr", "imagemap", "color")
 		lux_image_texture("", "kt", "imagemap", "color")
 		# lux_image_texture("", "IOR", "imagemap", "float")

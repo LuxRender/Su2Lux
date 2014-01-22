@@ -241,6 +241,23 @@ $(document).ready(
                 }
             }
         );
+                  
+ 
+        $("#specular_scheme").change(
+            function()
+            {
+                if (this.value=="specular_scheme_IOR"){
+                    $("#specular_scheme_color").hide();
+                    $("#specular_scheme_IOR").show();
+                }else{
+                    $("#specular_scheme_color").show();
+                    $("#specular_scheme_IOR").hide();
+                }
+            }
+        );
+                  
+                  
+                  
         
         $('#previewsize').change(
             function()

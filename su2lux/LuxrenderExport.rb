@@ -110,66 +110,12 @@ class LuxrenderExport
 
 	def compute_fov(xres, yres)
 		camera = Sketchup.active_model.active_view.camera
-        view = Sketchup.active_model.active_view
 		fov_vertical = camera.fov
 		width = xres.to_f
 		height = yres.to_f
-        skp_ratio = camera.aspect_ratio
-        lux_ratio = width/height
-		if(width >= height) # landscape
-            # check for two point perspective
-            centerx = view.screen_coords(camera.target)[0].to_f
-            centery = view.screen_coords(camera.target)[1].to_f
-            vcenterx = view.center[0].to_f
-            vcentery = view.center[1].to_f
-            if ((centerx-vcenterx).abs>1.0||(centery-vcentery).abs>1.0) # two point perspective
-                puts "calculating two point perspective camera angle"
-                # calculate angle by adding a virtual point, then getting distance to the target point in screen space
-                eye = camera.eye
-                target = camera.target
-                helper_vertical_distance = 1000.0;
-                target_distance = ((eye[0]-target[0])**2 + (eye[1]-target[1])**2 + (eye[2]-target[2])**2)**0.5
-                helper_point = Geom::Point3d.new(target[0], target[1], target[2]+helper_vertical_distance)
-                helper_height = (view.screen_coords(helper_point)[1] - view.screen_coords(target)[1]).abs
-                helper_fraction = helper_height / view.vpheight
-                fraction_tan = helper_vertical_distance/target_distance
-                total_tan = (0.5/helper_fraction) * fraction_tan
-                calculated_angle = 2*Math.atan(total_tan)
-                fov = calculated_angle.radians
-            else
-                fov = fov_vertical
-                puts "landscape fov: " + fov.to_s
-            end
-                
-            # deal with horizontal luxrender resolution in vertical sketchup layout
-            #if (skp_ratio < 1.0)
-            #    puts "lux_ratio, skp_ratio:"
-            #    puts lux_ratio
-            #    puts skp_ratio
-            #    puts "old fov: " + fov.to_s
-            #    fov = atan2(2 * tan (0.5 * fov_vertical (lux_ratio/skp_ratio)))
-            #    puts "landscape-portrait fov: " + fov.to_s
-            #end
-		else # portrait
-            centerx = view.screen_coords(camera.target)[0].to_f
-            centery = view.screen_coords(camera.target)[1].to_f
-            vcenterx = view.center[0].to_f
-            vcentery = view.center[1].to_f
-            if ((centerx-vcenterx).abs>1.0||(centery-vcentery).abs>1.0) # two point perspective
-                puts "calculating two point perspective camera angle, portrait"
-                # calculate angle by adding a virtual point, then getting distance to the target point in screen space
-                eye = camera.eye
-                target = camera.target
-                helper_vertical_distance = 1000.0;
-                target_distance = ((eye[0]-target[0])**2 + (eye[1]-target[1])**2 + (eye[2]-target[2])**2)**0.5
-                helper_point = Geom::Point3d.new(target[0], target[1], target[2]+helper_vertical_distance)
-                helper_height = (view.screen_coords(helper_point)[1] - view.screen_coords(target)[1]).abs
-                helper_fraction = helper_height / view.vpheight
-                fraction_tan = helper_vertical_distance/target_distance
-                total_tan = (0.5/helper_fraction) * fraction_tan
-                calculated_angle = 2*Math.atan(total_tan)
-                fov_vertical = calculated_angle.radians
-            end
+		if(width >= height)
+			fov = fov_vertical
+		else
 			focal_distance = 0.5 * height / Math.tan(0.5 * fov_vertical.degrees)
 			fov_horizontal = (2.0 * Math.atan2(0.5 * width, focal_distance)).radians
 			fov = fov_horizontal
@@ -197,43 +143,24 @@ class LuxrenderExport
 		ratio = @lrs.fleximage_xresolution.to_f / @lrs.fleximage_yresolution.to_f
 		inv_ratio = 1.0 / ratio
         
-        # two point perspective logic
+        # todo 2014: 2d camera logic
+        # get variables necessary for two point perspective offset calculation
         camtarget = Sketchup.active_model.active_view.camera.target
-        skp_view_height = Sketchup.active_model.active_view.vpheight.to_f
-        skp_view_width = Sketchup.active_model.active_view.vpwidth.to_f
-        skpratio = skp_view_width/skp_view_height
-        target_x = Sketchup.active_model.active_view.screen_coords(camtarget)[0].to_f
-        target_y = Sketchup.active_model.active_view.screen_coords(camtarget)[1].to_f
-        target_fraction_x_skp = 0.0
-        target_fraction_y_skp = 0.0
-        if (ratio > 1.0 && skpratio > 1.0)
-            # landscape
-            puts "landscape"
-            target_fraction_x_skp = ((target_x - 0.5*skp_view_width)/skp_view_width)*skpratio
-            target_fraction_y_skp = target_y / skp_view_height - 0.5
-        elsif (ratio < 1.0 && skpratio < 1.0)
-            # portrait
-            puts "portrait"
-            target_fraction_x_skp = ((target_x - 0.5*skp_view_width)/skp_view_width)
-            target_fraction_y_skp = (target_y / skp_view_height - 0.5)/ratio
-        elsif (ratio > 1.0 && skpratio < 1.0)
-            # Sketchup portrait, LuxRender landscape
-            puts "Sketchup portrait, LuxRender landscape"
-            target_fraction_x_skp = ((target_x - 0.5*skp_view_width)/skp_view_width) * ratio
-            target_fraction_y_skp = ((target_y - 0.5*skp_view_height)/skp_view_height)*ratio/skpratio
-        elsif (ratio < 1.0 && skpratio > 1.0)
-            # Sketchup landscape, LuxRender portrait
-            puts "Sketchup landscape, LuxRender portrait"
-            target_fraction_x_skp = ((target_x - 0.5*skp_view_width)/skp_view_width)/ratio
-            target_fraction_y_skp = ((target_y / skp_view_height) - 0.5)/ratio
-        end
-        offsetx = -2 * target_fraction_x_skp
-        offsety = 2 * target_fraction_y_skp
+        skp_view_height = Sketchup.active_model.active_view.vpheight
+        skp_view_width = Sketchup.active_model.active_view.vpwidth
+        target_x = Sketchup.active_model.active_view.screen_coords(camtarget)[0]
+        target_y = Sketchup.active_model.active_view.screen_coords(camtarget)[1]
+        target_fraction_x_skp = (skp_view_width / ( skp_view_height * ratio)) * ( (0.5 * skp_view_width - target_x) / skp_view_width)
+        target_fraction_y_skp = 0.5 - target_y / skp_view_height
+        offsetx = 2 * target_fraction_x_skp
+        offsety = -2 * target_fraction_y_skp
         puts "CALCULATED X, Y OFFSET:"
         puts target_fraction_x_skp
         puts target_fraction_y_skp
-        # end two point perspective logic
 
+        # todo 2014: check portrait aspect ratio offset
+        # ...
+        # ...
         
         if (@lrs.camera_type=='orthographic')
             imageheight = Sketchup.active_model.active_view.camera.height.to_m
@@ -244,7 +171,7 @@ class LuxrenderExport
             screen_window = [2 * cam_shiftX - ratio + offsetx, 2 * cam_shiftX + ratio + offsetx, 2 * cam_shiftY - 1.0 + offsety, 2 * cam_shiftY + 1.0 + offsety]
             #screen_window = [2 * cam_shiftX - ratio, 2 * cam_shiftX + ratio, 2 * cam_shiftY - 1.0, 2 * cam_shiftY + 1.0]
             else
-                screen_window = [2 * cam_shiftX - 1.0 + offsetx, 2 * cam_shiftX + 1.0 + offsetx, 2 * cam_shiftY - inv_ratio + offsety, 2 * cam_shiftY + inv_ratio + offsety]
+                screen_window = [2 * cam_shiftX - 1.0, 2 * cam_shiftX + 1.0, 2 * cam_shiftY - inv_ratio, 2 * cam_shiftY + inv_ratio]
             end
         end
 	end # END compute_screen_window
@@ -1548,7 +1475,10 @@ class LuxrenderExport
                 pre, post = self.export_diffuse_component(mat, pre, post)
                 pre, post = self.export_specular_component(mat, pre, post)
                 pre, post = self.export_exponent(mat, pre, post)
-                pre, post = self.export_IOR(mat, pre, post)
+                #pre, post = self.export_IOR(mat, pre, post)
+                #pre, post = self.export_spec_IOR(mat, pre, post)
+
+                
                 if (mat.use_absorption)
                     pre, post = self.export_absorption_component(mat, pre, post)
                 end
@@ -1828,11 +1758,19 @@ class LuxrenderExport
 	def export_specular_component(material, before, after)
 		preceding = ""
 		following = ""
-		if ( ! material.has_texture?("ks"))
-			following += "\t" + "\"color Ks\" [#{material.specular_tos}]" + "\n"
-		else
-			preceding, following = self.export_texture(material, "ks", "color", before, after)
-		end
+        if (material.specular_scheme == "specular_scheme_IOR")
+            if ( ! material.has_texture?("spec_IOR"))
+                following += "\t" + "\"float index\" [#{material.spec_IOR}]\n"
+            else
+                preceding, following = self.export_texture(material, "spec_IOR", "float", before, after)
+            end
+        else
+            if ( ! material.has_texture?("ks"))
+                following += "\t" + "\"color Ks\" [#{material.specular_tos}]" + "\n"
+            else
+                preceding, following = self.export_texture(material, "ks", "color", before, after)
+            end
+        end
 		return [before + preceding, after + following]
 	end
     
@@ -2125,9 +2063,12 @@ class LuxrenderExport
             when 'normal'
 				type_str = "bumpmap"
 				type_str2 = "normalmap"
-			when 'IOR_index'
+            when 'IOR_index'
 				type_str = 'index'
 				type_str2 = 'IOR_index'
+            when 'spec_IOR'
+				type_str = 'index'
+				type_str2 = 'spec_IOR'
 			when 'u_exponent'
 				type_str = 'uroughness'
 				type_str2 = 'uroughness'

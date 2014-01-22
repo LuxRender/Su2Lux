@@ -111,7 +111,6 @@ class LuxrenderMaterialEditor
 			
 			if existingluxmat == "none"
 				puts "LuxRender material not found, creating new material"
-                #UI.messagebox ("about to run .find for material " + material_name)
 				@current = self.find(material_name) ### use only this line if testing fails
 			else
 				puts "reusing LuxRender material"
@@ -123,7 +122,7 @@ class LuxrenderMaterialEditor
 			end
 			
 			# reload existing material preview image
-			puts "attempting to reload image"
+			puts "attempting to reload material preview image"
 			load_preview_image()
             puts @current.name
             settexturefields(@current.name)
@@ -136,22 +135,24 @@ class LuxrenderMaterialEditor
             #puts channels
             for channelname in channels
                 textypename = channelname + "_texturetype" # for example "kd_texturetype"
+                # puts luxmat.send(textypename)
+                # hide texture fields
                 cmd = "$('#" + textypename + "').nextAll('span').hide();"
                 @material_editor_dialog.execute_script(cmd)
                 cmd = "$('#" + textypename + "').nextAll('div').hide();"
                 @material_editor_dialog.execute_script(cmd)
+                # show active texture fields
                 activetexturetype = luxmat.send(textypename)
                 cmd = "$('#" + textypename + "').nextAll('." + activetexturetype + "').show()";
-                #puts cmd
                 @material_editor_dialog.execute_script(cmd)
                 
                 # set colorize checkboxes
                 colorizename = channelname + "_imagemap_colorize" # for example kd_imagemap_colorize
                 colorizeon = (@current.send(colorizename))? "true":"false"
                 cmd = "$('." + colorizename + "\').attr('checked', " + colorizeon + ");"
-                #puts cmd
                 @material_editor_dialog.execute_script(cmd)
             end
+            
             # hide carpaint diffuse section for presets
             if (@current.type == "carpaint" && @current.carpaint_name != "")
                 puts "hiding carpaint diffuse field"
@@ -162,15 +163,13 @@ class LuxrenderMaterialEditor
             # show proper auto alpha values
             if (@current.aa_texturetype=="imagealpha" || @current.aa_texturetype=="imagecolor")
                 puts "SHOWING AUTO ALPHA BUTTONS"
-                #cmd = '$("#aa").nextAll(".autoalpha_image").show()';
-                 cmd = '$("#autoalpha_image_field").show()';
+                cmd = '$("#autoalpha_image_field").show()';
                 @material_editor_dialog.execute_script(cmd)
 #           else # sketchup texture
 #               puts "HIDING AUTO ALPHA BUTTONS"
 #               #       $('#aa').nextAll(".imagemap").hide();
 #               #cmd = '$("#aa").nextAll(".autoalpha_image").hide()';
 #               cmd = '$("#autoalpha_image_field").hide()';
-#
 #               @material_editor_dialog.execute_script(cmd)
             end
             
@@ -259,9 +258,6 @@ class LuxrenderMaterialEditor
 			javascriptcommand = "$('#type').nextAll('.' + '" + @materialtype + "').show();"
             SU2LUX.dbg_p javascriptcommand
 			dialog.execute_script(javascriptcommand)
-            
-
-            
 		}
 		
 		@material_editor_dialog.add_action_callback('type_changed') { |dialog, material_type|
@@ -489,21 +485,16 @@ class LuxrenderMaterialEditor
 			prefix = data + '_' + texture_type + '_'
 			@texture_editor_data['texturetype'] = lux_material.send(method_name)
         
-            # temp
-           puts "lux_material, prefix:"
-           puts lux_material
-           puts prefix
-                                   
-           # end temp
-			['wrap', 'channel', 'filename', 'gamma', 'gain', 'filtertype', 'mapping', 'uscale',
-			 'vscale', 'udelta', 'vdelta', 'maxanisotropy', 'discardmipmaps'].each {|par|
+                                   #properties_export =	['wrap', 'channel', 'filename', 'gamma', 'gain', 'filtertype', 'mapping', 'uscale', 'vscale', 'udelta', 'vdelta', 'maxanisotropy', 'discardmipmaps']
+            properties_export =	['filename', 'uscale', 'vscale', 'udelta', 'vdelta', 'gamma', 'filtertype']
+            properties_export.each {|par|
 				@texture_editor_data[texture_type + '_' + par] = lux_material.send(prefix + par) if (lux_material.respond_to?(prefix+par))
 			}
             
             @texture_editor = LuxrenderTextureEditor.new(@texture_editor_data, data)
 
             puts "sending data to texture editor:"
-            puts @texture_editor_data
+            @texture_editor_data.each{|item| puts item}
             puts data
             
 			@texture_editor.show()
@@ -561,6 +552,32 @@ class LuxrenderMaterialEditor
 		@material_editor_dialog.execute_script(cmd)
     end
 	
+    def showhide_displacement()
+        if @current.dm_scheme == "loop"
+           cmd1 = '$("#loop").show()'
+           cmd2 = '$("#microdisplacement").hide()'
+       else
+           cmd1 = '$("#loop").hide()'
+           cmd2 = '$("#microdisplacement").show()'
+       end
+       @material_editor_dialog.execute_script(cmd1)
+       @material_editor_dialog.execute_script(cmd2)
+    end
+                           
+    def showhide_specularIOR()
+        if @current.specular_scheme == "specular_scheme_IOR"
+           cmd1 = '$("#specular_scheme_IOR").show()'
+           cmd2 = '$("#specular_scheme_color").hide()'
+       else
+           cmd1 = '$("#specular_scheme_IOR").hide()'
+           cmd2 = '$("#specular_scheme_color").show()'
+       end
+       @material_editor_dialog.execute_script(cmd1)
+       @material_editor_dialog.execute_script(cmd2)
+    end
+                           
+                           
+                           
 	def sanitize_path(original_path)
 		if (ENV['OS'] =~ /windows/i)
 			sanitized_path = original_path.unpack('U*').pack('C*') # converts string to ISO-8859-1
@@ -682,11 +699,11 @@ class LuxrenderMaterialEditor
 		end
 		
 		## update material editor contents
-		set_material_lists
-		sendDataFromSketchup()
-		load_preview_image		
-		set_current(@current.name)
-        update_texture_names(@current)
+        set_material_lists # dropdowns for materials + mix submaterials
+        sendDataFromSketchup() # material values
+        load_preview_image # material preview image
+        set_current(@current.name) # active material in material dropdown
+        update_texture_names(@current) # image texture paths
         puts "RUNNING REFRESH, ABOUT TO RUN settexturefields FOR MATERIAL " + @current.name
         settexturefields(@current.name)
         
@@ -772,7 +789,7 @@ class LuxrenderMaterialEditor
         SU2LUX.dbg_p "running sendDataFromSketchup for "
 		puts @current.name
 		materialproperties = @current.get_names # returns all settings from LuxrenderMaterial @@settings
-		materialproperties.each { |setting| updateSettingValue(setting)	}
+		materialproperties.each { |setting| updateSettingValue(setting)}
 		# SU2LUX.dbg_p "just ran sendDataFromSketchup@LuxrenderMaterialEditor"
 	end # END sendDataFromSketchup
 	

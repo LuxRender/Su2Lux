@@ -257,36 +257,80 @@
                     </div>
                 </div>
             </div><!-- end cloth -->
+            
+            
 			<div id="specular" class="glossy shinymetal glossytranslucent">
 				<p class="header2">Specular Reflections</p>
                 <div class="panelcontent collapse">
-                    <table id="swatch_specular">
-                    <tr><td id="specular_swatch" class="swatch" width=64 height=64></td></tr>
-                    </table>
-                    <label for="ks_R" class="kdr">Red</label><input type='text' id="ks_R" size="6" class="kdrvalue">
-                    <label for="ks_G" class="kdg">Green</label><input type='text' id="ks_G" size="6" class="kdgvalue">
-                    <label for="ks_B" class="kdb">Blue</label><input type='text' id="ks_B" size="6" class="kdbvalue">
                     
-                    <div class="texture_area_swatchfield">
-                    <label for="ks_texturetype" class="tex_label">Texture</label>
-                    <select id="ks_texturetype" class="tex_dropdown" name="ks">
-                        <option value="none">None</option>
-                        <option value="sketchup">Sketchup Texture</option>
-                        <option value="imagemap">Image Map</option>
+                    <label for="specular_scheme" class="specular_label">Specular definition: </label>
+                    <select id="specular_scheme" class="specular_field">
+                        <option value="specular_scheme_color">Color</option>
+                        <option value="specular_scheme_IOR">IOR</option>
+                        <!-- todo 2014: add IOR preset option -->
                     </select>
-                    <span class="sketchup">
-                        <div class="colorizesection"><input type="checkbox" class="ks_imagemap_colorize" name="ks_imagemap_colorize">
-                        <label for="multibounce">Multiply</label></div>
-                    </span>
-                    <span class="imagemap">
-                        <div id="ks_imgmapname" class="tex_path">&nbsp;</div>
-                        <input type="button" id="ks_browse_map" value="load" class="tex_loadbutton">
-                        <div class="colorizesection"><input type="checkbox" class="ks_imagemap_colorize" name="ks_imagemap_colorize">
-                        <label for="multibounce">Multiply</label></div>
-                    </span>
+                    
+                    <div id="specular_scheme_color" class="parameter_interface">
+                        <table id="swatch_specular">
+                        <tr><td id="specular_swatch" class="swatch" width=64 height=64></td></tr>
+                        </table>
+                        <label for="ks_R" class="kdr">Red</label><input type='text' id="ks_R" size="6" class="kdrvalue">
+                        <label for="ks_G" class="kdg">Green</label><input type='text' id="ks_G" size="6" class="kdgvalue">
+                        <label for="ks_B" class="kdb">Blue</label><input type='text' id="ks_B" size="6" class="kdbvalue">
+                        
+                        <div class="texture_area_swatchfield">
+                        <label for="ks_texturetype" class="tex_label">Texture</label>
+                        <select id="ks_texturetype" class="tex_dropdown" name="ks">
+                            <option value="none">None</option>
+                            <option value="sketchup">Sketchup Texture</option>
+                            <option value="imagemap">Image Map</option>
+                        </select>
+                        <span class="sketchup">
+                            <div class="colorizesection"><input type="checkbox" class="ks_imagemap_colorize" name="ks_imagemap_colorize">
+                            <label for="multibounce">Multiply</label></div>
+                        </span>
+                        <span class="imagemap">
+                            <div id="ks_imgmapname" class="tex_path">&nbsp;</div>
+                            <input type="button" id="ks_browse_map" value="load" class="tex_loadbutton">
+                            <div class="colorizesection"><input type="checkbox" class="ks_imagemap_colorize" name="ks_imagemap_colorize">
+                            <label for="multibounce">Multiply</label></div>
+                        </span>
+                        </div>
                     </div>
+                    
+                    <div id="specular_scheme_IOR" class="parameter_interface">
+                        <div id="spec_IOR_interface">
+                        <label for="spec_IOR" class="spec_IOR">Index of refraction: </label><input type='text' id="spec_IOR" size="6" class="spec_IORvalue">
+                        </div>
+                        
+                        <div class="texture_area_swatchfield">
+                            <label for="spec_IOR_texturetype" class="tex_label">Texture</label>
+                            <select id="spec_IOR_texturetype" class="tex_dropdown" name="spec_IOR">
+                                <option value="none">None</option>
+                                <option value="sketchup">Sketchup Texture</option>
+                                <option value="imagemap">Image Map</option>
+                            </select>
+                            <span class="sketchup">
+                                <div class="colorizesection"><input type="checkbox" class="spec_IOR_imagemap_colorize" name="spec_IOR_imagemap_colorize">
+                                <label for="multibounce">Multiply</label></div>
+                            </span>
+                            <span class="imagemap">
+                                <div id="spec_IOR_imgmapname" class="tex_path">&nbsp;</div>
+                                <input type="button" id="spec_IOR_browse_map" value="load" class="tex_loadbutton">
+                                <div class="colorizesection"><input type="checkbox" class="spec_IOR_imagemap_colorize" name="spec_IOR_imagemap_colorize">
+                                <label for="multibounce">Multiply</label></div>
+                            </span>
+                        </div>
+                            
+                    </div>
+                    
+                    
+                    
                 </div> <!-- END panelcontent -->
 			</div> <!-- END specular -->
+            
+            
+            
             
             <div id="mix" class="mix">
                 <p class="header2">Mix</p>

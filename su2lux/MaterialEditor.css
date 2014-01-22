@@ -251,7 +251,13 @@ input#get_diffuse_color {
     background-color: #ffffff;
 }
 
-#swatch_absorption{
+#spec_IOR_interface{
+    position: absolute;
+    top: 7px;
+    left: 0px;
+}
+
+#swatch_absorption, #specular_swatch{
     position: absolute;
     top: 7px;
     left: 7px;
@@ -570,6 +576,6 @@ input#get_diffuse_color {
 	float: right;
 }
 
-#kd_browse_map, #ks_browse_map, #km2_browse_map, #cl1kd_browse_map, #cl1ks_browse_map, #cl2kd_browse_map, #cl2ks_browse_map{
+#kd_browse_map, #ks_browse_map, #km2_browse_map, #cl1kd_browse_map, #cl1ks_browse_map, #cl2kd_browse_map, #cl2ks_browse_map, #spec_IOR_browse_map{
     width: 5em;
 }
