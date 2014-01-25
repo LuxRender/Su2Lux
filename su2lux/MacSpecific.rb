@@ -13,7 +13,8 @@ class OSSpecific
             "file_appendix" => "/Contents/MacOS/luxrender",
             "luxconsole_filename" => "LuxRender.app/Contents/MacOS/luxconsole",
 			"path_separator" => "/",
-			"material_preview_path" => File.expand_path("~/Library/Application\ Support")+"\/LuxRender/"
+			"material_preview_path" => File.expand_path("~/Library/Application\ Support")+"\/LuxRender/",
+            "settings_path" => File.expand_path("~/Library/Application\ Support")+"\/LuxRender/LuxRender_settings_presets/"
 		}
 	end
 	

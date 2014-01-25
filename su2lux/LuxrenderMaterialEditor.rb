@@ -23,6 +23,7 @@ class LuxrenderMaterialEditor
     attr_reader :material_editor_dialog
 	
 	def initialize
+        puts "initialising material editor"
 		@lrs = LuxrenderSettings.new
         @materials_skp_lux = Hash.new
 		@matname_changed = false
@@ -38,12 +39,15 @@ class LuxrenderMaterialEditor
         @color_picker.set_file(color_picker_path)
 		@texture_editor_data = {}
         
+        
         @numberofluxmaterials = 0
         
         for mat in Sketchup.active_model.materials
             luxmat = self.find(mat.name)
             get_skp_color(mat,luxmat)
         end
+        
+        puts "done initialising material editor"
 		
 		@material_editor_dialog.add_action_callback('param_generate') {|dialog, params|
             SU2LUX.dbg_p "callback: param_generate"
@@ -339,8 +343,8 @@ class LuxrenderMaterialEditor
             preview_path = os.get_variables["material_preview_path"]
             path_separator = os.get_variables["path_separator"]
 		
-            settingseditor = LuxrenderSettings.new
-            previewtime = settingseditor.preview_time
+            settings = LuxrenderSettings.new
+            previewtime = settings.preview_time
             
             active_material = @materials_skp_lux.index(@current) ## was Sketchup.active_model.materials.current  
 			active_material_name = active_material.name.delete("[<>]") # following LuxrenderMaterial.rb convention ## was Sketchup.active_model.materials.
@@ -384,9 +388,9 @@ class LuxrenderMaterialEditor
             lxs_section_3 = File.readlines(preview_path+"preview.lxs03")
             generated_lxs_file.puts lxs_section_1
             
-            generated_lxs_file.puts("\t\"integer xresolution\" [" + settingseditor.preview_size.to_s + "]")
-            generated_lxs_file.puts("\t\"integer yresolution\" [" + settingseditor.preview_size.to_s + "]")
-            generated_lxs_file.puts("\t\"integer halttime\" [" + settingseditor.preview_time.to_s + "]")
+            generated_lxs_file.puts("\t\"integer xresolution\" [" + settings.preview_size.to_s + "]")
+            generated_lxs_file.puts("\t\"integer yresolution\" [" + settings.preview_size.to_s + "]")
+            generated_lxs_file.puts("\t\"integer halttime\" [" + settings.preview_time.to_s + "]")
             generated_lxs_file.puts("\t\"string filename\" \[\""+Sketchup.active_model.title+"_"+active_material_name_converted+"\"]")
             generated_lxs_file.puts("")
             generated_lxs_file.puts("WorldBegin")
@@ -631,7 +635,7 @@ class LuxrenderMaterialEditor
             return getluxmatfromskpname(name)
         elsif (mat)
             @numberofluxmaterials += 1
-            puts @numberofluxmaterials
+            #puts @numberofluxmaterials
             newluxmat = LuxrenderMaterial.new(mat)
             @materials_skp_lux[mat] = newluxmat
             return newluxmat

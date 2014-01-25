@@ -13,7 +13,8 @@ class OSSpecific
             "file_appendix" => "/Contents/MacOS/luxrender",
             "luxconsole_filename" => "luxconsole.exe",
 			"path_separator" => "\\",
-			"material_preview_path" => ENV['APPDATA']+"\\"+"LuxRender\\"
+			"material_preview_path" => ENV['APPDATA']+"\\"+"LuxRender\\",
+            "settings_path" => ENV['APPDATA']+"\\"+"LuxRender\\LuxRender_settings_presets\\"
 		}
 	end
 	

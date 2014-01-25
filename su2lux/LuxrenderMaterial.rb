@@ -293,6 +293,7 @@ class LuxrenderMaterial
 	#
 	##
 	def reset
+            puts "resetting material"
 			@@settings.each do |key, value|
 				LuxrenderAttributeDictionary.set_attribute(@dict, key, value)
 			end

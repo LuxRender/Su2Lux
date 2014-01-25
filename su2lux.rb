@@ -95,8 +95,19 @@ module SU2LUX
 	def SU2LUX.initialize_variables
 	
 		os = OSSpecific.new
-		@os_specific_vars = os.get_variables 
-		@lrs= LuxrenderSettings.new
+		@os_specific_vars = os.get_variables
+        # create folder for settings files, copy settings files
+        @settings_path = @os_specific_vars["settings_path"]
+        Dir.mkdir(@settings_path) unless File.exists?(@settings_path)
+        settings_source_folder = File.join(SU2LUX::PLUGIN_FOLDER, "presets_settings_editor")
+        puts "about to copy preset files:"
+        settingsfilesstring = File.join(Sketchup.find_support_file("Plugins"),settings_source_folder,"/*.lxp")
+        Dir.glob(settingsfilesstring) do |presetfile|
+            settings_target_file = File.join(os.get_variables["settings_path"], File.basename(presetfile))
+            FileUtils.copy_file(presetfile,settings_target_file) unless File.exists?(settings_target_file)
+        end
+        puts "creating LuxRender settings"
+		@lrs = LuxrenderSettings.new
 		@luxrender_filename = @os_specific_vars["luxrender_filename"]
 		@luxrender_path = "" # todo: move to LuxrenderSettings.rb?
         @luxconsole_executable = @os_specific_vars["luxconsole_filename"]
@@ -413,6 +424,15 @@ module SU2LUX
 		return folder
 	end # END find_default_folder
 
+    ##
+    #
+    ##
+    def SU2LUX.get_settings_folder
+        settings_folder = @os_specific_vars["settings_path"]
+        puts "returning folder: " + settings_folder
+        return settings_folder
+    end # END find_default_folder
+
 	##
 	#
 	##
@@ -575,10 +595,17 @@ For further information please visit LuxRender's Website & Forum at www.luxrende
                 if @settings_editor
                       editor = @settings_editor
                 else
-                      editor = LuxrenderSettingsEditor.new
+                      @settings_editor = LuxrenderSettingsEditor.new
+                      editor = @settings_editor
                 end
-			when "material"
-				editor = @material_editor
+            when "material"
+                  if @material_editor
+                      editor = @material_editor
+                  else
+                      UI.messagebox "creating new material editor"
+                      @material_editor = LuxrenderMaterialEditor.new
+                      editor = @material_editor
+                  end
 		end
 		return editor
 	end # END get_editor
@@ -656,6 +683,7 @@ end # END class SU2LUX_view_observer
 
 class SU2LUX_app_observer < Sketchup::AppObserver
 	def onNewModel(model)
+        puts "onNewModel observer triggered"
 		SU2LUX.initialize_variables
 		@lrs = LuxrenderSettings.new
 		loaded = @lrs.load_from_model
@@ -848,7 +876,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 end
 
 if( not file_loaded?(__FILE__) )
-
+    puts "no SketchUp file loaded"
 	case SU2LUX.get_os
 		when :mac
 			load File.join(SU2LUX::PLUGIN_FOLDER, "MacSpecific.rb")
@@ -874,29 +902,34 @@ if( not file_loaded?(__FILE__) )
     create_toolbar()
   	
 	Sketchup.active_model.materials.current = Sketchup.active_model.materials[0]
-
-	@lrs = LuxrenderSettings.new
+    
+    puts "running LuxrenderSettings.new"
+    @lrs = LuxrenderSettings.new # already done by running initialize_variables, but variable is not accessible
 	loaded = @lrs.load_from_model
-	@lrs.reset unless loaded                      
-	for mat2 in Sketchup.active_model.materials
-		luxmat = LuxrenderMaterial.new(mat2)
+	@lrs.reset unless loaded
+                      
+	puts "loading material settings"
+    for mat in Sketchup.active_model.materials
+		luxmat = LuxrenderMaterial.new(mat)
 		loaded = luxmat.load_from_model
 		luxmat.reset unless loaded
 	end
-                      
+    puts "finished loading material settings"
+    
+    puts "looking for LuxRender path"
     if (Sketchup.read_default("SU2LUX","luxrenderpath"))
         @lrs.export_luxrender_path = Sketchup.read_default("SU2LUX","luxrenderpath").to_a.pack('H*') # copy stored executable path to settings, so it shows in settings window
     end
-                      
+          
+    puts "creating material editor"
 	@lme = SU2LUX.create_material_editor
-	material_editor = SU2LUX.get_editor("material")
     SU2LUX.dbg_p "material editor created, now starting refresh function"
-	material_editor.refresh
+	@lme.refresh
 	#observers
 	$SU2LUX_app_observer = SU2LUX_app_observer.new
 	Sketchup.add_observer($SU2LUX_app_observer)
-	SU2LUX.create_observers	
+	SU2LUX.create_observers
+    puts "finished 'no file loaded' logic"
 end
-
 
 file_loaded(__FILE__)

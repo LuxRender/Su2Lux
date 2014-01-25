@@ -20,15 +20,90 @@ function checkbox_expander(id)
 	}
 }
 
+function update_settings_dropdown(presetname){
+    //alert (presetname);
+    var preset_exists = false;
+    $('#preset option').each(
+        function(){
+            if (this.value == presetname  || this.text == presetname) {
+                preset_exists = true;
+            }
+        }
+    )
+    if (preset_exists==true){
+        //alert ("preset existed already")
+        $("#preset").val(presetname);
+    }else{
+        //alert ("new preset loaded")
+        // add value to dropdown and make current
+        $("#preset").append($('<option></option>').val(presetname).html(presetname));
+        $("#preset").val(presetname);
+        //cmd = "$('#" + dropdownname +"').append( $('"+ "<option value=\"#{luxrender_mat.original_name}\">#{luxrender_mat.name}</option>"
+    }
+    window.location = 'skp:display_loaded_presets@'   // refresh view
+}
+
+function add_to_dropdown(simplepreset){
+    //alert ("add_to_dropdown running");
+    $("#preset").append($('<option></option>').val(simplepreset).html(simplepreset));
+    if (simplepreset == 'Final interior - MLT+Bidirectional path tracing (recommended)'){
+        // set dropdown to recommended setting
+        $("#preset").val(simplepreset);
+        window.location = 'skp:load_settings@' + $("#preset option:selected").text()
+    }
+}
+
+function update_subfield(field_class)
+{
+    //alert(field_class)
+    $("#"+field_class).nextAll("."+field_class).hide();
+    id_option_string = "#" + field_class + " option:selected"
+    idname = $(id_option_string).text()
+    $("#"+field_class).nextAll("#"+idname).show();
+}
+
+
+
 $(document).ready(
 	function()
 	{
+        //alert ("DOM ready")
+        window.location = 'skp:load_preset_files@'
+        
 		$(".collapse").hide();
 		$(".collapse2").hide();
 		$(".advanced").hide();
         $("#camera").next(".collapse").show(); // shows camera settings by default
         $("#imageresolution").next(".collapse").show();
         $("#system").next(".collapse").show();
+                  
+        $("#save_settings_file").click(
+            function()
+            {
+                window.location = 'skp:export_settings@' + this.value
+            }
+        )
+                  
+        $("#overwrite_settings_file").click(
+            function()
+            {
+                window.location = 'skp:overwrite_settings@' + $("#preset").val()
+            }
+        )
+
+        $("#load_settings_file").click(
+            function()
+            {
+                window.location = 'skp:load_settings@' + false
+            }
+        )
+                  
+        $("#delete_settings_file").click(
+            function()
+            {
+                window.location = 'skp:delete_settings@' + $("#preset option:selected").text()
+            }
+        )
 	
 		$("#settings_panel select, :text").change(
 			function()
@@ -84,7 +159,7 @@ $(document).ready(
 		$("#settings_panel #sampler_type").change(
 			function()
 			{
-				$(this).nextAll(".samplertype").hide();
+				$(this).nextAll(".sampler_type").hide();
 				$(this).nextAll("#" + this.value).show();
 			}
 		);
@@ -93,7 +168,7 @@ $(document).ready(
 			function()
 			{
 				$(this).nextAll().hide();
-				$(this).nextAll("." + this.value).show();
+				$(this).nextAll("#" + this.value).show();
 			}
 		);
 		
@@ -117,8 +192,9 @@ $(document).ready(
 		$("#presets select").change(
 			function()
 			{
-				//alert("select preset");
-				window.location = 'skp:preset@' + this.value;
+				//alert("loading settings for preset");
+				//window.location = 'skp:preset@' + this.value;
+                window.location = 'skp:load_settings@' + $("#preset option:selected").text()
 			}
 		);
 

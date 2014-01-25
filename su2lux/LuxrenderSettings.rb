@@ -29,7 +29,7 @@ class LuxrenderSettings
 	##
 	# Settings
 	###
-        'preset' => '1',
+        #'preset' => '1',
     
 	##
 	# Camera
@@ -387,6 +387,7 @@ class LuxrenderSettings
 	#
 	##
 	def initialize
+        puts "initializing LuxRender settings"
 		singleton_class = (class << self; self; end)
 		@model=Sketchup.active_model
 		@view=@model.active_view
@@ -414,6 +415,7 @@ class LuxrenderSettings
 				end #end case
 			end #end settings.each
 		end #end module_eval
+        puts "done initializing LuxRender settings"
 	end #end initialize
 
 	def reset

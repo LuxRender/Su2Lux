@@ -26,15 +26,19 @@ class LuxrenderSettingsEditor
 	#
 	##
 	def initialize
-
-		pref_key = "LuxrenderSettingsEditor"
-		@settings_dialog = UI::WebDialog.new("LuxRender Settings Editor", true, pref_key, 520, 500, 10, 10, true)
-		@settings_dialog.max_width = 520
+        puts "initializing settings editor"
+        puts self
+		@settings_dialog = UI::WebDialog.new("LuxRender Settings Editor", true, "LuxrenderSettingsEditor", 520, 500, 10, 10, true)
+        @settings_dialog.max_width = 520
 		setting_html_path = Sketchup.find_support_file("settings.html" , "Plugins/"+SU2LUX::PLUGIN_FOLDER)
 		@settings_dialog.set_file(setting_html_path)
         # @settings_dialog.set_on_close { @presets[@lrad["preset"].value].save} # taken from Juicyfruit version, but @presets does not exist
 		@lrs=LuxrenderSettings.new
+        
+        @exportable_settings = ['pixelfilter_type','pixelfilter_mitchell_sharpness','pixelfilter_mitchell_optmode','pixelfilter_mitchell_xwidth','pixelfilter_mitchell_ywidth','pixelfilter_mitchell_B','pixelfilter_mitchell_C','pixelfilter_mitchell_supersample','pixelfilter_box_xwidth','pixelfilter_box_ywidth','pixelfilter_triangle_xwidth','pixelfilter_triangle_ywidth','pixelfilter_sinc_xwidth','pixelfilter_sinc_ywidth','pixelfilter_sinc_tau','pixelfilter_gaussian_xwidth','pixelfilter_gaussian_ywidth','pixelfilter_gaussian_alpha','sampler_type','sampler_random_pixelsamples','sampler_random_pixelsampler','sampler_lowdisc_pixelsamples','sampler_lowdisc_pixelsampler','sampler_noiseaware','sampler_metropolis_largemutationprob','sampler_metropolis_maxconsecrejects','sampler_metropolis_usevariance','sampler_erpt_chainlength','sintegrator_show_advanced','sintegrator_type','sintegrator_bidir_show_advanced','sintegrator_bidir_bounces','sintegrator_bidir_eyedepth','sintegrator_bidir_eyerrthreshold','sintegrator_bidir_lightdepth','sintegrator_bidir_lightthreshold','sintegrator_bidir_strategy','sintegrator_bidir_debug','sintegrator_direct_show_advanced','sintegrator_direct_bounces','sintegrator_direct_maxdepth','sintegrator_direct_shadow_ray_count','sintegrator_direct_strategy','sintegrator_distributedpath_directsampleall','sintegrator_distributedpath_directsamples','sintegrator_distributedpath_indirectsampleall','sintegrator_distributedpath_indirectsamples','sintegrator_distributedpath_diffusereflectdepth','sintegrator_distributedpath_diffusereflectsamples','sintegrator_distributedpath_diffuserefractdepth','sintegrator_distributedpath_diffuserefractsamples','sintegrator_distributedpath_directdiffuse','sintegrator_distributedpath_indirectdiffuse','sintegrator_distributedpath_glossyreflectdepth','sintegrator_distributedpath_glossyreflectsamples','sintegrator_distributedpath_glossyrefractdepth','sintegrator_distributedpath_glossyrefractsamples','sintegrator_distributedpath_directglossy','sintegrator_distributedpath_indirectglossy','sintegrator_distributedpath_specularreflectdepth','sintegrator_distributedpath_specularrefractdepth','sintegrator_distributedpath_strategy','sintegrator_distributedpath_reject','sintegrator_distributedpath_diffusereflectreject','sintegrator_distributedpath_diffusereflectreject_threshold','sintegrator_distributedpath_diffuserefractreject','sintegrator_distributedpath_diffuserefractreject_threshold','sintegrator_distributedpath_glossyreflectreject','sintegrator_distributedpath_glossyreflectreject_threshold','sintegrator_distributedpath_glossyrefractreject','sintegrator_distributedpath_glossyrefractreject_threshold','sintegrator_exphoton_show_advanced','sintegrator_exphoton_finalgather','sintegrator_exphoton_finalgathersamples','sintegrator_exphoton_gatherangle','sintegrator_exphoton_maxdepth','sintegrator_exphoton_maxphotondepth','sintegrator_exphoton_maxphotondist','sintegrator_exphoton_nphotonsused','sintegrator_exphoton_causticphotons','sintegrator_exphoton_directphotons','sintegrator_exphoton_indirectphotons','sintegrator_exphoton_radiancephotons','sintegrator_exphoton_renderingmode','sintegrator_exphoton_rrcontinueprob','sintegrator_exphoton_rrstrategy','sintegrator_exphoton_photonmapsfile','sintegrator_exphoton_shadow_ray_count','sintegrator_exphoton_strategy','sintegrator_exphoton_dbg_enable_direct','sintegrator_exphoton_dbg_enable_indircaustic','sintegrator_exphoton_dbg_enable_indirdiffuse','sintegrator_exphoton_dbg_enable_indirspecular','sintegrator_exphoton_dbg_enable_radiancemap','sintegrator_igi_show_advanced','sintegrator_igi_maxdepth','sintegrator_igi_mindist','sintegrator_igi_nsets','sintegrator_igi_nlights','sintegrator_path_show_advanced','sintegrator_path_include_environment','sintegrator_path_bounces','sintegrator_path_maxdepth','sintegrator_path_rrstrategy','sintegrator_path_rrcontinueprob','sintegrator_path_shadow_ray_count','sintegrator_path_strategy','volume_integrator_type','volume_integrator_stepsize','film_type','fleximage_premultiplyalpha','fleximage_filterquality','fleximage_ldr_clamp_method','fleximage_write_exr','fleximage_write_exr_channels','fleximage_write_exr_halftype','fleximage_write_exr_compressiontype','fleximage_write_exr_applyimaging','fleximage_write_exr_gamutclamp','fleximage_write_exr_ZBuf','fleximage_write_exr_zbuf_normalizationtype','fleximage_write_png','fleximage_write_png_channels','fleximage_write_png_16bit','fleximage_write_png_gamutclamp','fleximage_write_png_ZBuf','fleximage_write_png_zbuf_normalizationtype','fleximage_write_tga','fleximage_write_tga_channels','fleximage_write_tga_gamutclamp','fleximage_write_tga_ZBuf','fleximage_write_tga_zbuf_normalizaziontype','fleximage_write_resume_flm','fleximage_restart_resume_flm','fleximage_filename','fleximage_writeinterval','fleximage_displayinterval','fleximage_outlierrejection_k','fleximage_debug','fleximage_haltspp','fleximage_halttime','fleximage_colorspace_red_x','fleximage_colorspace_red_y','fleximage_colorspace_green_x','fleximage_colorspace_green_y','fleximage_colorspace_blue_x','fleximage_colorspace_blue_y','fleximage_colorspace_white_x','fleximage_colorspace_white_y','fleximage_tonemapkernel','fleximage_reinhard_prescale','fleximage_reinhard_postscale','fleximage_reinhard_burn','fleximage_linear_sensitivity','fleximage_linear_exposure','fleximage_linear_fstop','fleximage_linear_gamma','fleximage_contrast_ywa','fleximage_cameraresponse','fleximage_gamma','fleximage_linear_use_preset','fleximage_linear_camera_type','fleximage_linear_cinema_exposure','fleximage_linear_cinema_fps','fleximage_linear_photo_exposure','fleximage_linear_use_half_stop','fleximage_linear_hf_stopF','fleximage_linear_hf_stopT','fleximage_linear_iso','fleximage_use_preset','fleximage_use_colorspace_whitepoint','fleximage_use_colorspace_gamma','fleximage_use_colorspace_whitepoint_preset','fleximage_colorspace_wp_preset','fleximage_colorspace_gamma','fleximage_colorspace_preset_white_x','fleximage_colorspace_preset_white_y','fleximage_colorspace_preset','accelerator_type','kdtree_intersectcost','kdtree_traversalcost','kdtree_emptybonus','kdtree_maxprims','kdtree_maxdepth','qbvh_maxprimsperleaf','qbvh_skip_factor','grid_refineimmediately','useparamkeys','texexport','exp_distorted','geomexport','priority','copy_textures']
 		
+        puts "finished initialising settings editor"
+        
 		##
 		#
 		##
@@ -102,7 +106,114 @@ class LuxrenderSettingsEditor
 						end
 				end	
 		} #end action callback param_generatate
-		
+
+    ##
+    #
+    ##
+    @settings_dialog.add_action_callback("overwrite_settings"){ |settingseditor, presetname|
+        puts "exporting settings to existing file"
+        settings_folder = SU2LUX.get_settings_folder
+        settings_path = settings_folder + presetname +  ".lxp"
+        outputfile = File.new(settings_path, "w") # "a" adds to file, "w" writes new file content
+        @exportable_settings.each {|settingname|
+            if (settingname==@exportable_settings.last)
+                outputfile << settingname + "," + @lrs.send(settingname).to_s
+                else
+                outputfile << settingname + "," + @lrs.send(settingname).to_s + "\n"
+            end
+        }
+        outputfile.close
+    }
+
+
+        ##
+        #
+        ##
+        @settings_dialog.add_action_callback("export_settings"){ |settingseditor, params|
+            puts "exporting settings to file"
+            settings_folder = SU2LUX.get_settings_folder
+            settings_path = UI.savepanel("Save as", settings_folder, ".lxp")
+            outputfile = File.new(settings_path, "w") # "a" adds to file, "w" writes new file content
+            @exportable_settings.each {|settingname|
+                if (settingname==@exportable_settings.last)
+                    outputfile << settingname + "," + @lrs.send(settingname).to_s
+                else
+                    outputfile << settingname + "," + @lrs.send(settingname).to_s + "\n"
+                end
+            }
+            outputfile.close
+            # add to dropdown
+            settingsname = File.basename(settings_path,".lxp")
+            addtodropdown = 'add_to_dropdown(\'' + settingsname + '\');'
+            settingseditor.execute_script(addtodropdown)
+            # set active
+            setactivesettingsname = '$("#preset").val("' + settingsname + '");'
+            settingseditor.execute_script(setactivesettingsname)
+        }
+
+        ##
+        #
+        ##
+        @settings_dialog.add_action_callback("load_settings"){ |dialog, presetfile|
+            puts "loading settings from file"
+            puts presetfile
+            puts ""
+            if (!presetfile || presetfile==false || presetfile=="false")
+                # user gets file
+                settings_folder = SU2LUX.get_settings_folder
+                filepath = UI.openpanel("Open LuxRender settings file (.lxp)", settings_folder, "*")
+                if(filepath)
+                    inputfile = File.open(filepath, "r")
+                else
+                    next # break
+                end
+            else
+                # use file as defined by dropdown
+                filepath = File.join(SU2LUX.get_settings_folder, File.basename(presetfile)+".lxp")
+                inputfile = File.open(filepath, "r")
+            end
+            
+            # set value in @lrs
+            inputfile.each_line do |line|
+                cleanline = line.gsub(/\r/,"")
+                cleanline = cleanline.gsub(/\n/,"")
+                property = cleanline.split(",").first
+                value = cleanline.split(",").last
+                @lrs.send(property+"=",value)
+            end
+            inputfile.close
+            
+            # set value in dropdown menu
+            javascriptcommand = 'update_settings_dropdown("' + File.basename(filepath,".lxp") + '")'
+            SU2LUX.dbg_p javascriptcommand
+			dialog.execute_script(javascriptcommand)
+            
+            # update interface
+			self.sendDataFromSketchup()
+        }
+
+        ##
+        #
+        ##
+        @settings_dialog.add_action_callback("delete_settings"){ |dialog, presetfile|
+            if (presetfile != "Custom")
+                puts "delete settings file"
+                puts presetfile
+                puts ""
+                # delete file
+                filepath = File.join(SU2LUX.get_settings_folder, File.basename(presetfile)+".lxp")
+                File.delete(filepath)
+                # remove value from dropdown menu, set to custom instead
+                removecommand = '$("#preset option:selected").remove();'
+                puts dialog
+                dialog.execute_script(removecommand)
+                updatecommand = 'update_settings_dropdown("Custom")'
+                dialog.execute_script(updatecommand)
+            else
+                puts "Custom settings selected, nothing to delete"
+            end
+        }
+        
 		##
 		#
 		##
@@ -153,435 +264,15 @@ class LuxrenderSettingsEditor
 		# }
 		
 
-		##
-		#
-		##
-		@settings_dialog.add_action_callback("preset") {|d,p|
-			case p
-				when '0' #<option value='0'>0 Preview - Global Illumination</option> in settings.html
-					SU2LUX.dbg_p "set preset 0 Preview - Global Illumination"
-                    @lrs.preset = '0'
-					@lrs.fleximage_haltspp = 0
-					@lrs.fleximage_halttime = 0
-					
-					@lrs.useparamkeys = false
-					@lrs.sampler_show_advanced = false
-					@lrs.sintegrator_show_advanced = false
-					@lrs.pixelfilter_show_advanced = false
-					
-					@lrs.sampler_type = 'lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples = 1
-					@lrs.sampler_lowdisc_pixelsampler = 'lowdiscrepancy'
-					
-					@lrs.sintegrator_type = 'distributedpath'
-					@lrs.sintegrator_distributedpath_directsampleall = true
-					@lrs.sintegrator_distributedpath_directsamples = 1
-					@lrs.sintegrator_distributedpath_directdiffuse = true
-					@lrs.sintegrator_distributedpath_directglossy = true
-					@lrs.sintegrator_distributedpath_indirectsampleall = false
-					@lrs.sintegrator_distributedpath_indirectsamples = 1
-					@lrs.sintegrator_distributedpath_indirectdiffuse = true
-					@lrs.sintegrator_distributedpath_indirectglossy = true
-					@lrs.sintegrator_distributedpath_diffusereflectdepth = 1
-					@lrs.sintegrator_distributedpath_diffusereflectsamples = 4
-					@lrs.sintegrator_distributedpath_diffuserefractdepth = 4
-					@lrs.sintegrator_distributedpath_diffuserefractsamples = 1
-					@lrs.sintegrator_distributedpath_glossyreflectdepth = 1
-					@lrs.sintegrator_distributedpath_glossyreflectsamples = 2
-					@lrs.sintegrator_distributedpath_glossyrefractdepth = 4
-					@lrs.sintegrator_distributedpath_glossyrefractsamples = 1
-					@lrs.sintegrator_distributedpath_specularreflectdepth = 2
-					@lrs.sintegrator_distributedpath_specularrefractdepth = 4
-					@lrs.sintegrator_distributedpath_strategy = 'auto'
-					
-				when '0b'
-                    SU2LUX.dbg_p 'set preset 0b Preview - Direct Lighting'
-                    @lrs.preset = '0b'
-					@lrs.fleximage_haltspp = 0
-					@lrs.fleximage_halttime = 0
-					
-					@lrs.useparamkeys = false
-					@lrs.sampler_show_advanced = false
-					@lrs.sintegrator_show_advanced = false
-					@lrs.pixelfilter_show_advanced = false
-					
-					@lrs.sampler_type = 'lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples = 1
-					@lrs.sampler_lowdisc_pixelsampler = 'lowdiscrepancy'
-					
-					@lrs.sintegrator_type = 'directlighting'
-					@lrs.sintegrator_direct_maxdepth = 5
-				
-				when '0c'
-                    @lrs.preset = '0c'
-					@lrs.fleximage_haltspp = 1
-					@lrs.fleximage_halttime = 0
-					
-					@lrs.useparamkeys = false
-					@lrs.sampler_show_advanced = false
-					@lrs.sintegrator_show_advanced = false
-					@lrs.pixelfilter_show_advanced = false
-					
-					@lrs.sampler_type = 'lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples = 4
-					@lrs.sampler_lowdisc_pixelsampler = 'hilbert'
-					
-					@lrs.sintegrator_type = 'exphotonmap'
-					@lrs.sintegrator_exphoton_finalgather = false
-					@lrs.sintegrator_exphoton_finalgathersamples = 32
-					@lrs.sintegrator_exphoton_gatherangle = 10.0
-					@lrs.sintegrator_exphoton_maxdepth = 5
-					@lrs.sintegrator_exphoton_maxphotondepth = 10
-					@lrs.sintegrator_exphoton_maxphotondist = 0.5
-					@lrs.sintegrator_exphoton_nphotonsused = 50
-					@lrs.sintegrator_exphoton_causticphotons = 20000
-					@lrs.sintegrator_exphoton_directphotons = 20000
-					@lrs.sintegrator_exphoton_indirectphotons = 0
-					@lrs.sintegrator_exphoton_renderingmode = 'directlighting'
-					@lrs.sintegrator_exphoton_rrcontinueprob = 0.65
-					@lrs.sintegrator_exphoton_rrstrategy = 'efficiency'
-					@lrs.sintegrator_exphoton_photonmapsfile = ''
-					@lrs.sintegrator_exphoton_radiancephotons = 20000
-					@lrs.sintegrator_exphoton_shadow_ray_count = 1
-					@lrs.sintegrator_exphoton_strategy = 'auto'
+        ##
+        #
+        ##
+        @settings_dialog.add_action_callback("display_loaded_presets") {|dialog, params|
+            puts "running display_loaded_presets"
+            self.sendDataFromSketchup()
+        }
 
-                when '1'
-                    @lrs.preset = '1'
-					SU2LUX.dbg_p 'set preset 1 Final - MLT/Bidir Path Tracing (interior) (recommended)'
-					@lrs.fleximage_haltspp = 0
-					@lrs.fleximage_halttime = 0
-					
-					@lrs.useparamkeys = false
-					@lrs.sampler_show_advanced = false
-					@lrs.sintegrator_show_advanced = false
-					@lrs.pixelfilter_show_advanced = false
-					
-					@lrs.sampler_type = 'metropolis'
-					@lrs.sampler_metropolis_strength = 0.6
-                    @lrs.sampler_metropolis_largemutationprob = 0.4
-                    @lrs.sampler_noiseaware = true
-					@lrs.sampler_metropolis_maxconsecrejects = 512
-					@lrs.sampler_metropolis_usevariance = false
-					
-					@lrs.sintegrator_type = 'bidirectional'
-					@lrs.sintegrator_bidir_bounces = 16
-					@lrs.sintegrator_bidir_eyedepth = 16
-					@lrs.sintegrator_bidir_lightdepth = 16
 
-				when '2'
-                    SU2LUX.dbg_p 'set preset 2 Final - MLT/Path Tracing (exterior)'
-                    @lrs.preset = '2'
-					@lrs.fleximage_haltspp = 0
-					@lrs.fleximage_halttime = 0
-					
-					@lrs.useparamkeys = false
-					@lrs.sampler_show_advanced = false
-					@lrs.sintegrator_show_advanced = false
-					@lrs.pixelfilter_show_advanced = false
-					
-					@lrs.sampler_type = 'metropolis'
-					@lrs.sampler_metropolis_strength = 0.6
-                    @lrs.sampler_metropolis_largemutationprob = 0.4
-                    @lrs.sampler_noiseaware = true
-					@lrs.sampler_metropolis_maxconsecrejects = 512
-					@lrs.sampler_metropolis_usevariance  = false
-					
-					@lrs.sintegrator_type = 'path'
-					@lrs.sintegrator_path_bounces = 10
-					@lrs.sintegrator_path_maxdepth = 10
-
-                when '5'
-                    @lrs.preset = '5'
-					SU2LUX.dbg_p 'set preset 5 Progressive - Bidir Path Tracing (interior)'
-					@lrs.fleximage_haltspp = 0
-					@lrs.fleximage_halttime = 0
-					
-					@lrs.useparamkeys = false
-					@lrs.sampler_show_advanced = false
-					@lrs.sintegrator_show_advanced = false
-					@lrs.pixelfilter_show_advanced = false
-					
-					@lrs.sampler_type = 'lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples = 1
-					@lrs.sampler_lowdisc_pixelsampler = 'lowdiscrepancy'
-					
-					@lrs.sintegrator_type = 'bidirectional'
-					@lrs.sintegrator_bidir_bounces = 16
-					@lrs.sintegrator_bidir_eyedepth = 16
-					@lrs.sintegrator_bidir_lightdepth = 16
-
-                when '6'
-                    @lrs.preset = '6'
-					SU2LUX.dbg_p 'set preset 6 Progressive - Path Tracing (exterior)'
-					@lrs.fleximage_haltspp = 0
-					@lrs.fleximage_halttime = 0
-					
-					@lrs.useparamkeys = false
-					@lrs.sampler_show_advanced = false
-					@lrs.sintegrator_show_advanced = false
-					@lrs.pixelfilter_show_advanced = false
-					
-					@lrs.sampler_type = 'lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples = 1
-					@lrs.sampler_lowdisc_pixelsampler = 'lowdiscrepancy'
-					
-					@lrs.sintegrator_type = 'path'
-					@lrs.sintegrator_path_bounces = 10
-					@lrs.sintegrator_path_maxdepth = 10
-					
-                when '8'
-                    @lrs.preset = '8'
-					SU2LUX.dbg_p 'set preset 8 Bucket - Bidir Path Tracing (interior)'
-					@lrs.fleximage_haltspp = 0
-					@lrs.fleximage_halttime = 0
-					
-					@lrs.useparamkeys = false
-					@lrs.sampler_show_advanced = false
-					@lrs.sintegrator_show_advanced = false
-					@lrs.pixelfilter_show_advanced = false
-					
-					@lrs.sampler_type = 'lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples = 64
-					@lrs.sampler_lowdisc_pixelsampler = 'hilbert'
-					
-					@lrs.sintegrator_type = 'bidirectional'
-					@lrs.sintegrator_bidir_bounces = 8
-					@lrs.sintegrator_bidir_eyedepth = 8
-					@lrs.sintegrator_bidir_lightdepth = 10
-					
-                when '9'
-                    @lrs.preset = '9'
-					SU2LUX.dbg_p 'set preset 9 Bucket - Path Tracing (exterior)'
-					@lrs.fleximage_haltspp = 0
-					@lrs.fleximage_halttime = 0
-					
-					@lrs.useparamkeys = false
-					@lrs.sampler_show_advanced = false
-					@lrs.sintegrator_show_advanced = false
-					@lrs.pixelfilter_show_advanced = false
-					
-					@lrs.sampler_type = 'lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples = 64
-					@lrs.sampler_lowdisc_pixelsampler = 'hilbert'
-					
-					@lrs.sintegrator_type = 'path'
-					@lrs.sintegrator_path_bounces = 8
-					@lrs.sintegrator_path_maxdepth = 8
-					
-                when 'B'
-                    @lrs.preset = 'B'
-					SU2LUX.dbg_p 'set preset B Anim - Distributed/GI low Q'
-					@lrs.fleximage_haltspp = 1
-					@lrs.fleximage_halttime = 0
-					
-					@lrs.useparamkeys = false
-					@lrs.sampler_show_advanced = false
-					@lrs.sintegrator_show_advanced = false
-					@lrs.pixelfilter_show_advanced = false
-					
-					@lrs.sampler_type = 'lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples = 16
-					@lrs.sampler_lowdisc_pixelsampler = 'hilbert'
-					
-					@lrs.sintegrator_type = 'distributedpath'
-					@lrs.sintegrator_distributedpath_directsampleall = true
-					@lrs.sintegrator_distributedpath_directsamples = 1
-					@lrs.sintegrator_distributedpath_directdiffuse = true
-					@lrs.sintegrator_distributedpath_directglossy = true
-					@lrs.sintegrator_distributedpath_indirectsampleall = false
-					@lrs.sintegrator_distributedpath_indirectsamples = 1
-					@lrs.sintegrator_distributedpath_indirectdiffuse = true
-					@lrs.sintegrator_distributedpath_indirectglossy = true
-					@lrs.sintegrator_distributedpath_diffusereflectdepth = 2
-					@lrs.sintegrator_distributedpath_diffusereflectsamples = 1
-					@lrs.sintegrator_distributedpath_diffuserefractdepth = 5
-					@lrs.sintegrator_distributedpath_diffuserefractsamples = 1
-					@lrs.sintegrator_distributedpath_glossyreflectdepth = 2
-					@lrs.sintegrator_distributedpath_glossyreflectsamples = 1
-					@lrs.sintegrator_distributedpath_glossyrefractdepth = 5
-					@lrs.sintegrator_distributedpath_glossyrefractsamples = 1
-					@lrs.sintegrator_distributedpath_specularreflectdepth = 2
-					@lrs.sintegrator_distributedpath_specularrefractdepth = 5
-					
-                when 'C'
-                    @lrs.preset = 'C'
-					SU2LUX.dbg_p 'set preset C Anim - Distributed/GI medium Q'
-					@lrs.fleximage_haltspp = 1
-					@lrs.fleximage_halttime = 0
-					
-					@lrs.useparamkeys = false
-					@lrs.sampler_show_advanced = false
-					@lrs.sintegrator_show_advanced = false
-					@lrs.pixelfilter_show_advanced = false
-					
-					@lrs.sampler_type = 'lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples = 64
-					@lrs.sampler_lowdisc_pixelsampler = 'hilbert'
-					
-					@lrs.sintegrator_type = 'distributedpath'
-					@lrs.sintegrator_distributedpath_diffuserefractdepth = 5
-					@lrs.sintegrator_distributedpath_indirectglossy = true
-					@lrs.sintegrator_distributedpath_directsamples = 1
-					@lrs.sintegrator_distributedpath_diffuserefractsamples = 1
-					@lrs.sintegrator_distributedpath_glossyreflectdepth = 2
-					@lrs.sintegrator_distributedpath_directsampleall = true
-					@lrs.sintegrator_distributedpath_indirectdiffuse = true
-					@lrs.sintegrator_distributedpath_specularreflectdepth = 3
-					@lrs.sintegrator_distributedpath_diffusereflectsamples = 1
-					@lrs.sintegrator_distributedpath_glossyreflectsamples = 1
-					@lrs.sintegrator_distributedpath_glossyrefractdepth = 5
-					@lrs.sintegrator_distributedpath_diffusereflectdepth = 2
-					@lrs.sintegrator_distributedpath_indirectsamples = 1
-					@lrs.sintegrator_distributedpath_indirectsampleall = false
-					@lrs.sintegrator_distributedpath_glossyrefractsamples = 1
-					@lrs.sintegrator_distributedpath_directdiffuse = true
-					@lrs.sintegrator_distributedpath_directglossy = true
-					@lrs.sintegrator_distributedpath_strategy = 'auto'
-					@lrs.sintegrator_distributedpath_specularrefractdepth = 5
-					
-                when 'D'
-                    @lrs.preset = 'D'
-					SU2LUX.dbg_p 'set preset D Anim - Distributed/GI high Q'
-					@lrs.fleximage_haltspp = 1
-					@lrs.fleximage_halttime = 0
-					
-					@lrs.useparamkeys = false
-					@lrs.sampler_show_advanced = false
-					@lrs.sintegrator_show_advanced = false
-					@lrs.pixelfilter_show_advanced = false
-					
-					@lrs.sampler_type = 'lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples = 256
-					@lrs.sampler_lowdisc_pixelsampler = 'hilbert'
-					
-					@lrs.sintegrator_type = 'distributedpath'
-					@lrs.sintegrator_distributedpath_diffuserefractdepth = 5
-					@lrs.sintegrator_distributedpath_indirectglossy = true
-					@lrs.sintegrator_distributedpath_directsamples = 1
-					@lrs.sintegrator_distributedpath_diffuserefractsamples = 1
-					@lrs.sintegrator_distributedpath_glossyreflectdepth = 2
-					@lrs.sintegrator_distributedpath_directsampleall = true
-					@lrs.sintegrator_distributedpath_indirectdiffuse = true
-					@lrs.sintegrator_distributedpath_specularreflectdepth = 3
-					@lrs.sintegrator_distributedpath_diffusereflectsamples = 1
-					@lrs.sintegrator_distributedpath_glossyreflectsamples = 1
-					@lrs.sintegrator_distributedpath_glossyrefractdepth = 5
-					@lrs.sintegrator_distributedpath_diffusereflectdepth = 2
-					@lrs.sintegrator_distributedpath_indirectsamples = 1
-					@lrs.sintegrator_distributedpath_indirectsampleall = false
-					@lrs.sintegrator_distributedpath_glossyrefractsamples = 1
-					@lrs.sintegrator_distributedpath_directdiffuse = true
-					@lrs.sintegrator_distributedpath_directglossy = true
-					@lrs.sintegrator_distributedpath_strategy = 'auto'
-					@lrs.sintegrator_distributedpath_specularrefractdepth = 5
-					
-                when 'E'
-                    @lrs.preset = 'E'
-					SU2LUX.dbg_p 'set preset E Anim - Distributed/GI very high Q'
-					@lrs.fleximage_haltspp = 1
-					@lrs.fleximage_halttime = 0
-					
-					@lrs.useparamkeys = false
-					@lrs.sampler_show_advanced = false
-					@lrs.sintegrator_show_advanced = false
-					@lrs.pixelfilter_show_advanced = false
-					
-					@lrs.sampler_type = 'lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples = 512
-					@lrs.sampler_lowdisc_pixelsampler = 'hilbert'
-					
-					@lrs.sintegrator_type = 'distributedpath'
-					@lrs.sintegrator_distributedpath_diffuserefractdepth = 5
-					@lrs.sintegrator_distributedpath_indirectglossy = true
-					@lrs.sintegrator_distributedpath_directsamples = 1
-					@lrs.sintegrator_distributedpath_diffuserefractsamples = 1
-					@lrs.sintegrator_distributedpath_glossyreflectdepth = 2
-					@lrs.sintegrator_distributedpath_directsampleall = true
-					@lrs.sintegrator_distributedpath_indirectdiffuse = true
-					@lrs.sintegrator_distributedpath_specularreflectdepth = 3
-					@lrs.sintegrator_distributedpath_diffusereflectsamples = 1
-					@lrs.sintegrator_distributedpath_glossyreflectsamples = 1
-					@lrs.sintegrator_distributedpath_glossyrefractdepth = 5
-					@lrs.sintegrator_distributedpath_diffusereflectdepth = 2
-					@lrs.sintegrator_distributedpath_indirectsamples = 1
-					@lrs.sintegrator_distributedpath_indirectsampleall = false
-					@lrs.sintegrator_distributedpath_glossyrefractsamples = 1
-					@lrs.sintegrator_distributedpath_directdiffuse = true
-					@lrs.sintegrator_distributedpath_directglossy = true
-					@lrs.sintegrator_distributedpath_strategy = 'auto'
-					@lrs.sintegrator_distributedpath_specularrefractdepth = 5
-					
-                when 'F'
-                    @lrs.preset = 'F'
-					@lrs.fleximage_haltspp = 0
-					@lrs.fleximage_halttime = 0
-					
-					@lrs.useparamkeys = false
-					@lrs.sampler_show_advanced = false
-					@lrs.sintegrator_show_advanced = false
-					@lrs.pixelfilter_show_advanced = false
-					
-					@lrs.sampler_type = 'lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples = 16
-					@lrs.sampler_lowdisc_pixelsampler = 'hilbert'
-					
-					@lrs.sintegrator_type = 'exphotonmap'
-					@lrs.sintegrator_exphoton_finalgather = true
-					@lrs.sintegrator_exphoton_finalgathersamples = 32
-					@lrs.sintegrator_exphoton_gatherangle = 10.0
-					@lrs.sintegrator_exphoton_maxdepth = 5
-					@lrs.sintegrator_exphoton_maxphotondepth = 10
-					@lrs.sintegrator_exphoton_maxphotondist = 0.1
-					@lrs.sintegrator_exphoton_nphotonsused = 50
-					@lrs.sintegrator_exphoton_causticphotons = 20000
-					@lrs.sintegrator_exphoton_directphotons = 200000
-					@lrs.sintegrator_exphoton_indirectphotons = 200000
-					@lrs.sintegrator_exphoton_radiancephotons = 200000
-					@lrs.sintegrator_exphoton_renderingmode = 'directlighting'
-					@lrs.sintegrator_exphoton_rrcontinueprob = 0.65
-					@lrs.sintegrator_exphoton_rrstrategy = 'efficiency'
-					@lrs.sintegrator_exphoton_photonmapsfile = ''
-					@lrs.sintegrator_exphoton_shadow_ray_count = 1
-					@lrs.sintegrator_exphoton_strategy = 'auto'
-					
-                when 'G'
-                    @lrs.preset = 'G'
-					@lrs.fleximage_haltspp = 1
-					@lrs.fleximage_halttime = 0
-					
-					@lrs.useparamkeys = false
-					@lrs.sampler_show_advanced = false
-					@lrs.sintegrator_show_advanced = false
-					@lrs.pixelfilter_show_advanced = false
-					
-					@lrs.sampler_type = 'lowdiscrepancy'
-					@lrs.sampler_lowdisc_pixelsamples = 256
-					@lrs.sampler_lowdisc_pixelsampler = 'hilbert'
-					
-					@lrs.sintegrator_type = 'exphotonmap'
-					@lrs.sintegrator_exphoton_finalgather = true
-					@lrs.sintegrator_exphoton_finalgathersamples = 32
-					@lrs.sintegrator_exphoton_gatherangle = 10.0
-					@lrs.sintegrator_exphoton_maxdepth = 5
-					@lrs.sintegrator_exphoton_maxphotondepth = 10
-					@lrs.sintegrator_exphoton_maxphotondist = 0.1
-					@lrs.sintegrator_exphoton_nphotonsused = 50
-					@lrs.sintegrator_exphoton_causticphotons = 1000000
-					@lrs.sintegrator_exphoton_directphotons = 200000
-					@lrs.sintegrator_exphoton_indirectphotons = 200000
-					@lrs.sintegrator_exphoton_radiancephotons = 200000
-					@lrs.sintegrator_exphoton_renderingmode = 'directlighting'
-					@lrs.sintegrator_exphoton_rrcontinueprob = 0.65
-					@lrs.sintegrator_exphoton_rrstrategy = 'efficiency'
-					@lrs.sintegrator_exphoton_photonmapsfile = ''
-					@lrs.sintegrator_exphoton_shadow_ray_count = 1
-					@lrs.sintegrator_exphoton_strategy = 'auto'
-                
-				end #end case
-			self.sendDataFromSketchup()
-		} #end action callback preset
-		
-		
 		##
 		#
 		##
@@ -608,8 +299,25 @@ class LuxrenderSettingsEditor
 			UI.start_timer(0.5, false) { self.show }
 			# self.show
 		}
+        
+        @settings_dialog.add_action_callback("load_preset_files") {|dialog, params|
+            puts "LOADING SETTINGS FILES"
+            settings_folder = SU2LUX.get_settings_folder
+            Dir.foreach(settings_folder) do |settingsfile|
+                if File.extname(settingsfile)==".lxp"
+                    settingsfile2 = File.basename(settingsfile, ".lxp").to_s
+                    addtodropdown = 'add_to_dropdown(\'' + settingsfile2 + '\');'
+                    puts addtodropdown
+                    @settings_dialog.execute_script(addtodropdown)
+                end
+            end
+            puts "FINISHED LOADING SETTINGS FILES"
+        }
+        
 		
 	end # END initialize
+
+
 
 	##
 	#
@@ -625,9 +333,20 @@ class LuxrenderSettingsEditor
 		@lrs.fleximage_xresolution = Sketchup.active_model.active_view.vpwidth unless @lrs.fleximage_xresolution
 		@lrs.fleximage_yresolution = Sketchup.active_model.active_view.vpheight unless @lrs.fleximage_yresolution
 		settings = @lrs.get_names
+        puts "running sendDataFromSketchup"
 		settings.each { |setting|
+            #puts setting
 			updateSettingValue(setting)
 		}
+        
+        # set setting areas based on dropdown settings
+        subfield_categories = ["sampler_type", "sintegrator_type", "pixelfilter_type", "accelerator_type"]
+        subfield_categories.each{|fieldname|
+            update_subfield = 'update_subfield("' + fieldname + '")'
+            puts update_subfield
+            @settings_dialog.execute_script(update_subfield)
+        }
+        
 	end # END sendDataFromSketchup
 	
 	##
