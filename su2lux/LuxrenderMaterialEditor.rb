@@ -71,14 +71,14 @@ class LuxrenderMaterialEditor
 					lux_material.send(method_name, v) # updates values in material
 					case
 						when (k.match(/^kd_.$/) and !material.texture) # changing diffuse color, updating SketchUp material colour accordingly
-                            puts "updating color"
+                            puts "updating diffuse color"
                             # puts "lux_material.color: ", lux_material.color # debugging
 							red = (lux_material['kd_R'].to_f * 255.0).to_i
                             green = (lux_material['kd_G'].to_f * 255.0).to_i
                             blue = (lux_material['kd_B'].to_f * 255.0).to_i
                             material.color = Sketchup::Color.new(red, green, blue)
                         when (k.match(/_R/) || k.match(/_G/) || k.match(/_B/))
-                            puts "some other color channel"
+                            puts "updating color channel"
                             update_swatches()
 					end
                 end
@@ -224,6 +224,11 @@ class LuxrenderMaterialEditor
                     @current.km2_R = rvalue
                     @current.km2_G = gvalue
                     @current.km2_B = bvalue
+                when "em_swatch"
+                    puts "updating emission swatch"
+                    @current.em_R = rvalue
+                    @current.em_G = gvalue
+                    @current.em_B = bvalue
                 when "transmission_swatch"
                     @current.kt_R = rvalue
                     @current.kt_G = gvalue
@@ -555,6 +560,37 @@ class LuxrenderMaterialEditor
         end
 		@material_editor_dialog.execute_script(cmd)
     end
+                           
+    def showhide_carpaint()
+        if @current.type == "carpaint"
+            if @current.carpaint_name == nil
+                cmd = '$("#diffuse").show();'
+            else
+                cmd = '$("#diffuse").hide();'
+            end
+            @material_editor_dialog.execute_script(cmd)
+        end
+    end
+                           
+    def showhide_spectrum()
+        puts "UPDATING SPECTRUM FIELDS"
+        if @current.light_L == "emit_color"
+           cmd1 = '$("#emit_color").show()'
+           cmd2 = '$("#blackbody").hide()'
+           cmd3 = '$("#emit_preset").hide()'
+        elsif @current.light_L == "blackbody"
+           cmd1 = '$("#emit_color").hide()'
+           cmd2 = '$("#blackbody").show()'
+           cmd3 = '$("#emit_preset").hide()'
+        else
+           cmd1 = '$("#emit_color").hide()'
+           cmd2 = '$("#blackbody").hide()'
+           cmd3 = '$("#emit_preset").show()'
+        end
+        @material_editor_dialog.execute_script(cmd1)
+        @material_editor_dialog.execute_script(cmd2)
+        @material_editor_dialog.execute_script(cmd3)
+    end
 	
     def showhide_displacement()
         if @current.dm_scheme == "loop"
@@ -717,6 +753,8 @@ class LuxrenderMaterialEditor
         update_texture_names(@current) # image texture paths
         showhide_specularIOR # specular definition interface
         showhide_displacement # displacement interface
+        showhide_spectrum # emission spectrum
+        showhide_carpaint # carpaint custom channel
         update_spec_IOR() # specular IOR preset
         puts "running refresh for material " + @current.name
         settexturefields(@current.name)
@@ -768,8 +806,8 @@ class LuxrenderMaterialEditor
         # show right material in material editor dropdown menu
         puts "setting active material in SU2LUX material editor dropdown"
         cmd = "$('#material_name option').filter(function(){return ($(this).text() == \"#{passedname}\");}).attr('selected', true);"
-        #puts cmd
 		@material_editor_dialog.execute_script(cmd)
+        
 	end
 	
     ##

@@ -28,7 +28,7 @@ class LuxrenderMaterial
 	{
 		'type' => "glossy",
 		'kd_imagemap_Sketchup_filename' => '',
-        'texturechannels' => ["kd", "ks", "ka", "km2", "mx", "u_exponent", "v_exponent", "uroughness", "vroughness", "aa", "cl1kd", "cl1ks", "cl2kd", "cl2ks", "ka_d", "spec_IOR", "IOR_index", "kr", "kt", "cauchyb", "film", "filmindex", "bump", "normal", "dm"],
+        'texturechannels' => ["kd", "ks", "ka", "km2", "em", "mx", "u_exponent", "v_exponent", "uroughness", "vroughness", "aa", "cl1kd", "cl1ks", "cl2kd", "cl2ks", "ka_d", "spec_IOR", "IOR_index", "kr", "kt", "cauchyb", "film", "filmindex", "bump", "normal", "dm"],
         
 		'kd_R' => 0.64,
 		'kd_G' => 0.64,
@@ -53,6 +53,10 @@ class LuxrenderMaterial
 		'km2_R' => 1.0,
 		'km2_G' => 1.0,
 		'km2_B' => 1.0,
+        
+		'em_R' => 0.9,
+		'em_G' => 1.0,
+		'em_B' => 0.8,
         
         'cl1kd_R' => 0.8,
         'cl1kd_G' => 0.0,
@@ -112,6 +116,7 @@ class LuxrenderMaterial
         'specular_preset' => 1.360001,
 
 		'light_L' => 'blackbody',
+        'light_spectrum' => 'Incandescent1',
 		'light_temperature' => 6500.0,
 		'light_power' => 100.0,
 		'light_efficacy' => 17.0,
@@ -182,6 +187,7 @@ class LuxrenderMaterial
 			"matte_sigma_imagemap_filename",
 			"ks_imagemap_filename",
 			"km2_imagemap_filename",
+            "em_imagemap_filename",
 			"uroughness_imagemap_filename",
 			"vroughness_imagemap_filename",
             "aa_imagemap_filename",
@@ -228,6 +234,7 @@ class LuxrenderMaterial
 		lux_image_texture("", "ks", "imagemap", "color")
 		lux_image_texture("", "ka", "imagemap", "color")
 		lux_image_texture("", "km2", "imagemap", "color")
+		lux_image_texture("", "em", "imagemap", "color")
 		lux_image_texture("", "mx", "imagemap", "float") # mix
 		lux_image_texture("", "u_exponent", "imagemap", "float")
 		lux_image_texture("", "v_exponent", "imagemap", "float")
@@ -374,9 +381,14 @@ class LuxrenderMaterial
         channelcolor_tos('km2')
     end
     
+    def em_tos
+        channelcolor_tos('em')
+    end
+
     def cl1kd_tos
         channelcolor_tos('cl1kd')
     end
+    
     def cl1ks_tos
         channelcolor_tos('cl1ks')
     end

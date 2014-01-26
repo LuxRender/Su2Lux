@@ -144,9 +144,18 @@ $(document).ready(
                 }
 			}
 		)
-        
-         $("#carpaint_name").change(
+
+                  
+		$("#light_L").change(
 			function() {
+                //alert ("light spectrum type change")
+                $(".light_L").hide();
+                $("#" + this.value).show();
+			}
+		)
+                  
+        $("#carpaint_name").change(
+            function() {
                 if ($("#carpaint_name").val()==""){
                     $("#diffuse").show();
                 } else{

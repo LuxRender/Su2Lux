@@ -848,25 +848,85 @@
     <div id="light" class="light">
         <p class="header2">Light</p>
         <div class="panelcontent collapse">
-            <div class="parameter_interface">
-				<!--<label for="light_L">Texture</label>
-				<select id="light_L">
-					<option value="blackbody">Blackbody</option>
-				</select -->
-				<label for="light_temperature" class="parameter_label">Color Temperature (K)</label>
-				<input type="text" id="light_temperature" size="6" class="parameter_field_light">
-				<br>
-				<!-- <label for="light_power">Power</label>
-				<input type="text" id="light_power" size="6">
-				<label for="light_efficacy">Efficacy</label>
-				<input type="text" id="light_efficacy" size="6"> -->
+            <div class="parameter_interface_light">
                 <div id="lightgain">
-				<label for="light_gain" class="parameter_label">Gain</label>
-				<input type="text" id="light_gain" size="6" class="parameter_field_light">
+                    <label for="light_gain" class="parameter_label">Power</label>
+                    <input type="text" id="light_gain" size="6" class="parameter_field_light">
+                </div>
+                <!-- <label for="light_power">Power</label>
+                 <input type="text" id="light_power" size="6">
+                 <label for="light_efficacy">Efficacy</label>
+                 <input type="text" id="light_efficacy" size="6"> -->
+                <div id="lightspectrum">
+                    <label for="light_L">Spectrum</label>
+                    <select id="light_L" class="parameter_field_spectrum">
+                        <option value="emit_color">RGB Color</option>
+                        <option value="blackbody">Color temperature</option>
+                        <option value="emit_preset">Spectrum preset</option>
+                    </select>
                 </div>
             </div>
-        </div>
-    </div>
+                
+            <div class="parameter_interface">
+                <div class="light_L" id="blackbody">
+                    <label for="light_temperature" class="parameter_label">Color Temperature (K)</label>
+                    <input type="text" id="light_temperature" size="6" class="parameter_field_lightT">
+                </div>
+
+                <div class="light_L" id="emit_color">
+                    <table id="swatch_em"><tr><td id="em_swatch" class="swatch" width=64 height=64></td></tr></table>
+                    <label for="em_R" class="kdr">Red</label><input type='text' id="em_R" size="6" class="kdrvalue">
+                    <label for="em_G" class="kdg">Green</label><input type='text' id="em_G" size="6" class="kdgvalue">
+                    <label for="em_B" class="kdb">Blue</label><input type='text' id="em_B" size="6" class="kdbvalue">
+                </div>
+
+                <div class="light_L" id="emit_preset">
+                    <label for="light_spectrum">Preset</label>
+                    <select id="light_spectrum" class="parameter_field_spectrum">
+                        <option value="Daylight">daylight</option>
+                        <option value="Alcohol">flame, alcohol</option>
+                        <option value="Butane">flame, butane</option>
+                        <option value="Candle">flame, paraffin</option>
+                        <option value="Incandescent1">incandescent</option>
+                        <option value="AntiInsect">incandescent, anti-insect</option>
+                        <option value="Welsbach">gas mantle</option>
+                        <option value="FLD2">fluorescent, regular</option>
+                        <option value="FL37K">fluorescent, warm</option>
+                        <option value="CFL27K">fluorescent, tri-phosphor</option>
+                        <option value="CFL4K">fluorescent, tri-phosphor, warm</option>
+                        <option value="LEDB">LED, blue</option>
+                        <option value="RedLaser">LED, red</option>
+                        <option value="GreenLaser">LED, green</option>
+                        <option value="HPM2">high pressure mercury</option>
+                        <option value="HPMFL1">high pressure mercury, improved</option>
+                        <option value="LPS">sodium, low pressure</option>
+                        <option value="MPS">sodium, medium pressure</option>
+                        <option value="HPS">sodium, high pressure</option>
+                        <option value="SHPS">sodium, super high prssure</option>
+                        <option value="MHN">metal halide, red</option>
+                        <option value="MHWWD">metal halide, purple</option>
+                        <option value="MHSc">metal halide, white</option>
+                        <option value="FeCo">metal halide, cyan</option>
+                        <option value="BLAU">metal halide, blue</option>
+                        <option value="PLANTA">metal halide, plant growing specialty</option>
+                        <option value="GRUN">metal halide, green</option>
+                        <option value="XeI">low pressure, xenon</option>
+                        <option value="Rb">low pressure, rubidium</option>
+                        <option value="Cd">low pressure, cadmium</option>
+                        <option value="Zn">low pressure, zinc</option>
+                        <option value="Ne">glow discharge, neon</option>
+                        <option value="NeKrFL">glow discharge, neon – krypton – green phosphor</option>
+                        <option value="NeXeFL1">glow discharge, neon – xenon – green phosphor</option>
+                        <option value="NeXeFL2">glow discharge, neon – xenon – blue phosphor</option>
+                        <option value="Ar">glow discharge, argon</option>
+                        <option value="TV">CRT TV</option>
+                        <option value="FLBL">blacklight</option>
+                    </select>
+                </div>
+            </div>
+            
+        </div> <!-- end panelcontent -->
+    </div> <!-- end light -->
     
     <div id="portal" class="portal">
         <p class="header2">Portal</p>

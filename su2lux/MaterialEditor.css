@@ -271,7 +271,7 @@ input#get_diffuse_color {
     left: 0px;
 }
 
-#swatch_absorption, #specular_swatch{
+#swatch_absorption, #specular_swatch, #em_swatch{
     position: absolute;
     top: 7px;
     left: 7px;
@@ -293,8 +293,15 @@ input#get_diffuse_color {
 #lightgain{
     position: absolute;
     left: 0px;
+    top: 3px;
+}
+
+#lightspectrum{
+    position: absolute;
+    left: 0px;
     top: 30px;
 }
+
 
 #type{
     margin: 10px;
@@ -354,7 +361,19 @@ input#get_diffuse_color {
 
 .parameter_field_light{
     position: absolute;
+    left: 95px;
+    top: -3px;
+}
+
+.parameter_field_lightT{
+    position: absolute;
     left: 150px;
+    top: -3px;
+}
+
+.parameter_field_spectrum{
+    position: absolute;
+    left: 90px;
     top: -3px;
 }
 
@@ -371,6 +390,11 @@ input#get_diffuse_color {
 .parameter_interface_autoalpha{
     position: relative;
     height: 45px;
+}
+
+.parameter_interface_light{
+    position: relative;
+    height: 58px;
 }
 
 #metal2_color{
@@ -595,6 +619,6 @@ input#get_diffuse_color {
 	float: right;
 }
 
-#kd_browse_map, #ks_browse_map, #km2_browse_map, #cl1kd_browse_map, #cl1ks_browse_map, #cl2kd_browse_map, #cl2ks_browse_map, #spec_IOR_browse_map{
+#kd_browse_map, #ks_browse_map, #km2_browse_map, #cl1kd_browse_map, #cl1ks_browse_map, #cl2kd_browse_map, #cl2ks_browse_map, #spec_IOR_browse_map, #em_browse_map{
     width: 5em;
 }

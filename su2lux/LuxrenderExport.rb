@@ -1371,7 +1371,8 @@ class LuxrenderExport
         case luxrender_mat.type
         when "light"
             #out.puts "LightGroup \""+luxrender_mat.name+"\""
-            out.puts "AreaLightSource \"area\" \"texture L\" [\"#{luxrender_mat.name}:light:L\"]"
+            out.puts "AreaLightSource \"area\""
+            output_spectrum(out,luxrender_mat)
             out.puts "\"float power\" [#{"%.6f" %(luxrender_mat.light_power)}]"
             out.puts "\"float efficacy\" [#{"%.6f" %(luxrender_mat.light_efficacy)}]"
             out.puts "\"float gain\" [#{"%.6f" %(luxrender_mat.light_gain)}]"
@@ -1381,6 +1382,17 @@ class LuxrenderExport
         else
             out.puts "NamedMaterial \"" + matname.delete("[<>]") + "\""
         end # end case
+    end
+    
+    def output_spectrum(out,luxrender_mat)
+        case luxrender_mat.light_L
+        when "blackbody"
+            out.puts "\"texture L\" [\"#{luxrender_mat.name}:light:L\"]" # texture is defined in .lxm file
+        when "emit_color"
+            out.puts "\t" + "\"color L\" [" + luxrender_mat.em_R.to_s + " " + luxrender_mat.em_G.to_s + " " + luxrender_mat.em_B.to_s + "]" # todo 2014: replace by proper color values
+        when "emit_preset"
+            out.puts "\"texture L\" [\"#{luxrender_mat.name}:light:L\"]" # texture is defined in .lxm file
+        end
     end
         
     def export_displacement_textures (mat, out, luxrender_mat)
@@ -2094,13 +2106,18 @@ class LuxrenderExport
 	end
 
 	def export_mesh_light(material)
-		case material.light_L
-			when "blackbody"
-                puts material.light_temperature
-                #puts @currenttexname_prefixed
-				#following = "Texture \"" + @currenttexname_prefixed + ":light:L\" \"color\" \"blackbody\" \"float temperature\" [#{material.light_temperature}]" + "\n"
-                following = "Texture \"" + material.name + ":light:L\" \"color\" \"blackbody\" \"float temperature\" [#{material.light_temperature}]" + "\n"
-		end
+        puts "exporting blackbody texture"
+        if material.light_L == "blackbody"
+            following = "Texture \"" + material.name + ":light:L\"" + "\n"
+            following += "\t" + "\"color\" \"blackbody\"" + "\n"
+            following += "\t" + "\"float temperature\" [#{material.light_temperature}]" + "\n"
+        elsif material.light_L == "emit_preset"
+            following = "Texture \"" + material.name + ":light:L\"" + "\n"
+            following += "\t" + "\"color\" \"lampspectrum\""  + "\n"
+            following += "\t" + "\"string name\" [\"" + material.light_spectrum+ "\"]" + "\n"
+        else
+            following = ""
+        end
 	end
 
 	def texture_parameters_from_type(mat_type)

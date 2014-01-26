@@ -330,13 +330,14 @@ class LuxrenderSettings
     ##
     # Color Swatches
     ##
-    'swatch_list' => ['diffuse_swatch','specular_swatch','reflection_swatch','metal2_swatch','transmission_swatch','absorption_swatch','cl1kd_swatch','cl1ks_swatch','cl2kd_swatch','cl2ks_swatch'],
+    'swatch_list' => ['diffuse_swatch','specular_swatch','reflection_swatch','metal2_swatch','em_swatch','transmission_swatch','absorption_swatch','cl1kd_swatch','cl1ks_swatch','cl2kd_swatch','cl2ks_swatch'],
     'diffuse_swatch' => ['kd_R','kd_G','kd_B'],
     'specular_swatch'=> ['ks_R','ks_G','ks_B'],
     'reflection_swatch' => ['kr_R','kr_G','kr_B'],
     'transmission_swatch' => ['kt_R','kt_G','kt_B'],
     'absorption_swatch' => ['ka_R','ka_G','ka_B'],
     'metal2_swatch' => ['km2_R','km2_G','km2_B'],
+    'em_swatch' => ['em_R','em_G','em_B'],
     'cl1kd_swatch' => ['cl1kd_R','cl1kd_G','cl1kd_B'],
     'cl1ks_swatch' => ['cl1ks_R','cl1ks_G','cl1ks_B'],
     'cl2kd_swatch' => ['cl2kd_R','cl2kd_G','cl2kd_B'],

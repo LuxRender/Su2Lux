@@ -794,6 +794,8 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
             material_editor.showhideIOR()
             material_editor.showhide_displacement()
             material_editor.showhide_specularIOR()
+            material_editor.showhide_spectrum()
+            material_editor.showhide_carpaint()
 			material_editor.fire_event("#type", "change", "")
 			material_editor.load_preview_image()
             material_editor.update_spec_IOR()
