@@ -2096,7 +2096,10 @@ class LuxrenderExport
 	def export_mesh_light(material)
 		case material.light_L
 			when "blackbody"
-				following = "Texture \"" + @currenttexname_prefixed + ":light:L\" \"color\" \"blackbody\" \"float temperature\" [#{material.light_temperature}]" + "\n"
+                puts material.light_temperature
+                #puts @currenttexname_prefixed
+				#following = "Texture \"" + @currenttexname_prefixed + ":light:L\" \"color\" \"blackbody\" \"float temperature\" [#{material.light_temperature}]" + "\n"
+                following = "Texture \"" + material.name + ":light:L\" \"color\" \"blackbody\" \"float temperature\" [#{material.light_temperature}]" + "\n"
 		end
 	end
 

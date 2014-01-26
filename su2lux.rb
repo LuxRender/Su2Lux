@@ -810,6 +810,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
             puts "CREATING NEW MATERIAL"
             material_editor = SU2LUX.get_editor("material")
             newmaterial = material_editor.find(material.name)
+            newmaterial.color = material.color
             if (material.texture)
                 newmaterial.kd_texturetype = "sketchup"
             end
