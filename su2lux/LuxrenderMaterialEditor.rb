@@ -24,7 +24,7 @@ class LuxrenderMaterialEditor
 	
 	def initialize
         puts "initialising material editor"
-		@lrs = LuxrenderSettings.new
+		@lrs = SU2LUX.get_lrs
         @materials_skp_lux = Hash.new
 		@matname_changed = false
 		@material_editor_dialog = UI::WebDialog.new("LuxRender Material Editor", true, "LuxrenderMaterialEditor", 424, 700, 900, 100, true)
@@ -343,7 +343,7 @@ class LuxrenderMaterialEditor
             preview_path = os.get_variables["material_preview_path"]
             path_separator = os.get_variables["path_separator"]
 		
-            settings = LuxrenderSettings.new
+            settings = SU2LUX.get_lrs
             previewtime = settings.preview_time
             
             active_material = @materials_skp_lux.index(@current) ## was Sketchup.active_model.materials.current  

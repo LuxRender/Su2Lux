@@ -3,7 +3,8 @@ class LuxrenderExport
 	attr_reader :used_materials
     
 	def initialize(export_file_path,os_separator)
-		@lrs=LuxrenderSettings.new
+		@lrs=SU2LUX.get_lrs
+        puts "exporting, using @lrs:", @lrs
 		@export_file_path=export_file_path
 		@model_name=File.basename(@export_file_path)
 		@model_name=@model_name.split(".")[0]
@@ -329,9 +330,9 @@ class LuxrenderExport
 			out.puts "\t\"string write_tga_channels\" [\"#{@lrs.fleximage_write_tga_channels}\"]"
 			gamut = @lrs.fleximage_write_tga_gamutclamp ? "true" : "false"
 			out.puts "\t\"bool write_exr_gamutclamp\" [\"#{gamut}\"]\n"
-			if (@lrs.fleximage_write_tga_ZBuf)
-				out.puts "\t\"string write_tga_zbuf_normalizationtype\" [\"#{@lrs.fleximage_write_tga_zbuf_normalizationtype}\"]"
-			end
+			#if (@lrs.fleximage_write_tga_ZBuf)
+			#	out.puts "\t\"string write_tga_zbuf_normalizationtype\" [\"#{@lrs.fleximage_write_tga_zbuf_normalizationtype}\"]"
+			#end
 		end
 		flm = @lrs.fleximage_write_resume_flm ? "true" : "false"
 		out.puts "\t\"bool write_resume_flm\" [\"#{flm}\"]\n"

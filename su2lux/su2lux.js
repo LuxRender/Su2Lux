@@ -35,10 +35,8 @@ function update_settings_dropdown(presetname){
         $("#preset").val(presetname);
     }else{
         //alert ("new preset loaded")
-        // add value to dropdown and make current
         $("#preset").append($('<option></option>').val(presetname).html(presetname));
-        $("#preset").val(presetname);
-        //cmd = "$('#" + dropdownname +"').append( $('"+ "<option value=\"#{luxrender_mat.original_name}\">#{luxrender_mat.name}</option>"
+        $("#preset").val(presetname); // make current
     }
     window.location = 'skp:display_loaded_presets@'   // refresh view
 }
@@ -67,7 +65,7 @@ function update_subfield(field_class)
 $(document).ready(
 	function()
 	{
-        //alert ("DOM ready")
+        // alert ("settings DOM ready")
         window.location = 'skp:load_preset_files@'
         
 		$(".collapse").hide();

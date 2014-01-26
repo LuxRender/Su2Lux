@@ -33,7 +33,11 @@ class LuxrenderSettingsEditor
 		setting_html_path = Sketchup.find_support_file("settings.html" , "Plugins/"+SU2LUX::PLUGIN_FOLDER)
 		@settings_dialog.set_file(setting_html_path)
         # @settings_dialog.set_on_close { @presets[@lrad["preset"].value].save} # taken from Juicyfruit version, but @presets does not exist
-		@lrs=LuxrenderSettings.new
+		
+        
+        #@lrs=LuxrenderSettings.new
+        @lrs=SU2LUX.get_lrs
+        
         
         @exportable_settings = ['pixelfilter_type','pixelfilter_mitchell_sharpness','pixelfilter_mitchell_optmode','pixelfilter_mitchell_xwidth','pixelfilter_mitchell_ywidth','pixelfilter_mitchell_B','pixelfilter_mitchell_C','pixelfilter_mitchell_supersample','pixelfilter_box_xwidth','pixelfilter_box_ywidth','pixelfilter_triangle_xwidth','pixelfilter_triangle_ywidth','pixelfilter_sinc_xwidth','pixelfilter_sinc_ywidth','pixelfilter_sinc_tau','pixelfilter_gaussian_xwidth','pixelfilter_gaussian_ywidth','pixelfilter_gaussian_alpha','sampler_type','sampler_random_pixelsamples','sampler_random_pixelsampler','sampler_lowdisc_pixelsamples','sampler_lowdisc_pixelsampler','sampler_noiseaware','sampler_metropolis_largemutationprob','sampler_metropolis_maxconsecrejects','sampler_metropolis_usevariance','sampler_erpt_chainlength','sintegrator_show_advanced','sintegrator_type','sintegrator_bidir_show_advanced','sintegrator_bidir_bounces','sintegrator_bidir_eyedepth','sintegrator_bidir_eyerrthreshold','sintegrator_bidir_lightdepth','sintegrator_bidir_lightthreshold','sintegrator_bidir_strategy','sintegrator_bidir_debug','sintegrator_direct_show_advanced','sintegrator_direct_bounces','sintegrator_direct_maxdepth','sintegrator_direct_shadow_ray_count','sintegrator_direct_strategy','sintegrator_distributedpath_directsampleall','sintegrator_distributedpath_directsamples','sintegrator_distributedpath_indirectsampleall','sintegrator_distributedpath_indirectsamples','sintegrator_distributedpath_diffusereflectdepth','sintegrator_distributedpath_diffusereflectsamples','sintegrator_distributedpath_diffuserefractdepth','sintegrator_distributedpath_diffuserefractsamples','sintegrator_distributedpath_directdiffuse','sintegrator_distributedpath_indirectdiffuse','sintegrator_distributedpath_glossyreflectdepth','sintegrator_distributedpath_glossyreflectsamples','sintegrator_distributedpath_glossyrefractdepth','sintegrator_distributedpath_glossyrefractsamples','sintegrator_distributedpath_directglossy','sintegrator_distributedpath_indirectglossy','sintegrator_distributedpath_specularreflectdepth','sintegrator_distributedpath_specularrefractdepth','sintegrator_distributedpath_strategy','sintegrator_distributedpath_reject','sintegrator_distributedpath_diffusereflectreject','sintegrator_distributedpath_diffusereflectreject_threshold','sintegrator_distributedpath_diffuserefractreject','sintegrator_distributedpath_diffuserefractreject_threshold','sintegrator_distributedpath_glossyreflectreject','sintegrator_distributedpath_glossyreflectreject_threshold','sintegrator_distributedpath_glossyrefractreject','sintegrator_distributedpath_glossyrefractreject_threshold','sintegrator_exphoton_show_advanced','sintegrator_exphoton_finalgather','sintegrator_exphoton_finalgathersamples','sintegrator_exphoton_gatherangle','sintegrator_exphoton_maxdepth','sintegrator_exphoton_maxphotondepth','sintegrator_exphoton_maxphotondist','sintegrator_exphoton_nphotonsused','sintegrator_exphoton_causticphotons','sintegrator_exphoton_directphotons','sintegrator_exphoton_indirectphotons','sintegrator_exphoton_radiancephotons','sintegrator_exphoton_renderingmode','sintegrator_exphoton_rrcontinueprob','sintegrator_exphoton_rrstrategy','sintegrator_exphoton_photonmapsfile','sintegrator_exphoton_shadow_ray_count','sintegrator_exphoton_strategy','sintegrator_exphoton_dbg_enable_direct','sintegrator_exphoton_dbg_enable_indircaustic','sintegrator_exphoton_dbg_enable_indirdiffuse','sintegrator_exphoton_dbg_enable_indirspecular','sintegrator_exphoton_dbg_enable_radiancemap','sintegrator_igi_show_advanced','sintegrator_igi_maxdepth','sintegrator_igi_mindist','sintegrator_igi_nsets','sintegrator_igi_nlights','sintegrator_path_show_advanced','sintegrator_path_include_environment','sintegrator_path_bounces','sintegrator_path_maxdepth','sintegrator_path_rrstrategy','sintegrator_path_rrcontinueprob','sintegrator_path_shadow_ray_count','sintegrator_path_strategy','volume_integrator_type','volume_integrator_stepsize','film_type','fleximage_premultiplyalpha','fleximage_filterquality','fleximage_ldr_clamp_method','fleximage_write_exr','fleximage_write_exr_channels','fleximage_write_exr_halftype','fleximage_write_exr_compressiontype','fleximage_write_exr_applyimaging','fleximage_write_exr_gamutclamp','fleximage_write_exr_ZBuf','fleximage_write_exr_zbuf_normalizationtype','fleximage_write_png','fleximage_write_png_channels','fleximage_write_png_16bit','fleximage_write_png_gamutclamp','fleximage_write_png_ZBuf','fleximage_write_png_zbuf_normalizationtype','fleximage_write_tga','fleximage_write_tga_channels','fleximage_write_tga_gamutclamp','fleximage_write_tga_ZBuf','fleximage_write_tga_zbuf_normalizaziontype','fleximage_write_resume_flm','fleximage_restart_resume_flm','fleximage_filename','fleximage_writeinterval','fleximage_displayinterval','fleximage_outlierrejection_k','fleximage_debug','fleximage_haltspp','fleximage_halttime','fleximage_colorspace_red_x','fleximage_colorspace_red_y','fleximage_colorspace_green_x','fleximage_colorspace_green_y','fleximage_colorspace_blue_x','fleximage_colorspace_blue_y','fleximage_colorspace_white_x','fleximage_colorspace_white_y','fleximage_tonemapkernel','fleximage_reinhard_prescale','fleximage_reinhard_postscale','fleximage_reinhard_burn','fleximage_linear_sensitivity','fleximage_linear_exposure','fleximage_linear_fstop','fleximage_linear_gamma','fleximage_contrast_ywa','fleximage_cameraresponse','fleximage_gamma','fleximage_linear_use_preset','fleximage_linear_camera_type','fleximage_linear_cinema_exposure','fleximage_linear_cinema_fps','fleximage_linear_photo_exposure','fleximage_linear_use_half_stop','fleximage_linear_hf_stopF','fleximage_linear_hf_stopT','fleximage_linear_iso','fleximage_use_preset','fleximage_use_colorspace_whitepoint','fleximage_use_colorspace_gamma','fleximage_use_colorspace_whitepoint_preset','fleximage_colorspace_wp_preset','fleximage_colorspace_gamma','fleximage_colorspace_preset_white_x','fleximage_colorspace_preset_white_y','fleximage_colorspace_preset','accelerator_type','kdtree_intersectcost','kdtree_traversalcost','kdtree_emptybonus','kdtree_maxprims','kdtree_maxdepth','qbvh_maxprimsperleaf','qbvh_skip_factor','grid_refineimmediately','useparamkeys','texexport','exp_distorted','geomexport','priority','copy_textures']
 		
@@ -47,6 +51,8 @@ class LuxrenderSettingsEditor
 				pair = params.split("=")
 				key = pair[0]		   
 				value = pair[1]
+                puts key
+                puts value
 				case key
                     when "preset"
                         puts "preset toggled"
@@ -155,10 +161,10 @@ class LuxrenderSettingsEditor
         #
         ##
         @settings_dialog.add_action_callback("load_settings"){ |dialog, presetfile|
-            puts "loading settings from file"
-            puts presetfile
-            puts ""
-            if (!presetfile || presetfile==false || presetfile=="false")
+            puts "running load_settings"
+            if (presetfile == "Custom")
+                next # break; nothing needs to be changed as Custom is a temporary setting
+            elsif (!presetfile || presetfile==false || presetfile=="false")
                 # user gets file
                 settings_folder = SU2LUX.get_settings_folder
                 filepath = UI.openpanel("Open LuxRender settings file (.lxp)", settings_folder, "*")
@@ -173,23 +179,28 @@ class LuxrenderSettingsEditor
                 inputfile = File.open(filepath, "r")
             end
             
+            puts "loading settings from file: " + presetfile
+            
             # set value in @lrs
             inputfile.each_line do |line|
                 cleanline = line.gsub(/\r/,"")
                 cleanline = cleanline.gsub(/\n/,"")
                 property = cleanline.split(",").first
                 value = cleanline.split(",").last
+                if (value == "true")
+                    value = true
+                end
+                if (value == "false")
+                    value = false
+                end
                 @lrs.send(property+"=",value)
             end
             inputfile.close
             
-            # set value in dropdown menu
+            # set value in dropdown menu, update settings interface values
             javascriptcommand = 'update_settings_dropdown("' + File.basename(filepath,".lxp") + '")'
             SU2LUX.dbg_p javascriptcommand
 			dialog.execute_script(javascriptcommand)
-            
-            # update interface
-			self.sendDataFromSketchup()
         }
 
         ##
@@ -330,13 +341,15 @@ class LuxrenderSettingsEditor
 	#set parameters in inputs of settings.html
 	##
 	def sendDataFromSketchup()
+        puts "running sendDataFromSketchup from settings editor"
 		@lrs.fleximage_xresolution = Sketchup.active_model.active_view.vpwidth unless @lrs.fleximage_xresolution
 		@lrs.fleximage_yresolution = Sketchup.active_model.active_view.vpheight unless @lrs.fleximage_yresolution
 		settings = @lrs.get_names
-        puts "running sendDataFromSketchup"
+        puts "@lrs:", @lrs
 		settings.each { |setting|
             #puts setting
-			updateSettingValue(setting)
+            #puts @lrs.send(setting)
+            updateSettingValue(setting)
 		}
         
         # set setting areas based on dropdown settings
@@ -346,14 +359,14 @@ class LuxrenderSettingsEditor
             puts update_subfield
             @settings_dialog.execute_script(update_subfield)
         }
-        
+        puts "finished running sendDataFromSketchup (from settings editor)"
 	end # END sendDataFromSketchup
 	
 	##
 	#
 	##
 	def is_a_checkbox?(id)#much better to use objects for settings?!
-		if @lrs[id] == true or @lrs[id] == false
+		if @lrs[id] == true or @lrs[id] == false # or @lrs[id] == "true" or @lrs[id] == "false"
 			return id
 		end
 	end # END is_a_checkbox?
@@ -367,7 +380,7 @@ class LuxrenderSettingsEditor
 			
 		#### -- export_file_path slash change -- ####
 		when "export_file_path"
-            SU2LUX.dbg_p new_value
+            #SU2LUX.dbg_p new_value
 			new_value.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
 			new_value.gsub!(/\\/, '/') if new_value.include?('\\')
 			cmd="$('##{id}').val('#{new_value}');" #different asignment method
@@ -378,6 +391,8 @@ class LuxrenderSettingsEditor
 		
 		########  -- checkboxes -- ##########
 		when is_a_checkbox?(id)
+            #puts "updating checkbox: " + id + " is "
+            #puts value.class
 			cmd="$('##{id}').attr('checked', #{value});" #different asignment method
 			# SU2LUX.dbg_p cmd
 			@settings_dialog.execute_script(cmd)
@@ -392,6 +407,8 @@ class LuxrenderSettingsEditor
 		
 		######### -- other -- #############
 		else
+            #puts "updating other: " + id + " is "
+            #puts value.class
 			cmd="$('##{id}').val('#{new_value}');" #syntax jquery
 			# SU2LUX.dbg_p cmd
 			# cmd = "document.getElementById('#{id}').value=\"#{new_value}\""
@@ -411,6 +428,7 @@ class LuxrenderSettingsEditor
 	#
 	##
 	def updateSettingValue(id)
+        #puts "updating setting: " + id
 		setValue(id, @lrs[id])
 	end # END updateSettingValue
 

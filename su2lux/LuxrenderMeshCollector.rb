@@ -18,7 +18,7 @@ class LuxrenderMeshCollector
         @instance_counter_cache = Hash.new
         @deduplicate = instances
         @deferred_instances = Hash.new
-        @lrs = LuxrenderSettings.new
+        @lrs = SU2LUX.get_lrs
 	end # END initialize
     
     #####################################################################

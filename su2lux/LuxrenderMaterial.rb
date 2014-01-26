@@ -320,9 +320,12 @@ class LuxrenderMaterial
 	##
 	def get_names
 		settings = []
+        puts "collecting keys:"
 		@@settings.each { |key, value|
+            puts key
 			settings.push(key)
 		}
+        puts "done collecting keys"
 		return settings
 	end #END get_names
 	

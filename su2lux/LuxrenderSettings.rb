@@ -25,12 +25,6 @@ class LuxrenderSettings
 	
 	@@settings=
 	{
-	#'name_option'=>'default_value'
-	##
-	# Settings
-	###
-        #'preset' => '1',
-    
 	##
 	# Camera
 	###
@@ -49,7 +43,6 @@ class LuxrenderSettings
 		'distribution' => 'uniform',
 		'power' => 1,
 		'blades' => 6,
-    
 		'camera_scale' => 7.31, #seems to work only in Blender
 		'use_clipping' => false, #GUI
 		'use_dof_bokeh'=>false, #GUI
@@ -86,7 +79,6 @@ class LuxrenderSettings
 		'environment_sun_turbidity' => 2.2,
         'environment_use_sun' => true,
         'environment_use_sky' => true,
-
 		'use_environment_infinite_sun' => false, #GUI
 		'use_plain_color' => 'sketchup_color', #GUI
 		'environment_infinite_sun_lightgroup' => 'sun', #for full GUI
@@ -271,8 +263,8 @@ class LuxrenderSettings
 		'fleximage_displayinterval' => 20,
 		'fleximage_outlierrejection_k' => 0,
 		'fleximage_debug' => false,
-		'fleximage_haltspp' => -1,
-		'fleximage_halttime' => -1,
+		'fleximage_haltspp' => 0,
+		'fleximage_halttime' => 0,
 		'fleximage_colorspace_red_x' => 0.63, #GUI
 		'fleximage_colorspace_red_y' => 0.34, #GUI
 		'fleximage_colorspace_green_x' => 0.31, #GUI
@@ -419,7 +411,7 @@ class LuxrenderSettings
 	end #end initialize
 
 	def reset
-            puts "resetting settings editor"
+            puts "resetting LuxRender Settings"
 			@@settings.each do |key, value|
 				LuxrenderAttributeDictionary.set_attribute(@dict, key, value)
 			end
