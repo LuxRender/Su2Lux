@@ -208,22 +208,22 @@
                         <label for="cl2kd_B" class="kdb">Blue</label><input type='text' id="cl2kd_B" size="6" class="kdbvalue">
                         
                         <div class="texture_area_swatchfield">
-                        <label for="cl2kd_texturetype" class="tex_label">Texture</label>
-                        <select id="cl2kd_texturetype" class="tex_dropdown" name="cl2kd">
-                            <option value="none">None</option>
-                            <option value="sketchup">Sketchup Texture</option>
-                            <option value="imagemap">Image Map</option>
-                        </select>
-                        <span class="sketchup">
-                            <div class="colorizesection"><input type="checkbox" class="cl2kd_imagemap_colorize" name="cl2kd_imagemap_colorize">
-                            <label for="multibounce">Multiply</label></div>
-                        </span>
-                        <span class="imagemap">
-                            <div id="cl2kd_imgmapname" class="tex_path">&nbsp;</div>
-                            <input type="button" id="cl2kd_browse_map" value="load" class="tex_loadbutton">
-                            <div class="colorizesection"><input type="checkbox" class="cl2kd_imagemap_colorize" name="cl2kd_imagemap_colorize">
-                            <label for="multibounce">Multiply</label></div>
-                        </span>
+                            <label for="cl2kd_texturetype" class="tex_label">Texture</label>
+                            <select id="cl2kd_texturetype" class="tex_dropdown" name="cl2kd">
+                                <option value="none">None</option>
+                                <option value="sketchup">Sketchup Texture</option>
+                                <option value="imagemap">Image Map</option>
+                            </select>
+                            <span class="sketchup">
+                                <div class="colorizesection"><input type="checkbox" class="cl2kd_imagemap_colorize" name="cl2kd_imagemap_colorize">
+                                <label for="multibounce">Multiply</label></div>
+                            </span>
+                            <span class="imagemap">
+                                <div id="cl2kd_imgmapname" class="tex_path">&nbsp;</div>
+                                <input type="button" id="cl2kd_browse_map" value="load" class="tex_loadbutton">
+                                <div class="colorizesection"><input type="checkbox" class="cl2kd_imagemap_colorize" name="cl2kd_imagemap_colorize">
+                                <label for="multibounce">Multiply</label></div>
+                            </span>
                         </div>
                     </div>
                     Weft specular reflection
@@ -878,6 +878,21 @@
                     <label for="em_R" class="kdr">Red</label><input type='text' id="em_R" size="6" class="kdrvalue">
                     <label for="em_G" class="kdg">Green</label><input type='text' id="em_G" size="6" class="kdgvalue">
                     <label for="em_B" class="kdb">Blue</label><input type='text' id="em_B" size="6" class="kdbvalue">
+                        
+                    <div class="texture_area_swatchfield">
+                        <label for="em_texturetype" class="tex_label">Texture</label>
+                        <select id="em_texturetype" class="tex_dropdown" name="em">
+                            <option value="none">None</option>
+                            <option value="sketchup">Sketchup Texture</option>
+                            <option value="imagemap">Image Map</option>
+                        </select>
+                        <span class="sketchup">&nbsp;
+                        </span>
+                        <span class="imagemap">
+                            <div id="em_imgmapname" class="tex_path">&nbsp;</div>
+                            <input type="button" id="em_browse_map" value="load" class="tex_loadbutton">
+                        </span>
+                    </div>
                 </div>
 
                 <div class="light_L" id="emit_preset">

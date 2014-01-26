@@ -1389,7 +1389,12 @@ class LuxrenderExport
         when "blackbody"
             out.puts "\"texture L\" [\"#{luxrender_mat.name}:light:L\"]" # texture is defined in .lxm file
         when "emit_color"
-            out.puts "\t" + "\"color L\" [" + luxrender_mat.em_R.to_s + " " + luxrender_mat.em_G.to_s + " " + luxrender_mat.em_B.to_s + "]" # todo 2014: replace by proper color values
+            if luxrender_mat.has_texture?("em")
+                dummy, texturenameline = self.export_texture(luxrender_mat, "em", "color", "", "")
+                out.puts texturenameline
+            else
+                out.puts "\t" + "\"color L\" [" + luxrender_mat.em_R.to_s + " " + luxrender_mat.em_G.to_s + " " + luxrender_mat.em_B.to_s + "]"
+            end
         when "emit_preset"
             out.puts "\"texture L\" [\"#{luxrender_mat.name}:light:L\"]" # texture is defined in .lxm file
         end
@@ -1613,7 +1618,7 @@ class LuxrenderExport
                 multibounce = mat.multibounce ? "true": "false"
                 post += "\t" + "\"bool multibounce\" [\"#{multibounce}\"]" + "\n"
 			when "light"
-                post += self.export_mesh_light(mat)
+                pre, post = self.export_mesh_light(mat, pre, post)
 		end
         return pre, post
     end # end export_material_parameters
@@ -1664,7 +1669,8 @@ class LuxrenderExport
         
 		if (mat.type == "light")
             out.puts matnamecomment
-			out.puts post
+            out.puts "\n"
+			out.puts pre
         else
             if (mat.use_auto_alpha == true)
                 puts "explorting alpha transparency"
@@ -2105,19 +2111,26 @@ class LuxrenderExport
 		return [before + preceding, after] # following parts would be added to geometry, not to material definition
 	end
 
-	def export_mesh_light(material)
+	def export_mesh_light(material, pre, post)
         puts "exporting blackbody texture"
+        preceding = pre # empty
+        following = post # empty
         if material.light_L == "blackbody"
-            following = "Texture \"" + material.name + ":light:L\"" + "\n"
-            following += "\t" + "\"color\" \"blackbody\"" + "\n"
-            following += "\t" + "\"float temperature\" [#{material.light_temperature}]" + "\n"
+            preceding += "Texture \"" + material.name + ":light:L\"" + "\n"
+            preceding += "\t" + "\"color\" \"blackbody\"" + "\n"
+            preceding += "\t" + "\"float temperature\" [#{material.light_temperature}]" + "\n"
         elsif material.light_L == "emit_preset"
-            following = "Texture \"" + material.name + ":light:L\"" + "\n"
-            following += "\t" + "\"color\" \"lampspectrum\""  + "\n"
-            following += "\t" + "\"string name\" [\"" + material.light_spectrum+ "\"]" + "\n"
+            preceding += "Texture \"" + material.name + ":light:L\"" + "\n"
+            preceding += "\t" + "\"color\" \"lampspectrum\""  + "\n"
+            preceding += "\t" + "\"string name\" [\"" + material.light_spectrum+ "\"]" + "\n"
         else
-            following = ""
+            if (material.has_texture?('em'))
+                preceding, following = self.export_texture(material, "em", "color", preceding, following)
+            else
+                following = "\t" + "\"color L\" [" + material.em_R.to_s + " " + material.em_G.to_s + " " + material.em_B.to_s + "]"
+            end
         end
+        return [preceding, following]
 	end
 
 	def texture_parameters_from_type(mat_type)
@@ -2155,6 +2168,9 @@ class LuxrenderExport
 			when 'kt'
 				type_str = "Kt"
 				type_str2 = "transmission_tos"
+            when 'em'
+                type_str = "L"
+                type_str2 = "em_tos"
             when 'normal'
 				type_str = "bumpmap"
 				type_str2 = "normalmap"
