@@ -109,81 +109,70 @@ class LuxrenderExport
 		out.print "\n"
 	end # END export_camera
 
-	def compute_fov(xres, yres)
-		camera = Sketchup.active_model.active_view.camera
+def compute_fov(xres, yres)
+        width = xres.to_f
+        height = yres.to_f
         view = Sketchup.active_model.active_view
-		fov_vertical = camera.fov
-		width = xres.to_f
-		height = yres.to_f
-        skp_ratio = camera.aspect_ratio
+		camera = view.camera
+        centerx = view.screen_coords(camera.target)[0].to_f
+        centery = view.screen_coords(camera.target)[1].to_f
+        vcenterx = view.center[0].to_f
+        vcentery = view.center[1].to_f
+		fov_sketchup = camera.fov # vertical angle if aspect ratio is not set, horizontal angle if it is
+        skp_ratio = camera.aspect_ratio # 0.0, unless aspect ratio is fixed
         lux_ratio = width/height
-		if(width >= height) # landscape
-            # check for two point perspective
-            centerx = view.screen_coords(camera.target)[0].to_f
-            centery = view.screen_coords(camera.target)[1].to_f
-            vcenterx = view.center[0].to_f
-            vcentery = view.center[1].to_f
-            if ((centerx-vcenterx).abs>1.0||(centery-vcentery).abs>1.0) # two point perspective
-                puts "calculating two point perspective camera angle"
-                # calculate angle by adding a virtual point, then getting distance to the target point in screen space
-                eye = camera.eye
-                target = camera.target
-                helper_vertical_distance = 1000.0;
-                target_distance = ((eye[0]-target[0])**2 + (eye[1]-target[1])**2 + (eye[2]-target[2])**2)**0.5
-                helper_point = Geom::Point3d.new(target[0], target[1], target[2]+helper_vertical_distance)
-                helper_height = (view.screen_coords(helper_point)[1] - view.screen_coords(target)[1]).abs
-                helper_fraction = helper_height / view.vpheight
-                fraction_tan = helper_vertical_distance/target_distance
-                total_tan = (0.5/helper_fraction) * fraction_tan
-                calculated_angle = 2*Math.atan(total_tan)
+        
+        if ((centerx-vcenterx).abs>1.0 || (centery-vcentery).abs>1.0) # two point perspective
+            # calculate angle by adding a virtual point, then getting distance to the target point in screen space
+            puts "exporting camera, two point perspective"
+            eye = camera.eye
+            target = camera.target
+            helper_vertical_distance = 200.0; # inches
+            target_distance = ((eye[0]-target[0])**2 + (eye[1]-target[1])**2)**0.5 # inches
+            helper_point = Geom::Point3d.new(target[0], target[1], target[2]+helper_vertical_distance)
+            helper_height = (view.screen_coords(helper_point)[1] - view.screen_coords(target)[1]).abs
+            helper_fraction = helper_height / view.vpheight
+            if (skp_ratio != 0.0) # sketchup aspect ratio fixed
+                if (skp_ratio > 1.0) # landscape
+                    puts "fixed aspect ratio, landscape"
+                    fraction_tan = helper_vertical_distance/target_distance
+                    total_tan = (0.5/helper_fraction) * fraction_tan
+                    calculated_angle = 2*Math.atan(total_tan)
+                    fov = calculated_angle.radians
+                else # portrait
+                    puts "fixed aspect ratio, portrait"
+                    fraction_tan = helper_vertical_distance/target_distance
+                    total_tan = (0.5/helper_fraction) * fraction_tan
+                    calculated_angle = 2*Math.atan(total_tan)
+                    fov_vertical = calculated_angle.radians
+                    fov = 2 * (Math.atan(Math.tan(fov_vertical.degrees/2)*lux_ratio)).radians
+                end
+            else # free aspect ratio
+                puts "free aspect ratio"
+                half_tan = (0.5*view.vpheight/helper_height) * (helper_vertical_distance/target_distance) # (pixel screen space) * (3d space)
+                calculated_angle = 2*Math.atan(half_tan)
                 fov = calculated_angle.radians
-            else
-                fov = fov_vertical
-                puts "landscape fov: " + fov.to_s
             end
-                
-            # deal with horizontal luxrender resolution in vertical sketchup layout
-            #if (skp_ratio < 1.0)
-            #    puts "lux_ratio, skp_ratio:"
-            #    puts lux_ratio
-            #    puts skp_ratio
-            #    puts "old fov: " + fov.to_s
-            #    fov = atan2(2 * tan (0.5 * fov_vertical (lux_ratio/skp_ratio)))
-            #    puts "landscape-portrait fov: " + fov.to_s
-            #end
-		else # portrait
-            centerx = view.screen_coords(camera.target)[0].to_f
-            centery = view.screen_coords(camera.target)[1].to_f
-            vcenterx = view.center[0].to_f
-            vcentery = view.center[1].to_f
-            if ((centerx-vcenterx).abs>1.0||(centery-vcentery).abs>1.0) # two point perspective
-                puts "calculating two point perspective camera angle, portrait"
-                # calculate angle by adding a virtual point, then getting distance to the target point in screen space
-                eye = camera.eye
-                target = camera.target
-                helper_vertical_distance = 1000.0;
-                target_distance = ((eye[0]-target[0])**2 + (eye[1]-target[1])**2 + (eye[2]-target[2])**2)**0.5
-                helper_point = Geom::Point3d.new(target[0], target[1], target[2]+helper_vertical_distance)
-                helper_height = (view.screen_coords(helper_point)[1] - view.screen_coords(target)[1]).abs
-                helper_fraction = helper_height / view.vpheight
-                fraction_tan = helper_vertical_distance/target_distance
-                total_tan = (0.5/helper_fraction) * fraction_tan
-                calculated_angle = 2*Math.atan(total_tan)
-                fov_vertical = calculated_angle.radians
+        else # not two point perspective
+            puts "exporting camera"
+            if (skp_ratio != 0.0) # sketchup aspect ratio fixed
+                if (skp_ratio > 1.0) # landscape
+                    puts "fixed aspect ratio, landscape"
+                    fov = 2 * (Math.atan(Math.tan(fov_sketchup.degrees/2)/lux_ratio)).radians
+                else
+                    puts "fixed aspect ratio, portrait"
+                    fov = fov_sketchup
+                end
+            else # free aspect ratio
+                if (yres > xres) # portrait
+                    puts "free aspect ratio, portrait"
+                    fov = 2 * (Math.atan(lux_ratio*Math.tan(fov_vertical.degrees/2))).radians
+                else # landscape
+                    puts "free aspect ratio, landscape"
+                    fov = fov_vertical
+                end
             end
-			focal_distance = 0.5 * height / Math.tan(0.5 * fov_vertical.degrees)
-			fov_horizontal = (2.0 * Math.atan2(0.5 * width, focal_distance)).radians
-			fov = fov_horizontal
-		end
-
-		if (camera.aspect_ratio != 0.0)
-			focal_length = camera.focal_length
-			image_width = 2 * focal_length * Math::tan(0.5 * fov.degrees)
-			aspect_ratio_inverse = height /width
-			image_width = image_width * aspect_ratio_inverse
-			fov = 2.0 * Math.atan2(0.5 * image_width, focal_length)
-			fov = fov.radians
-		end
+        end
 		return fov
 	end # END compute_fov
 

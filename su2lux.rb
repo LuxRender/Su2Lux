@@ -30,7 +30,7 @@ module SU2LUX
 
     # Module constants
     SU2LUX_VERSION = "0.41"
-    SU2LUX_DATE = "25 January 2014"
+    SU2LUX_DATE = "28 January 2014"
 	CONFIG_FILE = "luxrender_path.txt"
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
