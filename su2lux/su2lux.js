@@ -75,6 +75,10 @@ $(document).ready(
         $("#imageresolution").next(".collapse").show();
         $("#system").next(".collapse").show();
                   
+        // todo 2014: load settings
+                  
+                  
+                  
         $("#save_settings_file").click(
             function()
             {
@@ -135,7 +139,79 @@ $(document).ready(
 				$(this).nextAll("." + this.value).show();
 			}
 		);
-		
+                  
+                  
+                  
+ 		$("#settings_panel #aspectratio_type").change(
+			function()
+			{
+                if (this.value=="aspectratio_sketchup_view"){
+                    $("#aspectratio_sketchup_view").show();
+                    $("#aspectratio_free").hide();
+                    $("#aspectratio_custom").hide();
+                    $("#aspectratio_fixed").hide();
+                    if ($("#aspectratio_skp_res_type").val()=="aspectratio_skp_view"){
+                      $("#aspectratio_resolution_interface").hide();
+                      window.location = 'skp:remove_frame@' + this.value
+                    }else{
+                      // start function that updates y resolution based on x resolution (1)
+                      window.location = 'skp:resolution_update_skp@' + this.value
+                    }
+                }else if (this.value=="aspectratio_free"){
+                    $("#aspectratio_sketchup_view").hide();
+                    $("#aspectratio_free").show();
+                    $("#aspectratio_custom").hide();
+                    $("#aspectratio_fixed").hide();
+                    $("#aspectratio_resolution_interface").show();
+                    window.location = 'skp:resolution_update_free@' + this.value;
+                }else if (this.value=="aspectratio_custom"){
+                    $("#aspectratio_sketchup_view").hide();
+                    $("#aspectratio_free").hide();
+                    $("#aspectratio_custom").show();
+                    $("#aspectratio_fixed").hide();
+                    $("#aspectratio_resolution_interface").show();
+                    // start function that updates resolutions based on custom aspect ratio
+                    window.location = 'skp:resolution_update_custom@' + this.value
+                }else { // fixed ratio
+                    $("#aspectratio_sketchup_view").hide();
+                    $("#aspectratio_free").hide();
+                    $("#aspectratio_custom").hide();
+                    $("#aspectratio_fixed").show();
+                    $("#aspectratio_resolution_interface").show();
+                    // start function that updates resolutions based on aspect ratio
+                    window.location = 'skp:resolution_update_fixed@' + this.value
+                }
+			}
+		);
+                  
+  		$("#settings_panel #aspectratio_skp_res_type").change(
+			function()
+			{
+                if (this.value=="aspectratio_skp_view"){
+                    $("#aspectratio_resolution_interface").hide();
+                }else { // custom ratio
+                    $("#aspectratio_resolution_interface").show();
+                    window.location = 'skp:resolution_update_skp@' + this.value
+                }
+			}
+		);
+        
+        $("#settings_panel #aspectratio_fixed_orientation").change(
+           function(){
+                //alert(this.value)
+                window.location = 'skp:swap_portrait_landscape@' + this.value               
+           }
+        );
+                  
+                  
+        $("#settings_panel #aspectratio_flip").click(
+           function(){
+                //alert(this.value)
+                window.location = 'skp:flip_aspect_ratio@' + this.value               
+           }
+        );
+                  
+                  
 		$("#settings_panel #sintegrator_path_rrstrategy").change(
 			function()
 			{
@@ -274,14 +350,6 @@ $(document).ready(
 			}
 		);
 		
-		// $("#settings_panel #environment_light_type").change(
-			// function()
-			// {
-				// nodes = $(this).next("div.collapse").hide();
-				// nodes = $(this).nextAll("#" + this.value).show();
-			// }
-		// );
-		
 		$("#export_file_path_browse").click(
 			function()
 			{
@@ -305,52 +373,58 @@ $(document).ready(
 			}
 		)
 		
-		$("#current_view").click(
-			function()
-			{	
-				window.location = 'skp:get_view_size';
-			}
-		);
+		//$("#current_view").click(
+		//	function()
+		//	{
+		//		window.location = 'skp:get_view_size';
+		//	}
+		//);
 		
-		$("#flip_dim").click(
-			function()
-			{	
-				width = $("#fleximage_xresolution").val();
-				height = $("#fleximage_yresolution").val();
-				$("#fleximage_xresolution").val(parseInt(height));
-				$("#fleximage_yresolution").val(parseInt(width));
-				window.location = 'skp:set_image_size@' + height + 'x' + width;
-			}
-		);
+		//$("#flip_dim").click(
+		//	function()
+		//	{
+		//		width = $("#fleximage_xresolution").val();
+		//		height = $("#fleximage_yresolution").val();
+		//		$("#fleximage_xresolution").val(parseInt(height));
+		//		$("#fleximage_yresolution").val(parseInt(width));
+		//		window.location = 'skp:set_image_size@' + height + 'x' + width;
+		//	}
+		//);
 		
-		$("#x800, #x1024, #x1280, #x1440, #x1080, #x1920").click(
-			function()
-			{	
-				window.location = 'skp:set_image_size@' + this.value + 'xtrue';
-			}
-		);
+		//$("#x800, #x1024, #x1280, #x1440, #x1080, #x1920").click(
+		//	function()
+		//	{
+		//		window.location = 'skp:set_image_size@' + this.value + 'xtrue';
+		//	}
+		//);
 
-		$("#multiply_by_2, #divide_by_2").click(
-			function()
-			{	
-				width = $("#fleximage_xresolution").val();
-				height = $("#fleximage_yresolution").val();
-				switch(this.id)
-				{
-					case 'multiply_by_2':
-						width *= 2;
-						height *= 2;
-						break;
-					case 'divide_by_2':
-						width /= 2;
-						height /= 2;
-						break;
-				}
-				$("#fleximage_xresolution").val(parseInt(width));
-				$("#fleximage_yresolution").val(parseInt(height));
-				window.location = 'skp:set_image_size@' + width + 'x' + height + 'xfalse';
-			}
-		);
+		//$("#multiply_by_2, #divide_by_2").click(
+		//	function()
+		//	{
+		//		width = $("#fleximage_xresolution").val();
+		//		height = $("#fleximage_yresolution").val();
+		//		switch(this.id)
+		//		{
+		//			case 'multiply_by_2':
+		//				width *= 2;
+		//				height *= 2;
+		//				break;
+		//			case 'divide_by_2':
+		//				width /= 2;
+		//				height /= 2;
+		//				break;
+		//		}
+		//		$("#fleximage_xresolution").val(parseInt(width));
+		//		$("#fleximage_yresolution").val(parseInt(height));
+		//		window.location = 'skp:set_image_size@' + width + 'x' + height + 'xfalse';
+		//	}
+		//);
+        
+        //$("#fleximage_xresolution").on('change', function()
+         //   {
+          //      alert ("hi there")
+           // }
+        //)
                   
 
                   

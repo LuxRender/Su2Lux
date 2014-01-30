@@ -35,8 +35,18 @@ class LuxrenderExport
 		@count_tri = 0
 		@model_textures={}
         @instance_name = 0
-		@lrs.fleximage_xresolution = Sketchup.active_model.active_view.vpwidth unless @lrs.fleximage_xresolution
+        @lrs.fleximage_xresolution = Sketchup.active_model.active_view.vpwidth unless @lrs.fleximage_xresolution
 		@lrs.fleximage_yresolution = Sketchup.active_model.active_view.vpheight unless @lrs.fleximage_yresolution
+        
+        if (@lrs.aspectratio_type == "aspectratio_sketchup_view" && @lrs.aspectratio_skp_res_type == "aspectratio_skp_view")
+            puts "updating @lrs.fleximage_resolution settings"
+            xres = Sketchup.active_model.active_view.vpwidth * @lrs.fleximage_resolution_percent.to_i / 100.0
+            @lrs.fleximage_xresolution = xres # needed for fov calculation
+            yres = Sketchup.active_model.active_view.vpheight * @lrs.fleximage_resolution_percent.to_i / 100.0
+            @lrs.fleximage_yresolution = yres # needed for fov calculation
+        end
+        
+        
 	end #END reset
 
 	def export_global_settings(out)
@@ -64,7 +74,12 @@ class LuxrenderExport
 		out.puts "Camera \"#{@lrs.camera_type}\""
 		case @lrs.camera_type
 			when "perspective"
+                puts "perspective camera, resolution:"
+                puts @lrs.fleximage_xresolution
+                puts @lrs.fleximage_yresolution
 				fov = compute_fov(@lrs.fleximage_xresolution, @lrs.fleximage_yresolution)
+                puts "fov:"
+                puts fov
 				out.puts "	\"float fov\" [%.6f" %(fov) + "]"
 			when "orthographic"
                 # scale is taken into account in screenwindow declaration
@@ -104,6 +119,7 @@ class LuxrenderExport
 			out.puts "\t\"float shutterclose\" [%.6f" %(@lrs.shutterclose) + "]"
 			out.puts "\t\"string shutterdistribution\" [\"" + @lrs.shutterdistribution + "\"]"
 		end
+        puts "about to compute screen window"
 		sw = compute_screen_window
 		out.puts	"\t\"float screenwindow\" [" + "%.6f" %(sw[0]) + " " + "%.6f" %(sw[1]) + " " + "%.6f" %(sw[2]) + " " + "%.6f" %(sw[3]) +"]\n"
 		out.print "\n"
@@ -112,6 +128,9 @@ class LuxrenderExport
 def compute_fov(xres, yres)
         width = xres.to_f
         height = yres.to_f
+        puts "computing fov:"
+        puts width
+        puts height
         view = Sketchup.active_model.active_view
 		camera = view.camera
         centerx = view.screen_coords(camera.target)[0].to_f
@@ -119,8 +138,11 @@ def compute_fov(xres, yres)
         vcenterx = view.center[0].to_f
         vcentery = view.center[1].to_f
 		fov_sketchup = camera.fov # vertical angle if aspect ratio is not set, horizontal angle if it is
+        puts "fov_sketchup:"
+        puts fov_sketchup
         skp_ratio = camera.aspect_ratio # 0.0, unless aspect ratio is fixed
         lux_ratio = width/height
+        view_ratio = view.vpwidth.to_f/view.vpheight.to_f
         
         if ((centerx-vcenterx).abs>1.0 || (centery-vcentery).abs>1.0) # two point perspective
             # calculate angle by adding a virtual point, then getting distance to the target point in screen space
@@ -136,6 +158,13 @@ def compute_fov(xres, yres)
                 if (skp_ratio > 1.0) # landscape
                     puts "fixed aspect ratio, landscape"
                     fraction_tan = helper_vertical_distance/target_distance
+                    if view_ratio < skp_ratio
+                        # if view ratio is more vertical than render ratio, fraction_tan should be multiplied by viewratio/renderratio
+                        puts "adjusting for horizontal bars"
+                        # puts view_ratio
+                        # puts skp_ratio
+                        fraction_tan = fraction_tan * view_ratio / skp_ratio
+                    end
                     total_tan = (0.5/helper_fraction) * fraction_tan
                     calculated_angle = 2*Math.atan(total_tan)
                     fov = calculated_angle.radians
@@ -164,15 +193,17 @@ def compute_fov(xres, yres)
                     fov = fov_sketchup
                 end
             else # free aspect ratio
-                if (yres > xres) # portrait
+                if (view.vpheight > view.vpwidth) # portrait
                     puts "free aspect ratio, portrait"
-                    fov = 2 * (Math.atan(lux_ratio*Math.tan(fov_vertical.degrees/2))).radians
+                    fov = 2 * (Math.atan(lux_ratio*Math.tan(fov_sketchup.degrees/2))).radians
                 else # landscape
                     puts "free aspect ratio, landscape"
-                    fov = fov_vertical
+                    fov = fov_sketchup
                 end
             end
         end
+        puts "calculated fov:"
+        puts fov
 		return fov
 	end # END compute_fov
 
@@ -185,6 +216,8 @@ def compute_fov(xres, yres)
             cam_shiftY = @lrs.shiftY.to_f
         end
 		ratio = @lrs.fleximage_xresolution.to_f / @lrs.fleximage_yresolution.to_f
+        puts "compute_screen_window using ratio (x/y):"
+        puts ratio
 		inv_ratio = 1.0 / ratio
         
         # two point perspective logic
@@ -196,24 +229,24 @@ def compute_fov(xres, yres)
         target_y = Sketchup.active_model.active_view.screen_coords(camtarget)[1].to_f
         target_fraction_x_skp = 0.0
         target_fraction_y_skp = 0.0
-        if (ratio > 1.0 && skpratio > 1.0)
-            # landscape
-            puts "landscape"
+        if (ratio > 1.0 && skpratio > ratio)
+            # landscape, vertical bars
+            puts "landscape, vertical bars"
             target_fraction_x_skp = ((target_x - 0.5*skp_view_width)/skp_view_width)*skpratio
             target_fraction_y_skp = target_y / skp_view_height - 0.5
-            elsif (ratio < 1.0 && skpratio < 1.0)
-            # portrait
-            puts "portrait"
+        elsif (ratio < 1.0 && skpratio < ratio)
+            # portrait, horizontal bars
+            puts "portrait, horizontal bars"
             target_fraction_x_skp = ((target_x - 0.5*skp_view_width)/skp_view_width)
             target_fraction_y_skp = (target_y / skp_view_height - 0.5)/ratio
-            elsif (ratio > 1.0 && skpratio < 1.0)
-            # Sketchup portrait, LuxRender landscape
-            puts "Sketchup portrait, LuxRender landscape"
+        elsif (ratio > 1.0 && skpratio < ratio)
+            # landscape, horizontal bars
+            puts "landscape, horizontal bars"
             target_fraction_x_skp = ((target_x - 0.5*skp_view_width)/skp_view_width) * ratio
             target_fraction_y_skp = ((target_y - 0.5*skp_view_height)/skp_view_height)*ratio/skpratio
-            elsif (ratio < 1.0 && skpratio > 1.0)
-            # Sketchup landscape, LuxRender portrait
-            puts "Sketchup landscape, LuxRender portrait"
+        elsif (ratio < 1.0 && skpratio > ratio)
+            # portrait, vertical bars
+            puts "portrait, vertical bars"
             target_fraction_x_skp = ((target_x - 0.5*skp_view_width)/skp_view_width)/ratio
             target_fraction_y_skp = ((target_y / skp_view_height) - 0.5)/ratio
         end
@@ -240,9 +273,14 @@ def compute_fov(xres, yres)
 
 	def export_film(out,file_basename)
 		out.puts "Film \"fleximage\""
+        
 		percent = @lrs.fleximage_resolution_percent.to_i / 100.0
-		xres = @lrs.fleximage_xresolution.to_i * percent
-		yres = @lrs.fleximage_yresolution.to_i * percent
+        xres = (@lrs.fleximage_xresolution.to_i * percent).round
+        yres = (@lrs.fleximage_yresolution.to_i * percent).round
+        
+        
+        
+        
 		out.puts "\t\"integer xresolution\" [#{xres.to_i}]"
 		out.puts "\t\"integer yresolution\" [#{yres.to_i}]"
 		out.puts "\t\"integer haltspp\" [#{@lrs.fleximage_haltspp.to_i}]"

@@ -574,7 +574,70 @@
         
 <p class="header" id="imageresolution">Image resolution</p>
 		<div class="collapse">
-			<label for="fleximage_xresolution">Width&nbsp;</label>
+            <div class="parameter_interface_single">
+			<label for="aspectratio_type" class="firstlabel">Aspect ratio</label>
+			<select id="aspectratio_type" class="singlelinedropdown">
+				<option value="aspectratio_sketchup_view">SketchUp view</option>
+				<option value="1.0">1:1</option>
+				<option value="0.5">1:2</option>
+				<option value="0.666666">2:3</option>
+				<option value="0.75">3:4</option>
+				<option value="0.625">5:8</option>
+				<option value="0.5625">9:16</option>
+				<option value="aspectratio_free">Free</option>
+				<option value="aspectratio_custom">Custom</option>
+			</select><br><br>
+            </div>
+            
+            <div id="aspectratio_sketchup_view" class="parameter_interface_single">
+                <label for="aspectratio_skp_res_type" class="firstlabel">Resolution</label>
+                <select id="aspectratio_skp_res_type" class="singlelinedropdown">
+                    <option value="aspectratio_skp_view">SketchUp view</option>
+                    <option value="aspectratio_skp_custom">Custom</option>
+                </select>
+            </div>
+            
+            <div id="aspectratio_custom" class="parameter_interface_single">
+                <div class="firstlabel">Proportion</div><div class="singlelinedropdown">
+				<input type='text' id="aspectratio_numerator" size="3"> : <input type='text' id="aspectratio_denominator" size="3">&nbsp;
+                <input type="button" id="aspectratio_flip" value="swap values"></div>
+            </div>
+            
+            <div id="aspectratio_fixed" class="parameter_interface_single">
+                <select id="aspectratio_fixed_orientation" class="singlelinedropdown">
+                    <option value="ratio_landscape">Landscape</option>
+                    <option value="ratio_portrait">Portrait</option>
+                </select>
+            </div>
+            
+            <div id="aspectratio_resolution_interface" class="parameter_interface">
+				<label for="fleximage_xresolution" class="firstlabel">Resolution x</label>
+				<input type='text' id="fleximage_xresolution" size="10" class="inputfield1">
+                <label for="fleximage_yresolution" class="secondlabel">Resolution y</label>
+                <input type='text' id="fleximage_yresolution" size="10" class="inputfield2">
+            </div>
+            
+            <div class="parameter_interface_single">
+                <label for="fleximage_resolution_percent" class="firstlabel">Scale</label>
+                <select id="fleximage_resolution_percent" class="singlelinedropdown">
+                    <option value="800">800%</option>
+                    <option value="400">400%</option>
+                    <option value="300">300%</option>
+                    <option value="200">200%</option>
+                    <option value="150">150%</option>
+                    <option value="100">100%</option>
+                    <option value="75">75%</option>
+                    <option value="50">50%</option>
+                    <option value="40">40%</option>
+                    <option value="30">30%</option>
+                    <option value="25">25%</option>
+                    <option value="20">20%</option>
+                    <option value="10">10%</option>
+                </select>
+            </div>
+            
+            
+			<!-- <label for="fleximage_xresolution">Width&nbsp;</label>
 			<input type="text" id="fleximage_xresolution" size="5">
 			<input type="button" id="multiply_by_2" value ="Double">
 			<input type="button" id="x800" value ="800x600">
@@ -603,7 +666,11 @@
 				<option value="10">10%</option>
 			</select>
 			<input type="button" id="current_view" value="Current view">
-			<input type="button" id="flip_dim" value="Flip dimensions">
+			<input type="button" id="flip_dim" value="Flip dimensions"> -->
+                
+                
+                
+                
 		</div>
         
 
@@ -1108,9 +1175,9 @@
 		</div>
 		<br>
 		<br>
-		<!-- <hr>
+		<hr>
 		<input type="button" id="save_to_model" value="Save settings to model">
-		<input type="button" id="reset" value="reset all settings">-->
+		<!-- <input type="button" id="reset" value="reset all settings">-->
 	</div><!--end settings_panel-->
 
 	<!--TODO - add button "Render" --> 

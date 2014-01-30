@@ -29,6 +29,46 @@
 .collapse2 {
 	padding: 6px;
 }
+
+.parameter_interface{
+    position: relative;
+    height: 78px;
+}
+
+.parameter_interface_single{
+    position: relative;
+    height: 30px;
+}
+
+.singlelinedropdown{
+    position: absolute;
+    top: 0px;
+    left: 100px;
+}
+
+.inputfield1{
+    position: absolute;
+    top: 0px;
+    left: 100px;
+}
+
+.inputfield2{
+    position: absolute;
+    top: 35px;
+    left: 100px;
+}
+
+.firstlabel{
+    position: absolute;
+    top: 4px;
+    left: 0px;
+}
+
+.secondlabel{
+    position: absolute;
+    top: 39px;
+    left: 0px;
+}
    
 input[type=button] {
 	margin: 3px;
@@ -55,10 +95,4 @@ input#save_to_model, input#reset {
 
 #flip_dim {
 	width: 169px;
-}
-
-#fleximage_xresolution, #fleximage_yresolution {
-	margin: -23px 5px 0 0;
-	text-align: right;
-	font-size: 10px;
 }

@@ -230,11 +230,22 @@ class LuxrenderSettings
 	##
 	# Film
 	##
+        'aspectratio_type' => "aspectratio_sketchup_view",
+        'aspectratio_fixed_ratio' => 0.666666,
+        'aspectratio_numerator' => 2.0,
+        'aspectratio_denominator' => 3.0,
+        'aspectratio_fixed_orientation' => "landscape",
+        'aspectratio_resolution_interface' => true,
+        'aspectratio_skp_res_type' => "aspectratio_skp_view",
+        
+        
+        
+        
 		'film_type' => "fleximage",
 		'fleximage_premultiplyalpha' => false,
-		'fleximage_xresolution' => nil,
-		'fleximage_yresolution' => nil,
-		'fleximage_resolution_percent' => 100, #GUI
+		'fleximage_xresolution' => 800,
+		'fleximage_yresolution' => 600,
+		'fleximage_resolution_percent' => 100,
 		'fleximage_filterquality' => 4,
 		'fleximage_ldr_clamp_method' => "lum",
 		'fleximage_write_exr' => false,

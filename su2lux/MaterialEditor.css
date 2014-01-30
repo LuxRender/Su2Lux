@@ -283,13 +283,6 @@ input#get_diffuse_color {
     left: 7px;
 }
 
-
-#fleximage_xresolution, #fleximage_yresolution {
-	margin: -23px 5px 0 0;
-	text-align: right;
-	font-size: 10px;
-}
-
 #lightgain{
     position: absolute;
     left: 0px;

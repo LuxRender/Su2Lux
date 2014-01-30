@@ -675,6 +675,7 @@ class SU2LUX_view_observer < Sketchup::ViewObserver
 	include SU2LUX
 
 	def onViewChanged(view)
+        # puts "onViewChanged observer triggered" # note: floods the ruby console when adjusting view
 		settings_editor = SU2LUX.get_editor("settings")
 		@lrs = SU2LUX.get_lrs
         # if not environment:
