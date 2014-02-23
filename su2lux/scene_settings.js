@@ -3,52 +3,13 @@ function checkbox_expander(id)
 {
 	if ($("#" + id).attr("checked"))
 	{
-		if (id.match("show_advanced") || id.match("_use_")) {
-			$("#" + id).nextAll(".basic").hide();
-			$("#" + id).nextAll(".advanced").show();
-		}
 		$("#" + id).nextAll(".collapse").show();
 		$("#" + id).nextAll(".collapse").children("#focus_type").change();
 	}
 	else if ($("#" + id).attr("checked") == false)
 	{
-		if (id.match("show_advanced") || id.match("_use_")) {
-			$("#" + id).nextAll(".basic").show();
-			$("#" + id).nextAll(".advanced").hide();
-		}
 		$("#" + id).nextAll(".collapse").hide();
 	}
-}
-
-function update_settings_dropdown(presetname){
-    //alert (presetname);
-    var preset_exists = false;
-    $('#preset option').each(
-        function(){
-            if (this.value == presetname  || this.text == presetname) {
-                preset_exists = true;
-            }
-        }
-    )
-    if (preset_exists==true){
-        //alert ("preset existed already")
-        $("#preset").val(presetname);
-    }else{
-        //alert ("new preset loaded")
-        $("#preset").append($('<option></option>').val(presetname).html(presetname));
-        $("#preset").val(presetname); // make current
-    }
-    window.location = 'skp:display_loaded_presets@'   // refresh view
-}
-
-function add_to_dropdown(simplepreset){
-    //alert ("add_to_dropdown running");
-    $("#preset").append($('<option></option>').val(simplepreset).html(simplepreset));
-    if (simplepreset == 'Final interior - MLT+Bidirectional path tracing (recommended)'){
-        // set dropdown to recommended setting
-        $("#preset").val(simplepreset);
-        window.location = 'skp:load_settings@' + $("#preset option:selected").text()
-    }
 }
 
 function update_subfield(field_class)
@@ -56,65 +17,44 @@ function update_subfield(field_class)
     //alert(field_class)
     $("#"+field_class).nextAll("."+field_class).hide();
     id_option_string = "#" + field_class + " option:selected"
-    idname = $(id_option_string).text()
-    $("#"+field_class).nextAll("#"+idname).show();
+    idname = $(id_option_string).val()
+    $("#"+idname).show();
+    $("."+idname).show();
 }
 
+function update_boxfield(field_class)
+{
+    //alert($("#"+field_class).is(':checked'))
+    $("#"+field_class).nextAll("."+field_class).hide();
+    if ($("#"+field_class).is(':checked') == true){
+        $("."+field_class).show();
+    }
+}
 
+update_boxfield
 
 $(document).ready(
 	function()
 	{
         // alert ("settings DOM ready")
-        window.location = 'skp:load_preset_files@'
-        
-		$(".collapse").hide();
-		$(".collapse2").hide();
-		$(".advanced").hide();
-        $("#camera").next(".collapse").show(); // shows camera settings by default
-        $("#imageresolution").next(".collapse").show();
-        $("#system").next(".collapse").show();
+        //hide categories that are less likely to be used or take too much space
+        //$("#tone_mapping").next(".collapse").hide()
                   
-        // todo 2014: load settings
-                  
-                  
-                  
-        $("#save_settings_file").click(
-            function()
-            {
-                window.location = 'skp:export_settings@' + this.value
-            }
-        )
-                  
-        $("#overwrite_settings_file").click(
-            function()
-            {
-                window.location = 'skp:overwrite_settings@' + $("#preset").val()
-            }
-        )
+        //hide subfields for settings that are not active
+        $(".use_custom_whitepoint").hide();
+        $(".fleximage_render_time").hide();
 
-        $("#load_settings_file").click(
-            function()
-            {
-                window.location = 'skp:load_settings@' + false
-            }
-        )
+        window.location = 'skp:scene_setting_loaded@'
                   
-        $("#delete_settings_file").click(
-            function()
-            {
-                window.location = 'skp:delete_settings@' + $("#preset option:selected").text()
-            }
-        )
-	
-		$("#settings_panel select, :text").change(
+		$("#scene_settings_panel select, :text").change( // catches changes in dropdowns and text input fields
 			function()
 			{
+                //alert ("change in settings panel text field");
 				window.location = 'skp:param_generate@' + this.id+'='+this.value;
 			}
 		);
 		
-		$("#settings_panel #camera_type").change(
+		$("#scene_settings_panel #camera_type").change(
 			function()
 			{
 				$(this).nextAll().hide();
@@ -123,7 +63,7 @@ $(document).ready(
 			}
 		);
 		
-		$("#settings_panel #focus_type").change(
+		$("#scene_settings_panel #focus_type").change(
 			function()
 			{
 				$(this).nextAll("div").hide();
@@ -132,17 +72,27 @@ $(document).ready(
 			}
 		);
 		
-		$("#settings_panel #environment_light_type").change(
+		$("#scene_settings_panel #environment_light_type").change(
 			function()
 			{
 				$(this).nextAll().hide();
 				$(this).nextAll("." + this.value).show();
 			}
 		);
+
+        $("#fleximage_colorspace_wp_preset").change(
+            function()
+            {
+                if(this.value=="use_custom_whitepoint"){
+                    $(".use_custom_whitepoint").show();
+                }else{
+                    $(".use_custom_whitepoint").hide();
+                }
+            }
+        );
+
                   
-                  
-                  
- 		$("#settings_panel #aspectratio_type").change(
+ 		$("#scene_settings_panel #aspectratio_type").change(
 			function()
 			{
                 if (this.value=="aspectratio_sketchup_view"){
@@ -184,7 +134,7 @@ $(document).ready(
 			}
 		);
                   
-  		$("#settings_panel #aspectratio_skp_res_type").change(
+  		$("#scene_settings_panel #aspectratio_skp_res_type").change(
 			function()
 			{
                 if (this.value=="aspectratio_skp_view"){
@@ -196,7 +146,7 @@ $(document).ready(
 			}
 		);
         
-        $("#settings_panel #aspectratio_fixed_orientation").change(
+        $("#scene_settings_panel #aspectratio_fixed_orientation").change(
            function(){
                 //alert(this.value)
                 window.location = 'skp:swap_portrait_landscape@' + this.value               
@@ -204,15 +154,35 @@ $(document).ready(
         );
                   
                   
-        $("#settings_panel #aspectratio_flip").click(
+        $("#scene_settings_panel #aspectratio_flip").click(
            function(){
                 //alert(this.value)
                 window.location = 'skp:flip_aspect_ratio@' + this.value               
            }
         );
+		
+		$("#scene_settings_panel #fleximage_tonemapkernel").change(
+			function()
+			{
+				$(this).nextAll("div").hide();
+				$(this).nextAll("." + this.value).show();
+			}
+		);
                   
-                  
-		$("#settings_panel #sintegrator_path_rrstrategy").change(
+		
+		$("#fleximage_render_time").change(
+			function()
+			{
+				$(".fleximage_render_time").hide();
+                if(this.value=="halt_spp"){
+                    $("#halt_spp").show();
+                }else if(this.value=="halt_time"){
+                    $("#halt_time").show();
+                }
+			}
+		);
+		
+		$("#scene_settings_panel #fleximage_linear_camera_type").change(
 			function()
 			{
 				$(this).nextAll("div").hide();
@@ -221,56 +191,6 @@ $(document).ready(
 			}
 		);
 		
-		$("#settings_panel #sintegrator_exphoton_rrstrategy").change(
-			function()
-			{
-				$(this).nextAll("div").hide();
-				$(this).nextAll("span").hide();
-				$(this).nextAll("." + this.value).show();
-			}
-		);
-		
-		$("#settings_panel #sampler_type").change(
-			function()
-			{
-				$(this).nextAll(".sampler_type").hide();
-				$(this).nextAll("#" + this.value).show();
-			}
-		);
-		
-		$("#settings_panel #pixelfilter_type").change(
-			function()
-			{
-				$(this).nextAll().hide();
-				$(this).nextAll("#" + this.value).show();
-			}
-		);
-		
-		$("#settings_panel #fleximage_tonemapkernel").change(
-			function()
-			{
-				$(this).nextAll("div").hide();
-				$(this).nextAll("." + this.value).show();
-			}
-		);
-		
-		$("#settings_panel #fleximage_linear_camera_type").change(
-			function()
-			{
-				$(this).nextAll("div").hide();
-				$(this).nextAll("span").hide();
-				$(this).nextAll("." + this.value).show();
-			}
-		);
-		
-		$("#presets select").change(
-			function()
-			{
-				//alert("loading settings for preset");
-				//window.location = 'skp:preset@' + this.value;
-                window.location = 'skp:load_settings@' + $("#preset option:selected").text()
-			}
-		);
 
 		$(":checkbox").click(
 			function()
@@ -280,14 +200,7 @@ $(document).ready(
 			}
 		);
 		
-		$("#settings_panel input[name=use_plain_color]:radio").click(
-			function()
-			{
-				window.location = 'skp:param_generate@' + this.name + '=' + this.value;
-			}
-		);
-		
-		$("#settings_panel p.header").click(
+		$("#scene_settings_panel p.header").click(
 			function()
 			{
 				node = $(this).next("div.collapse").children("#accelerator_type").attr("value");
@@ -309,7 +222,7 @@ $(document).ready(
 				// checkbox_expander("fleximage_write_exr")
 				// checkbox_expander("fleximage_write_png")
 				// checkbox_expander("fleximage_write_tga")
-				// checkbox_expander("fleximage_use_preset")
+				// checkbox_expander("fleximage_use_colorspace_preset")
 				$("input:checkbox").each(function(index, element) { checkbox_expander(element.id) } );
 				$(this).next("div.collapse").slideToggle(300);
 				// node = $(this).next("div.collapse").children("#environment_light_type").attr("value");
@@ -317,7 +230,7 @@ $(document).ready(
 			}
 		);
 				
-		$("#settings_panel p.header2").click(
+		$("#scene_settings_panel p.header2").click(
 			function()
 			{
 				node = $(this).next("div.collapse2").children("#accelerator_type").attr("value");
@@ -331,7 +244,7 @@ $(document).ready(
 			}
 		);
 				
-		$("#settings_panel #sintegrator_type").change(
+		$("#scene_settings_panel #sintegrator_type").change(
 			function()
 			{
 				//alert("#"+this.value);
@@ -341,7 +254,7 @@ $(document).ready(
 		);
 
 		
-		$("#settings_panel #accelerator_type").change(
+		$("#scene_settings_panel #accelerator_type").change(
 			function()
 			{
 				//alert("#"+this.value);
@@ -372,63 +285,7 @@ $(document).ready(
 				window.location = 'skp:open_dialog@load_env_image'
 			}
 		)
-		
-		//$("#current_view").click(
-		//	function()
-		//	{
-		//		window.location = 'skp:get_view_size';
-		//	}
-		//);
-		
-		//$("#flip_dim").click(
-		//	function()
-		//	{
-		//		width = $("#fleximage_xresolution").val();
-		//		height = $("#fleximage_yresolution").val();
-		//		$("#fleximage_xresolution").val(parseInt(height));
-		//		$("#fleximage_yresolution").val(parseInt(width));
-		//		window.location = 'skp:set_image_size@' + height + 'x' + width;
-		//	}
-		//);
-		
-		//$("#x800, #x1024, #x1280, #x1440, #x1080, #x1920").click(
-		//	function()
-		//	{
-		//		window.location = 'skp:set_image_size@' + this.value + 'xtrue';
-		//	}
-		//);
 
-		//$("#multiply_by_2, #divide_by_2").click(
-		//	function()
-		//	{
-		//		width = $("#fleximage_xresolution").val();
-		//		height = $("#fleximage_yresolution").val();
-		//		switch(this.id)
-		//		{
-		//			case 'multiply_by_2':
-		//				width *= 2;
-		//				height *= 2;
-		//				break;
-		//			case 'divide_by_2':
-		//				width /= 2;
-		//				height /= 2;
-		//				break;
-		//		}
-		//		$("#fleximage_xresolution").val(parseInt(width));
-		//		$("#fleximage_yresolution").val(parseInt(height));
-		//		window.location = 'skp:set_image_size@' + width + 'x' + height + 'xfalse';
-		//	}
-		//);
-        
-        //$("#fleximage_xresolution").on('change', function()
-         //   {
-          //      alert ("hi there")
-           // }
-        //)
-                  
-
-                  
-		
 		$("#save_to_model").click(
 			function()
 			{

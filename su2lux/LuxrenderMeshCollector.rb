@@ -18,7 +18,8 @@ class LuxrenderMeshCollector
         @instance_counter_cache = Hash.new
         @deduplicate = instances
         @deferred_instances = Hash.new
-        @lrs = SU2LUX.get_lrs
+        model_id = Sketchup.active_model.definitions.entityID
+        @lrs = SU2LUX.get_lrs(model_id)
 	end # END initialize
     
     #####################################################################
@@ -106,12 +107,12 @@ class LuxrenderMeshCollector
 
 				if @fm_comp.last==true
 					(@fm_materials[matname] ||= []) << [e,trans,uvHelp,mat_dir,mat,nil,distortion]
-                    puts "adding data to @fm_materials:"
-                    puts matname
-                    puts e,trans,uvHelp,mat_dir,mat
-                    puts ""
+                    #puts "adding data to @fm_materials:"
+                    #puts matname
+                    #puts e,trans,uvHelp,mat_dir,mat
+                    #puts ""
 				else
-                    puts "adding data to @materials"
+                    #puts "adding data to @materials"
 					(@materials[matname] ||= []) << [e,trans,uvHelp,mat_dir,mat,nil,distortion]
 				end
 				@count_faces+=1
@@ -141,7 +142,8 @@ class LuxrenderMeshCollector
 				else
 					mat = Sketchup.active_model.materials[SU2LUX::FRONT_FACE_MATERIAL]
 					mat = Sketchup.active_model.materials.add SU2LUX::FRONT_FACE_MATERIAL if mat.nil?
-                    mateditor = SU2LUX.get_editor("material")
+                    scene_id = Sketchup.active_model.definitions.entityID
+                    mateditor = SU2LUX.get_editor(scene_id,"material")
                     mateditor.find(SU2LUX::FRONT_FACE_MATERIAL) # creates LuxRender material
 					front_color = Sketchup.active_model.rendering_options["FaceFrontColor"]
 					scale = 0.8 / 255.0
@@ -153,7 +155,7 @@ class LuxrenderMeshCollector
         # store texture if material has any
 		if (mat.respond_to?(:texture) and mat.texture !=nil)
             #puts "material responds to texture"
-            puts "GETTING UV COORDINATES USING store_textured_entities FUNCTION"
+            puts "getting uv coordinates using store_textured_entities function"
 			ret=store_textured_entities(e,mat,mat_dir)
 			mat=ret[0]
 			uvHelp=ret[1]
@@ -276,9 +278,14 @@ class LuxrenderMeshCollector
 	##
 	def get_texture_name(name,mat)
 		ext=mat.texture.filename
+        
+        # test/todi 2014: return proper texture name instead of name based on file name
+        #name=name.split("\\").last # fix for textures that have a Windows file path as their name
+        
 		ext=ext[(ext.length-4)..ext.length]
 		ext=".png" if (ext.upcase ==".BMP" or ext.upcase ==".GIF" or ext.upcase ==".PNG") #Texture writer converts BMP,GIF to PNG
 		ext=".tif" if ext.upcase=="TIFF"
+		ext=".jpg" if ext.upcase==".JPG"
 		ext=".jpg" if ext.upcase[0]!=46 # 46 = dot
 		s=name+ext
 		return s
@@ -311,7 +318,7 @@ class LuxrenderMeshCollector
 	#
 	##
 	def get_UVHelp(e,mat_dir)
-        puts "getting SketchUp UVHelper"
+        # puts "getting SketchUp UVHelper"
 		uvHelp = e.get_UVHelper(mat_dir, !mat_dir, @texturewriter) # gets SketchUp UVHelper
         return uvHelp
 	end # END get_UVHelp

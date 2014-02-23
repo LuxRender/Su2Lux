@@ -23,11 +23,18 @@ class LuxrenderMaterialEditor
     attr_reader :material_editor_dialog
 	
 	def initialize
-        puts "initialising material editor"
-		@lrs = SU2LUX.get_lrs
+        puts "initializing material editor"
+        @scene_id = Sketchup.active_model.definitions.entityID
+		@lrs = SU2LUX.get_lrs(@scene_id)
         @materials_skp_lux = Hash.new
 		@matname_changed = false
-		@material_editor_dialog = UI::WebDialog.new("LuxRender Material Editor", true, "LuxrenderMaterialEditor", 424, 700, 900, 100, true)
+        filename = File.basename(Sketchup.active_model.path)
+        if (filename == "")
+            windowname = "LuxRender Material Editor"
+        else
+            windowname = "LuxRender Material Editor - " + filename
+        end
+		@material_editor_dialog = UI::WebDialog.new(windowname, true, "LuxrenderMaterialEditor", 424, 700, 960, 10, true)
 		material_editor_dialog_path = Sketchup.find_support_file("materialeditor.html", "Plugins/su2lux")
 		@material_editor_dialog.max_width = 800
 		@material_editor_dialog.set_file(material_editor_dialog_path)
@@ -39,11 +46,10 @@ class LuxrenderMaterialEditor
         @color_picker.set_file(color_picker_path)
 		@texture_editor_data = {}
         
-        
         @numberofluxmaterials = 0
         
         for mat in Sketchup.active_model.materials
-            luxmat = self.find(mat.name)
+            luxmat = self.find(mat.name) # adds material to materials_skp_lux
             get_skp_color(mat,luxmat)
         end
         
@@ -263,6 +269,7 @@ class LuxrenderMaterialEditor
 
 		@material_editor_dialog.add_action_callback('active_mat_type') { |dialog, param| # shows the appropriate material editor panels for current material type
             SU2LUX.dbg_p "callback: active_mat_type"
+            puts @current
 			@materialtype = @current.type
 			javascriptcommand = "$('#type').nextAll('.' + '" + @materialtype + "').show();"
             SU2LUX.dbg_p javascriptcommand
@@ -320,6 +327,7 @@ class LuxrenderMaterialEditor
                 PUTS "NO TEXTURE"
             end
             # reset material
+            puts "resetting material " + luxmat.name
             luxmat.reset
             
             # paste settings to be saved
@@ -348,7 +356,7 @@ class LuxrenderMaterialEditor
             preview_path = os.get_variables["material_preview_path"]
             path_separator = os.get_variables["path_separator"]
 		
-            settings = SU2LUX.get_lrs
+            settings = @lrs
             previewtime = settings.preview_time
             
             active_material = @materials_skp_lux.index(@current) ## was Sketchup.active_model.materials.current  
@@ -452,8 +460,8 @@ class LuxrenderMaterialEditor
 		@material_editor_dialog.add_action_callback("save_to_model") {|dialog, params|
             puts "callback: save_to_model"
 			materials = Sketchup.active_model.materials
-			for mat5 in materials
-				luxmat = self.find(mat5.name)
+			for mat in materials
+				luxmat = self.find(mat.name)
 				luxmat.save_to_model
 			end
 		}
@@ -526,11 +534,11 @@ class LuxrenderMaterialEditor
     end
     
     def getluxmatfromskpname(passedmatname)
-        for mat7 in @materials_skp_lux.values
-            if (mat7.name == passedmatname)
-                return mat7
-            elsif (mat7.original_name == passedmatname)
-                return mat7
+        for mat in @materials_skp_lux.values
+            if (mat.name == passedmatname)
+                return mat
+            elsif (mat.original_name == passedmatname)
+                return mat
             end
         end
         return nil
@@ -573,7 +581,7 @@ class LuxrenderMaterialEditor
     end
                            
     def showhide_spectrum()
-        puts "UPDATING SPECTRUM FIELDS"
+        #puts "updating spectrum fields"
         if @current.light_L == "emit_color"
            cmd1 = '$("#emit_color").show()'
            cmd2 = '$("#blackbody").hide()'
@@ -702,6 +710,10 @@ class LuxrenderMaterialEditor
     #
     ##
     def get_skp_color(skpmat,luxmat)
+       #puts "getting color from sketchup material:"
+       #puts skpmat
+       #puts "assigning to:"
+       #puts luxmat
         luxmat.color = skpmat.color
         if skpmat.texture
             puts "setting texture information"
@@ -719,7 +731,7 @@ class LuxrenderMaterialEditor
 	#
 	##
 	def refresh()
-		SU2LUX.dbg_p "running refresh function"
+		SU2LUX.dbg_p "running material editor refresh function"
         #UI.messagebox (Sketchup.active_model.materials.length)
 		materials = Sketchup.active_model.materials
         
@@ -876,12 +888,7 @@ class LuxrenderMaterialEditor
 				@material_editor_dialog.execute_script(cmd)
 				cmd = "$('##{id}').next('div.collapse').find('select').change();"
 				@material_editor_dialog.execute_script(cmd)
-			# #############################
-			# when "use_plain_color"
-				# radio_id = @lrs.use_plain_color
-				# cmd = "$('##{radio_id}').attr('checked', true)"
-				# @material_editor_dialog.execute_script(cmd)
-			
+
 			######### -- other -- #############
 			else
 				self.fire_event("##{id}", "val", new_value)

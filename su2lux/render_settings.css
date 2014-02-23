@@ -12,13 +12,15 @@
 	padding: 5px 0px 5px 5px;
 	cursor: pointer;
 	position: relative;
-	background-color: #bf8040;/*#c67700; /*#d77f00;*/
+	background-color: #7c4d38; /*#c67700; /*#d77f00;*/
 	margin: 1px 0px;
 }
 
 
 .header2 {
 	cursor: default;
+    margin-top: 4px;
+    margin-bottom: 8px;
 }
 
 .collapse {
@@ -32,7 +34,7 @@
 
 .parameter_interface{
     position: relative;
-    height: 78px;
+    height: 90px;
 }
 
 .parameter_interface_single{
@@ -54,22 +56,72 @@
 
 .inputfield2{
     position: absolute;
-    top: 35px;
+    top: 30px;
     left: 100px;
 }
 
-.firstlabel{
+.inputfield3{
+    position: absolute;
+    top: 60px;
+    left: 100px;
+}
+
+.inputfield1x{
+    position: absolute;
+    top: 0px;
+    left: 120px;
+}
+
+.inputfield1xx{
+    position: absolute;
+    top: 0px;
+    left: 150px;
+}
+
+.inputfield1xxx{
+    position: absolute;
+    top: 0px;
+    left: 180px;
+}
+
+.inputfield2x{
+    position: absolute;
+    top: 30px;
+    left: 120px;
+}
+
+.inputfield3x{
+    position: absolute;
+    top: 60px;
+    left: 120px;
+}
+
+.label1{
     position: absolute;
     top: 4px;
     left: 0px;
 }
 
-.secondlabel{
+.label2{
     position: absolute;
-    top: 39px;
+    top: 34px;
     left: 0px;
 }
-   
+
+
+.label3{
+    position: absolute;
+    top: 64px;
+    left: 0px;
+}
+
+#view{
+    position: relative;
+    top: 8px;
+    left: 0px;
+    padding: 0px 0px 12px 0px;
+}
+
 input[type=button] {
 	margin: 3px;
 	margin-right: 2px;
@@ -96,3 +148,9 @@ input#save_to_model, input#reset {
 #flip_dim {
 	width: 169px;
 }
+
+
+#pixelfilter_type, #sampler_lowdisc_pixelsampler, #sampler_type, #sintegrator_type, #accelerator_type, #delete_settings_file{
+    margin-bottom: 10px;
+}
+

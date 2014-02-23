@@ -1,37 +1,50 @@
 def create_toolbar
 	main_menu = UI.menu("Plugins").add_submenu("LuxRender")
 	main_menu.add_item("Render") { (SU2LUX.export_dialog)}
-	main_menu.add_item("Material Editor") {(SU2LUX.show_material_editor)}
-	main_menu.add_item("Settings Editor") { (SU2LUX.show_settings_editor)}
-	main_menu.add_item("About") {(SU2LUX.about)}
+	main_menu.add_item("Material Editor") {(SU2LUX.show_material_editor(Sketchup.active_model.definitions.entityID))}
+	main_menu.add_item("Scene Settings Editor") { (SU2LUX.show_scene_settings_editor(Sketchup.active_model.definitions.entityID))}
+	main_menu.add_item("Render Engine Settings Editor") { (SU2LUX.show_render_settings_editor(Sketchup.active_model.definitions.entityID))}
+	main_menu.add_item("About SU2LUX") {(SU2LUX.about)}
 	
 	toolbar = UI::Toolbar.new("LuxRender")
 
 	cmd_render = UI::Command.new("Render"){(SU2LUX.export_dialog)}
-	cmd_render.small_icon = "icons\\lux_icon.png"
-	cmd_render.large_icon = "icons\\lux_icon.png"
+	cmd_render.small_icon = "icons\\su2lux_render.png"
+	cmd_render.large_icon = "icons\\su2lux_render.png"
 	cmd_render.tooltip = "Export and Render with LuxRender"
 	cmd_render.menu_text = "Render"
 	cmd_render.status_bar_text = "Export and Render with LuxRender"
-	toolbar = toolbar.add_item(cmd_render)
+	@renderbutton = toolbar.add_item(cmd_render)
 
-	cmd_material = UI::Command.new("Material"){(SU2LUX.show_material_editor)}
-	cmd_material.small_icon = "icons\\lux_material_settings.png"
-	cmd_material.large_icon = "icons\\lux_material_settings.png"
+	cmd_material = UI::Command.new("Material"){(SU2LUX.show_material_editor(Sketchup.active_model.definitions.entityID))}
+	cmd_material.small_icon = "icons\\su2lux_material.png"
+	cmd_material.large_icon = "icons\\su2lux_material.png"
 	cmd_material.tooltip = "Open SU2LUX Material Editor"
 	cmd_material.menu_text = "Material Editor"
 	cmd_material.status_bar_text = "Open SU2LUX Material Editor"
-	toolbar = toolbar.add_item(cmd_material)
+    cmd_material.set_validation_proc{MF_UNCHECKED}
+	@materialbutton = toolbar.add_item(cmd_material)
     
-	cmd_settings = UI::Command.new("Settings"){(SU2LUX.show_settings_editor)}
-	cmd_settings.small_icon = "icons\\lux_icon_settings.png"
-	cmd_settings.large_icon = "icons\\lux_icon_settings.png"
-	cmd_settings.tooltip = "Open SU2LUX Settings Window"
-	cmd_settings.menu_text = "Settings"
-	cmd_settings.status_bar_text = "Open SU2LUX Settings Window"
-	toolbar = toolbar.add_item(cmd_settings)
+	cmd_scene_settings = UI::Command.new("Scene_settings"){(SU2LUX.show_scene_settings_editor(Sketchup.active_model.definitions.entityID))}
+	cmd_scene_settings.small_icon = "icons\\su2lux_scene_settings.png"
+	cmd_scene_settings.large_icon = "icons\\su2lux_scene_settings.png"
+	cmd_scene_settings.tooltip = "Open SU2LUX Scene Settings Window"
+	cmd_scene_settings.menu_text = "Scene Settings"
+	cmd_scene_settings.status_bar_text = "Open SU2LUX Scene Settings Window"
+    cmd_scene_settings.set_validation_proc{MF_UNCHECKED}
+	@scenesettingsbutton = toolbar.add_item(cmd_scene_settings)
+    
+	cmd_engine_settings = UI::Command.new("Settings"){(SU2LUX.show_render_settings_editor(Sketchup.active_model.definitions.entityID))}
+	cmd_engine_settings.small_icon = "icons\\su2lux_engine_settings.png"
+	cmd_engine_settings.large_icon = "icons\\su2lux_engine_settings.png"
+	cmd_engine_settings.tooltip = "Open SU2LUX Render Engine Settings Window"
+	cmd_engine_settings.menu_text = "Render Settings"
+	cmd_engine_settings.status_bar_text = "Open SU2LUX Render Engine Settings Window"
+    cmd_engine_settings.set_validation_proc{MF_UNCHECKED}
+	@rendersettingsbutton = toolbar.add_item(cmd_engine_settings)
 
 	toolbar.show
+    return toolbar
 end
 
 #def create_context_menu

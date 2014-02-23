@@ -3,8 +3,9 @@ class LuxrenderExport
 	attr_reader :used_materials
     
 	def initialize(export_file_path,os_separator)
-		@lrs=SU2LUX.get_lrs
-        puts "exporting, using @lrs:", @lrs
+        @scene_id = Sketchup.active_model.definitions.entityID
+		@lrs=SU2LUX.get_lrs(@scene_id)
+        #puts "exporting, using @lrs:", @lrs
 		@export_file_path=export_file_path
 		@model_name=File.basename(@export_file_path)
 		@model_name=@model_name.split(".")[0]
@@ -39,10 +40,10 @@ class LuxrenderExport
 		@lrs.fleximage_yresolution = Sketchup.active_model.active_view.vpheight unless @lrs.fleximage_yresolution
         
         if (@lrs.aspectratio_type == "aspectratio_sketchup_view" && @lrs.aspectratio_skp_res_type == "aspectratio_skp_view")
-            puts "updating @lrs.fleximage_resolution settings"
-            xres = Sketchup.active_model.active_view.vpwidth * @lrs.fleximage_resolution_percent.to_i / 100.0
+            #puts "getting SketchUp resolution"
+            xres = Sketchup.active_model.active_view.vpwidth # * @lrs.fleximage_resolution_percent.to_i / 100.0
             @lrs.fleximage_xresolution = xres # needed for fov calculation
-            yres = Sketchup.active_model.active_view.vpheight * @lrs.fleximage_resolution_percent.to_i / 100.0
+            yres = Sketchup.active_model.active_view.vpheight # * @lrs.fleximage_resolution_percent.to_i / 100.0
             @lrs.fleximage_yresolution = yres # needed for fov calculation
         end
         
@@ -74,12 +75,12 @@ class LuxrenderExport
 		out.puts "Camera \"#{@lrs.camera_type}\""
 		case @lrs.camera_type
 			when "perspective"
-                puts "perspective camera, resolution:"
-                puts @lrs.fleximage_xresolution
-                puts @lrs.fleximage_yresolution
+                #puts "perspective camera, resolution:"
+                #puts @lrs.fleximage_xresolution
+                #puts @lrs.fleximage_yresolution
 				fov = compute_fov(@lrs.fleximage_xresolution, @lrs.fleximage_yresolution)
-                puts "fov:"
-                puts fov
+                #puts "fov:"
+                #puts fov
 				out.puts "	\"float fov\" [%.6f" %(fov) + "]"
 			when "orthographic"
                 # scale is taken into account in screenwindow declaration
@@ -128,9 +129,9 @@ class LuxrenderExport
 def compute_fov(xres, yres)
         width = xres.to_f
         height = yres.to_f
-        puts "computing fov:"
-        puts width
-        puts height
+        #puts "computing fov:"
+        #puts width
+        #puts height
         view = Sketchup.active_model.active_view
 		camera = view.camera
         centerx = view.screen_coords(camera.target)[0].to_f
@@ -138,8 +139,8 @@ def compute_fov(xres, yres)
         vcenterx = view.center[0].to_f
         vcentery = view.center[1].to_f
 		fov_sketchup = camera.fov # vertical angle if aspect ratio is not set, horizontal angle if it is
-        puts "fov_sketchup:"
-        puts fov_sketchup
+        #puts "fov_sketchup:"
+        #puts fov_sketchup
         skp_ratio = camera.aspect_ratio # 0.0, unless aspect ratio is fixed
         lux_ratio = width/height
         view_ratio = view.vpwidth.to_f/view.vpheight.to_f
@@ -216,8 +217,8 @@ def compute_fov(xres, yres)
             cam_shiftY = @lrs.shiftY.to_f
         end
 		ratio = @lrs.fleximage_xresolution.to_f / @lrs.fleximage_yresolution.to_f
-        puts "compute_screen_window using ratio (x/y):"
-        puts ratio
+        #puts "compute_screen_window using ratio (x/y):"
+        #puts ratio
 		inv_ratio = 1.0 / ratio
         
         # two point perspective logic
@@ -229,7 +230,11 @@ def compute_fov(xres, yres)
         target_y = Sketchup.active_model.active_view.screen_coords(camtarget)[1].to_f
         target_fraction_x_skp = 0.0
         target_fraction_y_skp = 0.0
-        if (ratio > 1.0 && skpratio > ratio)
+        if (ratio == skpratio)
+            puts "render ratio equals sketchup ratio"
+            target_fraction_x_skp = ((target_x - 0.5*skp_view_width)/skp_view_width) * ratio
+            target_fraction_y_skp = target_y / skp_view_height - 0.5
+        elsif (ratio > 1.0 && skpratio > ratio)
             # landscape, vertical bars
             puts "landscape, vertical bars"
             target_fraction_x_skp = ((target_x - 0.5*skp_view_width)/skp_view_width)*skpratio
@@ -252,9 +257,9 @@ def compute_fov(xres, yres)
         end
         offsetx = -2 * target_fraction_x_skp
         offsety = 2 * target_fraction_y_skp
-        puts "CALCULATED X, Y OFFSET:"
-        puts target_fraction_x_skp
-        puts target_fraction_y_skp
+        #puts "CALCULATED X, Y OFFSET:"
+        #puts target_fraction_x_skp
+        #puts target_fraction_y_skp
         # end two point perspective logic
         
         if (@lrs.camera_type=='orthographic')
@@ -279,12 +284,14 @@ def compute_fov(xres, yres)
         yres = (@lrs.fleximage_yresolution.to_i * percent).round
         
         
-        
-        
 		out.puts "\t\"integer xresolution\" [#{xres.to_i}]"
 		out.puts "\t\"integer yresolution\" [#{yres.to_i}]"
-		out.puts "\t\"integer haltspp\" [#{@lrs.fleximage_haltspp.to_i}]"
-		out.puts "\t\"integer halttime\" [#{@lrs.fleximage_halttime.to_i}]"
+        case @lrs.fleximage_render_time
+            when "halt_time"
+                out.puts "\t\"integer halttime\" [" + (60*@lrs.fleximage_halttime.to_i).to_s + "]"
+            when "halt_spp"
+                out.puts "\t\"integer haltspp\" [#{@lrs.fleximage_haltspp.to_i}]"
+        end
 		out.puts "\t\"integer filterquality\" [#{@lrs.fleximage_filterquality.to_i}]"
 		pre_alpha = @lrs.fleximage_premultiplyalpha ? "true" : "false"
 		out.puts "\t\"bool premultiplyalpha\" [\"#{pre_alpha}\"]\n"
@@ -368,7 +375,7 @@ def compute_fov(xres, yres)
 		out.puts "\t\"string filename\" [\"#{file_basename}\"]"
         dbg = @lrs.fleximage_debug ? "true" : "false"
 		out.puts "\t\"bool debug\" [\"#{dbg}\"]\n"
-		if (@lrs.fleximage_use_preset)
+		if (@lrs.fleximage_use_colorspace_preset)
 		SU2LUX.dbg_p @lrs.fleximage_colorspace_preset
 			case @lrs.fleximage_colorspace_preset
 				when "sRGB - HDTV (ITU-R BT.709-5)"
@@ -444,13 +451,16 @@ def compute_fov(xres, yres)
 					cspaceblueX = 0.1666
 					cspaceblueY = 0.0089
 			end
-			if (@lrs.fleximage_use_colorspace_gamma)
+			if (@lrs.fleximage_use_colorspace_gamma) # not exposed, but both values are 2.2 by default
 				gamma = @lrs.fleximage_gamma
 			else
 				gamma = @lrs.fleximage_colorspace_gamma
 			end
-			if ( ! @lrs.fleximage_use_colorspace_whitepoint)
-				if (@lrs.fleximage_use_colorspace_whitepoint_preset)
+			if (@lrs.fleximage_colorspace_wp_preset != "use_colorspace_whitepoint") # in case of color space white point, variables have already been defined above
+                if (@lrs.fleximage_colorspace_wp_preset == "use_custom_whitepoint")
+                    cspacewhiteX = @lrs.fleximage_colorspace_preset_white_x
+                    cspacewhiteY = @lrs.fleximage_colorspace_preset_white_y
+				else
 					if (((@lrs.fleximage_colorspace_wp_preset)).include?("E - "))
 						cspacewhiteX = 0.333
 						cspacewhiteY = 0.333
@@ -488,9 +498,6 @@ def compute_fov(xres, yres)
 						cspacewhiteX = 0.381
 						cspacewhiteY = 0.377
 					end
-				else
-					cspacewhiteX = @lrs.fleximage_colorspace_preset_white_x
-					cspacewhiteY = @lrs.fleximage_colorspace_preset_white_y
 				end
 			end
 			out.puts "\t\"float colorspace_white\" [#{"%.6f" %(cspacewhiteX)} #{"%.6f" %(cspacewhiteY)}]\n"
@@ -498,7 +505,7 @@ def compute_fov(xres, yres)
 			out.puts "\t\"float colorspace_green\" [#{"%.6f" %(cspacegreenX)} #{"%.6f" %(cspacegreenY)}]\n"
 			out.puts "\t\"float colorspace_blue\" [#{"%.6f" %(cspaceblueX)} #{"%.6f" %(cspaceblueY)}]\n"
 			out.puts "\t\"float gamma\" [#{"%.6f" %(gamma)}]\n"
-		else
+        else # custom color space
 			out.puts "\t\"float colorspace_white\" [#{"%.6f" %(@lrs.fleximage_colorspace_white_x)} #{"%.6f" %(@lrs.fleximage_colorspace_white_y)}]\n"
 			out.puts "\t\"float colorspace_red\" [#{"%.6f" %(@lrs.fleximage_colorspace_red_x)} #{"%.6f" %(@lrs.fleximage_colorspace_red_y)}]\n"
 			out.puts "\t\"float colorspace_green\" [#{"%.6f" %(@lrs.fleximage_colorspace_green_x)} #{"%.6f" %(@lrs.fleximage_colorspace_green_y)}]\n"
@@ -506,9 +513,6 @@ def compute_fov(xres, yres)
 			out.puts "\t\"float gamma\" [#{"%.6f" %(@lrs.fleximage_gamma)}]\n"
 		end
 		out.puts "\t\"integer outlierrejection_k\" [#{@lrs.fleximage_outlierrejection_k.to_i}]"
-		
-		# flm = @lrs.useparamkeys ? "true" : "false"
-		# out.puts "\t\"bool useparamkeys\" [\"#{flm}\"]\n"
 	end # END export_film
 
 	def get_exposure(type, shutterStr, fpsStr)
@@ -542,53 +546,26 @@ def compute_fov(xres, yres)
 		filter += "PixelFilter \"#{@lrs.pixelfilter_type}\"\n"
 		case @lrs.pixelfilter_type
 			when "box"
-				if (@lrs.pixelfilter_show_advanced_box)
-					filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_box_xwidth)}]\n"
-					filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_box_ywidth)}]\n"
-				end
+                filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_box_xwidth)}]\n"
+                filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_box_ywidth)}]\n"
 			when "gaussian"
-				if (@lrs.pixelfilter_show_advanced_gaussian)
-					filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_gaussian_xwidth)}]\n"
-					filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_gaussian_ywidth)}]\n"
-					filter += "\t\"float alpha\" [#{"%.6f" %(@lrs.pixelfilter_gaussian_alpha)}]\n"
-				end
+                filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_gaussian_xwidth)}]\n"
+                filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_gaussian_ywidth)}]\n"
+                filter += "\t\"float alpha\" [#{"%.6f" %(@lrs.pixelfilter_gaussian_alpha)}]\n"
 			when "mitchell"
-				if (@lrs.pixelfilter_show_advanced_mitchell)
-					filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_mitchell_xwidth)}]\n"
-					filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_mitchell_ywidth)}]\n"
-					case @lrs.pixelfilter_mitchell_optmode
-						when "slider"
-							sharpness = @lrs.pixelfilter_mitchell_sharpness
-							filter += "\t\"float B\" [#{"%.6f" %(sharpness)}]\n"
-							filter += "\t\"float C\" [#{"%.6f" %(sharpness)}]\n"
-						when "manual"
-							filter += "\t\"float B\" [#{"%.6f" %(@lrs.pixelfilter_mitchell_B)}]\n"
-							filter += "\t\"float C\" [#{"%.6f" %(@lrs.pixelfilter_mitchell_C)}]\n"
-						when "preset"
-							# to be implemented following LuxBlend
-					end
-					supersample = @lrs.pixelfilter_mitchell_supersample ? "true" : "false"
-					filter += "\t\"bool supersample\" [\"" + supersample + "\"]\n"
-				else
-					sharpness = @lrs.pixelfilter_mitchell_sharpness
-					filter += "\t\"float B\" [#{"%.6f" %(sharpness)}]\n"
-					filter += "\t\"float C\" [#{"%.6f" %(sharpness)}]\n"
-					width = 1.5
-					filter += "\t\"float xwidth\" [#{"%.6f" %(width)}]\n"
-					filter += "\t\"float ywidth\" [#{"%.6f" %(width)}]\n"
-					filter += "\t\"bool supersample\" [\"true\"]\n"
-				end
+                filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_mitchell_xwidth)}]\n"
+                filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_mitchell_ywidth)}]\n"
+                filter += "\t\"float B\" [#{"%.6f" %(@lrs.pixelfilter_mitchell_B)}]\n"
+                filter += "\t\"float C\" [#{"%.6f" %(@lrs.pixelfilter_mitchell_C)}]\n"
+                supersample = @lrs.pixelfilter_mitchell_supersample ? "true" : "false"
+                filter += "\t\"bool supersample\" [\"" + supersample + "\"]\n"
 			when "sinc"
-				if (@lrs.pixelfilter_show_advanced_sinc)
-					filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_sinc_xwidth)}]\n"
-					filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_sinc_ywidth)}]\n"
-					filter += "\t\"float tau\" [#{"%.6f" %(@lrs.pixelfilter_sinc_tau)}]\n"
-				end
+                filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_sinc_xwidth)}]\n"
+                filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_sinc_ywidth)}]\n"
+                filter += "\t\"float tau\" [#{"%.6f" %(@lrs.pixelfilter_sinc_tau)}]\n"
 			when "triangle"
-				if (@lrs.pixelfilter_show_advanced_triangle)
-					filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_triangle_xwidth)}]\n"
-					filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_triangle_ywidth)}]\n"
-				end
+                filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_triangle_xwidth)}]\n"
+                filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_triangle_ywidth)}]\n"
 		end
 		return filter
 	end #END export_filter
@@ -627,33 +604,22 @@ def compute_fov(xres, yres)
 		case @lrs.sintegrator_type
 			# "bidirectional"
 			when "bidirectional"
-				if (@lrs.sintegrator_bidir_show_advanced)
-					integrator += "\t\"integer eyedepth\" [#{@lrs.sintegrator_bidir_eyedepth}]\n"
-					integrator += "\t\"integer lightdepth\" [#{@lrs.sintegrator_bidir_lightdepth}]\n"
-					integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_bidir_strategy}\"]\n"
-					integrator += "\t\"float eyerrthreshold\" [#{"%.6f" %(@lrs.sintegrator_bidir_eyerrthreshold)}]\n"
-					integrator += "\t\"float lightrrthreshold\" [#{"%.6f" %(@lrs.sintegrator_bidir_lightthreshold)}]\n"
-				else
-					integrator += "\t\"integer eyedepth\" [#{@lrs.sintegrator_bidir_bounces.to_i}]\n"
-					integrator += "\t\"integer lightdepth\" [#{@lrs.sintegrator_bidir_bounces.to_i}]\n"
-				end
+                integrator += "\t\"integer eyedepth\" [#{@lrs.sintegrator_bidir_eyedepth}]\n"
+                integrator += "\t\"integer lightdepth\" [#{@lrs.sintegrator_bidir_lightdepth}]\n"
+                integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_bidir_strategy}\"]\n"
+                integrator += "\t\"float eyerrthreshold\" [#{"%.6f" %(@lrs.sintegrator_bidir_eyerrthreshold)}]\n"
+                integrator += "\t\"float lightrrthreshold\" [#{"%.6f" %(@lrs.sintegrator_bidir_lightthreshold)}]\n"
 			# 'path'
 			when "path"
-				if (@lrs.sintegrator_path_show_advanced)
-					integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_path_maxdepth}]\n"
-					environment = @lrs.sintegrator_path_include_environment ? "true" : "false"
-					integrator += "\t\"bool includeenvironment\" [\"#{environment}\"]\n"
-					integrator += "\t\"string rrstrategy\" [\"#{@lrs.sintegrator_path_rrstrategy}\"]\n"
-					if (@lrs.sintegrator_path_rrstrategy == "probability")
-						integrator += "\t\"float rrcontinueprob\" [#{"%.6f" %(@lrs.sintegrator_path_rrcontinueprob)}]\n"
-					end
-					integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_path_strategy}\"]\n"
-					integrator += "\t\"integer shadowraycount\" [#{@lrs.sintegrator_path_shadow_ray_count}]\n"
-				else
-					integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_path_bounces}]\n"
-					environment = @lrs.sintegrator_path_include_environment ? "true" : "false"
-					integrator += "\t\"bool includeenvironment\" [\"#{environment}\"]\n"
-				end
+                integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_path_maxdepth}]\n"
+                environment = @lrs.sintegrator_path_include_environment ? "true" : "false"
+                integrator += "\t\"bool includeenvironment\" [\"#{environment}\"]\n"
+                integrator += "\t\"string rrstrategy\" [\"#{@lrs.sintegrator_path_rrstrategy}\"]\n"
+                if (@lrs.sintegrator_path_rrstrategy == "probability")
+                    integrator += "\t\"float rrcontinueprob\" [#{"%.6f" %(@lrs.sintegrator_path_rrcontinueprob)}]\n"
+                end
+                integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_path_strategy}\"]\n"
+                integrator += "\t\"integer shadowraycount\" [#{@lrs.sintegrator_path_shadow_ray_count}]\n"
 			# "distributedpath"
 			when "distributedpath"
 				integrator += "\t\"string strategy\" [\"#{@lrs.sintegrator_distributedpath_strategy}\"]\n"
@@ -698,13 +664,9 @@ def compute_fov(xres, yres)
 
 			# "directlighting"
 			when "directlighting"
-				if (@lrs.sintegrator_direct_show_advanced)
-					integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_direct_maxdepth}]\n"
-					integrator += "\t\"integer shadowraycount\" [#{@lrs.sintegrator_direct_shadow_ray_count}]\n"
-					integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_direct_strategy}\"]\n"
-				else
-					integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_direct_bounces}]\n"
-				end
+                integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_direct_maxdepth}]\n"
+                integrator += "\t\"integer shadowraycount\" [#{@lrs.sintegrator_direct_shadow_ray_count}]\n"
+                integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_direct_strategy}\"]\n"
 			# "exphotonmap"
 			when "exphotonmap"
 				integrator += "\t\"integer directphotons\" [#{@lrs.sintegrator_exphoton_directphotons}]\n"
@@ -727,7 +689,7 @@ def compute_fov(xres, yres)
 				integrator += "\t\"integer shadowraycount\" [#{@lrs.sintegrator_exphoton_shadow_ray_count}]\n"
 				integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_exphoton_strategy}\"]\n"
 				integrator += "\t\"string renderingmode\" [\"#{@lrs.sintegrator_exphoton_renderingmode}\"]\n"
-				if (@lrs.sintegrator_exphoton_show_advanced)
+				if (@lrs.sintegrator_exphoton_show_advanced) # not exposed
 					dbg = @lrs.sintegrator_exphoton_dbg_enable_direct ? "true" : "false"
 					integrator += "\t\"bool dbg_enabledirect\" [\"#{dbg}\"]\n"
 					dbg = @lrs.sintegrator_exphoton_dbg_enable_indircaustic ? "true" : "false"
@@ -742,11 +704,9 @@ def compute_fov(xres, yres)
 			# "igi"
 			when "igi"
 				integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_igi_maxdepth}]\n"
-				if (@lrs.sintegrator_igi_show_advanced)
-					integrator += "\t\"integer nsets\" [#{@lrs.sintegrator_igi_nsets}]\n"
-					integrator += "\t\"integer nlights\" [#{@lrs.sintegrator_igi_nlights}]\n"
-					integrator += "\t\"float mindist\" [#{"%.6f" %(@lrs.sintegrator_igi_mindist)}]\n"
-				end
+                integrator += "\t\"integer nsets\" [#{@lrs.sintegrator_igi_nsets}]\n"
+                integrator += "\t\"integer nlights\" [#{@lrs.sintegrator_igi_nlights}]\n"
+                integrator += "\t\"float mindist\" [#{"%.6f" %(@lrs.sintegrator_igi_mindist)}]\n"
 		end
 		return integrator
 		
@@ -767,7 +727,8 @@ def compute_fov(xres, yres)
 				accel += "\t\"bool refineimmediately\" [\"#{refine}\"]\n"
 			when "bvh"
 			when "qbvh"
-				accel += "\t\"integer maxprimsperleaf\" [#{@lrs.qbvh_maxprimsperleaf.to_i}]\n"
+                accel += "\t\"integer maxprimsperleaf\" [#{@lrs.qbvh_maxprimsperleaf.to_i}]\n"
+                accel += "\t\"integer fullsweepthreshold\" [#{@lrs.qbvh_fullsweepthreshold.to_i}]\n"
 				accel += "\t\"integer skipfactor\" [#{@lrs.qbvh_skip_factor.to_i}]\n"
 		end
 		return accel
@@ -776,12 +737,7 @@ def compute_fov(xres, yres)
 	def export_volume_integrator
 		volume = "\n"
 		volume += "VolumeIntegrator \"#{@lrs.volume_integrator_type}\"\n"
-		case @lrs.volume_integrator_type
-			when "single"  
-				volume += "\t\"float stepsize\" [#{"%.6f" %(@lrs.volume_integrator_stepsize)}]\n"
-			when "emission"
-				volume += "\t\"float stepsize\" [#{"%.6f" %(@lrs.volume_integrator_stepsize)}]\n"
-		end
+		volume += "\t\"float stepsize\" [#{"%.6f" %(@lrs.volume_integrator_stepsize)}]\n"
 		return volume
 	end
 
@@ -791,12 +747,14 @@ def compute_fov(xres, yres)
 		case @lrs.environment_light_type
             when 'sunsky'
                 out.puts "\tLightGroup \"#{@lrs.environment_sky_lightgroup}\""
-			when 'infinite'
+			when 'environmentimage'
 				if ( ! @lrs.environment_infinite_mapname.strip.empty?)
 					out.puts "\tRotate #{@lrs.environment_infinite_rotatex} 1 0 0" 
 					out.puts "\tRotate #{@lrs.environment_infinite_rotatey} 0 1 0"
 					out.puts "\tRotate #{@lrs.environment_infinite_rotatez} 0 0 1"
 				end
+				out.puts "\tLightGroup \"#{@lrs.environment_infinite_lightgroup}\""
+            when 'environmentcolor'
 				out.puts "\tLightGroup \"#{@lrs.environment_infinite_lightgroup}\""
 		end
 		out.puts "AttributeBegin"
@@ -812,38 +770,38 @@ def compute_fov(xres, yres)
                     
                     out.puts "AttributeBegin"
                 end
-                if (@lrs.environment_use_sun)
-                    out.puts "\tLightGroup \"#{@lrs.environment_sun_lightgroup}\""
-                    out.puts "\tLightSource \"sun\""
-                    out.puts "\t\"float gain\" [#{"%.6f" %(@lrs.environment_sun_gain)}]"
-                    out.puts "\t\"float relsize\" [#{"%.6f" %(@lrs.environment_sun_relsize)}]"
-                    out.puts "\t\"float turbidity\" [#{"%.6f" %(@lrs.environment_sun_turbidity)}]"
-                    out.puts "\t\"vector sundir\" [#{"%.6f" %(sun_direction.x)} #{"%.6f" %(sun_direction.y)} #{"%.6f" %(sun_direction.z)}]"
-                    out.puts "\tPortalInstance \"Portal_Shape\"" if @has_portals == true
-                end
-			when 'infinite'
+                # sun is written below
+			when 'environmentimage'
 				out.puts "\tLightSource \"infinitesample\""
 				out.puts "\t\"float gain\" [#{"%.6f" %(@lrs.environment_infinite_gain)}]"
-				if ( ! @lrs.environment_infinite_mapname.strip.empty?)
+				if (! @lrs.environment_infinite_mapname.strip.empty?)
 					out.puts "\t\"float gamma\" [#{"%.6f" %(@lrs.environment_infinite_gamma)}]"
 					out.puts "\t\"string mapping\" [\"" + @lrs.environment_infinite_mapping + "\"]"
 					out.puts "\t\"string mapname\" [\"" + @lrs.environment_infinite_mapname + "\"]"
-				else
+                else
 					out.puts "\t\"color L\" [#{"%.6f" %(@lrs.environment_infinite_L_R)} #{"%.6f" %(@lrs.environment_infinite_L_G)} #{"%.6f" %(@lrs.environment_infinite_L_B)}]"
 				end
-					
-				if (@lrs.use_environment_infinite_sun)
-					out.puts "\tLightGroup \"#{@lrs.environment_infinite_sun_lightgroup}\""
-					out.puts "\tLightSource \"sun\""
-					out.puts "\t\"float gain\" [#{"%.6f" %(@lrs.environment_infinite_sun_gain)}]"
-					out.puts "\t\"float relsize\" [#{"%.6f" %(@lrs.environment_infinite_sun_relsize)}]"
-					out.puts "\t\"float turbidity\" [#{"%.6f" %(@lrs.environment_infinite_sun_turbidity)}]"
-					out.puts "\t\"vector sundir\" [#{"%.6f" %(sun_direction.x)} #{"%.6f" %(sun_direction.y)} #{"%.6f" %(sun_direction.z)}]"
-					out.puts "\tPortalInstance \"Portal_Shape\"" if @has_portals == true
-				end
+			when 'environmentcolor'
+				out.puts "\tLightSource \"infinitesample\""
+				out.puts "\t\"float gain\" [#{"%.6f" %(@lrs.environment_infinite_gain)}]"
+                out.puts "\t\"color L\" [#{"%.6f" %(@lrs.environment_infinite_L_R)} #{"%.6f" %(@lrs.environment_infinite_L_G)} #{"%.6f" %(@lrs.environment_infinite_L_B)}]"
+
 		end
 		out.puts "AttributeEnd"
 		out.puts "TransformEnd"
+        
+        out.puts "AttributeBegin"
+        if ((@lrs.environment_light_type == 'sunsky' && @lrs.environment_use_sun) || @lrs.use_environment_infinite_sun)
+            out.puts "\tLightGroup \"#{@lrs.environment_sun_lightgroup}\""
+            out.puts "\tLightSource \"sun\""
+            out.puts "\t\"float gain\" [#{"%.6f" %(@lrs.environment_sun_gain)}]"
+            out.puts "\t\"float relsize\" [#{"%.6f" %(@lrs.environment_sun_relsize)}]"
+            out.puts "\t\"float turbidity\" [#{"%.6f" %(@lrs.environment_sun_turbidity)}]"
+            out.puts "\t\"vector sundir\" [#{"%.6f" %(sun_direction.x)} #{"%.6f" %(sun_direction.y)} #{"%.6f" %(sun_direction.z)}]"
+            out.puts "\tPortalInstance \"Portal_Shape\"" if @has_portals == true
+        end
+        out.puts "AttributeEnd"
+        
 	end # END export_light
 
 	def export_mesh(out)
@@ -927,18 +885,23 @@ def compute_fov(xres, yres)
 			texturefilename = currentmaterial.texture.filename
 			trimmedfilename = texturefilename.gsub("\\", "")
 			trimmedfilename = trimmedfilename.gsub("/", "")
-			if (texturefilename == trimmedfilename) # texture is built-in texture
-				puts "exporting SketchUp texture to preview texture folder"
-                imageexport = @texturewriter.write_all(preview_path+texture_path+"/", false)
-                if (!imageexport) # catch missing file extension
-                    @texturewriter.write(luxmat_face, true, preview_path+texture_path+"/" + luxmat_face.material.name + ".jpg")
-                end
-			else # texture is loaded from file
+			if (File.exist?(texturefilename)) # was: if (texturefilename == trimmedfilename) # texture is built-in texture
 				texture_name=mcpre.get_texture_name(currentmaterialname,currentmaterial)
 				puts "copying material preview texture from:", texturefilename
 				outputpath = preview_path+texture_path+"/"+File.basename(texture_name)  # last part was File.basename(texturefilename)
 				texturefilename = sanitize_path(texturefilename)
+                puts "copying texture:"
+                puts texturefilename
 				FileUtils.copy_file(texturefilename, outputpath)
+            else
+                puts "exporting SketchUp texture to preview texture folder"
+                imageexport = @texturewriter.write_all(preview_path+texture_path+"/", false)
+                #texture_path = sanitize_path(texture_path)
+                if (!imageexport) # catch missing file extension
+                    # follow meshcollector logic, use material name instead of texture name
+                    mattexfilename = mcpre.get_texture_name(currentmaterial.name,currentmaterial).delete("[<>]")
+                    @texturewriter.write(luxmat_face, true, preview_path+texture_path+"/" + mattexfilename)
+                end
 			end
 		end
 		
@@ -996,7 +959,7 @@ def compute_fov(xres, yres)
         @currentmatname = matname.delete("[<>]")
         skpmatname = mat.name
         puts "skpmatname is " + skpmatname
-        puts out,mat,fm_mat,is_instance,matname,distorted
+        #puts out,mat,fm_mat,is_instance,matname,distorted
 		meshes = []
 		polycount = 0
 		pointcount = 0
@@ -1011,11 +974,11 @@ def compute_fov(xres, yres)
 			export=@materials[matname]
 		end
         
-        puts "ITERATING EXPORT"
-        for currentface in export
-            puts currentface[0].material
-        end
-        puts ""
+        #puts "ITERATING EXPORT"
+        #for currentface in export
+        #    puts currentface[0].material
+        #end
+        #puts ""
         
 		has_texture = false
 		if mat.respond_to?(:name)
@@ -1092,7 +1055,7 @@ def compute_fov(xres, yres)
 		#has_texture = false
 		@current_step += 1
         
-        mateditor = SU2LUX.get_editor("material")
+        mateditor = SU2LUX.get_editor(@scene_id,"material")
 		luxrender_mat = mateditor.materials_skp_lux[mat]
         luxrender_name=luxrender_mat.name
 		
@@ -1448,7 +1411,7 @@ def compute_fov(xres, yres)
     end
 	
 	def export_used_materials(materials, out, texexport, datafolder)
-        mateditor = SU2LUX.get_editor("material")
+        mateditor = SU2LUX.get_editor(@scene_id,"material")
         puts "@texexport: " + texexport
         @texexport = texexport
         @texfolder = datafolder
@@ -1472,7 +1435,7 @@ def compute_fov(xres, yres)
 	end
     
 	def export_distorted_materials(out, datafolder)
-        mateditor = SU2LUX.get_editor("material")
+        mateditor = SU2LUX.get_editor(@scene_id,"material")
         @texfolder = datafolder
         
         # step one: process @model_textures, get only distorted textures
@@ -1667,8 +1630,11 @@ def compute_fov(xres, yres)
         else
             @currentmatname = sanitize_path(mat.name)
             if (@model_textures.has_key?(mat.name))
+                puts "getting file name from @model_textures"
                 @currentfilename = sanitize_path(@model_textures[mat.name][4])
                 @currenttexname = @currenttexname_prefixed = File.basename(@currentfilename, '.*')
+            else
+                puts "creating file name from material name"
             end
         end
         
@@ -1700,7 +1666,7 @@ def compute_fov(xres, yres)
 			out.puts pre
         else
             if (mat.use_auto_alpha == true)
-                puts "explorting alpha transparency"
+                puts "exporting alpha transparency"
                 # export material as mix material
                 out.puts "# auto-alpha material for Material '" + @currentmatname + "'" + "\n"+ "\n"
                 # define null material
@@ -1796,7 +1762,8 @@ def compute_fov(xres, yres)
 					p 'path: '+tex_path_base+value[4]
 					p return_val
 					p 'write texture1'
-                else
+                else # texture assigned to group or component
+                    tw.load value[1]
 					tw.write value[1], (tex_path_base+@os_separator+value[4])
 					p 'write texture2'
 				end

@@ -14,18 +14,10 @@ function checkbox_expander(id)      // user interface, shows and hides interface
 {
     if ($("#" + id).attr("checked"))
 	{
-		if (id.match("show_advanced") || id.match("_use_")) {
-			$("#" + id).nextAll(".basic").hide();
-			$("#" + id).nextAll(".advanced").show();
-		}
 		$("#" + id).nextAll(".collapse_check").show();
 	}
 	else if ($("#" + id).attr("checked") == false)
 	{
-		if (id.match("show_advanced") || id.match("_use_")) {
-			$("#" + id).nextAll(".basic").show();
-			$("#" + id).nextAll(".advanced").hide();
-		}
 		$("#" + id).nextAll(".collapse_check").hide();
 	}
 }
@@ -125,6 +117,8 @@ $(document).ready(
                 }
 			}
 		)
+                  
+                  
 
 		$("#type").change(
 			function() {

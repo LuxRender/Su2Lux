@@ -29,8 +29,8 @@ class LuxrenderTextureEditor
 
 		@texture_data = texture_data
 		@lux_parameter = lux_parameter
-
-		material_editor = SU2LUX.get_editor("material")
+        @scene_id = Sketchup.active_model.definitions.entityID
+		material_editor = SU2LUX.get_editor(@scene_id,"material")
 		@current = material_editor.current
 
 		@texture_editor_dialog.add_action_callback('param_generate') {|dialog, params|
@@ -192,13 +192,7 @@ class LuxrenderTextureEditor
 				cmd="checkbox_expander('#{id}');"
 				@texture_editor_dialog.execute_script(cmd)
 				cmd = "$('##{id}').next('div.collapse').find('select').change();"
-				@texture_editor_dialog.execute_script(cmd)
-			# #############################
-			# when "use_plain_color"
-				# radio_id = @lrs.use_plain_color
-				# cmd = "$('##{radio_id}').attr('checked', true)"
-				# @texture_editor_dialog.execute_script(cmd)
-			
+				@texture_editor_dialog.execute_script(cmd)			
 			######### -- other -- #############
 			else
 				self.fire_event("##{id}", "val", new_value)
