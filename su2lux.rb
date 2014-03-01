@@ -24,7 +24,11 @@
 # Type         : Exporter
 
 require 'sketchup.rb'
-require 'su2lux/fileutils.rb'
+if (Sketchup::version.split(".")[0].to_f >= 14)
+    require 'fileutils'
+else
+    require 'su2lux/fileutils_ruby19.rb' # versions older than 2014 do not come with fileutils, using local copy instead
+end
 
 module SU2LUX
 
@@ -665,7 +669,7 @@ module SU2LUX
       about_dialog_dialog_path = Sketchup.find_support_file("about.html", "Plugins/su2lux")
       @about_dialog.max_width = 450
       @about_dialog.set_file(about_dialog_dialog_path)
-      # todo: onload, run function that get version number
+      # todo: onload, run function that gets version number
 	  @about_dialog.set_size(450,546)
       @about_dialog.show
 
@@ -677,11 +681,11 @@ module SU2LUX
     def SU2LUX.get_global_values(lrs)
         puts "looking for LuxRender path"
         if (Sketchup.read_default("SU2LUX","luxrenderpath"))
-            lrs.export_luxrender_path = Sketchup.read_default("SU2LUX","luxrenderpath").to_a.pack('H*') # copy stored executable path to settings
+            lrs.export_luxrender_path = Array(Sketchup.read_default("SU2LUX","luxrenderpath")).pack('H*') # copy stored executable path to settings
         end
         puts "getting 'run luxrender' value"
         if (Sketchup.read_default("SU2LUX","runluxrender"))
-            lrs.runluxrender = Sketchup.read_default("SU2LUX","runluxrender").to_a.pack('H*')
+            lrs.runluxrender = Array(Sketchup.read_default("SU2LUX","runluxrender")).pack('H*')
         else
             # write runluxrender: ask
             defaultruntype = "ask"
