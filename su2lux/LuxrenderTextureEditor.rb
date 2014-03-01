@@ -92,12 +92,12 @@ class LuxrenderTextureEditor
 				lux_material.send(@lux_parameter + '_' + method_name + "=", value)
 			}
 			has_texture = ! (lux_material.send(@lux_parameter + '_' + 'imagemap_filename')).empty?
-			if (has_texture)
-				case @lux_parameter
-					when 'kd'
-						lux_material.use_diffuse_texture = true
-				end
-			end
+			#if (has_texture)
+            #	case @lux_parameter
+            #	when 'kd'
+            #		lux_material.use_diffuse_texture = true
+            #	end
+            #end
             
             # update image path text in material editor
             material_editor.update_texture_name(lux_material, @lux_parameter)

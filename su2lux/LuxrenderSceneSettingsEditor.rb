@@ -79,7 +79,7 @@ class LuxrenderSceneSettingsEditor
 							@lrs.send(method_name, value)
 						else
 							# UI.messagebox "Parameter " + key + " does not exist. Please inform the developers."
-							SU2LUX.dbg_p "Parameter " + key + " does not exist. Please inform the developers."
+							SU2LUX.dbg_p "Parameter " + key + " does not exist. Please report on the LuxRender forum."
 						end
 				end
 		} #end action callback param_generatate  

@@ -53,8 +53,40 @@ class LuxrenderExport
 	def export_global_settings(out)
 		out.puts "# LuxRender Scene File"
 		out.puts "# Exported by SU2LUX #{SU2LUX::SU2LUX_VERSION}"
-		out.puts "# Global Information"
+		out.puts ""
 	end # END export_global_settings
+    
+    
+    def export_renderer(out)
+        case @lrs.renderer
+            when "sampler"
+                out.puts "Renderer \"#{@lrs.renderer}\""
+            when "hybrid"
+                out.puts "Renderer \"#{@lrs.renderer}\""
+                out.puts '\t"bool opencl.gpu.use" ["true"]'
+            when "sppm"
+                out.puts "Renderer \"#{@lrs.renderer}\""
+            when "luxcore_pathcpu"
+                out.puts "Renderer \"luxcore\""
+                out.puts '\t"string config" ["opencl.gpu.use = 1" "opencl.cpu.use = 1" "renderengine.type = PATHCPU" ""]'
+            when "luxcore_pathocl"
+                out.puts "Renderer \"luxcore\""
+                out.puts '\t"string config" ["opencl.gpu.use = 1" "opencl.cpu.use = 1" "renderengine.type = PATHOCL" ""]'
+            when "luxcore_biaspathcpu"
+                out.puts "Renderer \"luxcore\""
+                out.puts '\t"string config" ["opencl.gpu.use = 1" "opencl.cpu.use = 1" "renderengine.type = BIASPATHCPU" "tile.multipass.enable = 1" ""]'
+            when "luxcore_biaspathocl"
+                out.puts "Renderer \"luxcore\""
+                out.puts '\t"string config" ["opencl.gpu.use = 1" "opencl.cpu.use = 1" "renderengine.type = BIASPATHOCL" "tile.multipass.enable = 1" ""]'
+            when "luxcore_bidircpu"
+                out.puts "Renderer \"luxcore\""
+                out.puts '\t"string config" ["opencl.gpu.use = 1" "opencl.cpu.use = 1" "renderengine.type = BIDIRCPU" ""]'
+            when "luxcore_bidircpuvm"
+                out.puts "Renderer \"luxcore\""
+                out.put '\t"string config" ["opencl.gpu.use = 1" "opencl.cpu.use = 1" "opencl.gpu.workgroup.size = 64" "opencl.kernelcache = NONE" "renderengine.type = PATHCPU" ""]'
+        end
+        out.puts ""
+    end
 
 	def export_camera(view, out)
 		user_camera = view.camera
@@ -545,6 +577,9 @@ def compute_fov(xres, yres)
 		filter = "\n"
 		filter += "PixelFilter \"#{@lrs.pixelfilter_type}\"\n"
 		case @lrs.pixelfilter_type
+			when "blackmanharris"
+                filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_blackmanharris_xwidth)}]\n"
+                filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_blackmanharris_ywidth)}]\n"
 			when "box"
                 filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_box_xwidth)}]\n"
                 filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_box_ywidth)}]\n"
@@ -598,116 +633,131 @@ def compute_fov(xres, yres)
 		return sampler
 	end #END export_sampler
 
-	def export_surface_integrator
-		integrator = "\n"
-		integrator += "SurfaceIntegrator \"#{@lrs.sintegrator_type}\"\n"
-		case @lrs.sintegrator_type
-			# "bidirectional"
-			when "bidirectional"
-                integrator += "\t\"integer eyedepth\" [#{@lrs.sintegrator_bidir_eyedepth}]\n"
-                integrator += "\t\"integer lightdepth\" [#{@lrs.sintegrator_bidir_lightdepth}]\n"
-                integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_bidir_strategy}\"]\n"
-                integrator += "\t\"float eyerrthreshold\" [#{"%.6f" %(@lrs.sintegrator_bidir_eyerrthreshold)}]\n"
-                integrator += "\t\"float lightrrthreshold\" [#{"%.6f" %(@lrs.sintegrator_bidir_lightthreshold)}]\n"
-			# 'path'
-			when "path"
-                integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_path_maxdepth}]\n"
-                environment = @lrs.sintegrator_path_include_environment ? "true" : "false"
-                integrator += "\t\"bool includeenvironment\" [\"#{environment}\"]\n"
-                integrator += "\t\"string rrstrategy\" [\"#{@lrs.sintegrator_path_rrstrategy}\"]\n"
-                if (@lrs.sintegrator_path_rrstrategy == "probability")
-                    integrator += "\t\"float rrcontinueprob\" [#{"%.6f" %(@lrs.sintegrator_path_rrcontinueprob)}]\n"
-                end
-                integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_path_strategy}\"]\n"
-                integrator += "\t\"integer shadowraycount\" [#{@lrs.sintegrator_path_shadow_ray_count}]\n"
-			# "distributedpath"
-			when "distributedpath"
-				integrator += "\t\"string strategy\" [\"#{@lrs.sintegrator_distributedpath_strategy}\"]\n"
-				bool_value = @lrs.sintegrator_distributedpath_directsampleall ? "true" : "false"
-				integrator += "\t\"bool directsampleall\" [\"#{bool_value}\"]\n"
-				integrator += "\t\"integer directsamples\" [#{@lrs.sintegrator_distributedpath_directsamples.to_i}]\n"
-				bool_value = @lrs.sintegrator_distributedpath_indirectsampleall ? "true" : "false"
-				integrator += "\t\"bool indirectsampleall\" [\"#{bool_value}\"]\n"
-				integrator += "\t\"integer indirectsamples\" [#{@lrs.sintegrator_distributedpath_indirectsamples.to_i}]\n"
-				integrator += "\t\"integer diffusereflectdepth\" [#{@lrs.sintegrator_distributedpath_diffusereflectdepth.to_i}]\n"
-				integrator += "\t\"integer diffusereflectsamples\" [#{@lrs.sintegrator_distributedpath_diffusereflectsamples.to_i}]\n"
-				integrator += "\t\"integer diffuserefractdepth\" [#{@lrs.sintegrator_distributedpath_diffuserefractdepth.to_i}]\n"
-				integrator += "\t\"integer diffuserefractsamples\" [#{@lrs.sintegrator_distributedpath_diffuserefractsamples.to_i}]\n"
-				bool_value = @lrs.sintegrator_distributedpath_directdiffuse ? "true" : "false"
-				integrator += "\t\"bool directdiffuse\" [\"#{bool_value}\"]\n"
-				bool_value = @lrs.sintegrator_distributedpath_indirectdiffuse ? "true" : "false"
-				integrator += "\t\"bool indirectdiffuse\" [\"#{bool_value}\"]\n"
-				integrator += "\t\"integer glossyreflectdepth\" [#{@lrs.sintegrator_distributedpath_glossyreflectdepth.to_i}]\n"
-				integrator += "\t\"integer glossyreflectsamples\" [#{@lrs.sintegrator_distributedpath_glossyreflectsamples.to_i}]\n"
-				integrator += "\t\"integer glossyrefractdepth\" [#{@lrs.sintegrator_distributedpath_glossyrefractdepth.to_i}]\n"
-				integrator += "\t\"integer glossyrefractsamples\" [#{@lrs.sintegrator_distributedpath_glossyrefractsamples.to_i}]\n"
-				bool_value = @lrs.sintegrator_distributedpath_directglossy ? "true" : "false"
-				integrator += "\t\"bool directglossy\" [\"#{bool_value}\"]\n"
-				bool_value = @lrs.sintegrator_distributedpath_indirectglossy ? "true" : "false"
-				integrator += "\t\"bool indirectglossy\" [\"#{bool_value}\"]\n"
-				integrator += "\t\"integer specularreflectdepth\" [#{@lrs.sintegrator_distributedpath_specularreflectdepth.to_i}]\n"
-				integrator += "\t\"integer specularrefractdepth\" [#{@lrs.sintegrator_distributedpath_specularrefractdepth.to_i}]\n"
-				if (@lrs.sintegrator_distributedpath_reject)
-					bool_value = @lrs.sintegrator_distributedpath_diffusereflectreject ? "true" : "false"
-					integrator += "\t\"bool diffusereflectreject\" [\"#{bool_value}\"]\n"
-					integrator += "\t\"float diffusereflectreject_threshold\" [#{"%.6f" %(@lrs.sintegrator_distributedpath_diffusereflectreject_threshold)}]\n"
-					bool_value = @lrs.sintegrator_distributedpath_diffuserefractreject ? "true" : "false"
-					integrator += "\t\"bool diffuserefractreject\" [\"#{bool_value}\"]\n"
-					integrator += "\t\"float diffuserefractreject_threshold\" [#{"%.6f" %(@lrs.sintegrator_distributedpath_diffuserefractreject_threshold)}]\n"
-					bool_value = @lrs.sintegrator_distributedpath_glossyreflectreject ? "true" : "false"
-					integrator += "\t\"bool glossyreflectreject\" [\"#{bool_value}\"]\n"
-					integrator += "\t\"float glossyreflectreject_threshold\" [#{"%.6f" %(@lrs.sintegrator_distributedpath_glossyreflectreject_threshold)}]\n"
-					bool_value = @lrs.sintegrator_distributedpath_glossyrefractreject ? "true" : "false"
-					integrator += "\t\"bool glossyrefractreject\" [\"#{bool_value}\"]\n"
-					integrator += "\t\"float glossyrefractreject_threshold\" [#{"%.6f" %(@lrs.sintegrator_distributedpath_glossyrefractreject_threshold)}]\n"
-				end
-
-			# "directlighting"
-			when "directlighting"
-                integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_direct_maxdepth}]\n"
-                integrator += "\t\"integer shadowraycount\" [#{@lrs.sintegrator_direct_shadow_ray_count}]\n"
-                integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_direct_strategy}\"]\n"
-			# "exphotonmap"
-			when "exphotonmap"
-				integrator += "\t\"integer directphotons\" [#{@lrs.sintegrator_exphoton_directphotons}]\n"
-				integrator += "\t\"integer indirectphotons\" [#{@lrs.sintegrator_exphoton_indirectphotons}]\n"
-				integrator += "\t\"integer causticphotons\" [#{@lrs.sintegrator_exphoton_causticphotons}]\n"
-				finalgather = @lrs.sintegrator_exphoton_finalgather ? "true" : "false"
-				integrator += "\t\"bool finalgather\" [\"#{finalgather}\"]\n"
-				if (@lrs.sintegrator_exphoton_finalgather)
-					integrator += "\t\"integer finalgathersamples\" [#{@lrs.sintegrator_exphoton_finalgathersamples}]\n"
-					integrator += "\t\"string rrstrategy\" [\"#{@lrs.sintegrator_exphoton_rrstrategy}\"]\n"
-					if (@lrs.sintegrator_exphoton_rrstrategy.match("probability"))
-						integrator += "\t\"float rrcontinueprob\" [#{"%.6f" %(@lrs.sintegrator_exphoton_rrcontinueprob)}]\n"
-					end
-					integrator += "\t\"float gatherangle\" [#{"%.6f" %(@lrs.sintegrator_exphoton_gatherangle)}]\n"
-				end
-				integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_exphoton_maxdepth}]\n"
-				integrator += "\t\"integer maxphotondepth\" [#{@lrs.sintegrator_exphoton_maxphotondepth}]\n"
-				integrator += "\t\"float maxphotondist\" [#{"%.6f" %(@lrs.sintegrator_exphoton_maxphotondist)}]\n"
-				integrator += "\t\"integer nphotonsused\" [#{@lrs.sintegrator_exphoton_nphotonsused}]\n"
-				integrator += "\t\"integer shadowraycount\" [#{@lrs.sintegrator_exphoton_shadow_ray_count}]\n"
-				integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_exphoton_strategy}\"]\n"
-				integrator += "\t\"string renderingmode\" [\"#{@lrs.sintegrator_exphoton_renderingmode}\"]\n"
-				#if (@lrs.sintegrator_exphoton_show_advanced) # not exposed
-                    #dbg = @lrs.sintegrator_exphoton_dbg_enable_direct ? "true" : "false"
-					#integrator += "\t\"bool dbg_enabledirect\" [\"#{dbg}\"]\n"
-					#dbg = @lrs.sintegrator_exphoton_dbg_enable_indircaustic ? "true" : "false"
-					#integrator += "\t\"bool dbg_enableindircaustic\" [\"#{dbg}\"]\n"
-					#dbg = @lrs.sintegrator_exphoton_dbg_enable_indirdiffuse ? "true" : "false"
-					#integrator += "\t\"bool dbg_enableindirdiffuse\" [\"#{dbg}\"]\n"
-					#dbg = @lrs.sintegrator_exphoton_dbg_enable_indirspecular ? "true" : "false"
-					#integrator += "\t\"bool dbg_enableindirspecular\" [\"#{dbg}\"]\n"
-					#dbg = @lrs.sintegrator_exphoton_dbg_enable_radiancemap ? "true" : "false"
-					#integrator += "\t\"bool dbg_enableradiancemap\" [\"#{dbg}\"]\n"
-                #end
-			# "igi"
-			when "igi"
-				integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_igi_maxdepth}]\n"
-                integrator += "\t\"integer nsets\" [#{@lrs.sintegrator_igi_nsets}]\n"
-                integrator += "\t\"integer nlights\" [#{@lrs.sintegrator_igi_nlights}]\n"
-                integrator += "\t\"float mindist\" [#{"%.6f" %(@lrs.sintegrator_igi_mindist)}]\n"
-		end
+    def export_surface_integrator
+        puts "renderer is:"
+        puts @lrs.renderer
+        integrator = "\n"
+        if (@lrs.renderer != "sppm")
+            integrator += "SurfaceIntegrator \"#{@lrs.sintegrator_type}\"\n"
+            case @lrs.sintegrator_type
+                # "bidirectional"
+                when "bidirectional"
+                    integrator += "\t\"integer eyedepth\" [#{@lrs.sintegrator_bidir_eyedepth}]\n"
+                    integrator += "\t\"integer lightdepth\" [#{@lrs.sintegrator_bidir_lightdepth}]\n"
+                    integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_bidir_strategy}\"]\n"
+                    integrator += "\t\"float eyerrthreshold\" [#{"%.6f" %(@lrs.sintegrator_bidir_eyerrthreshold)}]\n"
+                    integrator += "\t\"float lightrrthreshold\" [#{"%.6f" %(@lrs.sintegrator_bidir_lightthreshold)}]\n"
+                # 'path'
+                when "path"
+                    integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_path_maxdepth}]\n"
+                    environment = @lrs.sintegrator_path_include_environment ? "true" : "false"
+                    integrator += "\t\"bool includeenvironment\" [\"#{environment}\"]\n"
+                    integrator += "\t\"string rrstrategy\" [\"#{@lrs.sintegrator_path_rrstrategy}\"]\n"
+                    if (@lrs.sintegrator_path_rrstrategy == "probability")
+                        integrator += "\t\"float rrcontinueprob\" [#{"%.6f" %(@lrs.sintegrator_path_rrcontinueprob)}]\n"
+                    end
+                    integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_path_strategy}\"]\n"
+                    integrator += "\t\"integer shadowraycount\" [#{@lrs.sintegrator_path_shadow_ray_count}]\n"
+                # "distributedpath"
+                when "distributedpath"
+                    integrator += "\t\"string strategy\" [\"#{@lrs.sintegrator_distributedpath_strategy}\"]\n"
+                    bool_value = @lrs.sintegrator_distributedpath_directsampleall ? "true" : "false"
+                    integrator += "\t\"bool directsampleall\" [\"#{bool_value}\"]\n"
+                    integrator += "\t\"integer directsamples\" [#{@lrs.sintegrator_distributedpath_directsamples.to_i}]\n"
+                    bool_value = @lrs.sintegrator_distributedpath_indirectsampleall ? "true" : "false"
+                    integrator += "\t\"bool indirectsampleall\" [\"#{bool_value}\"]\n"
+                    integrator += "\t\"integer indirectsamples\" [#{@lrs.sintegrator_distributedpath_indirectsamples.to_i}]\n"
+                    integrator += "\t\"integer diffusereflectdepth\" [#{@lrs.sintegrator_distributedpath_diffusereflectdepth.to_i}]\n"
+                    integrator += "\t\"integer diffusereflectsamples\" [#{@lrs.sintegrator_distributedpath_diffusereflectsamples.to_i}]\n"
+                    integrator += "\t\"integer diffuserefractdepth\" [#{@lrs.sintegrator_distributedpath_diffuserefractdepth.to_i}]\n"
+                    integrator += "\t\"integer diffuserefractsamples\" [#{@lrs.sintegrator_distributedpath_diffuserefractsamples.to_i}]\n"
+                    bool_value = @lrs.sintegrator_distributedpath_directdiffuse ? "true" : "false"
+                    integrator += "\t\"bool directdiffuse\" [\"#{bool_value}\"]\n"
+                    bool_value = @lrs.sintegrator_distributedpath_indirectdiffuse ? "true" : "false"
+                    integrator += "\t\"bool indirectdiffuse\" [\"#{bool_value}\"]\n"
+                    integrator += "\t\"integer glossyreflectdepth\" [#{@lrs.sintegrator_distributedpath_glossyreflectdepth.to_i}]\n"
+                    integrator += "\t\"integer glossyreflectsamples\" [#{@lrs.sintegrator_distributedpath_glossyreflectsamples.to_i}]\n"
+                    integrator += "\t\"integer glossyrefractdepth\" [#{@lrs.sintegrator_distributedpath_glossyrefractdepth.to_i}]\n"
+                    integrator += "\t\"integer glossyrefractsamples\" [#{@lrs.sintegrator_distributedpath_glossyrefractsamples.to_i}]\n"
+                    bool_value = @lrs.sintegrator_distributedpath_directglossy ? "true" : "false"
+                    integrator += "\t\"bool directglossy\" [\"#{bool_value}\"]\n"
+                    bool_value = @lrs.sintegrator_distributedpath_indirectglossy ? "true" : "false"
+                    integrator += "\t\"bool indirectglossy\" [\"#{bool_value}\"]\n"
+                    integrator += "\t\"integer specularreflectdepth\" [#{@lrs.sintegrator_distributedpath_specularreflectdepth.to_i}]\n"
+                    integrator += "\t\"integer specularrefractdepth\" [#{@lrs.sintegrator_distributedpath_specularrefractdepth.to_i}]\n"
+                    if (@lrs.sintegrator_distributedpath_reject)
+                        bool_value = @lrs.sintegrator_distributedpath_diffusereflectreject ? "true" : "false"
+                        integrator += "\t\"bool diffusereflectreject\" [\"#{bool_value}\"]\n"
+                        integrator += "\t\"float diffusereflectreject_threshold\" [#{"%.6f" %(@lrs.sintegrator_distributedpath_diffusereflectreject_threshold)}]\n"
+                        bool_value = @lrs.sintegrator_distributedpath_diffuserefractreject ? "true" : "false"
+                        integrator += "\t\"bool diffuserefractreject\" [\"#{bool_value}\"]\n"
+                        integrator += "\t\"float diffuserefractreject_threshold\" [#{"%.6f" %(@lrs.sintegrator_distributedpath_diffuserefractreject_threshold)}]\n"
+                        bool_value = @lrs.sintegrator_distributedpath_glossyreflectreject ? "true" : "false"
+                        integrator += "\t\"bool glossyreflectreject\" [\"#{bool_value}\"]\n"
+                        integrator += "\t\"float glossyreflectreject_threshold\" [#{"%.6f" %(@lrs.sintegrator_distributedpath_glossyreflectreject_threshold)}]\n"
+                        bool_value = @lrs.sintegrator_distributedpath_glossyrefractreject ? "true" : "false"
+                        integrator += "\t\"bool glossyrefractreject\" [\"#{bool_value}\"]\n"
+                        integrator += "\t\"float glossyrefractreject_threshold\" [#{"%.6f" %(@lrs.sintegrator_distributedpath_glossyrefractreject_threshold)}]\n"
+                    end
+                # "directlighting"
+                when "directlighting"
+                    integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_direct_maxdepth}]\n"
+                    integrator += "\t\"integer shadowraycount\" [#{@lrs.sintegrator_direct_shadow_ray_count}]\n"
+                    integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_direct_strategy}\"]\n"
+                # "exphotonmap"
+                when "exphotonmap"
+                    integrator += "\t\"integer directphotons\" [#{@lrs.sintegrator_exphoton_directphotons}]\n"
+                    integrator += "\t\"integer indirectphotons\" [#{@lrs.sintegrator_exphoton_indirectphotons}]\n"
+                    integrator += "\t\"integer causticphotons\" [#{@lrs.sintegrator_exphoton_causticphotons}]\n"
+                    finalgather = @lrs.sintegrator_exphoton_finalgather ? "true" : "false"
+                    integrator += "\t\"bool finalgather\" [\"#{finalgather}\"]\n"
+                    if (@lrs.sintegrator_exphoton_finalgather)
+                        integrator += "\t\"integer finalgathersamples\" [#{@lrs.sintegrator_exphoton_finalgathersamples}]\n"
+                        integrator += "\t\"string rrstrategy\" [\"#{@lrs.sintegrator_exphoton_rrstrategy}\"]\n"
+                        if (@lrs.sintegrator_exphoton_rrstrategy.match("probability"))
+                            integrator += "\t\"float rrcontinueprob\" [#{"%.6f" %(@lrs.sintegrator_exphoton_rrcontinueprob)}]\n"
+                        end
+                        integrator += "\t\"float gatherangle\" [#{"%.6f" %(@lrs.sintegrator_exphoton_gatherangle)}]\n"
+                    end
+                    integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_exphoton_maxdepth}]\n"
+                    integrator += "\t\"integer maxphotondepth\" [#{@lrs.sintegrator_exphoton_maxphotondepth}]\n"
+                    integrator += "\t\"float maxphotondist\" [#{"%.6f" %(@lrs.sintegrator_exphoton_maxphotondist)}]\n"
+                    integrator += "\t\"integer nphotonsused\" [#{@lrs.sintegrator_exphoton_nphotonsused}]\n"
+                    integrator += "\t\"integer shadowraycount\" [#{@lrs.sintegrator_exphoton_shadow_ray_count}]\n"
+                    integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_exphoton_strategy}\"]\n"
+                    integrator += "\t\"string renderingmode\" [\"#{@lrs.sintegrator_exphoton_renderingmode}\"]\n"
+                    #if (@lrs.sintegrator_exphoton_show_advanced) # not exposed
+                        #dbg = @lrs.sintegrator_exphoton_dbg_enable_direct ? "true" : "false"
+                        #integrator += "\t\"bool dbg_enabledirect\" [\"#{dbg}\"]\n"
+                        #dbg = @lrs.sintegrator_exphoton_dbg_enable_indircaustic ? "true" : "false"
+                        #integrator += "\t\"bool dbg_enableindircaustic\" [\"#{dbg}\"]\n"
+                        #dbg = @lrs.sintegrator_exphoton_dbg_enable_indirdiffuse ? "true" : "false"
+                        #integrator += "\t\"bool dbg_enableindirdiffuse\" [\"#{dbg}\"]\n"
+                        #dbg = @lrs.sintegrator_exphoton_dbg_enable_indirspecular ? "true" : "false"
+                        #integrator += "\t\"bool dbg_enableindirspecular\" [\"#{dbg}\"]\n"
+                        #dbg = @lrs.sintegrator_exphoton_dbg_enable_radiancemap ? "true" : "false"
+                        #integrator += "\t\"bool dbg_enableradiancemap\" [\"#{dbg}\"]\n"
+                    #end
+                # "igi"
+                when "igi"
+                    integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_igi_maxdepth}]\n"
+                    integrator += "\t\"integer nsets\" [#{@lrs.sintegrator_igi_nsets}]\n"
+                    integrator += "\t\"integer nlights\" [#{@lrs.sintegrator_igi_nlights}]\n"
+                    integrator += "\t\"float mindist\" [#{"%.6f" %(@lrs.sintegrator_igi_mindist)}]\n"
+            end # case
+        else
+            # SPPM
+            integrator += "SurfaceIntegrator \"sppm\"\n"
+            integrator += "\t\"string photonsampler\" [\"#{@lrs.sppm_photonsampler}\"]\n"
+            integrator += "\t\"string lookupaccel\" [\"#{@lrs.sppm_lookupaccel}\"]\n"
+            integrator += "\t\"integer maxeyedepth\" [#{@lrs.sppm_maxeyedepth}]\n"
+            integrator += "\t\"integer maxphotondepth\" [#{@lrs.sppm_maxphotondepth}]\n"
+            integrator += "\t\"integer photonperpass\" [#{@lrs.sppm_photonperpass}]\n"
+            integrator += "\t\"float startradius\" [#{"%.6f" %(@lrs.sppm_startradius)}]\n"
+            integrator += "\t\"float alpha\" [#{"%.6f" %(@lrs.sppm_alpha)}]\n"
+            integrator += "\t\"bool includeenvironment\" [\"true\"]\n"
+            integrator += "\t\"bool directlightsampling\" [\"true\"]\n"
+        end
 		return integrator
 		
 	end #END export_surface_integrator
@@ -1116,7 +1166,7 @@ def compute_fov(xres, yres)
                     out.puts "LightGroup \""+luxrender_mat.name+"\""
                 end
                 out.puts "AttributeBegin #instance_#{@instance_name}"
-                m=i_trans.to_a
+                m=Array(i_trans)
                 out.print "Transform [ #{m[0]} #{m[1]} #{m[2]} #{m[3]} #{m[4]} #{m[5]} #{m[6]} #{m[7]} #{m[8]} #{m[9]} #{m[10]} #{m[11]} #{m[12]*@scale} #{m[13]*@scale} #{m[14]*@scale} #{m[15]} ] \n"
                 output_material(mat, out, luxrender_mat, @currenttexname)
                 out.puts "ObjectInstance \"instance_#{@instance_name}\""
@@ -1180,7 +1230,7 @@ def compute_fov(xres, yres)
                     uv = [mesh.uv_at(p,dir).x/texsize.x, mesh.uv_at(p,dir).y/texsize.y, mesh.uv_at(p,dir).z/texsize.z]
                 end
               
-                pos = mesh.point_at(p).to_a
+                pos = Array(mesh.point_at(p))
                 norm = mesh.normal_at(p)
                 norm.reverse! if mat_dir_tmp==false
                 if ( binary == true)
@@ -1266,7 +1316,7 @@ def compute_fov(xres, yres)
         out.puts '"point P" ['
         for mesh in meshes
             for p in (1..mesh.count_points)
-                pos = mesh.point_at(p).to_a
+                pos = Array(mesh.point_at(p))
                 out.print "#{"%.6f" %(pos[0]*@scale)} #{"%.6f" %(pos[1]*@scale)} #{"%.6f" %(pos[2]*@scale)}\n"
             end
         end
@@ -1366,6 +1416,11 @@ def compute_fov(xres, yres)
             out.puts "\"float power\" [#{"%.6f" %(luxrender_mat.light_power)}]"
             out.puts "\"float efficacy\" [#{"%.6f" %(luxrender_mat.light_efficacy)}]"
             out.puts "\"float gain\" [#{"%.6f" %(luxrender_mat.light_gain)}]"
+            # add material name for base material
+            if (luxrender_mat.lightbase != 'default')
+                matname = luxrender_mat.lightbase.delete("[<>]")
+                out.puts "NamedMaterial \"" + matname + "\""
+            end
         when "portal"
             out.puts "ObjectBegin \"Portal_Shape\""
             @has_portals = true

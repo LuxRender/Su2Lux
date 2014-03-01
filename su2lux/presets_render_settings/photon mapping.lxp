@@ -18,12 +18,9 @@ sintegrator_exphoton_rrstrategy,probability
 sintegrator_exphoton_rrcontinueprob,0.65
 volume_integrator_type,single
 volume_integrator_stepsize,1.0
-pixelfilter_type,mitchell
-pixelfilter_mitchell_xwidth,1.1
-pixelfilter_mitchell_ywidth,1.1
-pixelfilter_mitchell_B,1.0
-pixelfilter_mitchell_C,0.0
-pixelfilter_mitchell_supersample,true
+pixelfilter_type,blackmanharris
+pixelfilter_blackmanharris_xwidth,3.3
+pixelfilter_blackmanharris_ywidth,3.3
 accelerator_type,qbvh
 qbvh_skip_factor,1
 qbvh_maxprimsperleaf,1

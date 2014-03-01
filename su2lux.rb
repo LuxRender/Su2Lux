@@ -213,6 +213,7 @@ module SU2LUX
         # write lxs file
 		out = File.new(exportpath,"w")
 		le.export_global_settings(out)
+		le.export_renderer(out)
 		le.export_camera(model.active_view, out)
 		le.export_film(out,file_basename)
 		le.export_render_settings(out)
@@ -396,7 +397,7 @@ module SU2LUX
 			Sketchup.write_default("SU2LUX", "luxrenderpath", storedpath.unpack('H*')[0])
         else
             # convert path back to usable form
-            storedpath = storedpath.to_a.pack('H*')
+            storedpath = Array(storedpath).pack('H*')
 		end
 		return storedpath
 	end #END get_luxrender_path
@@ -750,14 +751,7 @@ end # END module SU2LUX
                       
 
 class SU2LUX_model_observer < Sketchup::ModelObserver
-    def onEraseAll(model)
-        UI.messagebox("onEraseAll: " + model.to_s)
-    end
-    
-    def onDeleteModel(model)
-        UI.messagebox("onDeleteModel: " + model.to_s)
-    end
-    # test 2014: commented out following lines; attribute dictionaries should be updated instantly when updating settings
+    #commented out following lines; attribute dictionaries should be updated instantly when updating settings
     #def onPreSaveModel(model)
     #scene_id = Sketchup.active_model.definitions.entityID
     # for all materials, save settings
@@ -888,20 +882,15 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 			else
 				material_editor.refresh()
 				#material_editor.current = LuxrenderMaterial.new(current_mat)
-				#material_editor.materials_skp_lux[current_mat] = material_editor.current 
+				#material_editor.materials_skp_lux[current_mat] = material_editor.current
 				#puts "onMaterialSetCurrent creating new LuxRender material" # , material_editor.current
 			end
 			material_editor.set_current(material_editor.current.name) # sets name of current material in dropdown, updates swatches
 			material_editor.sendDataFromSketchup
-            material_editor.settexturefields(current_mat.name)
-            material_editor.showhideIOR()
-            material_editor.showhide_displacement()
-            material_editor.showhide_specularIOR()
-            material_editor.showhide_spectrum()
-            material_editor.showhide_carpaint()
 			material_editor.fire_event("#type", "change", "")
 			material_editor.load_preview_image()
-            material_editor.update_spec_IOR()
+            material_editor.settexturefields(current_mat.name)
+            material_editor.showhide_fields()
 		else
 			puts "current material is not used"
 		end
@@ -980,12 +969,12 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
                     texture_name.gsub!(/\\/, '/') if texture_name.include?('\\')
                     luxmaterial.kd_imagemap_Sketchup_filename = texture_name
                     luxmaterial.kd_texturetype = 'sketchup' if (luxmaterial.kd_texturetype != 'imagemap')
-                    luxmaterial.use_diffuse_texture = true
+                    #luxmaterial.use_diffuse_texture = true
                 else
                     luxmaterial.kd_imagemap_Sketchup_filename = ''
                     if (luxmaterial.kd_texturetype == 'sketchup') # todo: check if non-sketchup texture is being used
                         luxmaterial.kd_texturetype = 'none'
-                        luxmaterial.current.use_diffuse_texture = false
+                        #luxmaterial.current.use_diffuse_texture = false
                     end
                 end
                       
@@ -993,7 +982,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
                       puts "modified material is current"
                       material_editor.updateSettingValue("kd_imagemap_Sketchup_filename")
                       material_editor.updateSettingValue("kd_texturetype")
-                      material_editor.updateSettingValue("use_diffuse_texture")
+                      #material_editor.updateSettingValue("use_diffuse_texture")
                       if (updateswatches == true)
                         material_editor.material_editor_dialog.execute_script("update_RGB('#kt_R','#kt_G','#kt_B','#{colorarray[0]}','#{colorarray[1]}','#{colorarray[2]}')")
                         material_editor.material_editor_dialog.execute_script("update_RGB('#kd_R','#kd_G','#kd_B','#{colorarray[0]}','#{colorarray[1]}','#{colorarray[2]}')")
@@ -1012,6 +1001,7 @@ end # end observer section
 if( not file_loaded?(__FILE__))
     # runs whenever SketchUp is started, both when opening by double clicking a file and when starting SketchUp by itself
     puts "initializing SU2LUX"
+    model = Sketchup.active_model
 	
     # load platform specific code
     case SU2LUX.get_os
@@ -1056,23 +1046,22 @@ if( not file_loaded?(__FILE__))
 	loaded = lrs.load_from_model # true if a (saved) SketchUp file is open, false if working with a new file
   	lrs.reset_viewparams unless loaded
     
-    # create/load LuxRender materials
-    puts "loading material settings"
-    for mat in Sketchup.active_model.materials
-		luxmat = LuxrenderMaterial.new(mat)
-		loaded = luxmat.load_from_model
-        #puts "resetting material " + luxmat.name unless loaded
-		#luxmat.reset unless loaded
-	end
-    puts "finished loading material settings"
-    
     # get LuxRender path (as stored within SketchUp) and other global values
     SU2LUX.get_global_values(lrs)
-   
-    # create material editor
-    puts "creating material editor"
-    @lme = SU2LUX.create_material_editor(model_id)
-    @lme.refresh
+    
+    # create/load LuxRender materials
+    puts "loading material settings"
+    material_editor = SU2LUX.create_material_editor(model_id)
+    material_editor.materials_skp_lux = Hash.new
+    material_editor.current = nil
+    for mat in model.materials
+        luxmat = material_editor.find(mat.name)
+        loaded = luxmat.load_from_model
+        #luxmat.reset unless loaded
+        material_editor.materials_skp_lux[mat] = luxmat
+    end
+    material_editor.refresh
+    puts "finished loading material settings"
 
 	# set observers
     puts "creating observers"
@@ -1087,7 +1076,6 @@ if( not file_loaded?(__FILE__))
     SU2LUX.create_render_settings_editor(model_id)
                     
     # dialog may not have fully loaded yet, therefore loading presets should happen later as reaction on DOM loaded
-    # sse.sendDataFromSketchup
             
     # create toolbar
     toolbar = create_toolbar()

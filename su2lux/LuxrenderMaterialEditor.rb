@@ -144,8 +144,7 @@ class LuxrenderMaterialEditor
             channels = luxmat.texturechannels
             #puts channels
             for channelname in channels
-                textypename = channelname + "_texturetype" # for example "kd_texturetype"
-                # puts luxmat.send(textypename)
+                textypename = channelname + "_texturetype" # for example "kd_texturetype"\
                 # hide texture fields
                 cmd = "$('#" + textypename + "').nextAll('span').hide();"
                 @material_editor_dialog.execute_script(cmd)
@@ -266,6 +265,16 @@ class LuxrenderMaterialEditor
             SU2LUX.dbg_p "refresh called through javascript"
 			refresh()
 		}
+        
+		@material_editor_dialog.add_action_callback('start_refresh_and_update') { |dialog, param|
+            SU2LUX.dbg_p "refresh called through javascript"
+			refresh()
+            @materialtype = @current.type
+			javascriptcommand = "$('#type').nextAll('.' + '" + @materialtype + "').show();"
+            SU2LUX.dbg_p javascriptcommand
+			dialog.execute_script(javascriptcommand)
+		}
+        
 
 		@material_editor_dialog.add_action_callback('active_mat_type') { |dialog, param| # shows the appropriate material editor panels for current material type
             SU2LUX.dbg_p "callback: active_mat_type"
@@ -582,6 +591,7 @@ class LuxrenderMaterialEditor
                            
     def showhide_spectrum()
         #puts "updating spectrum fields"
+                           #cmd0 = '$(".light_L").hide()'
         if @current.light_L == "emit_color"
            cmd1 = '$("#emit_color").show()'
            cmd2 = '$("#blackbody").hide()'
@@ -595,6 +605,7 @@ class LuxrenderMaterialEditor
            cmd2 = '$("#blackbody").hide()'
            cmd3 = '$("#emit_preset").show()'
         end
+                           #@material_editor_dialog.execute_script(cmd0)
         @material_editor_dialog.execute_script(cmd1)
         @material_editor_dialog.execute_script(cmd2)
         @material_editor_dialog.execute_script(cmd3)
@@ -722,7 +733,7 @@ class LuxrenderMaterialEditor
             texture_name.gsub!(/\\/, '/') if texture_name.include?('\\')
             luxmat.kd_imagemap_Sketchup_filename = texture_name
             luxmat.kd_texturetype = 'sketchup'
-            luxmat.use_diffuse_texture = true
+            #luxmat.use_diffuse_texture = true
         end
     end
                            
@@ -763,13 +774,8 @@ class LuxrenderMaterialEditor
         load_preview_image # material preview image
         set_current(@current.name) # active material in material dropdown
         update_texture_names(@current) # image texture paths
-        showhide_specularIOR # specular definition interface
-        showhide_displacement # displacement interface
-        showhide_spectrum # emission spectrum
-        showhide_carpaint # carpaint custom channel
-        update_spec_IOR() # specular IOR preset
-        puts "running refresh for material " + @current.name
         settexturefields(@current.name)
+        showhide_fields()
         
         # set preview section height
         setdivheightcmd = 'setpreviewheight(' + @lrs.preview_size.to_s + ',' + @lrs.preview_time.to_s + ')'
@@ -778,6 +784,15 @@ class LuxrenderMaterialEditor
         
 	end
     
+    def showhide_fields()
+        showhide_specularIOR # specular definition interface
+        showhide_displacement # displacement interface
+        showhide_spectrum # emission spectrum
+        showhide_carpaint # carpaint custom channel
+        update_spec_IOR() # specular IOR preset
+    end
+                           
+                           
     ##
     #
     ##
@@ -803,6 +818,7 @@ class LuxrenderMaterialEditor
         set_material_list("material_name")  # main material list
         set_material_list("material_list1") # mix material 1
         set_material_list("material_list2") # mix material 2
+        set_material_list("lightbase") # emitter base material
     end
     
 	
@@ -829,15 +845,18 @@ class LuxrenderMaterialEditor
         puts "updating material dropdown list in LuxRender Material Editor, " + dropdownname
 		cmd = "$('#" + dropdownname + "').empty()"
 		@material_editor_dialog.execute_script(cmd)
+        if (dropdownname == "lightbase")
+            defcmd = "$('#lightbase').append($('<option></option>').val('default').html('default'))"
+            @material_editor_dialog.execute_script(defcmd)
+        end
+                           
 		cmd = "$('#" + dropdownname +"').append( $('"
 		# puts "material list command: ", cmd
 		materials = Sketchup.active_model.materials.sort
-        #puts "whole material list (@materials_skp_lux):"
-        #puts @materials_skp_lux
-		for mat4 in materials
+		for mat in materials
             #puts "set_material_list running"
             #puts mat.name
-			luxrender_mat = @materials_skp_lux[mat4]
+			luxrender_mat = @materials_skp_lux[mat]
             #puts luxrender_mat
 			# puts "adding luxrender material to material list: ", luxrender_mat
 			cmd = cmd + "<option value=\"#{luxrender_mat.original_name}\">#{luxrender_mat.name}</option>"
@@ -854,6 +873,11 @@ class LuxrenderMaterialEditor
 		puts @current.name
 		materialproperties = @current.get_names # returns all settings from LuxrenderMaterial @@settings
 		materialproperties.each { |setting| updateSettingValue(setting)}
+        # update interface based on dropdown menus
+                           
+                           
+                           
+                           
 		# SU2LUX.dbg_p "just ran sendDataFromSketchup@LuxrenderMaterialEditor"
 	end # END sendDataFromSketchup
                            

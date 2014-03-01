@@ -72,7 +72,7 @@ class LuxrenderRenderSettingsEditor
 							@lrs.send(method_name, value)
 						else
 							# UI.messagebox "Parameter " + key + " does not exist. Please inform the developers."
-							SU2LUX.dbg_p "Parameter " + key + " does not exist. Please inform the developers."
+							SU2LUX.dbg_p "Parameter " + key + " does not exist. Please report on the LuxRender forum."
 						end
                     # set dropdown to custom
                     dialog.execute_script('$("#renderpreset").val("custom");')
@@ -210,7 +210,7 @@ class LuxrenderRenderSettingsEditor
         
         
         
-        @render_settings_dialog.add_action_callback("scene_setting_loaded") {|dialog, params|
+        @render_settings_dialog.add_action_callback("render_setting_loaded") {|dialog, params|
             puts "adding preset files to dropdown menu"
             settings_folder = SU2LUX.get_settings_folder
             Dir.foreach(settings_folder) do |settingsfile|
@@ -255,6 +255,23 @@ class LuxrenderRenderSettingsEditor
             #puts update_subfield
             @render_settings_dialog.execute_script(update_subfield)
         }
+        # show/hide SPPM integrator field
+        if (@lrs.renderer=="sppm")
+            showintegrator='$("#sppm").show();'
+            hideintegrator='$("#integratorsection").hide();'
+        else
+            showintegrator='$("#integratorsection").show();'
+            hideintegrator='$("#sppm").hide();'
+        
+        end
+        @render_settings_dialog.execute_script(hideintegrator)
+        @render_settings_dialog.execute_script(showintegrator)
+        
+        # show preset name in dropdown value
+        setdropdown = '$("#renderpreset").val(' + @lrs.renderpreset + ');'
+        @render_settings_dialog.execute_script(setdropdown)
+
+        
 	end # END sendDataFromSketchup
 	
 	##

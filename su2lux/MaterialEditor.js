@@ -26,8 +26,10 @@ function startactivemattype(){
     // loaded on opening SketchUp on OS X, on showing material dialog on Windows // triggered by window.location = 'skp:show_continued@'
 		if ($("#material_name").val() == "bogus"){
 			//alert ("not initialized");
-			window.location = 'skp:start_refresh@' + this.id;
-			window.location = 'skp:active_mat_type@'; 	// shows options for current material's material type
+			window.location = 'skp:start_refresh_and_update@' + this.id;
+            
+            //window.location = 'skp:start_refresh@' + this.id;
+			//window.location = 'skp:active_mat_type@'; 	// shows options for current material's material type
 		}
 	}
 	
@@ -142,7 +144,7 @@ $(document).ready(
                   
 		$("#light_L").change(
 			function() {
-                //alert ("light spectrum type change")
+                //alert ("javascript: light spectrum type change")
                 $(".light_L").hide();
                 $("#" + this.value).show();
 			}

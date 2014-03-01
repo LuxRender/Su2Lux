@@ -17,16 +17,7 @@
     <label for="renderpreset">Presets:</label>
     <select id="renderpreset">
         <option value='custom'>custom</option>
-        <!-- options get loaded from preset files, the following lines are not used
-        <option value='0'>Preview - Global Illumination</option>
-        <option value='0b'>Preview - Direct Lighting</option>
-        <option value="0c">Preview - Photon Mapping</option>
-        <option value='1'>Final interior - MLT/Bidir Path Tracing (recommended)</option>
-        <option value='2'>Final exterior - MLT/Path Tracing</option>
-        <option value='5'>Progressive interior - Bidir Path Tracing</option>
-        <option value='6'>Progressive exterior - Path Tracing</option>
-        <option value='F'>Photon Mapping - Low Quality</option>
-        <option value='G'>Photon Mapping - High Quality</option>-->
+        <!-- other presets are loaded from preset files -->
     </select><br><br>
     <input type="button" id="overwrite_settings_file" value="overwrite" style="width:70px">
     <input type="button" id="save_settings_file" value="save as new" style="width:90px">
@@ -36,6 +27,23 @@
 
 
 <div id="render_settings_panel">
+    <p class="header" id="renderersection">Renderer</p>
+        <div class="collapse">
+            <label for="renderer">Renderer</label>
+			<select id="renderer">
+				<option value="sampler">classic (default)</option>
+				<option value="hybrid">hybrid path</option>
+				<option value="sppm">SPPM (photon mapping)</option>
+				<option value="luxcore_pathcpu">LuxCore, PATHCPU</option>
+				<option value="luxcore_pathocl">LuxCore, PATHOCL</option>
+				<option value="luxcore_biaspathcpu">LuxCore, BIASPATHCPU</option>
+				<option value="luxcore_biaspathocl">LuxCore, BIASPATHOCL</option>
+				<option value="luxcore_bidircpu">LuxCore, BIDIRCPU</option>
+				<option value="luxcore_bidircpuvm">LuxCore, BIDIRCPUVM</option>
+			</select>
+        </div>
+    </p>
+    
     <p class="header" id="sampler">Sampler</p>
 		<div class="collapse">
 			<label for="sampler_type">Sampler type</label>
@@ -96,7 +104,55 @@
             <input type="checkbox" id="sampler_noiseaware">
             <label for="sampler_noiseaware">Noise aware</label><br>
 		</div>
+        
+<div id="sppm">
+    <p class="header">Integrator, SPPM</p>
+    <div class="collapse">
+        <div class="parameter_interface_single">
+            <label for="sppm_photonsampler">Photon sampler</label>
+            <select id="sppm_photonsampler">
+                <option value="halton">halton</option>
+                <option value ="amc">amc</option>
+            </select>
+        </div>
+        <div class="parameter_interface_single">
+            <label for="sppm_lookupaccel">Lookup accelerator</label>
+            <select id="sppm_lookupaccel">
+                <option value="hashgrid">hash grid</option>
+                <option value ="hybridhashgrid">hybrid hash grid</option>
+                <option value="parallelhashgrid">parallel hash grid</option>
+                <option value ="kdtree">kdtree</option>
+            </select>
+        </div>
+        
+        <div class="parameter_interface_single">
+            <label for="sppm_maxeyedepth" class="label1">Eye depth</label>
+            <input type='text' id="sppm_maxeyedepth" size="2" class="inputfield1xx">
+        </div>
+        <div class="parameter_interface_single">
+            <label for="sppm_maxphotondepth" class="label1">Photon depth</label>
+            <input type='text' id="sppm_maxphotondepth" size="2" class="inputfield1xx">
+        </div>
+        <div class="parameter_interface_single">
+            <label for="sppm_photonperpass" class="label1">Photons per pass</label>
+            <input type='text' id="sppm_photonperpass" size="8" class="inputfield1xx">
+        </div>
+        <div class="parameter_interface_single">
+            <label for="sppm_startradius" class="label1">Start radius</label>
+            <input type='text' id="sppm_startradius" size="2" class="inputfield1xx">
+        </div>
+        <div class="parameter_interface_single">
+            <label for="sppm_alpha" class="label1">Radius reduction</label>
+            <input type='text' id="sppm_alpha" size="2" class="inputfield1xx">
+        </div>
+    </div>
+</div>
+        
 
+
+
+
+<div id="integratorsection">
     <p class="header" id="integrator">Integrator</p>
 		<div class="collapse">
 			<label for="sintegrator_type">Integrator type</label>
@@ -286,9 +342,7 @@
                 <input type="checkbox" id="sintegrator_exphoton_dbg_enable_indirspecular">
                 <label for="sintegrator_exphoton_dbg_enable_radiancemap">radiance map</label>
                 <input type="checkbox" id="sintegrator_exphoton_dbg_enable_radiancemap"> -->
-
             </div>
-            
                 
             <div class="sintegrator_type" id="distributedpath">
                 <label for="sintegrator_distributedpath_strategy">strategy</label>
@@ -388,6 +442,7 @@
 				</div>
 				
 		</div>
+</div> <!-- end integrator section -->
 
 		<p class="header">Volume integrator</p>
 		<div class="collapse">
@@ -414,13 +469,22 @@
 		<div class="collapse">
 			<label for="pixelfilter_type">Filter type</label>
 			<select id="pixelfilter_type">
+				<option value="blackmanharris">blackman-harris</option>
 				<option value="box">box</option>
 				<option value="gaussian">gaussian</option>
 				<option value="mitchell">mitchell</option>
 				<option value="sinc">sinc</option>
-				<option value="triangle">triangle</option>
 			</select>
-            
+			<div class="pixelfilter_type" id="blackmanharris">
+                <div class="parameter_interface_single">
+                    <label for="pixelfilter_blackmanharris_xwidth" class="label1">X width</label>
+                    <input type="text" id="pixelfilter_blackmanharris_xwidth" size="4" class="inputfield1">
+                        </div>
+                <div class="parameter_interface_single">
+                    <label for="pixelfilter_blackmanharris_ywidth" class="label1">Y width</label>
+                    <input type="text" id="pixelfilter_blackmanharris_ywidth" size="4" class="inputfield1">
+                        </div>
+			</div>
 			<div class="pixelfilter_type" id="box">
                 <div class="parameter_interface_single">
                     <label for="pixelfilter_box_xwidth" class="label1">X width</label>

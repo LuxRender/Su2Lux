@@ -122,6 +122,10 @@
     padding: 0px 0px 12px 0px;
 }
 
+#sppm{
+    display: none;
+}
+
 input[type=button] {
 	margin: 3px;
 	margin-right: 2px;

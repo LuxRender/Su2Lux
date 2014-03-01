@@ -15,7 +15,7 @@
 	<div id="settings_panel">
         
 		<div id="material_management" name="materiallist">
-			<label for="material_name2">Material</label>
+			<label for="material_name2">Material name</label>
 			<select id="material_name">
 				<option value="bogus">not initialized</option>
 			</select>
@@ -25,7 +25,7 @@
 			<input type="button" id="preset_delete" value="Delete"> /-->
 		</div>
         
-		<p class="header">Material preview</p>
+		<p class="header2">Preview</p>
         <div class="panelcontent collapse" id="preview">
             <input type="button" id="update_material_preview" value="refresh">
             <select id="previewsize">
@@ -44,9 +44,9 @@
             <img src="empty_preview.png" id="preview_image" height=100>
 		</div>
 
-		<p class="header">Material properties</p>
-        <div class="collapse" id="material_type">
-                &nbsp; Material type
+
+        <p class="header2">Material type</p>
+            <div id="material_type">
                 <select id="type">
                     <option value="matte">Matte</option>
                     <option value="glossy">Glossy</option>
@@ -938,6 +938,12 @@
                         <option value="FLBL">blacklight</option>
                     </select>
                 </div>
+            </div><!-- end parameter_interface -->
+            <div class="parameter_interface_single_padded">
+                <label for="lightbase" class="parameter_label">Base material</label>
+                <select id="lightbase" class="parameter_field_spectrum">
+                    <option value="default">default</option>
+                </select>
             </div>
             
         </div> <!-- end panelcontent -->

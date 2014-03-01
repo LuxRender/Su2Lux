@@ -25,16 +25,18 @@ class LuxrenderSettings
 	
 	@@settings_render=
 	{
-    'renderpreset' => 'interior',
+    'renderer' => 'sampler',
 	############  Pixel filter  ############
-    'pixelfilter_type' => 'mitchell',
+    'pixelfilter_type' => 'blackmanharris',
     'pixelfilter_mitchell_optmode' => 'manual', #TODO: change to slider ##unused in Sketchup
     'pixelfilter_mitchell_xwidth' => 1.1,
     'pixelfilter_mitchell_ywidth' => 1.1,
     'pixelfilter_mitchell_B' => 1.0,
     'pixelfilter_mitchell_C' => 0.0,
     'pixelfilter_mitchell_supersample' => true,
-    'pixelfilter_box_xwidth' => 0.5, 
+    'pixelfilter_blackmanharris_xwidth' => 3.3,
+    'pixelfilter_blackmanharris_ywidth' => 3.3,
+    'pixelfilter_box_xwidth' => 0.5,
     'pixelfilter_box_ywidth' => 0.5,
     'pixelfilter_triangle_xwidth' => 2.0, 
     'pixelfilter_triangle_ywidth' => 2.0,
@@ -128,6 +130,17 @@ class LuxrenderSettings
     'sintegrator_path_rrcontinueprob' => 0.65,
     'sintegrator_path_shadow_ray_count' => 1,
     'sintegrator_path_strategy' => 'auto',
+    
+    
+    ############ Integrator, SPPM ######
+    
+    'sppm_photonsampler' => "halton",
+    'sppm_lookupaccel' => "hybridhashgrid",
+    'sppm_maxeyedepth' => 16,
+    'sppm_maxphotondepth' => 16,
+    'sppm_photonperpass' => 1000000,
+    'sppm_startradius' => 2.0,
+    'sppm_alpha' =>  0.7,
 
 	############  Volume Integrator  ############
     'volume_integrator_type' => "multi",
@@ -263,7 +276,7 @@ class LuxrenderSettings
     'fleximage_linear_sensitivity' => 50.0,
     'fleximage_linear_exposure' => 1.0,
     'fleximage_linear_fstop' => 2.8,
-    'fleximage_linear_gamma' => 1.0,
+    'fleximage_linear_gamma' => 2.2,
     'fleximage_contrast_ywa' => 1.0,
     'fleximage_cameraresponse' => "",
     'fleximage_gamma' => 2.2,
@@ -301,6 +314,8 @@ class LuxrenderSettings
     
 	@@settings_other=
 	{
+    #### render settings preset; saving it in @@settings_render causes it to be saved in preset files, causing confusion ###
+    'renderpreset' => 'interior',
     ############   Color Swatches   ############
     'swatch_list' => ['diffuse_swatch','specular_swatch','reflection_swatch','metal2_swatch','em_swatch','transmission_swatch','absorption_swatch','cl1kd_swatch','cl1ks_swatch','cl2kd_swatch','cl2ks_swatch'],
     'diffuse_swatch' => ['kd_R','kd_G','kd_B'],

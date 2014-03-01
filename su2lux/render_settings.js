@@ -70,7 +70,7 @@ $(document).ready(
                   
                   
         //window.location = 'skp:load_preset_files@'
-        window.location = 'skp:scene_setting_loaded@'
+        window.location = 'skp:render_setting_loaded@'
                   
         $("#save_settings_file").click(
             function()
@@ -117,6 +117,21 @@ $(document).ready(
 				$(this).nextAll("#" + this.value).show();
 			}
 		);
+                  
+      $("#renderer").change(
+            function()
+            {
+               // alert (this.value)
+                    if (this.value=="sppm"){
+                        $("#sppm").show();
+                        $("#integratorsection").hide();
+                    }else{
+                        $("#sppm").hide();
+                        $("#integratorsection").show();
+                    }
+                //$(this).nextAll("#" + this.value).show();
+            }
+            );
                   
 		$("#sintegrator_path_rrstrategy, #sintegrator_exphoton_rrstrategy").change(
 			function()

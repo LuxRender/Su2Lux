@@ -77,8 +77,8 @@ class LuxrenderAttributeDictionary
 		@dictionary = self.choose(name) # self is #<LuxrenderAttributeDictionary:.....>
 		model_dictionary = @model.attribute_dictionary(name)
 		if (model_dictionary)
-            puts "number of attribute dictionary items:"
-            puts model_dictionary.length
+            #puts "number of attribute dictionary items:"
+            #puts model_dictionary.length
 			model_dictionary.each { |key, value|
 				self.set_attribute(name, key, value) # set, because we're taking values from the model's attribute dictionary
                                                      # and setting them in the (temporary) LuxRender attribute dictionary

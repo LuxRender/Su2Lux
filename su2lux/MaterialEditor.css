@@ -2,7 +2,9 @@
 	background-color: #393939;
 }
 
-
+#emit_color{
+    display: none;
+}
 
 
 
@@ -386,6 +388,12 @@ input#get_diffuse_color {
 .parameter_interface_single{
     position: relative;
     height: 30px;
+}
+
+.parameter_interface_single_padded{
+    position: relative;
+    height: 30px;
+    margin-top: 8px;
 }
 
 .parameter_interface_autoalpha{
