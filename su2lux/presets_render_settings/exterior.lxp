@@ -8,9 +8,9 @@ sintegrator_path_maxdepth,10
 volume_integrator_type,multi
 volume_integrator_stepsize,1.0
 pixelfilter_type,mitchell
-pixelfilter_mitchell_xwidth,2.0
-pixelfilter_mitchell_ywidth,2.0
-pixelfilter_mitchell_B,0.5
+pixelfilter_mitchell_xwidth,1.1
+pixelfilter_mitchell_ywidth,1.1
+pixelfilter_mitchell_B,1.0
 pixelfilter_mitchell_C,0.0
 pixelfilter_mitchell_supersample,true
 accelerator_type,qbvh

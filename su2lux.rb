@@ -29,8 +29,8 @@ require 'su2lux/fileutils.rb'
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.42"
-    SU2LUX_DATE = "23 February 2014" # to be updated in about.html manually
+    SU2LUX_VERSION = "0.42b"
+    SU2LUX_DATE = "25 February 2014" # to be updated in about.html manually
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
 	PLUGIN_FOLDER = "su2lux"
@@ -120,10 +120,13 @@ module SU2LUX
         settings_source_folder = File.join(SU2LUX::PLUGIN_FOLDER, "presets_render_settings")
         puts "copying preset files"
         settingsfilesstring = File.join(Sketchup.find_support_file("Plugins"),settings_source_folder,"/*.lxp")
+        puts settingsfilesstring
         Dir.glob(settingsfilesstring) do |presetfile|
             settings_target_file = File.join(os.get_variables["settings_path"], File.basename(presetfile))
+            puts settings_target_file
             FileUtils.copy_file(presetfile,settings_target_file) unless File.exists?(settings_target_file)
         end
+        puts "finished copying preset files"
         
 	end # END initialize_variables
 
@@ -667,8 +670,25 @@ module SU2LUX
       @about_dialog.show
 
     end
-                      
-                      
+
+    ##
+    #
+    ##
+    def SU2LUX.get_global_values(lrs)
+        puts "looking for LuxRender path"
+        if (Sketchup.read_default("SU2LUX","luxrenderpath"))
+            lrs.export_luxrender_path = Sketchup.read_default("SU2LUX","luxrenderpath").to_a.pack('H*') # copy stored executable path to settings
+        end
+        puts "getting 'run luxrender' value"
+        if (Sketchup.read_default("SU2LUX","runluxrender"))
+            lrs.runluxrender = Sketchup.read_default("SU2LUX","runluxrender").to_a.pack('H*')
+        else
+            # write runluxrender: ask
+            defaultruntype = "ask"
+            Sketchup.write_default("SU2LUX","runluxrender",defaultruntype.unpack('H*')[0])
+        end
+    end
+    
               
 
 	##
@@ -726,6 +746,13 @@ end # END module SU2LUX
                       
 
 class SU2LUX_model_observer < Sketchup::ModelObserver
+    def onEraseAll(model)
+        UI.messagebox("onEraseAll: " + model.to_s)
+    end
+    
+    def onDeleteModel(model)
+        UI.messagebox("onDeleteModel: " + model.to_s)
+    end
     # test 2014: commented out following lines; attribute dictionaries should be updated instantly when updating settings
     #def onPreSaveModel(model)
     #scene_id = Sketchup.active_model.definitions.entityID
@@ -828,7 +855,6 @@ class SU2LUX_app_observer < Sketchup::AppObserver
             material_editor.materials_skp_lux[mat] = luxmat
 		end
         material_editor.refresh
-
         puts "finished running onOpenModel"
         SU2LUX.create_observers(model)
 	end
@@ -1008,7 +1034,15 @@ if( not file_loaded?(__FILE__))
 
     # initialize, set active material
 	SU2LUX.initialize_variables
-	Sketchup.active_model.materials.current = Sketchup.active_model.materials[0]
+    puts "finished initializing variables"
+
+    puts "setting active material"
+    if (!Sketchup.active_model.materials.current)
+        if (Sketchup.active_model.materials.length == 0)
+            Sketchup.active_model.materials.add
+        end
+        Sketchup.active_model.materials.current = Sketchup.active_model.materials[0]
+    end
     
     # create LuxrenderSettings
     puts "creating LuxRender settings for current model"
@@ -1028,11 +1062,8 @@ if( not file_loaded?(__FILE__))
 	end
     puts "finished loading material settings"
     
-    # get LuxRender path (as stored within SketchUp)
-    puts "looking for LuxRender path"
-    if (Sketchup.read_default("SU2LUX","luxrenderpath"))
-        lrs.export_luxrender_path = Sketchup.read_default("SU2LUX","luxrenderpath").to_a.pack('H*') # copy stored executable path to settings
-    end
+    # get LuxRender path (as stored within SketchUp) and other global values
+    SU2LUX.get_global_values(lrs)
    
     # create material editor
     puts "creating material editor"

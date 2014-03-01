@@ -262,6 +262,14 @@ $(document).ready(
 				nodes = $(this).nextAll("#" + this.value).show();
 			}
 		);
+                  
+        $("#runluxrender").change(
+            function()
+            {
+              //alert(this.value);
+              window.location = 'skp:set_runtype@' + this.value;
+            }
+        )
 		
 		$("#export_file_path_browse").click(
 			function()

@@ -248,6 +248,12 @@ class LuxrenderSceneSettingsEditor
 		} #end action callback open_dialog
 
 
+        @scene_settings_dialog.add_action_callback("set_runtype") {|dialog, params|
+            puts params
+            @lrs.runluxrender = params
+            Sketchup.write_default("SU2LUX", "runluxrender", params.unpack('H*')[0])
+        }
+
 		@scene_settings_dialog.add_action_callback("save_to_model") {|dialog, params|
 			@lrs.save_to_model
 		}

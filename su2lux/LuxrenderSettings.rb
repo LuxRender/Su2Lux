@@ -29,9 +29,9 @@ class LuxrenderSettings
 	############  Pixel filter  ############
     'pixelfilter_type' => 'mitchell',
     'pixelfilter_mitchell_optmode' => 'manual', #TODO: change to slider ##unused in Sketchup
-    'pixelfilter_mitchell_xwidth' => 2.0,
-    'pixelfilter_mitchell_ywidth' => 2.0,
-    'pixelfilter_mitchell_B' => 0.5,
+    'pixelfilter_mitchell_xwidth' => 1.1,
+    'pixelfilter_mitchell_ywidth' => 1.1,
+    'pixelfilter_mitchell_B' => 1.0,
     'pixelfilter_mitchell_C' => 0.0,
     'pixelfilter_mitchell_supersample' => true,
     'pixelfilter_box_xwidth' => 0.5, 
@@ -287,7 +287,7 @@ class LuxrenderSettings
     'fleximage_colorspace_preset' => 'sRGB - HDTV (ITU-R BT.709-5)',
     
     ############   System   ############
-    'runluxrender' => "ask",
+    'runluxrender' => "ask", # moved to 
     'texexport' => "skp",
     'exp_distorted' => true, # export distorted textures
     'export_file_path' => "",
