@@ -935,7 +935,7 @@ def compute_fov(xres, yres)
 			texturefilename = currentmaterial.texture.filename
 			trimmedfilename = texturefilename.gsub("\\", "")
 			trimmedfilename = trimmedfilename.gsub("/", "")
-			if (File.exist?(texturefilename)) # was: if (texturefilename == trimmedfilename) # texture is built-in texture
+			if (File.exist?(texturefilename)) # texture from file
 				texture_name=mcpre.get_texture_name(currentmaterialname,currentmaterial)
 				puts "copying material preview texture from:", texturefilename
 				outputpath = preview_path+texture_path+"/"+File.basename(texture_name)  # last part was File.basename(texturefilename)
@@ -946,10 +946,11 @@ def compute_fov(xres, yres)
             else
                 puts "exporting SketchUp texture to preview texture folder"
                 imageexport = @texturewriter.write_all(preview_path+texture_path+"/", false)
-                #texture_path = sanitize_path(texture_path)
+                @texturewriter.write(luxmat_face, true, preview_path+texture_path+"/" + sanitize_path(currentmaterial.name)+File.extname(texturefilename))
                 if (!imageexport) # catch missing file extension
-                    # follow meshcollector logic, use material name instead of texture name
-                    mattexfilename = mcpre.get_texture_name(currentmaterial.name,currentmaterial).delete("[<>]")
+                    puts "writing file, adding missing file extension"
+                    # use material name instead of texture name as texture is written that way:
+                    mattexfilename = mcpre.get_texture_name(currentmaterial.name,currentmaterial).delete("[<>]") # adds .jpg if necessary
                     @texturewriter.write(luxmat_face, true, preview_path+texture_path+"/" + mattexfilename)
                 end
 			end

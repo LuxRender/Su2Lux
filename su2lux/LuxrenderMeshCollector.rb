@@ -279,17 +279,20 @@ class LuxrenderMeshCollector
 	def get_texture_name(name,mat)
 		ext=mat.texture.filename
         
-        # test/todi 2014: return proper texture name instead of name based on file name
-        #name=name.split("\\").last # fix for textures that have a Windows file path as their name
+        # test/todo 2014: return proper texture name instead of name based on file name
+        # name=name.split("\\").last # fix for textures that have a Windows file path as their name
         
 		ext=ext[(ext.length-4)..ext.length]
 		ext=".png" if (ext.upcase ==".BMP" or ext.upcase ==".GIF" or ext.upcase ==".PNG") #Texture writer converts BMP,GIF to PNG
 		ext=".tif" if ext.upcase=="TIFF"
 		ext=".jpg" if ext.upcase==".JPG"
-		ext=".jpg" if ext.upcase[0]!=46 # 46 = dot
+		ext=".jpg" if ext.upcase[0]!=46 # 46 = dot; so add .jpg if no extension is found
 		s=name+ext
 		return s
 	end # END get_texture_name
+    
+    
+    
 
 	##
 	#

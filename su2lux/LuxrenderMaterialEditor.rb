@@ -432,8 +432,8 @@ class LuxrenderMaterialEditor
 			@time_out = previewtime.to_f + 5
 			@retry_interval = 0.5
 			@luxconsole_options = " -x "
-			pipe = IO.popen(luxconsole_path + @luxconsole_options + "\"" + @preview_lxs + "\"","r") # start rendering
-            puts (luxconsole_path + @luxconsole_options + "\"" + @preview_lxs + "\"")
+			pipe = IO.popen("\"" + luxconsole_path + "\"" + @luxconsole_options + " \"" + @preview_lxs + "\"","r") # start rendering
+            puts ("\"" + luxconsole_path + "\"" + @luxconsole_options + " \"" + @preview_lxs + "\"")
 			
 			# wait for rendering to get ready, then update image
 			@times_waited = 0.0
@@ -754,8 +754,8 @@ class LuxrenderMaterialEditor
 				puts "adding material #{mat.name} to material hash, creating LuxRender material"
                 @materials_skp_lux[mat]=luxmat
                 get_skp_color(mat,luxmat)
-			else
-				puts "material #{mat.name} found in material hash, skipping LuxRender material creation"
+            #else
+            #    puts "material #{mat.name} found in material hash, skipping LuxRender material creation"
 			end
 		end
 		
@@ -815,6 +815,7 @@ class LuxrenderMaterialEditor
     #
     ##
     def set_material_lists()
+        puts "updating material dropdown lists"
         set_material_list("material_name")  # main material list
         set_material_list("material_list1") # mix material 1
         set_material_list("material_list2") # mix material 2
@@ -842,7 +843,7 @@ class LuxrenderMaterialEditor
 	#
 	##
 	def set_material_list(dropdownname)
-        puts "updating material dropdown list in LuxRender Material Editor, " + dropdownname
+        #puts "updating material dropdown list in LuxRender Material Editor, " + dropdownname
 		cmd = "$('#" + dropdownname + "').empty()"
 		@material_editor_dialog.execute_script(cmd)
         if (dropdownname == "lightbase")

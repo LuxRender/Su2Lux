@@ -33,8 +33,8 @@ end
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.42b"
-    SU2LUX_DATE = "25 February 2014" # to be updated in about.html manually
+    SU2LUX_VERSION = "0.43"
+    SU2LUX_DATE = "2 March 2014" # to be updated in about.html manually
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
 	PLUGIN_FOLDER = "su2lux"
@@ -88,7 +88,11 @@ module SU2LUX
 	#
 	##
 	def SU2LUX.get_os
-		return (Object::RUBY_PLATFORM =~ /mswin/i) ? :windows : ((Object::RUBY_PLATFORM =~ /darwin/i) ? :mac : :other)
+        if (Object::RUBY_PLATFORM =~ /darwin/i)
+            return :mac
+        else
+            return :windows
+        end
 	end # END get_os
 
 
@@ -595,6 +599,13 @@ module SU2LUX
         @toolbar = toolbar
     end
 
+    def SU2LUX.reset_hashes()
+        @lrs_hash = Hash.new
+        @sceneedit_hash = Hash.new
+        @renderedit_hash = Hash.new
+        @matedit_hash = Hash.new
+    end
+
 
     ##
     #
@@ -625,17 +636,17 @@ module SU2LUX
 	##
 	def SU2LUX.show_scene_settings_editor(scene_id)
         puts "running show scene settings editor"
-        puts @sceneedit_hash[scene_id]
+        #puts @sceneedit_hash[scene_id]
 		if not @sceneedit_hash[scene_id]
 			@sceneedit_hash[scene_id] = LuxrenderSceneSettingsEditor.new
-            puts "new scene settings editor:"
-            puts @sceneedit_hash[scene_id]
+            #puts "new scene settings editor:"
+            #puts @sceneedit_hash[scene_id]
 		end
         if @sceneedit_hash[scene_id].visible?
-            puts "hiding scene settings editor"
+            #puts "hiding scene settings editor"
             @sceneedit_hash[scene_id].close
         else
-            puts "showing scene settings editor"
+            #puts "showing scene settings editor"
             @sceneedit_hash[scene_id].show
         end
     end # END show_scene_settings_editor
@@ -646,17 +657,17 @@ module SU2LUX
 	##
 	def SU2LUX.show_render_settings_editor(scene_id)
         puts "running show render settings editor"
-        puts @renderedit_hash[scene_id]
+        #puts @renderedit_hash[scene_id]
 		if not @renderedit_hash[scene_id]
 			@renderedit_hash[scene_id]=LuxrenderRenderSettingsEditor.new
-            puts "new render settings editor:"
-            puts @renderedit_hash[scene_id]
+            #puts "new render settings editor:"
+            #puts @renderedit_hash[scene_id]
 		end
         if @renderedit_hash[scene_id].visible?
-            puts "hiding render settings editor"
+            #puts "hiding render settings editor"
             @renderedit_hash[scene_id].close
         else
-            puts "showing render settings editor"
+            #puts "showing render settings editor"
             @renderedit_hash[scene_id].show
         end
     end # END show_scene_settings_editor
@@ -720,7 +731,7 @@ module SU2LUX
                 if @renderedit_hash[scene_id]
                     editor = @renderedit_hash[scene_id]
                 else
-                    UI.messagebox "creating new render settings editor"
+                    #UI.messagebox "creating new render settings editor"
                     @renderedit_hash[scene_id] = LuxrenderRenderSettingsEditor.new
                     editor = @renderedit_hash[scene_id]
                 end
@@ -804,33 +815,56 @@ end # END class SU2LUX_view_observer
 class SU2LUX_app_observer < Sketchup::AppObserver
 	def onNewModel(model)
         puts "onNewModel observer triggered"
-        #puts model
-		
-        lrs = LuxrenderSettings.new
         model_id = Sketchup.active_model.definitions.entityID
+		
+        # close editors, reset hashes on Windows; OS X has multiple editors in parallel
+        if (SU2LUX.get_os == :windows)
+            # close editors
+            oldmateditor = SU2LUX.get_editor(model_id,"material")
+            oldrendersettingseditor = SU2LUX.get_editor(model_id,"rendersettings")
+            oldscenesettingseditor = SU2LUX.get_editor(model_id,"scenesettings")
+            oldmateditor.close
+            oldrendersettingseditor.close
+            oldscenesettingseditor.close
+            # reset hashes
+            SU2LUX.reset_hashes
+        end
+        
+        lrs = LuxrenderSettings.new
         SU2LUX.add_lrs(lrs,model_id)
 		# loaded = lrs.load_from_model
 		# lrs.reset unless loaded
         lrs.reset_viewparams
         
+		Sketchup.active_model.materials.current = Sketchup.active_model.materials[0]
+        material_editor = SU2LUX.create_material_editor(model_id)
+        
         puts "onNewModel creating scene settings editor"
         scene_settings_editor = SU2LUX.create_scene_settings_editor(model_id)
+        
         puts "onNewModel creating render settings editor"
         render_settings_editor = SU2LUX.create_render_settings_editor(model_id)
-                      
-		Sketchup.active_model.materials.current = Sketchup.active_model.materials[0]
-                      
-        material_editor = SU2LUX.create_material_editor(model_id)
+        
         SU2LUX.create_observers(model)
         puts "finished running onNewModel"
 	end # END onNewModel
 
 	def onOpenModel(model)
         puts "onOpenModel triggered"
+        model_id = Sketchup.active_model.definitions.entityID
+        
+        # close material and settings windows on Windows
+        if (SU2LUX.get_os == :windows)
+            oldmateditor = SU2LUX.get_editor(model_id,"material")
+            oldrendersettingseditor = SU2LUX.get_editor(model_id,"rendersettings")
+            oldscenesettingseditor = SU2LUX.get_editor(model_id,"scenesettings")
+            oldmateditor.close
+            oldrendersettingseditor.close
+            oldscenesettingseditor.close
+        end
         
         puts "onOpenModel creating lrs"
         lrs = LuxrenderSettings.new
-        model_id = Sketchup.active_model.definitions.entityID
         SU2LUX.add_lrs(lrs,model_id)
         loaded = lrs.load_from_model
         lrs.reset unless loaded
