@@ -63,27 +63,27 @@ class LuxrenderExport
                 out.puts "Renderer \"#{@lrs.renderer}\""
             when "hybrid"
                 out.puts "Renderer \"#{@lrs.renderer}\""
-                out.puts '\t"bool opencl.gpu.use" ["true"]'
+                out.puts "\t\"bool opencl.gpu.use\" [\"true\"]"
             when "sppm"
                 out.puts "Renderer \"#{@lrs.renderer}\""
             when "luxcore_pathcpu"
-                out.puts "Renderer \"luxcore\""
-                out.puts '\t"string config" ["opencl.gpu.use = 1" "opencl.cpu.use = 1" "renderengine.type = PATHCPU" ""]'
+                out.puts "Renderer \"slg\""
+                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"renderengine.type = PATHCPU\" \"\"]"
             when "luxcore_pathocl"
-                out.puts "Renderer \"luxcore\""
-                out.puts '\t"string config" ["opencl.gpu.use = 1" "opencl.cpu.use = 1" "renderengine.type = PATHOCL" ""]'
+                out.puts "Renderer \"slg\""
+                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"renderengine.type = PATHOCL\" \"\"]"
             when "luxcore_biaspathcpu"
-                out.puts "Renderer \"luxcore\""
-                out.puts '\t"string config" ["opencl.gpu.use = 1" "opencl.cpu.use = 1" "renderengine.type = BIASPATHCPU" "tile.multipass.enable = 1" ""]'
+                out.puts "Renderer \"slg\""
+                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"renderengine.type = BIASPATHCPU\" \"tile.multipass.enable = 1\" \"\"]"
             when "luxcore_biaspathocl"
-                out.puts "Renderer \"luxcore\""
-                out.puts '\t"string config" ["opencl.gpu.use = 1" "opencl.cpu.use = 1" "renderengine.type = BIASPATHOCL" "tile.multipass.enable = 1" ""]'
+                out.puts "Renderer \"slg\""
+                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"renderengine.type = BIASPATHOCL\" \"tile.multipass.enable = 1\" \"\"]"
             when "luxcore_bidircpu"
-                out.puts "Renderer \"luxcore\""
-                out.puts '\t"string config" ["opencl.gpu.use = 1" "opencl.cpu.use = 1" "renderengine.type = BIDIRCPU" ""]'
+                out.puts "Renderer \"slg\""
+                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"renderengine.type = BIDIRCPU\" \"\"]"
             when "luxcore_bidircpuvm"
-                out.puts "Renderer \"luxcore\""
-                out.put '\t"string config" ["opencl.gpu.use = 1" "opencl.cpu.use = 1" "opencl.gpu.workgroup.size = 64" "opencl.kernelcache = NONE" "renderengine.type = PATHCPU" ""]'
+                out.puts "Renderer \"slg\""
+                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"opencl.gpu.workgroup.size = 64\" \"opencl.kernelcache = NONE\" \"renderengine.type = PATHCPU\" \"\"]"
         end
         out.puts ""
     end

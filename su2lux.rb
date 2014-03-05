@@ -25,16 +25,16 @@
 
 require 'sketchup.rb'
 if (Sketchup::version.split(".")[0].to_f >= 14)
-    require 'fileutils'
+    require 'su2lux/fileutils_ruby20.rb'
 else
-    require 'su2lux/fileutils_ruby19.rb' # versions older than 2014 do not come with fileutils, using local copy instead
+    require 'su2lux/fileutils_ruby19.rb' # versions older than 2014 use Ruby 1.9
 end
 
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.43"
-    SU2LUX_DATE = "2 March 2014" # to be updated in about.html manually
+    SU2LUX_VERSION = "0.43c"
+    SU2LUX_DATE = "5 March 2014" # to be updated in about.html manually
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
 	PLUGIN_FOLDER = "su2lux"
@@ -823,9 +823,15 @@ class SU2LUX_app_observer < Sketchup::AppObserver
             oldmateditor = SU2LUX.get_editor(model_id,"material")
             oldrendersettingseditor = SU2LUX.get_editor(model_id,"rendersettings")
             oldscenesettingseditor = SU2LUX.get_editor(model_id,"scenesettings")
-            oldmateditor.close
-            oldrendersettingseditor.close
-            oldscenesettingseditor.close
+			if oldmateditor.visible?
+				oldmateditor.close
+            end
+			if oldrendersettingseditor.visible?
+				oldrendersettingseditor.close
+            end
+			if oldscenesettingseditor.visible?
+				oldscenesettingseditor.close
+			end
             # reset hashes
             SU2LUX.reset_hashes
         end

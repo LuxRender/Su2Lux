@@ -268,7 +268,7 @@ class LuxrenderRenderSettingsEditor
         @render_settings_dialog.execute_script(showintegrator)
         
         # show preset name in dropdown value
-        setdropdown = '$("#renderpreset").val(' + @lrs.renderpreset + ');'
+        setdropdown = '$("#renderpreset").val("' + @lrs.renderpreset + '");'
         @render_settings_dialog.execute_script(setdropdown)
 
         
