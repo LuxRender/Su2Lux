@@ -210,15 +210,18 @@ jQuery._farbtastic = function (container, callback) {
   /**
    * Mouseup handler
    */
-  fb.mouseup = function () {
-    // SU2LUX addition
-	window.location = 'skp:pass_color@' + fb.color;
-  
-  
+  fb.mouseup = function () {	
     // Uncapture mouse
     $(document).unbind('mousemove', fb.mousemove);
     $(document).unbind('mouseup', fb.mouseup);
     document.dragging = false;
+	
+    // SU2LUX addition
+	colorasfloat = fb.unpack(fb.color);
+	document.getElementById("red_field").value = colorasfloat[0].toFixed(4);
+	document.getElementById("green_field").value = colorasfloat[1].toFixed(4);
+	document.getElementById("blue_field").value = colorasfloat[2].toFixed(4);
+	window.location = 'skp:pass_color@' + fb.color;
   }
 
   /**
@@ -346,4 +349,5 @@ jQuery._farbtastic = function (container, callback) {
   if (callback) {
     fb.linkTo(callback);
   }
+
 }

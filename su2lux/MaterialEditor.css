@@ -2,6 +2,8 @@
 	background-color: #393939;
 }
 
+body {overflow-x:hidden; overflow-y: auto}
+
 #emit_color{
     display: none;
 }
@@ -254,7 +256,7 @@ input#get_diffuse_color {
 
 .colorizesection{
     position: absolute;
-    left: 65px;
+    left: 90px;
     top: 45px;
     width: 120px;
 }
@@ -332,8 +334,15 @@ input#get_diffuse_color {
     top: 80px;
 }
 
+#spec_IOR{
+	width: 24pt;
+
+}
+
+
 .parameter_label{
     position: absolute;
+	width: 100pt;
     left: 0px;
     top: 0px;
 }
@@ -344,21 +353,27 @@ input#get_diffuse_color {
     top: -3px;
 }
 
-.parameter_field_dm{
+.parameter_field_coating{
     position: absolute;
-    left: 50px;
+    left: 125px;
     top: -3px;
 }
 
-.parameter_field_dr{
+.parameter_field_dm{
     position: absolute;
     left: 120px;
     top: -3px;
 }
 
-.parameter_field_cloth{
+.parameter_field_dr{
     position: absolute;
     left: 140px;
+    top: -3px;
+}
+
+.parameter_field_cloth{
+    position: absolute;
+    left: 110pt;
     top: -3px;
 }
 
@@ -376,7 +391,7 @@ input#get_diffuse_color {
 
 .parameter_field_spectrum{
     position: absolute;
-    left: 90px;
+    left: 70pt;
     top: -3px;
 }
 
@@ -398,6 +413,7 @@ input#get_diffuse_color {
 
 .parameter_interface_autoalpha{
     position: relative;
+	left: 40px;
     height: 45px;
 }
 
@@ -411,6 +427,10 @@ input#get_diffuse_color {
     top: 0px;
     left: -8px;
     height: 86px;
+}
+
+#u_exponent, #v_exponent, #ka_d, #IOR_index, #film, #filmindex, #cauchyb, #cl_repeatu, #cl_repeatv{
+	width: 24pt;
 }
 
 .parameter_interface_mix{
@@ -445,7 +465,7 @@ input#get_diffuse_color {
 
 .mix_uniform_field{
     position: absolute;
-    left: 148px;
+    left: 112pt;
     top: 21px;
 }
 
@@ -453,8 +473,16 @@ input#get_diffuse_color {
     margin: 0px;
     padding: 0px;
     position: absolute;
-    left: 200px;
+    left: 90px;
     top: 12px;
+}
+
+.texture_area_swatchfield_right{
+    margin: 0px;
+    padding: 0px;
+    position: absolute;
+    left: 210px;
+    top: 10px;
 }
 
 .texture_area{
@@ -472,8 +500,8 @@ input#get_diffuse_color {
 
 .texture_area_dr{
     position: absolute;
-    left: 200px;
-    top: 0px;
+    left: 120px;
+    top: 36px;
 }
 
 .tex_label_swatch{
@@ -492,7 +520,7 @@ input#get_diffuse_color {
 
 .tex_dropdown{
     position: absolute;
-    left: 60px;
+    left: 0px;
     top:    -3px;
 }
 
@@ -514,48 +542,60 @@ input#get_diffuse_color {
     position: absolute;
     left: 0px;
     top: 44px;
-    width: 250px;
+    width: 400px;
 }
 
 #microdisplacement{
     display: none;
     position: absolute;
     left: 0px;
-    top: 44px;
+    top: 114px;
     width: 250px;
 }
 
-#dm_subdiv_label, #dm_microlevels_label{
+#dm_microlevels_label{
     position: absolute;
     left: 0px;
     top: 2px;
 }
 
+#dm_subdiv_label{
+    position: absolute;
+    left: 0px;
+    top: 72px;
+}
+
 #dm_scale_label{
     position: absolute;
     left: 0px;
-    top: 77px;
+    top: 147px;
 }
 
 #dm_offset_label{
     position: absolute;
     left: 0px;
-    top: 108px;
+    top: 178px;
 }
 
 #dm_scale{
     position: absolute;
     left: 119px;
-    top: 75px;
+    top: 145px;
 }
 
 #dm_offset{
     position: absolute;
     left: 120px;
-    top: 105px;
+    top: 175px;
 }
 
-#dm_subdivl, #dm_microlevels{
+#dm_subdivl{
+    position: absolute;
+    left: 120px;
+    top: 70px;
+}
+
+#dm_microlevels{
     position: absolute;
     left: 120px;
     top: 0px;
@@ -563,39 +603,39 @@ input#get_diffuse_color {
 
 #dm_normalsmooth{
     position: absolute;
-    left: 199px;
-    top: 28px;
+    left: 211px;
+    top: 58px;
 }
 
 #dm_normalsplit{
     position: absolute;
-    left: 199px;
-    top: 48px;
+    left: 211px;
+    top: 88px;
 }
 
 #dm_sharpboundary{
     position: absolute;
-    left: 199px;
-    top: 68px;
+    left: 211px;
+    top: 118px;
 }
 
 #dm_normalsmooth_label{
     position: absolute;
-    left: 219px;
-    top: 28px;
+    left: 233px;
+    top: 58px;
     width: 130px;
 }
 #dm_normalsplit_label{
     position: absolute;
-    left: 219px;
-    top: 48px;
+    left: 233px;
+    top: 88px;
     width: 130px;
 }
 
 #dm_sharpboundary_label{
     position: absolute;
-    left: 219px;
-    top: 68px;
+    left: 233px;
+    top: 118px;
     width: 130px;
 }
 

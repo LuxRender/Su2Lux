@@ -88,16 +88,16 @@
                 <p class="header2">Diffuse Color</p>
                 <div class="panelcontent collapse">
                     <table id="swatch_diffuse"><tr><td id="diffuse_swatch" class="swatch" width=64 height=64></td></tr></table>
-                    <label for="kd_R" class="kdr">Red</label><input type='text' id="kd_R" size="6" class="kdrvalue">
+                    <!--  <label for="kd_R" class="kdr">Red</label><input type='text' id="kd_R" size="6" class="kdrvalue">
                     <label for="kd_G" class="kdg">Green</label><input type='text' id="kd_G" size="6" class="kdgvalue">
-                    <label for="kd_B" class="kdb">Blue</label><input type='text' id="kd_B" size="6" class="kdbvalue">
+                    <label for="kd_B" class="kdb">Blue</label><input type='text' id="kd_B" size="6" class="kdbvalue"> -->
                     
                     <div class="texture_area_swatchfield">
-                    <label for="kd_texturetype" class="tex_label">Texture</label>
+                    <!-- <label for="kd_texturetype" class="tex_label">Texture</label> -->
                     <select id="kd_texturetype" class="tex_dropdown">
-                        <option value="none">None</option>
-                        <option value="sketchup">Sketchup Texture</option>
-                        <option value="imagemap">Image Map</option>
+                        <option value="none">no texture</option>
+                        <option value="sketchup">SketchUp texture</option>
+                        <option value="imagemap">image map</option>
                     </select>
                     
                     <span class="sketchup">
@@ -130,11 +130,11 @@
                         </div>
                         <div id="clothrepeatx">
                         <label for="cl_repeatu" class="parameter_label">Number of threads, x</label>
-                        <input type='text' id="cl_repeatu" size="6" class="parameter_field_cloth">
+                        <input type='text' id="cl_repeatu" class="parameter_field_cloth">
                         </div>
                         <div id="clothrepeaty">
                         <label for="cl_repeatv" class="parameter_label">Number of threads, y</label>
-                        <input type='text' id="cl_repeatv" size="6" class="parameter_field_cloth">
+                        <input type='text' id="cl_repeatv" class="parameter_field_cloth">
                         </div>
                     </div>
                     <br>
@@ -144,16 +144,16 @@
                         <table id="swatch_cloth_cl1kd_R">
                         <tr><td id="cl1kd_swatch" class="swatch" width=64 height=64></td></tr>
                         </table>
-                        <label for="cl1kd_R" class="kdr">Red</label><input type='text' id="cl1kd_R" size="6" class="kdrvalue">
+                        <!-- <label for="cl1kd_R" class="kdr">Red</label><input type='text' id="cl1kd_R" size="6" class="kdrvalue">
                         <label for="cl1kd_G" class="kdg">Green</label><input type='text' id="cl1kd_G" size="6" class="kdgvalue">
-                        <label for="cl1kd_B" class="kdb">Blue</label><input type='text' id="cl1kd_B" size="6" class="kdbvalue">
+                        <label for="cl1kd_B" class="kdb">Blue</label><input type='text' id="cl1kd_B" size="6" class="kdbvalue"> -->
                         
                         <div class="texture_area_swatchfield">
-                        <label for="cl1kd_texturetype" class="tex_label">Texture</label>
+                        <!-- <label for="cl1kd_texturetype" class="tex_label">Texture</label> -->
                         <select id="cl1kd_texturetype" class="tex_dropdown" name="cl1kd">
-                            <option value="none">None</option>
-                            <option value="sketchup">Sketchup Texture</option>
-                            <option value="imagemap">Image Map</option>
+                            <option value="none">no texture</option>
+                            <option value="sketchup">SketchUp texture</option>
+                            <option value="imagemap">image map</option>
                         </select>
                         <span class="sketchup">
                             <div class="colorizesection"><input type="checkbox" class="cl1kd_imagemap_colorize" name="cl1kd_imagemap_colorize">
@@ -173,16 +173,16 @@
                         <table id="swatch_cloth_cl1kd_S">
                         <tr><td id="cl1ks_swatch" class="swatch" width=64 height=64></td></tr>
                         </table>
-                        <label for="cl1ks_R" class="kdr">Red</label><input type='text' id="cl1ks_R" size="6" class="kdrvalue">
+                        <!-- <label for="cl1ks_R" class="kdr">Red</label><input type='text' id="cl1ks_R" size="6" class="kdrvalue">
                         <label for="cl1ks_G" class="kdg">Green</label><input type='text' id="cl1ks_G" size="6" class="kdgvalue">
-                        <label for="cl1ks_B" class="kdb">Blue</label><input type='text' id="cl1ks_B" size="6" class="kdbvalue">
+                        <label for="cl1ks_B" class="kdb">Blue</label><input type='text' id="cl1ks_B" size="6" class="kdbvalue"> -->
                         
                         <div class="texture_area_swatchfield">
-                        <label for="cl1ks_texturetype" class="tex_label">Texture</label>
+                        <!-- <label for="cl1ks_texturetype" class="tex_label">Texture</label> -->
                         <select id="cl1ks_texturetype" class="tex_dropdown" name="cl1ks">
-                            <option value="none">None</option>
-                            <option value="sketchup">Sketchup Texture</option>
-                            <option value="imagemap">Image Map</option>
+                            <option value="none">no texture</option>
+                            <option value="sketchup">SketchUp texture</option>
+                            <option value="imagemap">image map</option>
                         </select>
                         <span class="sketchup">
                             <div class="colorizesection"><input type="checkbox" class="cl1ks_imagemap_colorize" name="cl1ks_imagemap_colorize">
@@ -203,16 +203,16 @@
                         <table id="swatch_cloth_cl2kd_R">
                         <tr><td id="cl2kd_swatch" class="swatch" width=64 height=64></td></tr>
                         </table>
-                        <label for="cl2kd_R" class="kdr">Red</label><input type='text' id="cl2kd_R" size="6" class="kdrvalue">
+                        <!-- <label for="cl2kd_R" class="kdr">Red</label><input type='text' id="cl2kd_R" size="6" class="kdrvalue">
                         <label for="cl2kd_G" class="kdg">Green</label><input type='text' id="cl2kd_G" size="6" class="kdgvalue">
-                        <label for="cl2kd_B" class="kdb">Blue</label><input type='text' id="cl2kd_B" size="6" class="kdbvalue">
+                        <label for="cl2kd_B" class="kdb">Blue</label><input type='text' id="cl2kd_B" size="6" class="kdbvalue"> -->
                         
                         <div class="texture_area_swatchfield">
-                            <label for="cl2kd_texturetype" class="tex_label">Texture</label>
+                            <!-- <label for="cl2kd_texturetype" class="tex_label">Texture</label> -->
                             <select id="cl2kd_texturetype" class="tex_dropdown" name="cl2kd">
-                                <option value="none">None</option>
-                                <option value="sketchup">Sketchup Texture</option>
-                                <option value="imagemap">Image Map</option>
+                                <option value="none">no texture</option>
+                                <option value="sketchup">SketchUp texture</option>
+                                <option value="imagemap">image map</option>
                             </select>
                             <span class="sketchup">
                                 <div class="colorizesection"><input type="checkbox" class="cl2kd_imagemap_colorize" name="cl2kd_imagemap_colorize">
@@ -232,16 +232,16 @@
                         <table id="swatch_cloth_cl2kd_S">
                         <tr><td id="cl2ks_swatch" class="swatch" width=64 height=64></td></tr>
                         </table>
-                        <label for="cl2ks_R" class="kdr">Red</label><input type='text' id="cl2ks_R" size="6" class="kdrvalue">
+                        <!-- <label for="cl2ks_R" class="kdr">Red</label><input type='text' id="cl2ks_R" size="6" class="kdrvalue">
                         <label for="cl2ks_G" class="kdg">Green</label><input type='text' id="cl2ks_G" size="6" class="kdgvalue">
-                        <label for="cl2ks_B" class="kdb">Blue</label><input type='text' id="cl2ks_B" size="6" class="kdbvalue">
+                        <label for="cl2ks_B" class="kdb">Blue</label><input type='text' id="cl2ks_B" size="6" class="kdbvalue"> -->
                         
                         <div class="texture_area_swatchfield">
-                        <label for="cl2ks_texturetype" class="tex_label">Texture</label>
+                        <!-- <label for="cl2ks_texturetype" class="tex_label">Texture</label> -->
                         <select id="cl2ks_texturetype" class="tex_dropdown" name="cl2ks">
-                            <option value="none">None</option>
-                            <option value="sketchup">Sketchup Texture</option>
-                            <option value="imagemap">Image Map</option>
+                            <option value="none">no texture</option>
+                            <option value="sketchup">SketchUp texture</option>
+                            <option value="imagemap">image map</option>
                         </select>
                         <span class="sketchup">
                             <div class="colorizesection"><input type="checkbox" class="cl2ks_imagemap_colorize" name="cl2ks_imagemap_colorize">
@@ -274,16 +274,16 @@
                         <table id="swatch_specular">
                         <tr><td id="specular_swatch" class="swatch" width=64 height=64></td></tr>
                         </table>
-                        <label for="ks_R" class="kdr">Red</label><input type='text' id="ks_R" size="6" class="kdrvalue">
+                        <!-- <label for="ks_R" class="kdr">Red</label><input type='text' id="ks_R" size="6" class="kdrvalue">
                         <label for="ks_G" class="kdg">Green</label><input type='text' id="ks_G" size="6" class="kdgvalue">
-                        <label for="ks_B" class="kdb">Blue</label><input type='text' id="ks_B" size="6" class="kdbvalue">
+                        <label for="ks_B" class="kdb">Blue</label><input type='text' id="ks_B" size="6" class="kdbvalue"> -->
                         
                         <div class="texture_area_swatchfield">
-                        <label for="ks_texturetype" class="tex_label">Texture</label>
+                        <!-- <label for="ks_texturetype" class="tex_label">Texture</label> -->
                         <select id="ks_texturetype" class="tex_dropdown" name="ks">
-                            <option value="none">None</option>
-                            <option value="sketchup">Sketchup Texture</option>
-                            <option value="imagemap">Image Map</option>
+                            <option value="none">no texture</option>
+                            <option value="sketchup">SketchUp texture</option>
+                            <option value="imagemap">image map</option>
                         </select>
                         <span class="sketchup">
                             <div class="colorizesection"><input type="checkbox" class="ks_imagemap_colorize" name="ks_imagemap_colorize">
@@ -300,15 +300,15 @@
                     
                     <div id="specular_scheme_IOR" class="parameter_interface">
                         <div id="spec_IOR_interface">
-                        <label for="spec_IOR" class="spec_IOR">Index of refraction: </label><input type='text' id="spec_IOR" size="6" class="spec_IORvalue">
+                        <label for="spec_IOR" class="spec_IOR">Index of refraction: </label><input type='text' id="spec_IOR" class="spec_IORvalue">
                         </div>
                         
-                        <div class="texture_area_swatchfield">
-                            <label for="spec_IOR_texturetype" class="tex_label">Texture</label>
+                        <div class="texture_area_swatchfield_right">
+                            <!-- <label for="spec_IOR_texturetype" class="tex_label">Texture</label> -->
                             <select id="spec_IOR_texturetype" class="tex_dropdown" name="spec_IOR">
-                                <option value="none">None</option>
-                                <option value="sketchup">Sketchup Texture</option>
-                                <option value="imagemap">Image Map</option>
+                                <option value="none">no texture</option>
+                                <option value="sketchup">SketchUp texture</option>
+                                <option value="imagemap">image map</option>
                             </select>
                             <span class="sketchup">
                                 <div class="colorizesection"><input type="checkbox" class="spec_IOR_imagemap_colorize" name="spec_IOR_imagemap_colorize">
@@ -384,7 +384,7 @@
                             <select id="mx_texturetype" class="mixtypes_matlist">
                                 <option value="none">Uniform</option>
                                 <option value="sketchup">SketchUp texture</option>
-                                <option value="imagemap">Image Map</option>
+                                <option value="imagemap">image map</option>
                             </select>
                             <span class="none">
                                 <label for="mix_uniform" class="mix_uniform_label">Material 1 percentage</label>
@@ -409,19 +409,16 @@
                         <tr><td id="transmission_swatch" class="swatch" width=64 height=64></td></tr>
                     </table>
                     
-                    <label for="kt_R" class="kdr">Red</label>
-                    <input type='text' id="kt_R" size="6" class="kdrvalue">
-                    <label for="kt_G" class="kdg">Green</label>
-                    <input type='text' id="kt_G" size="6" class="kdgvalue">
-                    <label for="kt_B" class="kdb">Blue</label>
-                    <input type='text' id="kt_B" size="6" class="kdbvalue">
+                    <!-- <label for="kt_R" class="kdr">Red</label><input type='text' id="kt_R" size="6" class="kdrvalue">
+                    <label for="kt_G" class="kdg">Green</label><input type='text' id="kt_G" size="6" class="kdgvalue">
+                    <label for="kt_B" class="kdb">Blue</label><input type='text' id="kt_B" size="6" class="kdbvalue"> -->
                         
                         <div class="texture_area_swatchfield">
-                        <label for="kt_texturetype" class="tex_label">Texture</label>
+                        <!-- <label for="kt_texturetype" class="tex_label">Texture</label> -->
                         <select id="kt_texturetype" class="tex_dropdown">
-                            <option value="none">None</option>
-                            <option value="sketchup">Sketchup Texture</option>
-                            <option value="imagemap">Image Map</option>
+                            <option value="none">no texture</option>
+                            <option value="sketchup">SketchUp texture</option>
+                            <option value="imagemap">image map</option>
                         </select>
                         <span class="imagemap">
                             <div id="kt_imgmapname" class="tex_path">&nbsp;</div>
@@ -438,19 +435,16 @@
                         <tr><td id="reflection_swatch" class="swatch" width=64 height=64></td></tr>
                     </table>
                     
-                    <label for="kr_R" class="kdr">Red</label>
-                    <input type='text' id="kr_R" size="6" class="kdrvalue">
-                    <label for="kr_G" class="kdg">Green</label>
-                    <input type='text' id="kr_G" size="6" class="kdgvalue">
-                    <label for="kr_B" class="kdb">Blue</label>
-                    <input type='text' id="kr_B" size="6" class="kdbvalue">
+                    <!-- <label for="kr_R" class="kdr">Red</label><input type='text' id="kr_R" size="6" class="kdrvalue">
+                    <label for="kr_G" class="kdg">Green</label><input type='text' id="kr_G" size="6" class="kdgvalue">
+                    <label for="kr_B" class="kdb">Blue</label><input type='text' id="kr_B" size="6" class="kdbvalue"> -->
                     
                     <div class="texture_area_swatchfield">
-                        <label for="kr_texturetype" class="tex_label">Texture</label>
+                        <!-- <label for="kr_texturetype" class="tex_label">Texture</label> -->
                         <select id="kr_texturetype" class="tex_dropdown">
                             <option value="none">None</option>
-                            <option value="sketchup">Sketchup Texture</option>
-                            <option value="imagemap">Image Map</option>
+                            <option value="sketchup">SketchUp texture</option>
+                            <option value="imagemap">image map</option>
                         </select>
                         <span class="imagemap">
                             <div id="kr_imgmapname" class="tex_path">&nbsp;</div>
@@ -466,9 +460,9 @@
 				<input type='text' id="matte_sigma" size="6">
 				<label for="matte_sigma_texturetype">Texture</label>
 				<select id="matte_sigma_texturetype">
-					<option value="none">None</option>
-					<option value="sketchup">Sketchup Texture</option>
-					<option value="imagemap">Image Map</option>
+					<option value="none">no texture</option>
+					<option value="sketchup">SketchUp texture</option>
+					<option value="imagemap">image map</option>
 				</select>
 				<span class="imagemap">
                     <div id="matte_sigma_imgmapname" class="imgmapname">&nbsp;</div>
@@ -506,16 +500,16 @@
                     <span class="metal2_custom">
                         <div id="metal2_color">
                             <table id="swatch_metal2"><tr><td id="metal2_swatch" class="swatch" width=64 height=64></td></tr></table>
-                            <label for="km2_R" class="kdr">Red</label><input type='text' id="km2_R" size="6" class="kdrvalue">
+                            <!-- <label for="km2_R" class="kdr">Red</label><input type='text' id="km2_R" size="6" class="kdrvalue">
                             <label for="km2_G" class="kdg">Green</label><input type='text' id="km2_G" size="6" class="kdgvalue">
-                            <label for="km2_B" class="kdb">Blue</label><input type='text' id="km2_B" size="6" class="kdbvalue">
+                            <label for="km2_B" class="kdb">Blue</label><input type='text' id="km2_B" size="6" class="kdbvalue"> -->
                             
                             <div class="texture_area_swatchfield">
-                                <label for="km2_texturetype" class="tex_label">Texture</label>
+                                <!-- <label for="km2_texturetype" class="tex_label">Texture</label> -->
                                 <select id="km2_texturetype" class="tex_dropdown">
-                                    <option value="none">None</option>
-                                    <option value="sketchup">Sketchup Texture</option>
-                                    <option value="imagemap">Image Map</option>
+                                    <option value="none">no texture</option>
+                                    <option value="sketchup">SketchUp texture</option>
+                                    <option value="imagemap">image map</option>
                                 </select>
                                 
                                 <span class="sketchup">
@@ -541,11 +535,11 @@
                     <div class="collapse_check">
                         <div class="parameter_interface_autoalpha">
                             <div class="texture_area_autoalpha">
-                                <label for="aa_texturetype" class="tex_label">Texture</label>
+                                <!-- <label for="aa_texturetype" class="tex_label">Texture</label> -->
                                 <select id="aa_texturetype" class="tex_dropdown">
                                     <option value="sketchupalpha">SketchUp texture alpha</option>
-                                    <option value="imagealpha">Image map alpha</option>
-                                    <option value="imagecolor">Image map color</option>
+                                    <option value="imagealpha">image map alpha</option>
+                                    <option value="imagecolor">image map color</option>
                                 </select>
                                 <span class="imagemap" id="autoalpha_image_field">
                                     <div id="aa_imgmapname" class="tex_path">&nbsp; temporary text</div>
@@ -563,13 +557,13 @@
                 <div class="panelcontent collapse">
                 <div class="parameter_interface">
                     <label for="u_exponent" class="parameter_label">U Exponent</label>
-                    <input type='text' id="u_exponent" size="6" class="parameter_field">
+                    <input type='text' id="u_exponent" class="parameter_field">
                     <div class="texture_area">
-                        <label for="u_exponent_texturetype" class="tex_label">Texture</label>
+                        <!-- <label for="u_exponent_texturetype" class="tex_label">Texture</label> -->
                         <select id="u_exponent_texturetype" class="tex_dropdown">
-                            <option value="none">None</option>
-                            <option value="sketchup">Sketchup Texture</option>
-                            <option value="imagemap">Image Map</option>
+                            <option value="none">no texture</option>
+                            <option value="sketchup">SketchUp texture</option>
+                            <option value="imagemap">image map</option>
                         </select>
                         <span class="imagemap">
                             <div id="u_exponent_imgmapname" class="tex_path">&nbsp;</div>
@@ -579,14 +573,14 @@
                 </div>
                 <div class="parameter_interface">
                     <label for="v_exponent" class="parameter_label">V Exponent</label>
-                    <input type='text' id="v_exponent" size="6" class="parameter_field">
+                    <input type='text' id="v_exponent" class="parameter_field">
                     
                     <div class="texture_area">
-                        <label for="v_exponent_texturetype" class="tex_label">Texture</label>
+                        <!-- <label for="v_exponent_texturetype" class="tex_label">Texture</label> -->
                         <select id="v_exponent_texturetype" class="tex_dropdown">
-                            <option value="none">None</option>
-                            <option value="sketchup">Sketchup Texture</option>
-                            <option value="imagemap">Image Map</option>
+                            <option value="none">no texture</option>
+                            <option value="sketchup">SketchUp texture</option>
+                            <option value="imagemap">image map</option>
                         </select>
                         <span class="imagemap">
                             <div id="v_exponent_imgmapname" class="tex_path">&nbsp;</div>
@@ -602,14 +596,14 @@
                 <div class="panelcontent collapse" id="IOR_interface">
                     <div class="parameter_interface">
                         <label for="IOR" class="parameter_label">Value</label>
-                        <input type='text' id="IOR_index" size="6" class="parameter_field">
+                        <input type='text' id="IOR_index" class="parameter_field">
                             
                         <div class="texture_area">
-                            <label for="IOR_index_texturetype" class="tex_label">Texture</label>
+                            <!-- <label for="IOR_index_texturetype" class="tex_label">Texture</label> -->
                             <select id="IOR_index_texturetype" class="tex_dropdown">
-                                <option value="none">None</option>
-                                <option value="sketchup">Sketchup Texture</option>
-                                <option value="imagemap">Image Map</option>
+                                <option value="none">no texture</option>
+                                <option value="sketchup">SketchUp texture</option>
+                                <option value="imagemap">image map</option>
                             </select>
                             <span class="imagemap">
                                 <div id="IOR_index_imgmapname" class="tex_path">&nbsp;</div>
@@ -645,15 +639,15 @@
                         
                         <div class="parameter_interface_L">
                             <table id="swatch_absorption"><tr><td id="absorption_swatch" class="swatch" width=64 height=64></td></tr></table>
-                            <label for="ka_R" class="kdr">Red</label><input type='text' id="ka_R" size="6" class="kdrvalue">
+                            <!-- <label for="ka_R" class="kdr">Red</label><input type='text' id="ka_R" size="6" class="kdrvalue">
                             <label for="ka_G" class="kdg">Green</label><input type='text' id="ka_G" size="6" class="kdgvalue">
-                            <label for="ka_B" class="kdb">Blue</label><input type='text' id="ka_B" size="6" class="kdbvalue">
+                            <label for="ka_B" class="kdb">Blue</label><input type='text' id="ka_B" size="6" class="kdbvalue"> -->
                             <div class="texture_area_swatchfield">
-                                <label for="ka_texturetype" class="tex_label">Texture</label>
+                                <!-- <label for="ka_texturetype" class="tex_label">Texture</label> -->
                                 <select id="ka_texturetype" class="tex_dropdown">
-                                    <option value="none">None</option>
-                                    <option value="sketchup">Sketchup Texture</option>
-                                    <option value="imagemap">Image Map</option>
+                                    <option value="none">no texture</option>
+                                    <option value="sketchup">SketchUp texture</option>
+                                    <option value="imagemap">image map</option>
                                 </select>
                                 <span class="imagemap">
                                     <div id="ka_imgmapname" class="tex_path">&nbsp;</div>
@@ -664,14 +658,14 @@
                         
                         <div class="parameter_interface">
                             <label for="ka_d" class="parameter_label">Depth</label>
-                            <input type='text' id="ka_d" size="6" class="parameter_field">
+                            <input type='text' id="ka_d" class="parameter_field">
                             
                             <div class="texture_area">
-                                <label for="ka_d_texturetype" class="tex_label">Texture</label>
+                                <!-- <label for="ka_d_texturetype" class="tex_label">Texture</label> -->
                                 <select id="ka_d_texturetype" class="tex_dropdown">
-                                    <option value="none">None</option>
-                                    <option value="sketchup">Sketchup Texture</option>
-                                    <option value="imagemap">Image Map</option>
+                                    <option value="none">no texture</option>
+                                    <option value="sketchup">SketchUp texture</option>
+                                    <option value="imagemap">image map</option>
                                 </select>
                                 <span class="imagemap">
                                     <div id="ka_d_imgmapname" class="tex_path">&nbsp;</div>
@@ -690,14 +684,14 @@
                 <input type="checkbox" id="use_thin_film_coating" class="margin_bottom"><label for="use_thin_film_coating"> Use thin film coating</label>
 				<div class="collapse_check">
                         <div class="parameter_interface">
-                            <label for="film" class="parameter_label">Film thickness</label>
-                            <input type='text' id="film" size="6" class="parameter_field">
+                            <label for="film" class="parameter_label">Thickness (nm)</label>
+                            <input type='text' id="film" class="parameter_field_coating">
                             <div class="texture_area">
-                                <label for="film_texturetype" class="tex_label">Texture</label>
+                                <!-- <label for="film_texturetype" class="tex_label">Texture</label> -->
                                 <select id="film_texturetype" class="tex_dropdown">
-                                    <option value="none">None</option>
-                                    <option value="sketchup">Sketchup Texture</option>
-                                    <option value="imagemap">Image Map</option>
+                                    <option value="none">no texture</option>
+                                    <option value="sketchup">SketchUp texture</option>
+                                    <option value="imagemap">image map</option>
                                 </select>
                                 <span class="imagemap">
                                     <div id="kd_imgmapname" class="tex_path">&nbsp;</div>
@@ -707,13 +701,13 @@
                         </div> <!-- end parameter interface -->
                         <div class="parameter_interface">
                             <label for="filmindex" class="parameter_label">Film IOR</label>
-                            <input type='text' id="filmindex" size="6" class="parameter_field">
+                            <input type='text' id="filmindex" class="parameter_field_coating">
                             <div class="texture_area">
-                                <label for="filmindex_texturetype" class="tex_label">Texture</label>
+                                <!-- <label for="filmindex_texturetype" class="tex_label">Texture</label> -->
                                 <select id="filmindex_texturetype" class="tex_dropdown">
-                                    <option value="none">None</option>
-                                    <option value="sketchup">Sketchup Texture</option>
-                                    <option value="imagemap">Image Map</option>
+                                    <option value="none">no texture</option>
+                                    <option value="sketchup">SketchUp texture</option>
+                                    <option value="imagemap">image map</option>
                                 </select>
                                 <span class="imagemap">
                                     <div id="kd_imgmapname" class="tex_path">&nbsp;</div>
@@ -733,13 +727,13 @@
                     <div class="collapse_check">
                         <div class="parameter_interface">
                             <label for="cauchyb" class="parameter_label">Cauchy coefficient</label>
-                            <input type='text' id="cauchyb" size="6" class="parameter_field_dr">
+                            <input type='text' id="cauchyb" class="parameter_field_dr">
                             <div class="texture_area_dr">
-                                <label for="cauchyb_texturetype" class="tex_label">Texture</label>
+                                <!-- label for="cauchyb_texturetype" class="tex_label">Texture</label> -->
                                 <select id="cauchyb_texturetype" class="tex_dropdown">
-                                    <option value="none">None</option>
-                                    <option value="sketchup">Sketchup Texture</option>
-                                    <option value="imagemap">Image Map</option>
+                                    <option value="none">no texture</option>
+                                    <option value="sketchup">SketchUp texture</option>
+                                    <option value="imagemap">image map</option>
                                 </select>
                                 <span class="imagemap">
                                     <div id="kd_imgmapname" class="tex_path">&nbsp;</div>
@@ -765,11 +759,11 @@
                         <label for="bumpmap" class="parameter_label">Scale (m)</label>
                         <input type='text' id="bumpmap" size="6" class="parameter_field">
                             <div class="texture_area">
-                                <label for="bump_texturetype" class="tex_label">Texture</label>
+                                <!-- <label for="bump_texturetype" class="tex_label">Texture</label> -->
                                 <select id="bump_texturetype" class="tex_dropdown">
-                                    <option value="none">None</option>
-                                    <option value="sketchup">Sketchup Texture</option>
-                                    <option value ="imagemap">Image Map</option>
+                                    <option value="none">no texture</option>
+                                    <option value="sketchup">SketchUp texture</option>
+                                    <option value ="imagemap">image map</option>
                                 </select>
                                 <span class="imagemap">
                                     <div id="bump_imgmapname" class="tex_path">&nbsp;</div>
@@ -786,11 +780,11 @@
                     <div class="parameter_interface">
                         Normal map
                         <div class="texture_area">
-                            <label for="normal_texturetype" class="tex_label">Texture</label>
+                            <!-- <label for="normal_texturetype" class="tex_label">Texture</label> -->
                             <select id="normal_texturetype" class="tex_dropdown">
-                                <option value="none">None</option>
-                                <option value="sketchup">Sketchup Texture</option>
-                                <option value ="imagemap">Image Map</option>
+                                <option value="none">no texture</option>
+                                <option value="sketchup">SketchUp texture</option>
+                                <option value ="imagemap">image map</option>
                             </select>
                             <span class="imagemap">
                                 <div id="normal_imgmapname" class="tex_path">&nbsp;</div>
@@ -824,21 +818,21 @@
                             <label for="dm_subdivl" id="dm_subdiv_label">Subdivision levels</label>
                             <input type='text' id="dm_subdivl" size="6"><br>
                         </div>
-                        <div id="microdisplacement">
-                            <label for="dm_microlevels" id="dm_microlevels_label">Divisions</label>
-                            <input type='text' id="dm_microlevels" size="6"><br>
-                        </div>
                         <div class="texture_area_dr">
-                            <label for="dm_texturetype" class="tex_label">Texture</label>
+                            <!-- <label for="dm_texturetype" class="tex_label">Texture</label> -->
                             <select id="dm_texturetype" class="tex_dropdown">
-                                <option value="none">None</option>
-                                <option value="sketchup">Sketchup Texture</option>
-                                <option value="imagemap">Image Map</option>
+                                <option value="none">no texture</option>
+                                <option value="sketchup">SketchUp texture</option>
+                                <option value="imagemap">image map</option>
                             </select>
                             <span class="imagemap">
                                 <div id="dm_imgmapname" class="tex_path">&nbsp;</div>
                                 <input type="button" id="dm_browse_map" value="load image" class="tex_loadbutton">
                             </span>
+                        </div>
+                        <div id="microdisplacement">
+                            <label for="dm_microlevels" id="dm_microlevels_label">Divisions</label>
+                            <input type='text' id="dm_microlevels" size="6"><br>
                         </div>
                     </div> <!-- parameter interface -->
                 </div> <!-- collapse check -->
@@ -851,7 +845,7 @@
             <div class="parameter_interface_light">
                 <div id="lightgain">
                     <label for="light_gain" class="parameter_label">Power</label>
-                    <input type="text" id="light_gain" size="6" class="parameter_field_light">
+                    <input type="text" id="light_gain" size="6" class="parameter_field_spectrum">
                 </div>
                 <!-- <label for="light_power">Power</label>
                  <input type="text" id="light_power" size="6">
@@ -875,16 +869,16 @@
 
                 <div class="light_L" id="emit_color">
                     <table id="swatch_em"><tr><td id="em_swatch" class="swatch" width=64 height=64></td></tr></table>
-                    <label for="em_R" class="kdr">Red</label><input type='text' id="em_R" size="6" class="kdrvalue">
+                    <!-- <label for="em_R" class="kdr">Red</label><input type='text' id="em_R" size="6" class="kdrvalue">
                     <label for="em_G" class="kdg">Green</label><input type='text' id="em_G" size="6" class="kdgvalue">
-                    <label for="em_B" class="kdb">Blue</label><input type='text' id="em_B" size="6" class="kdbvalue">
+                    <label for="em_B" class="kdb">Blue</label><input type='text' id="em_B" size="6" class="kdbvalue"> -->
                         
                     <div class="texture_area_swatchfield">
-                        <label for="em_texturetype" class="tex_label">Texture</label>
+                        <!-- <label for="em_texturetype" class="tex_label">Texture</label> -->
                         <select id="em_texturetype" class="tex_dropdown" name="em">
-                            <option value="none">None</option>
-                            <option value="sketchup">Sketchup Texture</option>
-                            <option value="imagemap">Image Map</option>
+                            <option value="none">no texture</option>
+                            <option value="sketchup">SketchUp texture</option>
+                            <option value="imagemap">image map</option>
                         </select>
                         <span class="sketchup">&nbsp;
                         </span>

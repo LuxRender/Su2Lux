@@ -191,8 +191,49 @@ class LuxrenderMaterialEditor
             @lrs.colorpicker=param
             @color_picker.show
         }
+		
+		@color_picker.add_action_callback('provide_color') { |dialog, passedcolor|
+			puts "ruby asking color picker to start init_color command"
+			# @lrs.colorpicker stores which color swatch we are dealing with, but what is its current color?
+			# create a seprate function that returns the current rgb value based on @lrs.colorpicker
+			swatchrgb = get_swatch_rgb()
+			
+			# set values in colorpicker RGB fields
+			rval =  @current.send(@lrs.send(@lrs.colorpicker)[0])
+			gval =  @current.send(@lrs.send(@lrs.colorpicker)[1])
+			bval =  @current.send(@lrs.send(@lrs.colorpicker)[2])
+			cmd1 = "init_rgb_fields(\"#{rval}\",\"#{gval}\",\"#{bval}\")"
+            @color_picker.execute_script(cmd1)
+			
+			# set value for hidden field in color picker
+			cmd2 = "init_color(\"#{swatchrgb}\")"
+            @color_picker.execute_script(cmd2)
+		}
+		
+		
+		@color_picker.add_action_callback('colorfield_red_update') { |dialog, colorvalue|
+			puts "updating red for"
+			puts @lrs.colorpicker
+			@current.send(@lrs.send(@lrs.colorpicker)[0]+"=",colorvalue)
+            update_swatches()
+		}		
+		
+		@color_picker.add_action_callback('colorfield_green_update') { |dialog, colorvalue|
+			puts "updating green for"
+			puts @lrs.colorpicker
+			@current.send(@lrs.send(@lrs.colorpicker)[1]+"=",colorvalue)
+            update_swatches()
+		}	
+		
+		@color_picker.add_action_callback('colorfield_blue_update') { |dialog, colorvalue|
+			puts "updating blue for"
+			puts @lrs.colorpicker
+			@current.send(@lrs.send(@lrs.colorpicker)[2]+"=",colorvalue)
+            update_swatches()
+		}
+		
         
-        @color_picker.add_action_callback('pass_color') { |dialog, passedcolor|
+        @color_picker.add_action_callback('pass_color') { |dialog, passedcolor| # passedcolor is in #ffffff form
             passedcolor="000000" if passedcolor.length != 7 # color picker may return NaN when mouse is dragged outside window
             SU2LUX.dbg_p "passed color received"
 			@colorpicker_triggered = true
@@ -204,57 +245,12 @@ class LuxrenderMaterialEditor
             if ((@lrs.colorpicker=="diffuse_swatch" or @lrs.colorpicker=="transmission_swatch")  and !Sketchup.active_model.materials.current.texture)
                 Sketchup.active_model.materials.current.color = [rvalue,gvalue,bvalue] # material observer will update kd_R,G,B values
             end
+			
             #puts "updating swatch:", colorswatch
-            colorvars = []
-            case colorswatch
-                when "diffuse_swatch"
-                    puts "updating diffuse swatch"
-                    @current.kd_R = rvalue
-                    @current.kd_G = gvalue
-                    @current.kd_B = bvalue
-                when "specular_swatch"
-                    puts "updating specular swatch"
-                    @current.ks_R = rvalue
-                    @current.ks_G = gvalue
-                    @current.ks_B = bvalue
-                when "absorption_swatch"
-                    @current.ka_R = rvalue
-                    @current.ka_G = gvalue
-                    @current.ka_B = bvalue
-                when "reflection_swatch"
-                    @current.kr_R = rvalue
-                    @current.kr_G = gvalue
-                    @current.kr_B = bvalue
-                when "metal2_swatch"
-                    @current.km2_R = rvalue
-                    @current.km2_G = gvalue
-                    @current.km2_B = bvalue
-                when "em_swatch"
-                    puts "updating emission swatch"
-                    @current.em_R = rvalue
-                    @current.em_G = gvalue
-                    @current.em_B = bvalue
-                when "transmission_swatch"
-                    @current.kt_R = rvalue
-                    @current.kt_G = gvalue
-                    @current.kt_B = bvalue
-                when "cl1kd_swatch"
-                    @current.cl1kd_R = rvalue
-                    @current.cl1kd_G = gvalue
-                    @current.cl1kd_B = bvalue
-                when "cl1ks_swatch"
-                    @current.cl1ks_R = rvalue
-                    @current.cl1ks_G = gvalue
-                    @current.cl1ks_B = bvalue
-                when "cl2kd_swatch"
-                    @current.cl2kd_R = rvalue
-                    @current.cl2kd_G = gvalue
-                    @current.cl2kd_B = bvalue
-                when "cl2ks_swatch"
-                    @current.cl2ks_R = rvalue
-                    @current.cl2ks_G = gvalue
-                    @current.cl2ks_B = bvalue     
-            end
+			@current.send(@lrs.send(colorswatch)[0]+"=",rvalue)
+			@current.send(@lrs.send(colorswatch)[1]+"=",gvalue)
+			@current.send(@lrs.send(colorswatch)[2]+"=",bvalue)
+			
             updateSettingValue(@lrs.send(colorswatch)[0])
             updateSettingValue(@lrs.send(colorswatch)[1])
             updateSettingValue(@lrs.send(colorswatch)[2])
@@ -666,7 +662,16 @@ class LuxrenderMaterialEditor
         end
     end
     
-    
+    def get_swatch_rgb()
+		current_r =  @current.send(@lrs.send(@lrs.colorpicker)[0]).to_f
+		current_g =  @current.send(@lrs.send(@lrs.colorpicker)[1]).to_f
+		current_b =  @current.send(@lrs.send(@lrs.colorpicker)[2]).to_f
+		r_hex = "%02x" %("0x"+((current_r*255).to_i.to_s(16)))
+		g_hex = "%02x" %("0x"+((current_g*255).to_i.to_s(16)))
+		b_hex = "%02x" %("0x"+((current_b*255).to_i.to_s(16)))
+		rgbstring = "#" + r_hex + g_hex + b_hex
+		return rgbstring
+	end
     
 	##
 	# Takes a string like "key1=value1,key2=value2" and creates an hash.
