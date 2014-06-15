@@ -1634,6 +1634,7 @@ def compute_fov(xres, yres)
 			when "roughglass"
                 pre, post = self.export_reflection_component(mat, pre, post)
                 pre, post = self.export_transmission_component(mat, pre, post)
+                pre, post = self.export_exponent(mat, pre, post)
                 pre, post = self.export_IOR(mat, pre, post)
                 pre, post = self.export_dispersive_refraction(mat, pre, post)
 			when "metal"
