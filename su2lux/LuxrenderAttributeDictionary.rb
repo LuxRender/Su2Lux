@@ -37,11 +37,14 @@ class LuxrenderAttributeDictionary
         #puts key
         #puts value
         #puts ""
+		@model.start_operation("SU2LUX settings update", true, false, true)
+		
 		dictionary = self.choose(name)
 		dictionary[key] = value
 		@dictionaries[name] = dictionary
         @model.set_attribute(name, key, value) # store to model's attribute dictionary
-        
+		
+		@model.commit_operation()
 	end #END set_attribute
 	
 	##
@@ -73,16 +76,20 @@ class LuxrenderAttributeDictionary
 	end #END save_to_model
     
 	def load_from_model(name)
-        #puts "attempting to load attribute dictionary " + name
+        #puts "running load_from model:"
 		@dictionary = self.choose(name) # self is #<LuxrenderAttributeDictionary:.....>
 		model_dictionary = @model.attribute_dictionary(name)
 		if (model_dictionary)
             #puts "number of attribute dictionary items:"
             #puts model_dictionary.length
+			@model.start_operation("SU2LUX load model data", true, false, true)
 			model_dictionary.each { |key, value|
+				puts "load_from_model updating attributes"
 				self.set_attribute(name, key, value) # set, because we're taking values from the model's attribute dictionary
                                                      # and setting them in the (temporary) LuxRender attribute dictionary
 			}
+			@model.commit_operation()
+			
 			return true
 		else
             #puts "dictionary does not exist"

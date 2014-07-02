@@ -33,8 +33,8 @@ end
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.43e"
-    SU2LUX_DATE = "7 March 2014" # to be updated in about.html manually
+    SU2LUX_VERSION = "0.44dev"
+    SU2LUX_DATE = "1 July 2014" # to be updated in about.html manually
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
 	PLUGIN_FOLDER = "su2lux"
@@ -206,8 +206,13 @@ module SU2LUX
 		le.export_mesh(out_geom)
 		out_geom.close
 
-		#Exporting all materials
+		# prepare lxm file
 		out_mat = File.new(file_datafolder + file_basename + SUFFIX_MATERIAL, "w")
+		out_mat << "MakeNamedMaterial \"SU2LUX_helper_null\" \n"
+		out_mat << "	\"string type\" [\"null\"]"
+		out_mat << "\n\n"
+		
+		# export all materials		
         relative_datafolder = file_basename+SU2LUX::SUFFIX_DATAFOLDER
         puts "RELATIVE DATA FOLDER: " + relative_datafolder
 		le.export_used_materials(materials, out_mat, lrs.texexport, relative_datafolder)
@@ -451,12 +456,19 @@ module SU2LUX
     end # END find_default_folder
 
     ##
-    #
+    # access LuxRender settings from within the plugin
     ##
     def SU2LUX.get_lrs(model_id)
         return @lrs_hash[model_id]
     end
 
+	##
+    # access LuxRender settings from the Ruby console
+    ##
+    def SU2LUX.this_lrs()
+        return @lrs_hash[Sketchup.active_model.definitions.entityID]
+    end
+	
     ##
     #
     ##
@@ -969,6 +981,10 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 	
 	def onMaterialChange(materials, material)
         puts "observer catching SketchUp material change"
+		
+		# undo
+		Sketchup.active_model.start_operation("SU2LUX material observer", true, false, true)
+		
         scene_id = Sketchup.active_model.definitions.entityID
 		material_editor = SU2LUX.get_editor(scene_id,"material")
         if (material_editor && material_editor.materials_skp_lux.include?(material))
@@ -1000,7 +1016,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
                 luxR = 255.0 * luxmaterial.kd_R.to_f
                 luxG = 255.0 * luxmaterial.kd_G.to_f
                 luxB = 255.0 * luxmaterial.kd_B.to_f
-                puts skpR, skpG, skpB, luxR, luxG, luxB
+                # puts skpR, skpG, skpB, luxR, luxG, luxB
                 updateswatches = false
                 if ((skpR-luxR).abs > 1 || (skpG-luxG).abs > 1 || (skpB-luxB).abs > 1)
                     luxmaterial.color = material.color
@@ -1039,6 +1055,10 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
                 end
             end
         end
+		
+		# end undo
+		Sketchup.active_model.commit_operation()
+		
 	end
 	
 end # end observer section

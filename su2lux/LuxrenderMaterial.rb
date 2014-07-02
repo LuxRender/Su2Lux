@@ -318,6 +318,7 @@ class LuxrenderMaterial
 	##
 	def save_to_model
 		@model.start_operation "SU2LUX Material settings saved"
+		puts "SAVE TO MODEL CALLED FROM LUXRENDERMATERIAL"
 		@attributedictionary.save_to_model(@dict)
 		@model.commit_operation
 	end #END save_to_model

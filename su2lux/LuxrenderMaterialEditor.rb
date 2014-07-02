@@ -374,6 +374,9 @@ class LuxrenderMaterialEditor
 			base_file = preview_path + "ansi.txt"
 			FileUtils.copy_file(base_file,lxm_path_8859_1)
 			generated_lxm_file = File.new(lxm_path_8859_1,"a")
+			generated_lxm_file << "MakeNamedMaterial \"SU2LUX_helper_null\" \n"
+			generated_lxm_file << "	\"string type\" [\"null\"]"
+			generated_lxm_file << "\n"
 			
 			texture_subfolder = "LuxRender_luxdata/textures"
 			previewExport=LuxrenderExport.new(preview_path,path_separator) # preview path should define where preview files will be stored
@@ -852,8 +855,10 @@ class LuxrenderMaterialEditor
 		cmd = "$('#" + dropdownname + "').empty()"
 		@material_editor_dialog.execute_script(cmd)
         if (dropdownname == "lightbase")
-            defcmd = "$('#lightbase').append($('<option></option>').val('default').html('default'))"
-            @material_editor_dialog.execute_script(defcmd)
+            defcmd1 = "$('#lightbase').append($('<option></option>').val('default').html('default'))"
+            @material_editor_dialog.execute_script(defcmd1)
+            defcmd2 = "$('#lightbase').append($('<option></option>').val('invisible').html('invisible'))"
+            @material_editor_dialog.execute_script(defcmd2)
         end
                            
 		cmd = "$('#" + dropdownname +"').append( $('"

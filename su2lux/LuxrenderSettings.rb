@@ -424,6 +424,7 @@ class LuxrenderSettings
 	def save_to_model
         puts "LuxrenderSettings.rb calling attribute dictionary to save settings to SketchUp file"
 		@model.start_operation "SU2LUX settings saved" # start undo operation block
+		puts "SAVE TO MODEL CALLED FROM LUXRENDERSETTINGS"
         if(@dict)
             @attributedictionary.save_to_model(@dict)
         end
@@ -454,6 +455,9 @@ class LuxrenderSettings
 		return scenesettings
 	end
     
+	def get_attributedictionary
+		return @attributedictionary
+	end
     
 	
 end # END class LuxrenderSettings
