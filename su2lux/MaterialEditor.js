@@ -188,6 +188,19 @@ $(document).ready(
             }
         )
         
+		$("#IES_path_button").click(
+			function()
+			{
+				window.location = 'skp:select_IES@'; 
+			}
+		)
+		        
+		$("#IES_path_clear").click(
+			function()
+			{
+				window.location = 'skp:clear_IES@'; 
+			}
+		)
                   
         $("td.swatch").click(
             function()

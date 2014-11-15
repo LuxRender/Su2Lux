@@ -1431,6 +1431,10 @@ class LuxrenderExport
                 matname = luxrender_mat.lightbase.delete("[<>]")
                 out.puts "NamedMaterial \"" + matname + "\""
             end
+			# write IES file
+			if (luxrender_mat.IES_path != "")
+				out.puts "\"string iesname\" [\"" + luxrender_mat.IES_path + "\"]"  
+			end	
         when "portal"
             out.puts "ObjectBegin \"Portal_Shape\""
             @has_portals = true

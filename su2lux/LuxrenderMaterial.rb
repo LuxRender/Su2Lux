@@ -121,6 +121,7 @@ class LuxrenderMaterial
 		'light_efficacy' => 17.0,
 		'light_gain' => 1.0,
         'lightbase' => 'default',
+		'ies_path' => '',
 
 		'use_architectural' => false,
         'use_auto_alpha' => false,

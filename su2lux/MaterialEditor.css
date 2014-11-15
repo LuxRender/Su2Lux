@@ -437,6 +437,16 @@ input#get_diffuse_color {
     height: 5.5em;
 }
 
+.IES_browse{
+    position: relative;
+	left: 7.5em;
+}
+
+.IES_clear{
+    position: relative;
+	left: 8em;
+}
+
 #metal2_color{
     position: relative;
     top: 0em;
@@ -446,6 +456,10 @@ input#get_diffuse_color {
 
 #u_exponent, #v_exponent, #ka_d, #IOR_index, #film, #filmindex, #cauchyb, #cl_repeatu, #cl_repeatv{
 	width: 3em;
+}
+
+#IES_path{
+	width: 16em;
 }
 
 .parameter_interface_mix{

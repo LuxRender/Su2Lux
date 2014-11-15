@@ -103,6 +103,34 @@ class LuxrenderMaterialEditor
 			}
 		}
 				
+		@material_editor_dialog.add_action_callback("clear_IES") {|dialog, params|
+			puts "clear callback responding"
+			# set IES value 	
+			@current.send("IES_path=", "")
+			# update IES value in material interface
+            cmd = "$('#IES_path').val('');"
+            @material_editor_dialog.execute_script(cmd)				
+		}
+	
+		@material_editor_dialog.add_action_callback("select_IES") {|dialog, params|
+			puts "select_IES callback responding"
+			# get path
+			newIESpath = UI.openpanel("Select IES file", "", "")
+			if(newIESpath)
+				# escape path
+				newIESpath.gsub!(/\\\\/, '/') 
+				newIESpath.gsub!(/\\/, '/') if newIESpath.include?('\\')
+				# feedback
+				puts "new IES path:"
+				puts newIESpath
+				# set IES value 	
+				@current.send("IES_path=", newIESpath)
+				# update IES value in material interface
+                cmd = "$('#IES_path').val('" + newIESpath + "');"
+                @material_editor_dialog.execute_script(cmd)				
+			end
+		}
+		
 		@material_editor_dialog.add_action_callback("open_dialog") {|dialog, params|
             SU2LUX.dbg_p "callback: open_dialog"
 			data = params.to_s
@@ -892,8 +920,7 @@ class LuxrenderMaterialEditor
 	#set parameters in inputs of settings.html
 	##
 	def sendDataFromSketchup()
-        SU2LUX.dbg_p "running sendDataFromSketchup for "
-		puts @current.name
+        puts  "running sendDataFromSketchup for " + @current.name
 		materialproperties = @current.get_names # returns all settings from LuxrenderMaterial @@settings
 		materialproperties.each { |setting| updateSettingValue(setting)}
         # update interface based on dropdown menus
