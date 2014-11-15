@@ -35,7 +35,7 @@ class LuxrenderSceneSettingsEditor
             windowname = "LuxRender Scene Settings Editor - " + filename
         end
 		@scene_settings_dialog = UI::WebDialog.new(windowname, true, "LuxrenderSceneSettingsEditor", 450, 600, 10, 10, true)
-        @scene_settings_dialog.max_width = 520
+        @scene_settings_dialog.max_width = 700
 		setting_html_path = Sketchup.find_support_file("scene_settings.html" , "Plugins/"+SU2LUX::PLUGIN_FOLDER)
 		@scene_settings_dialog.set_file(setting_html_path)
         @lrs=SU2LUX.get_lrs(@scene_id)
@@ -62,11 +62,14 @@ class LuxrenderSceneSettingsEditor
 					when "fleximage_yresolution"
 						@lrs.fleximage_yresolution=value.to_i
                         update_resolutions(key,value.to_i)
-                    else # true/false toggles
+					when "export_luxrender_path"
+						puts "LuxRender path modified, updating"
+						SU2LUX.change_luxrender_path(value)
+						@lrs.send(key + "=", value.dump.tr('"', ''))
+						
+                    else 
 						if (@lrs.respond_to?(key))
                             #puts "@lrs responding"
-                            #puts key
-                            #puts value.to_s.downcase
 							method_name = key + "="
 							if (value.to_s.downcase == "true")
 								value = true
@@ -446,12 +449,17 @@ class LuxrenderSceneSettingsEditor
 			cmd="checkbox_expander('#{id}');"
 			# SU2LUX.dbg_p cmd
 			@scene_settings_dialog.execute_script(cmd)
+		when (id == "export_luxrender_path")
+			puts "getting luxrender path:"
+			puts value
+			puts value.dump.tr('"', '')
+			cmd="$('##{id}').val('#{value.dump.tr('"', '')}');" #syntax jquery
+			@scene_settings_dialog.execute_script(cmd)
+			
 		else
             #puts "updating other: " + id + " is "
             #puts value.class
 			cmd="$('##{id}').val('#{new_value}');" #syntax jquery
-			# SU2LUX.dbg_p cmd
-			# cmd = "document.getElementById('#{id}').value=\"#{new_value}\""
 			# SU2LUX.dbg_p cmd
 			@scene_settings_dialog.execute_script(cmd)
 			#Horror coding?

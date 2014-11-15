@@ -50,7 +50,11 @@ $(document).ready(
 			function()
 			{
                 //alert ("change in settings panel text field");
-				window.location = 'skp:param_generate@' + this.id+'='+this.value;
+				if(this.id=="export_luxrender_path"){
+					window.location = 'skp:param_generate@' + this.id+'='+ escape(this.value); //this.value;
+				}else{
+					window.location = 'skp:param_generate@' + this.id+'='+this.value;
+				}
 			}
 		);
 		

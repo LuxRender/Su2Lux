@@ -158,7 +158,7 @@ class LuxrenderExport
 		out.print "\n"
 	end # END export_camera
 
-def compute_fov(xres, yres)
+	def compute_fov(xres, yres)
         width = xres.to_f
         height = yres.to_f
         #puts "computing fov:"
@@ -575,60 +575,60 @@ def compute_fov(xres, yres)
 
 	def export_filter
 		filter = "\n"
-		filter += "PixelFilter \"#{@lrs.pixelfilter_type}\"\n"
+		filter << "PixelFilter \"#{@lrs.pixelfilter_type}\"\n"
 		case @lrs.pixelfilter_type
 			when "blackmanharris"
-                filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_blackmanharris_xwidth)}]\n"
-                filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_blackmanharris_ywidth)}]\n"
+                filter << "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_blackmanharris_xwidth)}]\n"
+                filter << "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_blackmanharris_ywidth)}]\n"
 			when "box"
-                filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_box_xwidth)}]\n"
-                filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_box_ywidth)}]\n"
+                filter << "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_box_xwidth)}]\n"
+                filter << "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_box_ywidth)}]\n"
 			when "gaussian"
-                filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_gaussian_xwidth)}]\n"
-                filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_gaussian_ywidth)}]\n"
-                filter += "\t\"float alpha\" [#{"%.6f" %(@lrs.pixelfilter_gaussian_alpha)}]\n"
+                filter << "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_gaussian_xwidth)}]\n"
+                filter << "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_gaussian_ywidth)}]\n"
+                filter << "\t\"float alpha\" [#{"%.6f" %(@lrs.pixelfilter_gaussian_alpha)}]\n"
 			when "mitchell"
-                filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_mitchell_xwidth)}]\n"
-                filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_mitchell_ywidth)}]\n"
-                filter += "\t\"float B\" [#{"%.6f" %(@lrs.pixelfilter_mitchell_B)}]\n"
-                filter += "\t\"float C\" [#{"%.6f" %(@lrs.pixelfilter_mitchell_C)}]\n"
+                filter << "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_mitchell_xwidth)}]\n"
+                filter << "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_mitchell_ywidth)}]\n"
+                filter << "\t\"float B\" [#{"%.6f" %(@lrs.pixelfilter_mitchell_B)}]\n"
+                filter << "\t\"float C\" [#{"%.6f" %(@lrs.pixelfilter_mitchell_C)}]\n"
                 supersample = @lrs.pixelfilter_mitchell_supersample ? "true" : "false"
-                filter += "\t\"bool supersample\" [\"" + supersample + "\"]\n"
+                filter << "\t\"bool supersample\" [\"" + supersample + "\"]\n"
 			when "sinc"
-                filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_sinc_xwidth)}]\n"
-                filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_sinc_ywidth)}]\n"
-                filter += "\t\"float tau\" [#{"%.6f" %(@lrs.pixelfilter_sinc_tau)}]\n"
+                filter << "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_sinc_xwidth)}]\n"
+                filter << "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_sinc_ywidth)}]\n"
+                filter << "\t\"float tau\" [#{"%.6f" %(@lrs.pixelfilter_sinc_tau)}]\n"
 			when "triangle"
-                filter += "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_triangle_xwidth)}]\n"
-                filter += "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_triangle_ywidth)}]\n"
+                filter << "\t\"float xwidth\" [#{"%.6f" %(@lrs.pixelfilter_triangle_xwidth)}]\n"
+                filter << "\t\"float ywidth\" [#{"%.6f" %(@lrs.pixelfilter_triangle_ywidth)}]\n"
 		end
 		return filter
 	end #END export_filter
 
 	def export_sampler
 		sampler = "\n"
-		sampler += "Sampler \"#{@lrs.sampler_type}\"\n"
+		sampler << "Sampler \"#{@lrs.sampler_type}\"\n"
         usevariance = @lrs.sampler_metropolis_usevariance ? "true" : "false"
         noiseaware = @lrs.sampler_noiseaware ? "true" : "false"
 		case @lrs.sampler_type
 			when "metropolis"
-                sampler += "\t\"float largemutationprob\" [#{"%.6f" %(@lrs.sampler_metropolis_largemutationprob)}]\n"
-                sampler += "\t\"integer maxconsecrejects\" [#{@lrs.sampler_metropolis_maxconsecrejects.to_i}]\n"
-                sampler += "\t\"bool usevariance\" [\"#{usevariance}\"]\n"
-                sampler += "\t\"bool noiseaware\" [\"#{noiseaware}\"]\n"
+                sampler << "\t\"float largemutationprob\" [#{"%.6f" %(@lrs.sampler_metropolis_largemutationprob)}]\n"
+                sampler << "\t\"integer maxconsecrejects\" [#{@lrs.sampler_metropolis_maxconsecrejects.to_i}]\n"
+                sampler << "\t\"bool usevariance\" [\"#{usevariance}\"]\n"
+                sampler << "\t\"bool noiseaware\" [\"#{noiseaware}\"]\n"
 			when "lowdiscrepancy"
-				sampler += "\t\"string pixelsampler\" [\"#{@lrs.sampler_lowdisc_pixelsampler}\"]\n"
-				sampler += "\t\"integer pixelsamples\" [#{@lrs.sampler_lowdisc_pixelsamples.to_i}]\n"
-                sampler += "\t\"bool noiseaware\" [\"#{noiseaware}\"]\n"
+				sampler << "\t\"string pixelsampler\" [\"#{@lrs.sampler_lowdisc_pixelsampler}\"]\n"
+				sampler << "\t\"integer pixelsamples\" [#{@lrs.sampler_lowdisc_pixelsamples.to_i}]\n"
+                sampler << "\t\"bool noiseaware\" [\"#{noiseaware}\"]\n"
 			when "random"
-				sampler += "\t\"string pixelsampler\" [\"#{@lrs.sampler_random_pixelsampler}\"]\n"
-				sampler += "\t\"integer pixelsamples\" [#{@lrs.sampler_random_pixelsamples.to_i}]\n"
-                sampler += "\t\"bool noiseaware\" [\"#{noiseaware}\"]\n"
+				sampler << "\t\"string pixelsampler\" [\"#{@lrs.sampler_random_pixelsampler}\"]\n"
+				sampler << "\t\"integer pixelsamples\" [#{@lrs.sampler_random_pixelsamples.to_i}]\n"
+                sampler << "\t\"bool noiseaware\" [\"#{noiseaware}\"]\n"
 			when "erpt"
-                sampler += "\t\"integer chainlength\" [#{@lrs.sampler_erpt_chainlength.to_i}]\n"
+                sampler << "\t\"integer chainlength\" [#{@lrs.sampler_erpt_chainlength.to_i}]\n"
             when "sobol"
-                sampler += "\n"
-                sampler += "\t\"bool noiseaware\" [\"#{noiseaware}\"]\n"
+                sampler << "\n"
+                sampler << "\t\"bool noiseaware\" [\"#{noiseaware}\"]\n"
 		end
 		return sampler
 	end #END export_sampler
@@ -638,125 +638,125 @@ def compute_fov(xres, yres)
         puts @lrs.renderer
         integrator = "\n"
         if (@lrs.renderer != "sppm")
-            integrator += "SurfaceIntegrator \"#{@lrs.sintegrator_type}\"\n"
+            integrator << "SurfaceIntegrator \"#{@lrs.sintegrator_type}\"\n"
             case @lrs.sintegrator_type
                 # "bidirectional"
                 when "bidirectional"
-                    integrator += "\t\"integer eyedepth\" [#{@lrs.sintegrator_bidir_eyedepth}]\n"
-                    integrator += "\t\"integer lightdepth\" [#{@lrs.sintegrator_bidir_lightdepth}]\n"
-                    integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_bidir_strategy}\"]\n"
-                    integrator += "\t\"float eyerrthreshold\" [#{"%.6f" %(@lrs.sintegrator_bidir_eyerrthreshold)}]\n"
-                    integrator += "\t\"float lightrrthreshold\" [#{"%.6f" %(@lrs.sintegrator_bidir_lightthreshold)}]\n"
+                    integrator << "\t\"integer eyedepth\" [#{@lrs.sintegrator_bidir_eyedepth}]\n"
+                    integrator << "\t\"integer lightdepth\" [#{@lrs.sintegrator_bidir_lightdepth}]\n"
+                    integrator << "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_bidir_strategy}\"]\n"
+                    integrator << "\t\"float eyerrthreshold\" [#{"%.6f" %(@lrs.sintegrator_bidir_eyerrthreshold)}]\n"
+                    integrator << "\t\"float lightrrthreshold\" [#{"%.6f" %(@lrs.sintegrator_bidir_lightthreshold)}]\n"
                 # 'path'
                 when "path"
-                    integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_path_maxdepth}]\n"
+                    integrator << "\t\"integer maxdepth\" [#{@lrs.sintegrator_path_maxdepth}]\n"
                     environment = @lrs.sintegrator_path_include_environment ? "true" : "false"
-                    integrator += "\t\"bool includeenvironment\" [\"#{environment}\"]\n"
-                    integrator += "\t\"string rrstrategy\" [\"#{@lrs.sintegrator_path_rrstrategy}\"]\n"
+                    integrator << "\t\"bool includeenvironment\" [\"#{environment}\"]\n"
+                    integrator << "\t\"string rrstrategy\" [\"#{@lrs.sintegrator_path_rrstrategy}\"]\n"
                     if (@lrs.sintegrator_path_rrstrategy == "probability")
-                        integrator += "\t\"float rrcontinueprob\" [#{"%.6f" %(@lrs.sintegrator_path_rrcontinueprob)}]\n"
+                        integrator << "\t\"float rrcontinueprob\" [#{"%.6f" %(@lrs.sintegrator_path_rrcontinueprob)}]\n"
                     end
-                    integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_path_strategy}\"]\n"
-                    integrator += "\t\"integer shadowraycount\" [#{@lrs.sintegrator_path_shadow_ray_count}]\n"
+                    integrator << "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_path_strategy}\"]\n"
+                    integrator << "\t\"integer shadowraycount\" [#{@lrs.sintegrator_path_shadow_ray_count}]\n"
                 # "distributedpath"
                 when "distributedpath"
-                    integrator += "\t\"string strategy\" [\"#{@lrs.sintegrator_distributedpath_strategy}\"]\n"
+                    integrator << "\t\"string strategy\" [\"#{@lrs.sintegrator_distributedpath_strategy}\"]\n"
                     bool_value = @lrs.sintegrator_distributedpath_directsampleall ? "true" : "false"
-                    integrator += "\t\"bool directsampleall\" [\"#{bool_value}\"]\n"
-                    integrator += "\t\"integer directsamples\" [#{@lrs.sintegrator_distributedpath_directsamples.to_i}]\n"
+                    integrator << "\t\"bool directsampleall\" [\"#{bool_value}\"]\n"
+                    integrator << "\t\"integer directsamples\" [#{@lrs.sintegrator_distributedpath_directsamples.to_i}]\n"
                     bool_value = @lrs.sintegrator_distributedpath_indirectsampleall ? "true" : "false"
-                    integrator += "\t\"bool indirectsampleall\" [\"#{bool_value}\"]\n"
-                    integrator += "\t\"integer indirectsamples\" [#{@lrs.sintegrator_distributedpath_indirectsamples.to_i}]\n"
-                    integrator += "\t\"integer diffusereflectdepth\" [#{@lrs.sintegrator_distributedpath_diffusereflectdepth.to_i}]\n"
-                    integrator += "\t\"integer diffusereflectsamples\" [#{@lrs.sintegrator_distributedpath_diffusereflectsamples.to_i}]\n"
-                    integrator += "\t\"integer diffuserefractdepth\" [#{@lrs.sintegrator_distributedpath_diffuserefractdepth.to_i}]\n"
-                    integrator += "\t\"integer diffuserefractsamples\" [#{@lrs.sintegrator_distributedpath_diffuserefractsamples.to_i}]\n"
+                    integrator << "\t\"bool indirectsampleall\" [\"#{bool_value}\"]\n"
+                    integrator << "\t\"integer indirectsamples\" [#{@lrs.sintegrator_distributedpath_indirectsamples.to_i}]\n"
+                    integrator << "\t\"integer diffusereflectdepth\" [#{@lrs.sintegrator_distributedpath_diffusereflectdepth.to_i}]\n"
+                    integrator << "\t\"integer diffusereflectsamples\" [#{@lrs.sintegrator_distributedpath_diffusereflectsamples.to_i}]\n"
+                    integrator << "\t\"integer diffuserefractdepth\" [#{@lrs.sintegrator_distributedpath_diffuserefractdepth.to_i}]\n"
+                    integrator << "\t\"integer diffuserefractsamples\" [#{@lrs.sintegrator_distributedpath_diffuserefractsamples.to_i}]\n"
                     bool_value = @lrs.sintegrator_distributedpath_directdiffuse ? "true" : "false"
-                    integrator += "\t\"bool directdiffuse\" [\"#{bool_value}\"]\n"
+                    integrator << "\t\"bool directdiffuse\" [\"#{bool_value}\"]\n"
                     bool_value = @lrs.sintegrator_distributedpath_indirectdiffuse ? "true" : "false"
-                    integrator += "\t\"bool indirectdiffuse\" [\"#{bool_value}\"]\n"
-                    integrator += "\t\"integer glossyreflectdepth\" [#{@lrs.sintegrator_distributedpath_glossyreflectdepth.to_i}]\n"
-                    integrator += "\t\"integer glossyreflectsamples\" [#{@lrs.sintegrator_distributedpath_glossyreflectsamples.to_i}]\n"
-                    integrator += "\t\"integer glossyrefractdepth\" [#{@lrs.sintegrator_distributedpath_glossyrefractdepth.to_i}]\n"
-                    integrator += "\t\"integer glossyrefractsamples\" [#{@lrs.sintegrator_distributedpath_glossyrefractsamples.to_i}]\n"
+                    integrator << "\t\"bool indirectdiffuse\" [\"#{bool_value}\"]\n"
+                    integrator << "\t\"integer glossyreflectdepth\" [#{@lrs.sintegrator_distributedpath_glossyreflectdepth.to_i}]\n"
+                    integrator << "\t\"integer glossyreflectsamples\" [#{@lrs.sintegrator_distributedpath_glossyreflectsamples.to_i}]\n"
+                    integrator << "\t\"integer glossyrefractdepth\" [#{@lrs.sintegrator_distributedpath_glossyrefractdepth.to_i}]\n"
+                    integrator << "\t\"integer glossyrefractsamples\" [#{@lrs.sintegrator_distributedpath_glossyrefractsamples.to_i}]\n"
                     bool_value = @lrs.sintegrator_distributedpath_directglossy ? "true" : "false"
-                    integrator += "\t\"bool directglossy\" [\"#{bool_value}\"]\n"
+                    integrator << "\t\"bool directglossy\" [\"#{bool_value}\"]\n"
                     bool_value = @lrs.sintegrator_distributedpath_indirectglossy ? "true" : "false"
-                    integrator += "\t\"bool indirectglossy\" [\"#{bool_value}\"]\n"
-                    integrator += "\t\"integer specularreflectdepth\" [#{@lrs.sintegrator_distributedpath_specularreflectdepth.to_i}]\n"
-                    integrator += "\t\"integer specularrefractdepth\" [#{@lrs.sintegrator_distributedpath_specularrefractdepth.to_i}]\n"
+                    integrator << "\t\"bool indirectglossy\" [\"#{bool_value}\"]\n"
+                    integrator << "\t\"integer specularreflectdepth\" [#{@lrs.sintegrator_distributedpath_specularreflectdepth.to_i}]\n"
+                    integrator << "\t\"integer specularrefractdepth\" [#{@lrs.sintegrator_distributedpath_specularrefractdepth.to_i}]\n"
                     if (@lrs.sintegrator_distributedpath_reject)
                         bool_value = @lrs.sintegrator_distributedpath_diffusereflectreject ? "true" : "false"
-                        integrator += "\t\"bool diffusereflectreject\" [\"#{bool_value}\"]\n"
-                        integrator += "\t\"float diffusereflectreject_threshold\" [#{"%.6f" %(@lrs.sintegrator_distributedpath_diffusereflectreject_threshold)}]\n"
+                        integrator << "\t\"bool diffusereflectreject\" [\"#{bool_value}\"]\n"
+                        integrator << "\t\"float diffusereflectreject_threshold\" [#{"%.6f" %(@lrs.sintegrator_distributedpath_diffusereflectreject_threshold)}]\n"
                         bool_value = @lrs.sintegrator_distributedpath_diffuserefractreject ? "true" : "false"
-                        integrator += "\t\"bool diffuserefractreject\" [\"#{bool_value}\"]\n"
-                        integrator += "\t\"float diffuserefractreject_threshold\" [#{"%.6f" %(@lrs.sintegrator_distributedpath_diffuserefractreject_threshold)}]\n"
+                        integrator << "\t\"bool diffuserefractreject\" [\"#{bool_value}\"]\n"
+                        integrator << "\t\"float diffuserefractreject_threshold\" [#{"%.6f" %(@lrs.sintegrator_distributedpath_diffuserefractreject_threshold)}]\n"
                         bool_value = @lrs.sintegrator_distributedpath_glossyreflectreject ? "true" : "false"
-                        integrator += "\t\"bool glossyreflectreject\" [\"#{bool_value}\"]\n"
-                        integrator += "\t\"float glossyreflectreject_threshold\" [#{"%.6f" %(@lrs.sintegrator_distributedpath_glossyreflectreject_threshold)}]\n"
+                        integrator << "\t\"bool glossyreflectreject\" [\"#{bool_value}\"]\n"
+                        integrator << "\t\"float glossyreflectreject_threshold\" [#{"%.6f" %(@lrs.sintegrator_distributedpath_glossyreflectreject_threshold)}]\n"
                         bool_value = @lrs.sintegrator_distributedpath_glossyrefractreject ? "true" : "false"
-                        integrator += "\t\"bool glossyrefractreject\" [\"#{bool_value}\"]\n"
-                        integrator += "\t\"float glossyrefractreject_threshold\" [#{"%.6f" %(@lrs.sintegrator_distributedpath_glossyrefractreject_threshold)}]\n"
+                        integrator << "\t\"bool glossyrefractreject\" [\"#{bool_value}\"]\n"
+                        integrator << "\t\"float glossyrefractreject_threshold\" [#{"%.6f" %(@lrs.sintegrator_distributedpath_glossyrefractreject_threshold)}]\n"
                     end
                 # "directlighting"
                 when "directlighting"
-                    integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_direct_maxdepth}]\n"
-                    integrator += "\t\"integer shadowraycount\" [#{@lrs.sintegrator_direct_shadow_ray_count}]\n"
-                    integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_direct_strategy}\"]\n"
+                    integrator << "\t\"integer maxdepth\" [#{@lrs.sintegrator_direct_maxdepth}]\n"
+                    integrator << "\t\"integer shadowraycount\" [#{@lrs.sintegrator_direct_shadow_ray_count}]\n"
+                    integrator << "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_direct_strategy}\"]\n"
                 # "exphotonmap"
                 when "exphotonmap"
-                    integrator += "\t\"integer directphotons\" [#{@lrs.sintegrator_exphoton_directphotons}]\n"
-                    integrator += "\t\"integer indirectphotons\" [#{@lrs.sintegrator_exphoton_indirectphotons}]\n"
-                    integrator += "\t\"integer causticphotons\" [#{@lrs.sintegrator_exphoton_causticphotons}]\n"
+                    integrator << "\t\"integer directphotons\" [#{@lrs.sintegrator_exphoton_directphotons}]\n"
+                    integrator << "\t\"integer indirectphotons\" [#{@lrs.sintegrator_exphoton_indirectphotons}]\n"
+                    integrator << "\t\"integer causticphotons\" [#{@lrs.sintegrator_exphoton_causticphotons}]\n"
                     finalgather = @lrs.sintegrator_exphoton_finalgather ? "true" : "false"
-                    integrator += "\t\"bool finalgather\" [\"#{finalgather}\"]\n"
+                    integrator << "\t\"bool finalgather\" [\"#{finalgather}\"]\n"
                     if (@lrs.sintegrator_exphoton_finalgather)
-                        integrator += "\t\"integer finalgathersamples\" [#{@lrs.sintegrator_exphoton_finalgathersamples}]\n"
-                        integrator += "\t\"string rrstrategy\" [\"#{@lrs.sintegrator_exphoton_rrstrategy}\"]\n"
+                        integrator << "\t\"integer finalgathersamples\" [#{@lrs.sintegrator_exphoton_finalgathersamples}]\n"
+                        integrator << "\t\"string rrstrategy\" [\"#{@lrs.sintegrator_exphoton_rrstrategy}\"]\n"
                         if (@lrs.sintegrator_exphoton_rrstrategy.match("probability"))
-                            integrator += "\t\"float rrcontinueprob\" [#{"%.6f" %(@lrs.sintegrator_exphoton_rrcontinueprob)}]\n"
+                            integrator << "\t\"float rrcontinueprob\" [#{"%.6f" %(@lrs.sintegrator_exphoton_rrcontinueprob)}]\n"
                         end
-                        integrator += "\t\"float gatherangle\" [#{"%.6f" %(@lrs.sintegrator_exphoton_gatherangle)}]\n"
+                        integrator << "\t\"float gatherangle\" [#{"%.6f" %(@lrs.sintegrator_exphoton_gatherangle)}]\n"
                     end
-                    integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_exphoton_maxdepth}]\n"
-                    integrator += "\t\"integer maxphotondepth\" [#{@lrs.sintegrator_exphoton_maxphotondepth}]\n"
-                    integrator += "\t\"float maxphotondist\" [#{"%.6f" %(@lrs.sintegrator_exphoton_maxphotondist)}]\n"
-                    integrator += "\t\"integer nphotonsused\" [#{@lrs.sintegrator_exphoton_nphotonsused}]\n"
-                    integrator += "\t\"integer shadowraycount\" [#{@lrs.sintegrator_exphoton_shadow_ray_count}]\n"
-                    integrator += "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_exphoton_strategy}\"]\n"
-                    integrator += "\t\"string renderingmode\" [\"#{@lrs.sintegrator_exphoton_renderingmode}\"]\n"
+                    integrator << "\t\"integer maxdepth\" [#{@lrs.sintegrator_exphoton_maxdepth}]\n"
+                    integrator << "\t\"integer maxphotondepth\" [#{@lrs.sintegrator_exphoton_maxphotondepth}]\n"
+                    integrator << "\t\"float maxphotondist\" [#{"%.6f" %(@lrs.sintegrator_exphoton_maxphotondist)}]\n"
+                    integrator << "\t\"integer nphotonsused\" [#{@lrs.sintegrator_exphoton_nphotonsused}]\n"
+                    integrator << "\t\"integer shadowraycount\" [#{@lrs.sintegrator_exphoton_shadow_ray_count}]\n"
+                    integrator << "\t\"string lightstrategy\" [\"#{@lrs.sintegrator_exphoton_strategy}\"]\n"
+                    integrator << "\t\"string renderingmode\" [\"#{@lrs.sintegrator_exphoton_renderingmode}\"]\n"
                     #if (@lrs.sintegrator_exphoton_show_advanced) # not exposed
                         #dbg = @lrs.sintegrator_exphoton_dbg_enable_direct ? "true" : "false"
-                        #integrator += "\t\"bool dbg_enabledirect\" [\"#{dbg}\"]\n"
+                        #integrator << "\t\"bool dbg_enabledirect\" [\"#{dbg}\"]\n"
                         #dbg = @lrs.sintegrator_exphoton_dbg_enable_indircaustic ? "true" : "false"
-                        #integrator += "\t\"bool dbg_enableindircaustic\" [\"#{dbg}\"]\n"
+                        #integrator << "\t\"bool dbg_enableindircaustic\" [\"#{dbg}\"]\n"
                         #dbg = @lrs.sintegrator_exphoton_dbg_enable_indirdiffuse ? "true" : "false"
-                        #integrator += "\t\"bool dbg_enableindirdiffuse\" [\"#{dbg}\"]\n"
+                        #integrator << "\t\"bool dbg_enableindirdiffuse\" [\"#{dbg}\"]\n"
                         #dbg = @lrs.sintegrator_exphoton_dbg_enable_indirspecular ? "true" : "false"
-                        #integrator += "\t\"bool dbg_enableindirspecular\" [\"#{dbg}\"]\n"
+                        #integrator << "\t\"bool dbg_enableindirspecular\" [\"#{dbg}\"]\n"
                         #dbg = @lrs.sintegrator_exphoton_dbg_enable_radiancemap ? "true" : "false"
-                        #integrator += "\t\"bool dbg_enableradiancemap\" [\"#{dbg}\"]\n"
+                        #integrator << "\t\"bool dbg_enableradiancemap\" [\"#{dbg}\"]\n"
                     #end
                 # "igi"
                 when "igi"
-                    integrator += "\t\"integer maxdepth\" [#{@lrs.sintegrator_igi_maxdepth}]\n"
-                    integrator += "\t\"integer nsets\" [#{@lrs.sintegrator_igi_nsets}]\n"
-                    integrator += "\t\"integer nlights\" [#{@lrs.sintegrator_igi_nlights}]\n"
-                    integrator += "\t\"float mindist\" [#{"%.6f" %(@lrs.sintegrator_igi_mindist)}]\n"
+                    integrator << "\t\"integer maxdepth\" [#{@lrs.sintegrator_igi_maxdepth}]\n"
+                    integrator << "\t\"integer nsets\" [#{@lrs.sintegrator_igi_nsets}]\n"
+                    integrator << "\t\"integer nlights\" [#{@lrs.sintegrator_igi_nlights}]\n"
+                    integrator << "\t\"float mindist\" [#{"%.6f" %(@lrs.sintegrator_igi_mindist)}]\n"
             end # case
         else
             # SPPM
-            integrator += "SurfaceIntegrator \"sppm\"\n"
-            integrator += "\t\"string photonsampler\" [\"#{@lrs.sppm_photonsampler}\"]\n"
-            integrator += "\t\"string lookupaccel\" [\"#{@lrs.sppm_lookupaccel}\"]\n"
-            integrator += "\t\"integer maxeyedepth\" [#{@lrs.sppm_maxeyedepth}]\n"
-            integrator += "\t\"integer maxphotondepth\" [#{@lrs.sppm_maxphotondepth}]\n"
-            integrator += "\t\"integer photonperpass\" [#{@lrs.sppm_photonperpass}]\n"
-            integrator += "\t\"float startradius\" [#{"%.6f" %(@lrs.sppm_startradius)}]\n"
-            integrator += "\t\"float alpha\" [#{"%.6f" %(@lrs.sppm_alpha)}]\n"
-            integrator += "\t\"bool includeenvironment\" [\"true\"]\n"
-            integrator += "\t\"bool directlightsampling\" [\"true\"]\n"
+            integrator << "SurfaceIntegrator \"sppm\"\n"
+            integrator << "\t\"string photonsampler\" [\"#{@lrs.sppm_photonsampler}\"]\n"
+            integrator << "\t\"string lookupaccel\" [\"#{@lrs.sppm_lookupaccel}\"]\n"
+            integrator << "\t\"integer maxeyedepth\" [#{@lrs.sppm_maxeyedepth}]\n"
+            integrator << "\t\"integer maxphotondepth\" [#{@lrs.sppm_maxphotondepth}]\n"
+            integrator << "\t\"integer photonperpass\" [#{@lrs.sppm_photonperpass}]\n"
+            integrator << "\t\"float startradius\" [#{"%.6f" %(@lrs.sppm_startradius)}]\n"
+            integrator << "\t\"float alpha\" [#{"%.6f" %(@lrs.sppm_alpha)}]\n"
+            integrator << "\t\"bool includeenvironment\" [\"true\"]\n"
+            integrator << "\t\"bool directlightsampling\" [\"true\"]\n"
         end
 		return integrator
 		
@@ -764,30 +764,30 @@ def compute_fov(xres, yres)
 
 	def export_accelerator
 		accel = "\n"
-		accel += "Accelerator \"#{@lrs.accelerator_type}\"\n"
+		accel << "Accelerator \"#{@lrs.accelerator_type}\"\n"
 		case @lrs.accelerator_type
 			when "kdtree", "tabreckdtree"
-				accel += "\t\"integer intersectcost\" [#{@lrs.kdtree_intersectcost.to_i}]\n"
-				accel += "\t\"integer traversalcost\" [#{@lrs.kdtree_traversalcost.to_i}]\n"
-				accel += "\t\"float emptybonus\" [#{"%.6f" %(@lrs.kdtree_emptybonus)}]\n"
-				accel += "\t\"integer maxprims\" [#{@lrs.kdtree_maxprims.to_i}]\n"
-				accel += "\t\"integer maxdepth\" [#{@lrs.kdtree_maxdepth.to_i}]\n"
+				accel << "\t\"integer intersectcost\" [#{@lrs.kdtree_intersectcost.to_i}]\n"
+				accel << "\t\"integer traversalcost\" [#{@lrs.kdtree_traversalcost.to_i}]\n"
+				accel << "\t\"float emptybonus\" [#{"%.6f" %(@lrs.kdtree_emptybonus)}]\n"
+				accel << "\t\"integer maxprims\" [#{@lrs.kdtree_maxprims.to_i}]\n"
+				accel << "\t\"integer maxdepth\" [#{@lrs.kdtree_maxdepth.to_i}]\n"
 			when "grid"
 				refine = @lrs.grid_refineimmediately ? "true": "false"
-				accel += "\t\"bool refineimmediately\" [\"#{refine}\"]\n"
+				accel << "\t\"bool refineimmediately\" [\"#{refine}\"]\n"
 			when "bvh"
 			when "qbvh"
-                accel += "\t\"integer maxprimsperleaf\" [#{@lrs.qbvh_maxprimsperleaf.to_i}]\n"
-                accel += "\t\"integer fullsweepthreshold\" [#{@lrs.qbvh_fullsweepthreshold.to_i}]\n"
-				accel += "\t\"integer skipfactor\" [#{@lrs.qbvh_skip_factor.to_i}]\n"
+                accel << "\t\"integer maxprimsperleaf\" [#{@lrs.qbvh_maxprimsperleaf.to_i}]\n"
+                accel << "\t\"integer fullsweepthreshold\" [#{@lrs.qbvh_fullsweepthreshold.to_i}]\n"
+				accel << "\t\"integer skipfactor\" [#{@lrs.qbvh_skip_factor.to_i}]\n"
 		end
 		return accel
 	end
 
 	def export_volume_integrator
 		volume = "\n"
-		volume += "VolumeIntegrator \"#{@lrs.volume_integrator_type}\"\n"
-		volume += "\t\"float stepsize\" [#{"%.6f" %(@lrs.volume_integrator_stepsize)}]\n"
+		volume << "VolumeIntegrator \"#{@lrs.volume_integrator_type}\"\n"
+		volume << "\t\"float stepsize\" [#{"%.6f" %(@lrs.volume_integrator_stepsize)}]\n"
 		return volume
 	end
 
@@ -1125,7 +1125,7 @@ def compute_fov(xres, yres)
         end
         
         geometrytype = @lrs.geomexport()
-        if ( geometrytype=="ply" ) # Write ply filename for all materials
+        if ( geometrytype=="ply" || geometrytype=="binply") # Write ply filename for all materials
             puts "using .ply export"
             
             ply_path_base = File.dirname(@export_file_path) + "/" +  File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER + SU2LUX::GEOMETRYFOLDER
@@ -1137,8 +1137,12 @@ def compute_fov(xres, yres)
             else
                 ply_path=ply_path_relative + @instance_name.to_s + '_' + luxrender_name +'.ply' # mat.name was mat.display_name
             end
-            output_ply_geometry((File.dirname(@export_file_path)+"/"+ply_path), meshes, mirrored, mat_dir, @rest, has_texture, matname, pointcount, polycount, default_mat, distorted_uv, (!has_texture and @exp_default_uvs==true), false)
-            out.puts "Shape \"plymesh\""
+			if(geometrytype=="binply")
+				output_ply_geometry((File.dirname(@export_file_path)+"/"+ply_path), meshes, mirrored, mat_dir, @rest, has_texture, matname, pointcount, polycount, default_mat, distorted_uv, (!has_texture and @exp_default_uvs==true), true)
+            else
+				output_ply_geometry((File.dirname(@export_file_path)+"/"+ply_path), meshes, mirrored, mat_dir, @rest, has_texture, matname, pointcount, polycount, default_mat, distorted_uv, (!has_texture and @exp_default_uvs==true), false)
+            end
+			out.puts "Shape \"plymesh\""
             out.puts "\"string filename\" [\"#{ply_path}\"]\n"
             
         else # write lxo geometry
@@ -1181,11 +1185,14 @@ def compute_fov(xres, yres)
     def output_ply_geometry(ply_path, meshes, mirrored, mat_dir, rest, has_texture, matname, pointcount, polycount, default_mat, distorted_uv, no_texture_uvs, binary)
         startindex = 0
         
-        ply_file=File.new(ply_path,"w")
-        ply_file << "ply\n"
-        if ( binary == true)
+
+        if ( binary == true)       
+			ply_file=File.new(ply_path,"wb")
+			ply_file << "ply\n"
             ply_file << "format binary_little_endian 1.0\n"
-            else
+        else
+			ply_file=File.new(ply_path,"w")
+			ply_file << "ply\n"
             ply_file << "format ascii 1.0\n"
         end
         ply_file << "comment created by SU2Lux " << Time.new << "\n"
@@ -1418,7 +1425,9 @@ def compute_fov(xres, yres)
             out.puts "\"float efficacy\" [#{"%.6f" %(luxrender_mat.light_efficacy)}]"
             out.puts "\"float gain\" [#{"%.6f" %(luxrender_mat.light_gain)}]"
             # add material name for base material
-            if (luxrender_mat.lightbase != 'default')
+			if (luxrender_mat.lightbase == 'invisible')
+				out.puts "NamedMaterial \"SU2LUX_helper_null\"" 
+            elsif (luxrender_mat.lightbase != 'default')
                 matname = luxrender_mat.lightbase.delete("[<>]")
                 out.puts "NamedMaterial \"" + matname + "\""
             end
@@ -1429,7 +1438,31 @@ def compute_fov(xres, yres)
             out.puts "NamedMaterial \"" + matname.delete("[<>]") + "\""
         end # end case
     end
-    
+   
+	def export_procedural_textures(out)
+		puts "exporting procedural textures"
+		# from luxrender_settings, get number of procedural textures
+		# for each of those:
+		for i in 0..@lrs.nrProceduralTextures-1
+			# write texture name
+			texName = "procMat_" + i.to_s
+			puts "processing texture " + texName
+			texType = LuxrenderProceduralTexture.getTexType(texName)
+			texChannelType = LuxrenderProceduralTexture.getChannelType(texName)
+			out.puts "Texture \"" + texName + "\" \"" + texChannelType + "\" \"" + texType + "\""
+			#	get and write texture properties
+			propLists = LuxrenderProceduralTexture.getFormattedValues(texName);
+			propLists.each {|propList|
+				puts "propList is:"
+				puts propList
+				puts propList[0]
+				puts propList[0][0..6]
+				out.puts "\t" + "\"" + propList[0] + "\" [" + propList[1].to_s + "]"
+			}
+			out.puts ""
+		end
+	end
+   
     def output_spectrum(out,luxrender_mat)
         case luxrender_mat.light_L
         when "blackbody"
@@ -1446,7 +1479,7 @@ def compute_fov(xres, yres)
         end
     end
         
-    def export_displacement_textures (mat, out, luxrender_mat)
+    def export_displacement_textures (skp_mat, out, luxrender_mat)
         puts "exporting displacement map"
         if luxrender_mat.use_displacement
             puts "running displacement"
@@ -1460,8 +1493,14 @@ def compute_fov(xres, yres)
                 when "microdisplacement"
                     out.puts "\"integer nsubdivlevels\" [#{luxrender_mat.dm_microlevels}]"
             end
-            out.puts "\"texture displacementmap\" [\""+     @currenttexname    +"::displacementmap\"]"
-            out.puts "\"float dmscale\" [#{"%.6f" %(luxrender_mat.dm_scale)}]"
+			
+			if (luxrender_mat.dm_texturetype == 'imagemap' || luxrender_mat.bump_texturetype == 'sketchup')
+				out.puts "\"texture displacementmap\" [\""+ @currenttexname +"::displacementmap\"]"
+			else # procedural
+				out.puts "\"texture displacementmap\" [\"#{luxrender_mat.dm_imagemap_proctex}\"]"
+            end
+			
+			out.puts "\"float dmscale\" [#{"%.6f" %(luxrender_mat.dm_scale)}]"
             out.puts "\"float dmoffset\" [#{"%.6f" %(luxrender_mat.dm_offset)}]"
         end
     end
@@ -1473,6 +1512,8 @@ def compute_fov(xres, yres)
         @texfolder = datafolder
 		# mix materials should be last, so first we write normal materials
         materials.each { |mat|
+			puts "preparing material export for:"
+			puts mat
             luxrender_mat = mateditor.materials_skp_lux[mat]
             if (luxrender_mat.type != "portal" && luxrender_mat.type != "mix" )
                 puts "exporting material: " + mat.name
@@ -1532,19 +1573,23 @@ def compute_fov(xres, yres)
     
 
 	def export_texture(material, mat_type, type, before, after)
-        puts "running export_texture"
+        puts "running export_texture, material:"
+		puts material.name
+		puts @currenttexname_prefixed
 		# SU2LUX.dbg_p "exporting additional texture channels"
-		type_str, type_str2 = self.texture_parameters_from_type(mat_type)
+		type_str = self.texture_parameters_from_type(mat_type)
 		preceding = ""
 		following = ""
         if (mat_type=="normal")
-            preceding += "Texture \"#{@currenttexname_prefixed}::#{type_str}\" \"#{type}\" \"normalmap\"" + "\n"
-        else
-            preceding += "Texture \"#{@currenttexname_prefixed}::#{type_str}\" \"#{type}\" \"imagemap\"" + "\n"
+            preceding << "Texture \"#{@currenttexname_prefixed}::#{type_str}\" \"#{type}\" \"normalmap\"" + "\n"
+        elsif (mat_type=="bump")
+            preceding << "Texture \"#{@currenttexname_prefixed}::#{type_str}" + "_unscaled" +  "\" \"#{type}\" \"imagemap\"" + "\n"
+		else
+            preceding << "Texture \"#{@currenttexname_prefixed}::#{type_str}\" \"#{type}\" \"imagemap\"" + "\n"
 		end
-        preceding += "\t" + "\"string wrap\" [\"#{material.send(mat_type + "_imagemap_wrap")}\"]" + "\n"
+        preceding << "\t" + "\"string wrap\" [\"#{material.send(mat_type + "_imagemap_wrap")}\"]" + "\n"
         if (mat_type=='dm')
-			preceding += "\t" + "\"string channel\" [\"#{material.send(mat_type + "_imagemap_channel")}\"]" + "\n"
+			preceding << "\t" + "\"string channel\" [\"#{material.send(mat_type + "_imagemap_channel")}\"]" + "\n"
         end
 		case material.send(mat_type + "_texturetype")
 			when "sketchup"
@@ -1555,32 +1600,48 @@ def compute_fov(xres, yres)
                     puts "export_texture: no texture file path found"
                     return [preceding, following]
                 end
-                preceding += "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
+                preceding << "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
 			when "imagemap"
                 if (@texexport == "all")
                     imagemap_filename = @texfolder + "/" + File.basename(sanitize_path(material.send(mat_type + "_imagemap_filename")))
                 else
                     imagemap_filename = sanitize_path(material.send(mat_type + "_imagemap_filename"))
                 end
-                preceding += "\t" + "\"string filename\" [\"#{imagemap_filename}\"]" + "\n"
+                preceding << "\t" + "\"string filename\" [\"#{imagemap_filename}\"]" + "\n"
         end
-		preceding += "\t" + "\"float gamma\" [#{material.send(mat_type + "_imagemap_gamma")}]" + "\n"
-		preceding += "\t" + "\"float gain\" [#{material.send(mat_type + "_imagemap_gain")}]" + "\n"
-		preceding += "\t" + "\"string filtertype\" [\"#{material.send(mat_type + "_imagemap_filtertype")}\"]" + "\n"
-		preceding += "\t" + "\"string mapping\" [\"#{material.send(mat_type + "_imagemap_mapping")}\"]" + "\n"
-		preceding += "\t" + "\"float uscale\" [#{"%.6f" %(material.send(mat_type + "_imagemap_uscale"))}]" + "\n"
-		preceding += "\t" + "\"float vscale\" [#{"%.6f" %(material.send(mat_type + "_imagemap_vscale"))}]" + "\n"
-		preceding += "\t" + "\"float udelta\" [#{"%.6f" %(material.send(mat_type + "_imagemap_udelta"))}]" + "\n"
-		preceding += "\t" + "\"float vdelta\" [#{"%.6f" %(material.send(mat_type + "_imagemap_vdelta"))}]" + "\n"
+		preceding << "\t" + "\"float gamma\" [#{material.send(mat_type + "_imagemap_gamma")}]" + "\n"
+		preceding << "\t" + "\"float gain\" [#{material.send(mat_type + "_imagemap_gain")}]" + "\n"
+		preceding << "\t" + "\"string filtertype\" [\"#{material.send(mat_type + "_imagemap_filtertype")}\"]" + "\n"
+		preceding << "\t" + "\"string mapping\" [\"#{material.send(mat_type + "_imagemap_mapping")}\"]" + "\n"
+		preceding << "\t" + "\"float uscale\" [#{"%.6f" %(material.send(mat_type + "_imagemap_uscale"))}]" + "\n"
+		preceding << "\t" + "\"float vscale\" [#{"%.6f" %(material.send(mat_type + "_imagemap_vscale"))}]" + "\n"
+		preceding << "\t" + "\"float udelta\" [#{"%.6f" %(material.send(mat_type + "_imagemap_udelta"))}]" + "\n"
+		preceding << "\t" + "\"float vdelta\" [#{"%.6f" %(material.send(mat_type + "_imagemap_vdelta"))}]" + "\n"
 
-        if (material.send(mat_type + "_imagemap_colorize") == true)
-            preceding += "Texture \"#{@currenttexname_prefixed}::#{type_str}.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{@currenttexname_prefixed}::#{type_str}\"] \"#{type} tex2\" [#{material.send(type_str2)}]" + "\n"
-            following += "\t" + "\"texture #{type_str}\" [\"#{@currenttexname_prefixed}::#{type_str}.scale\"]" + "\n"
-        else
-            following += "\t" + "\"texture #{type_str}\" [\"#{@currenttexname_prefixed}::#{type_str}\"]" + "\n"
-        end
+		preceding, following = write_texture_reference(material, mat_type, type, preceding, following)
         
         return [preceding, following]
+	end
+	
+	def write_texture_reference(material, tex_type, type, prec, foll)
+		puts "WRITING TEXTURE REFERENCE LINE"
+		type_str = self.texture_parameters_from_type(tex_type) # bump, Ks, displacementmap etc. 
+		
+        if (material.send(tex_type + "_texturetype") == "procedural")
+			procTexString = material.send(tex_type + "_imagemap_proctex")
+			puts procTexString
+			if(tex_type == "bump") # separate entry in order to scale 
+				foll << "\t" + "\"texture #{type_str}\" [\"" + procTexString + "_scale\"]" + "\n"
+			elsif
+				foll << "\t" + "\"texture #{type_str}\" [\"" + procTexString + "\"]" + "\n"
+			end
+		elsif (material.send(tex_type + "_imagemap_colorize") == true) 
+			prec << "Texture \"#{@currenttexname_prefixed}::#{type_str}.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{@currenttexname_prefixed}::#{type_str}\"] \"#{type} tex2\" [#{material.send(type_str2)}]" + "\n"
+			foll << "\t" + "\"texture #{type_str}\" [\"#{@currenttexname_prefixed}::#{type_str}.scale\"]" + "\n"
+		else # ordinary textures
+			foll << "\t" + "\"texture #{type_str}\" [\"#{@currenttexname_prefixed}::#{type_str}\"]" + "\n"
+		end
+		return [prec, foll]
 	end
 
 
@@ -1619,13 +1680,13 @@ def compute_fov(xres, yres)
                     pre, post = self.export_absorption_component(mat, pre, post)
                 end
                 multibounce = mat.multibounce ? "true": "false"
-                post += "\t" + "\"bool multibounce\" [\"#{multibounce}\"]" + "\n"
+                post << "\t" + "\"bool multibounce\" [\"#{multibounce}\"]" + "\n"
 			when "glass"
                 pre, post = self.export_reflection_component(mat, pre, post)
                 pre, post = self.export_transmission_component(mat, pre, post)
                 pre, post = self.export_IOR(mat, pre, post)
                 architectural = mat.use_architectural ? "true" : "false"
-                post += "\t" + "\"bool architectural\" [\"#{architectural}\"]" + "\n"
+                post << "\t" + "\"bool architectural\" [\"#{architectural}\"]" + "\n"
                 if ( ! mat.use_architectural)
                     if (mat.use_dispersive_refraction)
                         pre, post = self.export_dispersive_refraction(mat, pre, post)
@@ -1653,7 +1714,7 @@ def compute_fov(xres, yres)
                 pre, post = self.export_reflection_component(mat, pre, post)
                 pre, post = self.export_transmission_component(mat, pre, post)
                 energyconserving = mat.energyconserving ? "true": "false"
-                post += "\t" + "\"bool energyconserving\" [\"#{energyconserving}\"]" + "\n"
+                post << "\t" + "\"bool energyconserving\" [\"#{energyconserving}\"]" + "\n"
                 pre, post = self.export_sigma(mat, pre, post)
 			when "glossytranslucent"
                 pre, post = self.export_diffuse_component(mat, pre, post)
@@ -1663,7 +1724,7 @@ def compute_fov(xres, yres)
                 pre, post = self.export_IOR(mat, pre, post)
                 pre, post = self.export_absorption_component(mat, pre, post)
                 multibounce = mat.multibounce ? "true": "false"
-                post += "\t" + "\"bool multibounce\" [\"#{multibounce}\"]" + "\n"
+                post << "\t" + "\"bool multibounce\" [\"#{multibounce}\"]" + "\n"
 			when "light"
                 pre, post = self.export_mesh_light(mat, pre, post)
 		end
@@ -1691,9 +1752,13 @@ def compute_fov(xres, yres)
                 @currentfilename = sanitize_path(@model_textures[mat.name][4])
                 @currenttexname = @currenttexname_prefixed = File.basename(@currentfilename, '.*')
             else
+				@currenttexname_prefixed = sanitize_path(mat.name)
                 puts "creating file name from material name"
             end
         end
+		
+		puts "EXPORTING MATERIAL, @currenttexname_prefixed is"
+		puts @currenttexname_prefixed
         
         # export main material properties
 		pre = ""
@@ -1710,6 +1775,7 @@ def compute_fov(xres, yres)
             pre, post = self.export_normal(mat, pre, post)
 		end
         if (mat.has_displacement?)
+			puts "MATERIAL HAS DISPLACEMENT"
 			pre, post = self.export_displacement(mat, pre, post)
 		end
         
@@ -1843,13 +1909,19 @@ def compute_fov(xres, yres)
 	end # END write_textures
 
 	def export_diffuse_component(material, before, after)
+		puts "exporting diffuse component for material: "
+		puts material
+		puts material.kd_texturetype
 		preceding = ""
 		following = ""
-		if ( not material.has_texture?("kd"))
-			following += "\t" + "\"color Kd\" [#{material.color_tos}]" + "\n"
-		else
-			preceding += "Texture \"#{@currenttexname_prefixed}::Kd\" \"color\" \"imagemap\"" + "\n"
-			preceding += "\t" + "\"string wrap\" [\"#{material.kd_imagemap_wrap}\"]" + "\n"
+		case material.kd_texturetype
+		when "none"
+			following << "\t" + "\"color Kd\" [#{"%.6f" %(material.kd_R)} #{"%.6f" %(material.kd_G)} #{"%.6f" %(material.kd_B)}]" + "\n"
+		when "procedural"
+			following << "\t" + "\"texture Kd\" [\"#{material.kd_imagemap_proctex }\"]" + "\n"
+		else # SketchUp texture or image texture
+			preceding << "Texture \"#{@currenttexname_prefixed}::Kd\" \"color\" \"imagemap\"" + "\n"
+			preceding << "\t" + "\"string wrap\" [\"#{material.kd_imagemap_wrap}\"]" + "\n"
 			case material.kd_texturetype
 				when "sketchup"
 					if (@model_textures.has_key?(material.name))
@@ -1860,27 +1932,27 @@ def compute_fov(xres, yres)
 						return [before, after]
 					end
 
-					preceding += "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
+					preceding << "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
 				when "imagemap"
                     if (@texexport == "all")
                         imagemapfilepath = @texfolder + "/" + File.basename(sanitize_path(material.kd_imagemap_filename))
                     else
                         imagemapfilepath = sanitize_path(material.kd_imagemap_filename)
                     end
-					preceding += "\t" + "\"string filename\" [\"#{imagemapfilepath}\"]" + "\n"
+					preceding << "\t" + "\"string filename\" [\"#{imagemapfilepath}\"]" + "\n"
 			end
-			preceding += "\t" + "\"float gamma\" [#{material.kd_imagemap_gamma}]" + "\n"
-            preceding += "\t" + "\"float uscale\" [#{"%.6f" %(material.kd_imagemap_uscale)}]" + "\n"
-            preceding += "\t" + "\"float vscale\" [#{"%.6f" %(material.kd_imagemap_vscale)}]" + "\n"
-			preceding += "\t" + "\"float gain\" [#{material.kd_imagemap_gain}]" + "\n"
-			preceding += "\t" + "\"string filtertype\" [\"#{material.kd_imagemap_filtertype}\"]" + "\n"
+			preceding << "\t" + "\"float gamma\" [#{material.kd_imagemap_gamma}]" + "\n"
+            preceding << "\t" + "\"float uscale\" [#{"%.6f" %(material.kd_imagemap_uscale)}]" + "\n"
+            preceding << "\t" + "\"float vscale\" [#{"%.6f" %(material.kd_imagemap_vscale)}]" + "\n"
+			preceding << "\t" + "\"float gain\" [#{material.kd_imagemap_gain}]" + "\n"
+			preceding << "\t" + "\"string filtertype\" [\"#{material.kd_imagemap_filtertype}\"]" + "\n"
             
             # color = "#{"%.6f" %(material.color[0])} #{"%.6f" %(material.color[1])} #{"%.6f" %(material.color[2])}"
 			if (material.send("kd_imagemap_colorize") == true)
-                preceding += "Texture \"#{@currenttexname_prefixed}::Kd.scale\" \"color\" \"scale\" \"texture tex1\" [\"#{@currenttexname_prefixed}::Kd\"] \"color tex2\" [#{material.color_tos}]" + "\n"
-				following += "\t" + "\"texture Kd\" [\"#{@currenttexname_prefixed}::Kd.scale\"]" + "\n"
+                preceding << "Texture \"#{@currenttexname_prefixed}::Kd.scale\" \"color\" \"scale\" \"texture tex1\" [\"#{@currenttexname_prefixed}::Kd\"] \"color tex2\" [#{material.color_tos}]" + "\n"
+				following << "\t" + "\"texture Kd\" [\"#{@currenttexname_prefixed}::Kd.scale\"]" + "\n"
 			else
-				following += "\t" + "\"texture Kd\" [\"#{@currenttexname_prefixed}::Kd\"]" + "\n"
+				following << "\t" + "\"texture Kd\" [\"#{@currenttexname_prefixed}::Kd\"]" + "\n"
 			end
 		end
 		return [before + preceding, after + following]
@@ -1890,7 +1962,7 @@ def compute_fov(xres, yres)
 		preceding = ""
 		following = ""
 		if ( ! material.has_texture?("matte_sigma"))
-			following += "\t" + "\"float sigma\" [#{material.matte_sigma}]" + "\n"
+			following << "\t" + "\"float sigma\" [#{material.matte_sigma}]" + "\n"
 		else
 			preceding, following = self.export_texture(material, "matte_sigma", "float", before, after)
 		end
@@ -1901,16 +1973,17 @@ def compute_fov(xres, yres)
 		preceding = ""
 		following = ""
         if (material.specular_scheme == "specular_scheme_preset")
-            following += "\t" + "\"float index\" [#{material.specular_preset}]\n"
+            following << "\t" + "\"float index\" [#{material.specular_preset}]\n"
         elsif (material.specular_scheme == "specular_scheme_IOR")
             if ( ! material.has_texture?("spec_IOR"))
-                following += "\t" + "\"float index\" [#{material.spec_IOR}]\n"
+                following << "\t" + "\"float index\" [#{material.spec_IOR}]\n"
             else
                 preceding, following = self.export_texture(material, "spec_IOR", "float", before, after)
             end
         else
             if ( ! material.has_texture?("ks"))
-                following += "\t" + "\"color Ks\" [#{material.specular_tos}]" + "\n"
+                following << "\t" + "\"color Ks\" [#{"%.6f" %(material.ks_R)} #{"%.6f" %(material.ks_G)} #{"%.6f" %(material.ks_B)}]" + "\n"
+				
             else
                 preceding, following = self.export_texture(material, "ks", "color", before, after)
             end
@@ -1922,9 +1995,9 @@ def compute_fov(xres, yres)
 		preceding = ""
 		following = ""
         # add cloth type, u scale, v scale
-        following += "\t" + "\"string presetname\" [\"#{material.cl_type}\"]" + "\n"
-        following += "\t" + "\"float repeat_u\" [#{material.cl_repeatu}]" + "\n"
-        following += "\t" + "\"float repeat_v\" [#{material.cl_repeatv}]" + "\n"
+        following << "\t" + "\"string presetname\" [\"#{material.cl_type}\"]" + "\n"
+        following << "\t" + "\"float repeat_u\" [#{material.cl_repeatu}]" + "\n"
+        following << "\t" + "\"float repeat_v\" [#{material.cl_repeatv}]" + "\n"
         
         return [before + preceding, after + following]
 	end
@@ -1933,7 +2006,7 @@ def compute_fov(xres, yres)
         preceding = ""
         following = ""
         if ( ! material.has_texture?("cl1kd"))
-            following += "\t" + "\"color warp_Kd\" [#{material.channelcolor_tos('cl1kd')}]" + "\n"
+            following << "\t" + "\"color warp_Kd\" [#{material.channelcolor_tos('cl1kd')}]" + "\n"
         else
             preceding, following = self.export_texture(material, "cl1kd", "color", before, after)
         end
@@ -1944,7 +2017,7 @@ def compute_fov(xres, yres)
         preceding = ""
         following = ""
         if ( ! material.has_texture?("cl1ks"))
-            following += "\t" + "\"color warp_Ks\" [#{material.channelcolor_tos('cl1ks')}]" + "\n"
+            following << "\t" + "\"color warp_Ks\" [#{material.channelcolor_tos('cl1ks')}]" + "\n"
         else
             preceding, following = self.export_texture(material, "cl1ks", "color", before, after)
         end
@@ -1956,7 +2029,7 @@ def compute_fov(xres, yres)
         following = ""
         
         if ( ! material.has_texture?("cl2kd"))
-            following += "\t" + "\"color weft_Kd\" [#{material.channelcolor_tos('cl2kd')}]" + "\n"
+            following << "\t" + "\"color weft_Kd\" [#{material.channelcolor_tos('cl2kd')}]" + "\n"
         else
             preceding, following = self.export_texture(material, "cl2kd", "color", before, after)
         end
@@ -1967,7 +2040,7 @@ def compute_fov(xres, yres)
         preceding = ""
         following = ""
         if ( ! material.has_texture?("cl2kd"))
-            following += "\t" + "\"color weft_Ks\" [#{material.channelcolor_tos('cl2ks')}]" + "\n"
+            following << "\t" + "\"color weft_Ks\" [#{material.channelcolor_tos('cl2ks')}]" + "\n"
         else
             preceding, following = self.export_texture(material, "cl2ks", "color", before, after)
         end
@@ -1980,31 +2053,37 @@ def compute_fov(xres, yres)
 	def export_null(material, before, after)
 		preceding = ""
 		following = ""
-		#following += "\t" + "\"string type\" [\"null\"]"+ "\n\n"
+		#following << "\t" + "\"string type\" [\"null\"]"+ "\n\n"
 
 		return [before + preceding, after + following]
 	end
     
 	def export_mix(material, before, after)
+		puts "MATERIAL.MX_TEXTURETYPE: " + material.mx_texturetype
 		preceding = ""
 		following = ""
         mixmat1 = material.material_list1.delete("[<>]")
         mixmat2 = material.material_list2.delete("[<>]")
         case material.mx_texturetype
             when "none"
-                following += "\t" + "\"string namedmaterial1\" [\"#{mixmat1}\"]" + "\n"
-                following += "\t" + "\"string namedmaterial2\" [\"#{mixmat2}\"]" + "\n"
+                following << "\t" + "\"string namedmaterial1\" [\"#{mixmat1}\"]" + "\n"
+                following << "\t" + "\"string namedmaterial2\" [\"#{mixmat2}\"]" + "\n"
                 mixamount = 1 - material.mix_uniform.to_f / 100
                 mixamountstring = mixamount.to_s
-                following += "\t" + "\"float amount\" [" + mixamountstring +"]" + "\n"
+                following << "\t" + "\"float amount\" [" + mixamountstring +"]" + "\n"
             when "sketchup"
                 preceding, following = self.export_texture(material, 'mx', 'float', before, after)
-                following += "\t" + "\"string namedmaterial1\" [\"#{mixmat1}\"]" + "\n"
-                following += "\t" + "\"string namedmaterial2\" [\"#{mixmat2}\"]" + "\n"
+                following << "\t" + "\"string namedmaterial1\" [\"#{mixmat1}\"]" + "\n"
+                following << "\t" + "\"string namedmaterial2\" [\"#{mixmat2}\"]" + "\n"
             when "imagemap"
                 preceding, following = self.export_texture(material, 'mx', 'float', before, after)
-                following += "\t" + "\"string namedmaterial1\" [\"#{mixmat1}\"]" + "\n"
-                following += "\t" + "\"string namedmaterial2\" [\"#{mixmat2}\"]" + "\n"
+                following << "\t" + "\"string namedmaterial1\" [\"#{mixmat1}\"]" + "\n"
+                following << "\t" + "\"string namedmaterial2\" [\"#{mixmat2}\"]" + "\n"
+			when "procedural"
+				preceding, following = self.write_texture_reference(material, 'mx', 'float', "", "")
+                following << "\t" + "\"string namedmaterial1\" [\"#{mixmat1}\"]" + "\n"
+                following << "\t" + "\"string namedmaterial2\" [\"#{mixmat2}\"]" + "\n"
+
 		end
 		return [before + preceding, after + following]
 	end
@@ -2013,7 +2092,7 @@ def compute_fov(xres, yres)
 		preceding = ""
 		following = ""
 		if (material.carpaint_name)
-			following += "\t" + "\"string name\" [\"#{material.carpaint_name}\"]" + "\n"
+			following << "\t" + "\"string name\" [\"#{material.carpaint_name}\"]" + "\n"
 		end
 		return [before + preceding, after + following]
 	end
@@ -2024,8 +2103,8 @@ def compute_fov(xres, yres)
 		material.uroughness = Math.sqrt(2.0 / (material.u_exponent.to_f + 2))
 		material.vroughness = Math.sqrt(2.0 / (material.v_exponent.to_f + 2))
 		if ( ! material.has_texture?('u_exponent'))
-			following += "\t" + "\"float uroughness\" [#{"%.6f" %(material.uroughness)}]" + "\n"
-			following += "\t" + "\"float vroughness\" [#{"%.6f" %(material.vroughness)}]" + "\n"
+			following << "\t" + "\"float uroughness\" [#{"%.6f" %(material.uroughness)}]" + "\n"
+			following << "\t" + "\"float vroughness\" [#{"%.6f" %(material.vroughness)}]" + "\n"
 		else
 			preceding_t, following_t = self.export_texture(material, "u_exponent", "float", before, after)
 			preceding, following = self.export_texture(material, "v_exponent", "float", before, after)
@@ -2039,7 +2118,7 @@ def compute_fov(xres, yres)
 		preceding = ""
 		following = ""
 		if ( ! material.has_texture?('IOR_index'))
-			following += "\t" + "\"float index\" [#{material.IOR_index}]\n"
+			following << "\t" + "\"float index\" [#{material.IOR_index}]\n"
 		else
 			preceding, following = self.export_texture(material, 'IOR_index', 'float', before, after)
 		end
@@ -2050,12 +2129,12 @@ def compute_fov(xres, yres)
 		preceding = ""
 		following = ""
 		if ( ! material.has_texture?('ka'))
-			following += "\t" + "\"color Ka\" [#{"%.6f" %(material.absorption[0])} #{"%.6f" %(material.absorption[1])} #{"%.6f" %(material.absorption[2])}]" + "\n"
+			following << "\t" + "\"color Ka\" [#{"%.6f" %(material.absorption[0])} #{"%.6f" %(material.absorption[1])} #{"%.6f" %(material.absorption[2])}]" + "\n"
 		else
 			preceding, following = self.export_texture(material, "ka", "color", before, after)
 		end
 		if ( ! material.has_texture?('ka_d'))
-			following += "\t" + "\"float d\" [#{"%.6f" %(material.ka_d)}]" + "\n"
+			following << "\t" + "\"float d\" [#{"%.6f" %(material.ka_d)}]" + "\n"
 		else
 			preceding, following = self.export_texture(material, "d", "float", before, after)
 		end
@@ -2065,7 +2144,7 @@ def compute_fov(xres, yres)
 	def export_nk(material, before, after)
 		preceding = ""
 		following = ""
-		following += "\t" + "\"string name\" [\"#{material.nk_preset}\"]" + "\n"
+		following << "\t" + "\"string name\" [\"#{material.nk_preset}\"]" + "\n"
 		return [before + preceding, after + following]
 	end
     
@@ -2075,17 +2154,17 @@ def compute_fov(xres, yres)
         if (material.metal2_preset == "custom")
             if (material.has_texture?('km2'))
                 preceding, preceding2 = self.export_texture(material, "km2", "color", before, after)
-                preceding += "\n" + "Texture \"#{@currenttexname_prefixed}::Km2_fresnel\" \"fresnel\" \"fresnelcolor\"" + "\n"
-                preceding += preceding2
+                preceding << "\n" + "Texture \"#{@currenttexname_prefixed}::Km2_fresnel\" \"fresnel\" \"fresnelcolor\"" + "\n"
+                preceding << preceding2
             else
-                preceding += "Texture \"#{@currenttexname_prefixed}::Km2_fresnel\" \"fresnel\" \"fresnelcolor\"" + "\n"
-                preceding += "\t" + "\"color Kr\" [#{material.km2_R} #{material.km2_G} #{material.km2_B}]" + "\n" + "\n"
+                preceding << "Texture \"#{@currenttexname_prefixed}::Km2_fresnel\" \"fresnel\" \"fresnelcolor\"" + "\n"
+                preceding << "\t" + "\"color Kr\" [#{material.km2_R} #{material.km2_G} #{material.km2_B}]" + "\n" + "\n"
             end
         else # preset
-            preceding += "Texture \"#{@currenttexname_prefixed}::Km2_fresnel\" \"fresnel\" \"preset\"" + "\n"
-            preceding += "\"string name\" [\"" + material.metal2_preset + "\"]" + "\n" + "\n"
+            preceding << "Texture \"#{@currenttexname_prefixed}::Km2_fresnel\" \"fresnel\" \"preset\"" + "\n"
+            preceding << "\"string name\" [\"" + material.metal2_preset + "\"]" + "\n" + "\n"
         end
-        following += "\t" + "\"texture fresnel\" [\"#{@currenttexname_prefixed}::Km2_fresnel\"]" + "\n"
+        following << "\t" + "\"texture fresnel\" [\"#{@currenttexname_prefixed}::Km2_fresnel\"]" + "\n"
         return [before + preceding, after + following]
     end
 
@@ -2093,7 +2172,7 @@ def compute_fov(xres, yres)
 		preceding = ""
 		following = ""
 		if ( ! material.has_texture?('kr'))
-			following += "\t" + "\"color Kr\" [#{"%.6f" %(material.kr_R)} #{"%.6f" %(material.kr_G)} #{"%.6f" %(material.kr_B)}]" + "\n"
+			following << "\t" + "\"color Kr\" [#{"%.6f" %(material.kr_R)} #{"%.6f" %(material.kr_G)} #{"%.6f" %(material.kr_B)}]" + "\n"
 		else
 			preceding, following = self.export_texture(material, 'kr', 'color', before, after)
 		end
@@ -2104,7 +2183,7 @@ def compute_fov(xres, yres)
 		preceding = ""
 		following = ""
 		if ( ! material.has_texture?('kt'))
-			following += "\t" + "\"color Kt\" [#{"%.6f" %(material.kt_R)} #{"%.6f" %(material.kt_G)} #{"%.6f" %(material.kt_B)}]" + "\n"
+			following << "\t" + "\"color Kt\" [#{"%.6f" %(material.kt_R)} #{"%.6f" %(material.kt_G)} #{"%.6f" %(material.kt_B)}]" + "\n"
 		else
 			preceding, following = self.export_texture(material, 'kt', 'color', before, after)
 		end
@@ -2116,12 +2195,12 @@ def compute_fov(xres, yres)
 		preceding = ""
 		following = ""
 		if ( ! material.has_texture?('film'))
-			following += "\t" + "\"float film\" [#{"%.6f" %(material.film)}]" + "\n"
+			following << "\t" + "\"float film\" [#{"%.6f" %(material.film)}]" + "\n"
 		else
 			preceding, following = self.export_texture(material, 'film', 'float', before, after)
 		end
 		if ( ! material.has_texture?('filmindex'))
-			following += "\t" + "\"float filmindex\" [#{"%.6f" %(material.filmindex)}]" + "\n"
+			following << "\t" + "\"float filmindex\" [#{"%.6f" %(material.filmindex)}]" + "\n"
 		else
 			preceding, following = self.export_texture(material, 'filmindex', 'float', before, after)
 		end
@@ -2132,7 +2211,7 @@ def compute_fov(xres, yres)
 		preceding = ""
 		following = ""
 		if ( ! material.has_texture?('cauchyb'))
-			following += "\t" + "\"float cauchyb\" [#{"%.6f" %(material.cauchyb)}]" + "\n"
+			following << "\t" + "\"float cauchyb\" [#{"%.6f" %(material.cauchyb)}]" + "\n"
 		else
 			preceding, following = self.export_texture(material, 'cauchyb', 'float', before, after)
 		end
@@ -2142,9 +2221,22 @@ def compute_fov(xres, yres)
 	def export_bump(material, before, after)
 		preceding = ""
 		following = ""
-        preceding, following = self.export_texture(material, "bump", "float", before, after)
+		# if image texture:
+		if (material.bump_texturetype == 'imagemap' || material.bump_texturetype == 'sketchup')
+			preceding, following = self.export_texture(material, "bump", "float", before, after)
+			preceding << "Texture \"#{@currenttexname_prefixed}::bumpmap\" \"float\" \"scale\"" + "\n"
+			preceding << "\t" + "\"float tex1\" [#{material.bumpmap}]" + "\n"
+			preceding << "\t" + "\"texture tex2\" [\"#{@currenttexname_prefixed}::bumpmap_unscaled\"]" + "\n"
+		else # procedural
+			preceding, following = write_texture_reference(material, "bump", material.type, preceding, following)
+			preceding << "Texture \"#{material.bump_imagemap_proctex}_scale\" \"float\" \"scale\"" + "\n"
+			preceding << "\t" + "\"float tex1\" [#{material.bumpmap}]" + "\n"
+			preceding << "\t" + "\"texture tex2\" [\"#{material.bump_imagemap_proctex}\"]" + "\n"
+		end
+		# todo: make original bump always refer to this scale texture -> add "_scale" to texture name
 		return [before + preceding, after + following]
 	end
+	
 	def export_normal(material, before, after)
 		preceding = ""
 		following = ""
@@ -2155,10 +2247,11 @@ def compute_fov(xres, yres)
 	def export_displacement(material, before, after)
 		preceding = ""
 		following = ""
-		if (material.has_texture?('dm'))
+		if (material.has_texture?('dm') && material.dm_texturetype != "procedural")
             puts ("material.has_texture? dm is true")
 			preceding, following = self.export_texture(material, "dm", "float", before, after)
 		end
+		
 		return [before + preceding, after] # following parts would be added to geometry, not to material definition
 	end
 
@@ -2167,13 +2260,13 @@ def compute_fov(xres, yres)
         preceding = pre # empty
         following = post # empty
         if material.light_L == "blackbody"
-            preceding += "Texture \"" + material.name + ":light:L\"" + "\n"
-            preceding += "\t" + "\"color\" \"blackbody\"" + "\n"
-            preceding += "\t" + "\"float temperature\" [#{material.light_temperature}]" + "\n"
+            preceding << "Texture \"" + material.name + ":light:L\"" + "\n"
+            preceding << "\t" + "\"color\" \"blackbody\"" + "\n"
+            preceding << "\t" + "\"float temperature\" [#{material.light_temperature}]" + "\n"
         elsif material.light_L == "emit_preset"
-            preceding += "Texture \"" + material.name + ":light:L\"" + "\n"
-            preceding += "\t" + "\"color\" \"lampspectrum\""  + "\n"
-            preceding += "\t" + "\"string name\" [\"" + material.light_spectrum+ "\"]" + "\n"
+            preceding << "Texture \"" + material.name + ":light:L\"" + "\n"
+            preceding << "\t" + "\"color\" \"lampspectrum\""  + "\n"
+            preceding << "\t" + "\"string name\" [\"" + material.light_spectrum+ "\"]" + "\n"
         else
             if (material.has_texture?('em'))
                 preceding, following = self.export_texture(material, "em", "color", preceding, following)
@@ -2188,78 +2281,52 @@ def compute_fov(xres, yres)
 		case mat_type
 			when 'kd'
 				type_str = "Kd"
-				if (material.color['red'].to_f != 1.0 or material.color['green'].to_f != 1.0 or material.color['blue'].to_f != 1.0)
-					color = material.color_tos
-				end
-				type_str2 = ""
 			when 'bump'
 				type_str = "bumpmap"
-				type_str2 = "bumpmap"
 			when 'dm'
 				type_str = "displacementmap"
-				type_str2 = "dm_imagemap_uscale"
 			when 'matte_sigma'
 				type_str = "sigma"
-				type_str2 = "matte_sigma"
 			when 'ks'
 				type_str = "Ks"
-				type_str2 = "specular_tos"
 			when 'ka'
 				type_str = "Ka"
-				type_str2 = "absorption_tos"
             when 'km2'
                 type_str = "Kr"
-                type_str2 = "km2_tos"
 			when 'ka_d'
 				type_str = "d"
-				type_str2 = "ka_d"
 			when 'kr'
 				type_str = "Kr"
-				type_str2 = "reflection_tos"
 			when 'kt'
 				type_str = "Kt"
-				type_str2 = "transmission_tos"
             when 'em'
                 type_str = "L"
-                type_str2 = "em_tos"
             when 'normal'
 				type_str = "bumpmap"
-				type_str2 = "normalmap"
             when 'IOR_index'
 				type_str = 'index'
-				type_str2 = 'IOR_index'
             when 'spec_IOR'
 				type_str = 'index'
-				type_str2 = 'spec_IOR'
 			when 'u_exponent'
 				type_str = 'uroughness'
-				type_str2 = 'uroughness'
 			when 'v_exponent'
 				type_str = 'vroughness'
-				type_str2 = 'vroughness'
 			when 'mx'
 				type_str = 'amount'
-				type_str2 = 'skmixstrtwo'
 			when 'carpaint_name'
 				type_str = 'carpaint_name'
-				type_str2 = 'name'
             when 'cl1kd'
                 type_str = 'warp_Kd'
-                type_str2 = 'cl1kd_tos'
             when 'cl1ks'
                 type_str = 'warp_Ks'
-                type_str2 = 'cl1ks_tos'
             when 'cl2kd'
                 type_str = 'weft_Kd'
-                type_str2 = 'cl2kd_tos'
             when 'cl2ks'
                 type_str = 'weft_Ks'
-                type_str2 = 'cl2ks_tos'
-                
 			else
-				type_str = type_str2 = mat_type
+				type_str = mat_type
 		end
-		return [type_str, type_str2]
+		return type_str
 	end
 	
 end # END class LuxrenderExport

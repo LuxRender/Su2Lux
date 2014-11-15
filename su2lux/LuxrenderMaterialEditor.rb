@@ -19,7 +19,7 @@
 
 class LuxrenderMaterialEditor
 
-	attr_accessor :current, :matname_changed, :materials_skp_lux
+	attr_accessor :current, :matname_changed, :materials_skp_lux, :material_editor_dialog
     attr_reader :material_editor_dialog
 	
 	def initialize
@@ -38,6 +38,12 @@ class LuxrenderMaterialEditor
 		material_editor_dialog_path = Sketchup.find_support_file("materialeditor.html", "Plugins/su2lux")
 		@material_editor_dialog.max_width = 800
 		@material_editor_dialog.set_file(material_editor_dialog_path)
+		# add procedural texture names to all dropdowns
+		for i in 0..@lrs.nrProceduralTextures-1
+			texName = "procMat_" + i.to_s
+			channel = LuxrenderProceduralTexture.getChannelType(texName)
+			@material_editor_dialog.execute_script('addToProcTextList("' + texName + '","' + channel + '")')
+		end
         @collectedmixmaterials = []
         @collectedmixmaterials_i = 0
         
@@ -46,7 +52,7 @@ class LuxrenderMaterialEditor
         @color_picker.set_file(color_picker_path)
 		@texture_editor_data = {}
         
-        @numberofluxmaterials = 0
+        @numberOfLuxMaterials = 0
         
         for mat in Sketchup.active_model.materials
             luxmat = self.find(mat.name) # adds material to materials_skp_lux
@@ -63,10 +69,8 @@ class LuxrenderMaterialEditor
 			lux_material = @current
 			parameters.each{ |k, v|
 				if (lux_material.respond_to?(k))
-                    puts k
-                    puts v
-                    puts "lux_material responding"
-                    puts @current
+					puts k # temp 2014
+                    puts "setting " + k.to_s + " to " + v.to_s + " for " + @current.to_s
 					method_name = k + "="
 					if (v.to_s.downcase == "true")
 						v = true
@@ -89,10 +93,10 @@ class LuxrenderMaterialEditor
 					end
                 end
                 if (v == "imagemap")
-                        puts "updating text"
-                        textype = k.dup
-                        textype.slice!("_texturetype")
-                        update_texture_name(lux_material, textype)
+                    puts "updating text"
+                    textype = k.dup
+                    textype.slice!("_texturetype")
+                    update_texture_name(lux_material, textype)
                 end
                 
                 
@@ -379,8 +383,9 @@ class LuxrenderMaterialEditor
 			generated_lxm_file << "\n"
 			
 			texture_subfolder = "LuxRender_luxdata/textures"
-			previewExport=LuxrenderExport.new(preview_path,path_separator) # preview path should define where preview files will be stored
-            
+			previewExport = LuxrenderExport.new(preview_path,path_separator) # preview path should define where preview files will be stored
+			previewExport.export_procedural_textures(generated_lxm_file)
+			
             collect_mix_materials(@current) # check if the current material is a mix material; if so, recursively gather submaterials
             puts "collected materials:"
             puts @collectedmixmaterials
@@ -389,6 +394,8 @@ class LuxrenderMaterialEditor
                 active_material_name = active_material.name.delete("[<>]") # following LuxrenderMaterial.rb convention
                 active_material_name_converted = sanitize_path(active_material_name)
                 previewExport.export_preview_material(preview_path,generated_lxm_file,active_material_name_converted,active_material,texture_subfolder,prmat)
+				
+				
             end
             @collectedmixmaterials = []
             @collectedmixmaterials_i = 0
@@ -494,13 +501,10 @@ class LuxrenderMaterialEditor
 		}
 		
 		@material_editor_dialog.add_action_callback("texture_editor") {|dialog, params|
-            puts "callback: texture_editor"
+            puts "callback: texture_editor for " + params.to_s
 
 			lux_material = @current
-            puts "params:"
-            puts params.to_s
             data = params.to_s # for example ks
-                                   
 			method_name = data + '_texturetype'
 			texture_type = lux_material.send(method_name)
             if (data=="aa") # autoalpha does not have a single imagemap entry, but does store its texture under that name
@@ -510,7 +514,7 @@ class LuxrenderMaterialEditor
 			prefix = data + '_' + texture_type + '_'
 			@texture_editor_data['texturetype'] = lux_material.send(method_name)
         
-                                   #properties_export =	['wrap', 'channel', 'filename', 'gamma', 'gain', 'filtertype', 'mapping', 'uscale', 'vscale', 'udelta', 'vdelta', 'maxanisotropy', 'discardmipmaps']
+            #properties_export = ['wrap', 'channel', 'filename', 'gamma', 'gain', 'filtertype', 'mapping', 'uscale', 'vscale', 'udelta', 'vdelta', 'maxanisotropy', 'discardmipmaps']
             properties_export =	['filename', 'uscale', 'vscale', 'udelta', 'vdelta', 'gamma', 'filtertype']
             properties_export.each {|par|
 				@texture_editor_data[texture_type + '_' + par] = lux_material.send(prefix + par) if (lux_material.respond_to?(prefix+par))
@@ -697,8 +701,8 @@ class LuxrenderMaterialEditor
         if (getluxmatfromskpname(name))
             return getluxmatfromskpname(name)
         elsif (mat)
-            @numberofluxmaterials += 1
-            #puts @numberofluxmaterials
+            @numberOfLuxMaterials += 1
+            #puts @numberOfLuxMaterials
             newluxmat = LuxrenderMaterial.new(mat)
             @materials_skp_lux[mat] = newluxmat
             return newluxmat
@@ -714,8 +718,7 @@ class LuxrenderMaterialEditor
 	def show
         SU2LUX.dbg_p "running show function"
 		@material_editor_dialog.show{}
-        #refresh()
-        # SU2LUX.dbg_p "finished running show function"
+		
 	end	
 	
 	##
@@ -788,8 +791,17 @@ class LuxrenderMaterialEditor
         # set preview section height
         setdivheightcmd = 'setpreviewheight(' + @lrs.preview_size.to_s + ',' + @lrs.preview_time.to_s + ')'
         puts setdivheightcmd
+		
         @material_editor_dialog.execute_script(setdivheightcmd)
-        
+		
+		# add procedural textures to dropdown
+		@lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
+		puts "LuxRenderMaterialEditor.rb adding " + @lrs.nrProceduralTextures.to_s + " procedural textures to texture dropdown menus"
+		for i in 0..@lrs.nrProceduralTextures-1
+			# get texture name, then texture type
+			texChannelType = LuxrenderProceduralTexture.getChannelType("procMat_" + i.to_s)
+			@material_editor_dialog.execute_script('addToProcTextList("procMat_' + i.to_s + '","' + texChannelType + '")')
+		end        
 	end
     
     def showhide_fields()
@@ -951,7 +963,7 @@ class LuxrenderMaterialEditor
 			when "attr"
 				params = string_to_hash(parameters)
 				params.each{ |key, value|
-					cmd += "$('#{object}').attr('#{key}', #{value});"
+					cmd << "$('#{object}').attr('#{key}', #{value});"
 				}
 		end
 		@material_editor_dialog.execute_script(cmd)

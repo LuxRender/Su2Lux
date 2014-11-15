@@ -24,7 +24,7 @@ class LuxrenderTextureEditor
         puts "creating new texture editor"
 		@texture_editor_dialog = UI::WebDialog.new("LuxRender Texture Editor", true, "LuxrenderTextureEditor", 600, 322, 900, 400, true)
 		texture_editor_dialog_path = Sketchup.find_support_file("TextureEditor.html", "Plugins/su2lux")
-		@texture_editor_dialog.max_width = 600
+		@texture_editor_dialog.max_width = 800
 		@texture_editor_dialog.set_file(texture_editor_dialog_path)
 
 		@texture_data = texture_data
@@ -55,8 +55,11 @@ class LuxrenderTextureEditor
 			# lux_material = LuxrenderMaterial.new(material)
 			lux_material = @current
 			SU2LUX.load_image("Open image", lux_material, data, @lux_parameter)
-			@texture_data[data] = lux_material.send(@lux_parameter + '_' + data)
-			updateSettingValue(data, @lux_parameter + '_')
+			puts "compound name:"
+			puts @lux_parameter
+			puts data
+			@texture_data[data] = lux_material.send(@lux_parameter + '_' +  data)
+			updateSettingValue(data, @lux_parameter) # removed  + '_'
 			# UI.messagebox @texture_data[data]
 			self.show_image(@texture_data[data])
 			
@@ -221,7 +224,7 @@ class LuxrenderTextureEditor
 			when "attr"
 				params = string_to_hash(parameters)
 				params.each{ |key, value|
-					cmd += "$('#{object}').attr('#{key}', '#{value}');"
+					cmd << "$('#{object}').attr('#{key}', '#{value}');"
 					# UI.messagebox cmd
 				}
 		end

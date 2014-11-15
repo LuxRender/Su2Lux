@@ -1,24 +1,59 @@
 class LuxrenderAttributeDictionary
 
+	attr_reader :dictionaries
+
     #private_class_method :new
 
 	#list of all possible dictionaries in use
-	#@@dictionaries = {} # class variable
+	
+	@@allDictionaryCollections = [] # class variable
+	
 	#@@dictionary = {}   # the current working dictionary (class variable)
 
 	##
 	#
 	##
 	def initialize(model)
-        @dictionaries = {}
-        @dictionary = {}
+		@@allDictionaryCollections << self
+        @dictionaries = {} # hash containing name strings and dictionary objects
+        @dictionary = {} # hash containing parameters and values
         @model = model
 	end #END initialize
+	
+	def self.returnDictionary(name)
+		@@allDictionaryCollections.each{ |dictCollection|
+			if dictCollection.dictionaries.key?(name)
+				puts "found dictionary containing key " + name
+				return dictCollection.dictionaries[name]
+			end
+		}
+		puts "no dictionary found with name " + name + ", returning nil"
+		return nil
+	end
+	
+	def returnDictionary(name)
+		if @dictionaries.key?(name)
+			puts "returnDictionary found dictionary containing key " + name
+			return @dictionaries[name]
+		end
+		puts "returnDictionary found no dictionary with name " + name + ", returning nil"
+		return nil	
+	end
+		
+	def self.returnDictionaryCollection(name)
+		@@allDictionaryCollections.each{ |dictCollection|
+			if dictCollection.dictionaries.key?(name)
+				puts "found dictionary collection containing key " + name
+				return dictCollection
+			end
+		}
+		return nil
+	end
 	
 	##
 	#
 	##
-	def get_attribute(name, key, default)
+	def get_attribute(name, key, default = nil)
 		dictionary = self.choose(name)
 		if ( dictionary.key? key)
 			return dictionary[key]
@@ -37,14 +72,14 @@ class LuxrenderAttributeDictionary
         #puts key
         #puts value
         #puts ""
-		@model.start_operation("SU2LUX settings update", true, false, true)
+		@model.start_operation("SU2LUX settings update", true, false, true) # start undoable operation
 		
 		dictionary = self.choose(name)
 		dictionary[key] = value
 		@dictionaries[name] = dictionary
         @model.set_attribute(name, key, value) # store to model's attribute dictionary
 		
-		@model.commit_operation()
+		@model.commit_operation() # end undoable operation
 	end #END set_attribute
 	
 	##
@@ -52,9 +87,11 @@ class LuxrenderAttributeDictionary
 	##
 	def choose(name)
 		if (name.nil? or name.strip.empty?)
+			puts "returning @dictionary"
 			return @dictionary
 		end
 		if ( ! @dictionaries.key? name)
+			puts "adding new dictionary with name " + name + " to @dictionaries"
 			@dictionaries[name] = {}
 		end
 		@dictionary = @dictionaries[name]
@@ -62,7 +99,7 @@ class LuxrenderAttributeDictionary
 	end #END choose
     
 	def save_to_model(name)
-        puts "attributedictionary running save_to_model for: " + name.to_s
+        puts "attributeDictionary running save_to_model for: " + name.to_s
 		@dictionary = self.choose(name)
 		if (self.modified?(name))
             puts "modified"
@@ -76,12 +113,13 @@ class LuxrenderAttributeDictionary
 	end #END save_to_model
     
 	def load_from_model(name)
-        #puts "running load_from model:"
+        puts "running load_from model for " + name.to_s + ", using attribute dictionary:"
+		puts self
 		@dictionary = self.choose(name) # self is #<LuxrenderAttributeDictionary:.....>
 		model_dictionary = @model.attribute_dictionary(name)
 		if (model_dictionary)
-            #puts "number of attribute dictionary items:"
-            #puts model_dictionary.length
+            puts "number of attribute dictionary items:"
+            puts model_dictionary.length
 			@model.start_operation("SU2LUX load model data", true, false, true)
 			model_dictionary.each { |key, value|
 				puts "load_from_model updating attributes"
@@ -92,10 +130,34 @@ class LuxrenderAttributeDictionary
 			
 			return true
 		else
-            #puts "dictionary does not exist"
+            puts "dictionary does not exist"
 			return false
 		end
 	end #END load_from_model
+	
+#	def load_from_model_procedural(name)
+#	puts "running load_from model for " + name.to_s + ", using attribute dictionary:"
+#		puts self
+#		@dictionary = self.choose(name) # self is #<LuxrenderAttributeDictionary:.....>
+#		puts @dictionary
+#		model_dictionary = @model.attribute_dictionary(name)
+#		if (model_dictionary)
+#			puts "number of attribute dictionary items:"
+#			puts model_dictionary.length
+#			@model.start_operation("SU2LUX load model data", true, false, true)
+#			model_dictionary.each { |key, value|
+#				puts "setting value for procedural texture key"
+#				@dictionary[key] = value 
+#			}
+#			@model.commit_operation()
+#			puts @dictionary
+#			
+#			return true
+#		else
+#			puts "dictionary does not exist"
+#			return false
+#		end
+#	end #END load_from_model_procedural
 	
 	def modified?(name)
 		@dictionary = self.choose(name)

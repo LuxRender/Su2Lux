@@ -11,50 +11,52 @@ body {overflow-x:hidden; overflow-y: auto}
 
 
 #material_name{
-    margin: 4px, 4px;
-    padding: 10px, 10px;
+    margin: 0.4em, 0.4em;
+    padding: 1em, 1em;
 }
 
 #material_management {
-	padding: 6px 10px;
+	padding: 0.6em 1em;
 }
 
 #settings_panel {
-	border: 0px solid #eeeeee;
-	margin: 0px;
-	padding: 0px;
+	border: 0em solid #eeeeee;
+	margin: 0em;
+	padding: 0em;
 }
 
 #preview_image{
     position: relative;
-	margin: 0px;
-	padding: 0px;
-    left: 8px;
-    top: 8px;
+	margin: 0em;
+	margin-bottom: 4px;
+	padding: 0em;
+    left: 0.8em;
+    bottom: 0.8em;
+    top: 0.8em;
 
 }
 
 .collapse {
-	margin: 0px;
-	padding: 0px;
+	margin: 0em;
+	padding: 0em;
 }
    
 .collapse_check {
 	display:none;
-	padding: 0px;
-    margin: 0px;
+	padding: 0em;
+    margin: 0em;
 }
 
 input[type=text]{
-    width: 5em;
+    width: 4em;
 }
 
 input[type=button] {
 	margin: 3px;
 	margin-right: 2px;
 	font-family: Verdana, Arial, Helvetica, sans-serif;
-	font-size: 12px;
-	width: 8em;
+	font-size: 1em;
+	width: 7em;
 }
 
 input#divide_by_2, input#multiply_by_2 {
@@ -62,25 +64,25 @@ input#divide_by_2, input#multiply_by_2 {
 }
 
 input#save_to_model, input#reset {
-	width: 160px;
-    margin: 3px 0px 8px 8px;
+	width: 16em;
+    margin: 0.3em 0em 0.8em 0.8em;
 }
 
 input#get_diffuse_color {
-	width: 140px;
+	width: 14em;
 }
 
 #current_view {
 /*	height: 45px;*/
 /*	float: right;*/
-	width: 139px;
-	margin-left: 5px;
+	width: 14em;
+	margin-left: 0.5em;
 }
 
 .panelcontent{
     position: relative;
-    padding: 7px;
-    margin: 0px;
+    padding: 0.7em;
+    margin: 0em;
 }
 
 #cloth{
@@ -109,38 +111,38 @@ input#get_diffuse_color {
 
 .kdr {
     position: absolute;
-    left: 80px;
-    top: 12px;
+    left: 8em;
+    top: 1em;
 }
 
 .kdg {
     position: absolute;
-    left: 80px;
-    top: 35px;
+    left: 8em;
+    top: 3.5em;
 }
 
 .kdb {
     position: absolute;
-    left: 80px;
-    top: 58px;
+    left: 8em;
+    top: 5.8em;
 }
 
 .kdrvalue{
     position: absolute;
-    left: 122px;
-    top: 8px;
+    left: 12em;
+    top: 8em;
 }
 
 .kdgvalue{
     position: absolute;
-    left: 122px;
-    top: 31px;
+    left: 12em;
+    top: 3em;
 }
 
 .kdbvalue{
     position: absolute;
-    left: 122px;
-    top: 54px;
+    left: 12em;
+    top: 5.5em;
 }
 
 #mixmaterials {
@@ -149,512 +151,533 @@ input#get_diffuse_color {
 
 .mixmat1{
     position: absolute;
-    left: 0px;
-    top: 0px;
+    left: 0em;
+    top: 0em;
 }
 
 .mixmatlist1{
     position: absolute;
-    left: 92px;
-    top: -4px;
+    left: 9em;
+    top: -0.4em;
 }
 
 .mixmat2{
     position: absolute;
-    left: 0px;
-    top: 26px;
+    left: 0em;
+    top: 2.6em;
 }
 
 .mixmatlist2{
     position: absolute;
-    left: 92px;
-    top: 22px;
+    left: 9em;
+    top: 2em;
 }
 
 
 #specular_preset{
     position: absolute;
-    left: 70px;
-    top: -2px;
+    left: 7em;
+    top: -0.2em;
 }
 
 #spec_IOR_preset_value{
     position: absolute;
-    left: 200px;
-    top: 0px;
-    width: 200px;
+    left: 20em;
+    top: 0em;
+    width: 20em;
 }
 
 #mixtypes_label{
     position: absolute;
-    left: 0px;
-    top: 0px;
-    width: 100px;
+    left: 0em;
+    top: 0em;
+    width: 10em;
 }
 
 #mx_imgmapname{
     position: absolute;
-    left: 96px;
-    top: 25px;
+    left: 9.5em;
+    top: 2.5em;
 }
 
 #mx_browse_map{
     position: absolute;
-    left: 92px;
-    top: 46px;
+    left: 9em;
+    top: 4.5em;
 }
 
 .mixtypes_matlist{
     position: absolute;
-    left: 92px;
-    top: -4px;
+    left: 9em;
+    top: -0.4em;
 }
 
 .mixmatlabel{
     position: absolute;
-    left: 0px;
-    top: 50px;
+    left: 0em;
+    top: 5em;
 }
 
 .mixmattypelist{
     position: absolute;
-    left: 92px;
-    top: 0px;
+    left: 9em;
+    top: 0em;
 }
-
 
 .texture_area_mix{
     position: absolute;
-    left: 0px;
-    top: 52px;
+    left: 0em;
+    top: 5em;
 }
 
 .txfields{
     position: absolute;
-    left: 80px;
-    top: 73px;
+    left: 8em;
+    top: 7em;
 }
 
 .texturelabel{
     position: absolute;
-    left: 200px;
-    top: 7px;
+    left: 20em;
+    top: 0.7em;
 }
 
 .texturedropdown{
     position: absolute;
-    left: 260px;
-    top: 4px;
+    left: 26em;
+    top: 0.4em;
 }
 
 .textureloadbutton{
     position: absolute;
 	width: 4em;
-    left: 197px;
-    top: 50px;
+    left: 20em;
+    top: 5em;
 }
 
 .colorizesection{
     position: absolute;
-    left: 90px;
-    top: 45px;
-    width: 120px;
+    left: 9em;
+    top: 4.5em;
+    width: 12em;
 }
+
+.proctextsection{
+    position: absolute;
+    left: 0em;
+    top: 3em;
+    width: 14em;
+}
+
 
 .imgmapname{
     position: absolute;
-    left: 200px;
-    top: 31px;
+    left: 20em;
+    top: 3em;
 }
 
 #flip_dim {
-	width: 174px;
+	width: 17em;
 }
 
 .swatch {
     border: 1px solid black;
-    margin: 0px 0px 0px 0px;
+	width: 6em;
+	height: 6em;
+    margin: 0em 0em 0em 0em;
     background-color: #ffffff;
 }
 
 #spec_IOR_interface{
     position: absolute;
-    top: 7px;
-    left: 0px;
+    top: 0.7em;
+    left: 0em;
 }
 
 #swatch_absorption, #specular_swatch, #em_swatch{
     position: absolute;
-    top: 7px;
-    left: 7px;
+    top: 0.7em;
+    left: 0.7em;
 }
 
 #swatch_metal2{
     position: absolute;
-    top: 7px;
-    left: 7px;
+    top: 0.7em;
+    left: 0.7em;
 }
 
 #lightgain{
     position: absolute;
-    left: 0px;
-    top: 3px;
+    left: 0em;
+    top: 0.3em;
 }
 
 #lightspectrum{
     position: absolute;
-    left: 0px;
-    top: 30px;
+    left: 0em;
+    top: 3em;
 }
 
 
 #type{
-    margin: 10px;
+    margin: 1em;
 }
 #preview {
-    margin: 0px;
-    padding: 0px;
+    margin: 0em;
+    padding: 0em;
 }
 
 #previewsize{
     position: absolute;
-    left: 286px;
-    top: 4px;
+    left: 294px;
+    top: 0.6em;
 }
 
 #previewtime{
     position: absolute;
-    left: 286px;
-    top: 28px;
+    left: 294px;
+    top: 2.5em;
 }
 
 #update_material_preview{
     position: absolute;
-    left: 286px;
-    top: 80px;
+    left: 290px;
+    top: 8em;
 }
 
 #spec_IOR{
-	width: 24pt;
-
+	width: 3em;
 }
 
 
 .parameter_label{
     position: absolute;
-	width: 100pt;
-    left: 0px;
-    top: 0px;
+	width: 12em;
+    left: 0em;
+    top: 0em;
 }
 
 .parameter_field{
     position: absolute;
-    left: 100px;
-    top: -3px;
+    left: 7em;
+    top: -0.3em;
 }
 
 .parameter_field_coating{
     position: absolute;
-    left: 125px;
-    top: -3px;
+    left: 8.5em;
+    top: -0.3em;
 }
 
 .parameter_field_dm{
     position: absolute;
-    left: 120px;
-    top: -3px;
+    left: 6em;
+    top: -0.3em;
 }
 
 .parameter_field_dr{
     position: absolute;
-    left: 140px;
-    top: -3px;
+    left: 14em;
+    top: -0.3em;
 }
 
 .parameter_field_cloth{
     position: absolute;
-    left: 110pt;
-    top: -3px;
+    left: 11em;
+    top: -0.3em;
 }
 
 .parameter_field_light{
     position: absolute;
-    left: 95px;
-    top: -3px;
+    left: 9.5em;
+    top: -0.3em;
 }
 
 .parameter_field_lightT{
     position: absolute;
-    left: 150px;
-    top: -3px;
+    left: 15em;
+    top: -0.3em;
 }
 
 .parameter_field_spectrum{
     position: absolute;
-    left: 70pt;
-    top: -3px;
+    left: 7em;
+    top: -0.3em;
 }
 
 .parameter_interface{
     position: relative;
-    height: 78px;
+    height: 6.5em;
+}
+
+.parameter_interface_specular{
+    position: relative;
+    height: 9.5em;
 }
 
 .parameter_interface_single{
     position: relative;
-    height: 30px;
+    height: 3em;
 }
 
 .parameter_interface_single_padded{
     position: relative;
-    height: 30px;
-    margin-top: 8px;
+    height: 3em;
+    margin-top: 0.8em;
 }
 
 .parameter_interface_autoalpha{
     position: relative;
-	left: 40px;
-    height: 45px;
+	left: 0em;
+    height: 4.5em;
 }
 
 .parameter_interface_light{
     position: relative;
-    height: 58px;
+    height: 5.5em;
 }
 
 #metal2_color{
     position: relative;
-    top: 0px;
-    left: -8px;
-    height: 86px;
+    top: 0em;
+    left: -0.8em;
+    height: 8.5em;
 }
 
 #u_exponent, #v_exponent, #ka_d, #IOR_index, #film, #filmindex, #cauchyb, #cl_repeatu, #cl_repeatv{
-	width: 24pt;
+	width: 3em;
 }
 
 .parameter_interface_mix{
     position: relative;
-    height: 126px;
+    height: 12.5em;
 }
 
 .parameter_interface_L{
     position: relative;
-    left: -7px;
-    top: -7px;
-    height: 85px;
-    margin: 7px 0px 0px 0px;
-    padding: 0px;
+    left: -0.7em;
+    top: -0.7em;
+    height: 8.5em;
+    margin: 0.7em 0em 0em 0em;
+    padding: 0em;
 }
 
 .margin_bottom{
-    margin: 0px 0px 10px 0px;
+    margin: 0em 0em 1em 0em;
 }
 
 .parameter_interface_displacement{
     position: relative;
-    height: 136px;
+    height: 19em;
 }
 
 .mix_uniform_label{
     position: absolute;
-    left: 0px;
-    top: 25px;
-    width: 180px;
+    left: 0em;
+    top: 3em;
+    width: 18em;
 }
 
 .mix_uniform_field{
     position: absolute;
-    left: 112pt;
-    top: 21px;
+    left: 11em;
+    top: 2.6em;
 }
 
 .texture_area_swatchfield{
-    margin: 0px;
-    padding: 0px;
+    margin: 0em;
+    padding: 0em;
     position: absolute;
-    left: 90px;
-    top: 12px;
+    left: 9em;
+    top: 1em;
 }
 
 .texture_area_swatchfield_right{
-    margin: 0px;
-    padding: 0px;
+    margin: 0em;
+    padding: 0em;
     position: absolute;
-    left: 210px;
-    top: 10px;
+    left: 16em;
+    top: 1em;
 }
+.texture_area_swatchfield_specular{
+    margin: 0em;
+    padding: 0em;
+    position: absolute;
+    left: 10em;
+    top: 3.5em;
+}
+
 
 .texture_area{
     position: absolute;
-    left: 180px;
-    top: 0px;
+    left: 14em;
+    top: 0em;
 }
 
 .texture_area_autoalpha{
     position: absolute;
-    left: 140px;
-    top: -23px;
+    left: 11em;
+    top: -1.9em;
 }
 
 
 .texture_area_dr{
     position: absolute;
-    left: 120px;
-    top: 36px;
+    left: 7em;
+    top: 2.5em;
 }
 
 .tex_label_swatch{
     position: absolute;
-    left: 0px;
-    top: 0px;
+    left: 0em;
+    top: 0em;
 }
 
 .tex_label{
     position: absolute;
-    left: 0px;
-    top: 0px;
-    width: 80px;
-    height: 30px;
+    left: 0em;
+    top: 0em;
+    width: 8em;
+    height: 3em;
 }
 
 .tex_dropdown{
     position: absolute;
-    left: 0px;
-    top:    -3px;
+    left: 0em;
+    top:    -0.3em;
 }
 
 .tex_path{
     position: absolute;
-    left: 0px;
-    top: 23px;
-    width: 200px;
+    left: 0em;
+    top: 2em;
+    width: 20em;
 }
 
 .tex_loadbutton{
     position: absolute;
-    left: -4px;
-    top: 42px;
+    left: -0.1em;
+    top: 4em;
 }
 
 
 #loop{
     position: absolute;
-    left: 0px;
-    top: 44px;
-    width: 400px;
+    left: 0em;
+    top: 2.5em;
+    width: 40em;
 }
 
 #microdisplacement{
     display: none;
     position: absolute;
-    left: 0px;
-    top: 114px;
-    width: 250px;
+    left: 0em;
+    top: 9.8em;
+    width: 25em;
 }
 
 #dm_microlevels_label{
     position: absolute;
-    left: 0px;
-    top: 2px;
+    left: 0em;
+    top: 0.2em;
 }
 
 #dm_subdiv_label{
     position: absolute;
-    left: 0px;
-    top: 72px;
+    left: 0em;
+    top: 7em;
 }
 
 #dm_scale_label{
     position: absolute;
-    left: 0px;
-    top: 147px;
+    left: 0em;
+    top: 12.5em;
 }
 
 #dm_offset_label{
     position: absolute;
-    left: 0px;
-    top: 178px;
+    left: 0em;
+    top: 15.5em;
 }
 
 #dm_scale{
     position: absolute;
-    left: 119px;
-    top: 145px;
+    left: 9em;
+    top: 11em;
 }
 
 #dm_offset{
     position: absolute;
-    left: 120px;
-    top: 175px;
+    left: 9em;
+    top: 13.4em;
 }
 
 #dm_subdivl{
     position: absolute;
-    left: 120px;
-    top: 70px;
+    left: 9em;
+    top: 6.2em;
 }
 
 #dm_microlevels{
     position: absolute;
-    left: 120px;
-    top: 0px;
+    left: 9em;
+    top: 0em;
 }
 
 #dm_normalsmooth{
     position: absolute;
-    left: 211px;
-    top: 58px;
+    left: 15.5em;
+    top: 7em;
 }
 
 #dm_normalsplit{
     position: absolute;
-    left: 211px;
-    top: 88px;
+    left: 15.5em;
+    top: 10em;
 }
 
 #dm_sharpboundary{
     position: absolute;
-    left: 211px;
-    top: 118px;
+    left: 15.5em;
+    top: 13em;
 }
 
 #dm_normalsmooth_label{
     position: absolute;
-    left: 233px;
-    top: 58px;
-    width: 130px;
+    left: 17em;
+    top: 7em;
+    width: 13em;
 }
 #dm_normalsplit_label{
     position: absolute;
-    left: 233px;
-    top: 88px;
-    width: 130px;
+    left: 17em;
+    top: 10em;
+    width: 13em;
 }
 
 #dm_sharpboundary_label{
     position: absolute;
-    left: 233px;
-    top: 118px;
-    width: 130px;
+    left: 17em;
+    top: 13em;
+    width: 13em;
 }
 
 #clothtype{
     position: absolute;
-    left: 0px;
-    top: 0px;
+    left: 0em;
+    top: 0em;
 }
 #clothrepeatx{
     position: absolute;
-    left: 0px;
-    top: 32px;
-    width: 150px;
+    left: 0em;
+    top: 3em;
+    width: 15em;
 }
 #clothrepeaty{
     position: absolute;
-    left: 0px;
-    top: 64px;
-    width: 150px;
+    left: 0em;
+    top: 6em;
+    width: 15em;
 }
 
 .imagemap{
@@ -669,5 +692,5 @@ input#get_diffuse_color {
 }
 
 #kd_browse_map, #ks_browse_map, #km2_browse_map, #cl1kd_browse_map, #cl1ks_browse_map, #cl2kd_browse_map, #cl2ks_browse_map, #spec_IOR_browse_map, #em_browse_map{
-    width: 5em;
+    width: 7em;
 }

@@ -29,7 +29,7 @@ class LuxrenderMaterial
 		'type' => "glossy",
 		'kd_imagemap_Sketchup_filename' => '',
         'texturechannels' => ["kd", "ks", "ka", "km2", "em", "mx", "u_exponent", "v_exponent", "uroughness", "vroughness", "aa", "cl1kd", "cl1ks", "cl2kd", "cl2ks", "ka_d", "spec_IOR", "IOR_index", "kr", "kt", "cauchyb", "film", "filmindex", "bump", "normal", "dm"],
-        
+        		
 		'kd_R' => 0.64,
 		'kd_G' => 0.64,
 		'kd_B' => 0.64,
@@ -98,8 +98,7 @@ class LuxrenderMaterial
         'metal2_preset' => 'aluminium',
 		'carpaint_name' => '',
 		'energyconserving' => true,
-		'bumpmap' => 0.0001,
-
+		'bumpmap' => 0.005,
 
 		'dm_scheme' => 'loop',
 		'dm_normalsmooth' => true,
@@ -122,19 +121,7 @@ class LuxrenderMaterial
 		'light_efficacy' => 17.0,
 		'light_gain' => 1.0,
         'lightbase' => 'default',
-		#GUI
-		# 'use_diffuse_texture' => false,
-		# 'use_sigma_texture' => false,
-		# 'use_uroughness_texture' => false,
-		# 'use_specular_texture' => false,
-		# 'use_absorption_texture' => false,
-		# 'use_absorption_depth_texture' => false,
-		# 'use_reflection_texture' => false,
-		# 'use_transmission_texture' => false,
-		# 'use_IOR_texture' => false,
-		# 'use_dispersive_refraction_texture' => false,
-		# 'use_film_texture' => false,
-		# 'use_filmindex_texture' => false,
+
 		'use_architectural' => false,
         'use_auto_alpha' => false,
 		'use_absorption' => false,
@@ -151,7 +138,7 @@ class LuxrenderMaterial
 	##
 	def lux_image_texture(material, name, texture, type)
 		material_prefix = material
-		material_prefix += "_" if ( ! material.empty?)
+		material_prefix << "_" if ( ! material.empty?)
 		key_prefix = material_prefix + "#{name}"
 		key = "#{key_prefix}_#{texture}_"
         if (name=="aa")
@@ -174,6 +161,7 @@ class LuxrenderMaterial
 		@@settings[key + "vscale"] = 1.0
 		@@settings[key + "udelta"] = 0.0
 		@@settings[key + "vdelta"] = 0.0
+		@@settings[key + "proctex"] = "procMat_0"
 		@@settings[key + "maxanisotropy"] = 8.0
 		@@settings[key + "discardmipmaps"] = 0
 		# @@settings[key + "uvset"] = 0
@@ -217,9 +205,9 @@ class LuxrenderMaterial
 	##
 	#
 	##
-	def initialize(su_material)
+	def initialize(su_material) # creates LuxrenderMaterial object
         @scene_id = Sketchup.active_model.definitions.entityID
-		@model=Sketchup.active_model
+		@model = Sketchup.active_model
         if su_material.class == String
             if @model.materials[su_material].class == Sketchup::Material
                 @mat = @model.materials[su_material]
@@ -266,30 +254,30 @@ class LuxrenderMaterial
 		singleton_class = (class << self; self; end)
 		@view=@model.active_view
 		@dict = mat.name
-        @attributedictionary = LuxrenderAttributeDictionary.new(@model)
+        @attributeDictionary = LuxrenderAttributeDictionary.new(@model)
         
         # puts "singleton_class inspect ",singleton_class.inspect
 		singleton_class.module_eval do
 
 			define_method("[]") do |key|  # method [] for <LuxrenderMaterial:........>
 				value = @@settings[key]
-				return @attributedictionary.get_attribute(@dict, key, value)
+				return @attributeDictionary.get_attribute(@dict, key, value)
             end
 			
 			@@settings.each do |key, value|
 				######## -- get any attribute -- #######
-				define_method(key) { @attributedictionary.get_attribute(@dict, key, value) }
+				define_method(key) { @attributeDictionary.get_attribute(@dict, key, value) }
 
 				case key
 					when LuxrenderMaterial::ui_refreshable?(key)# set ui_refreshable
 						define_method("#{key}=") do |new_value|
-                            @attributedictionary.set_attribute(@dict, key, new_value)
+                            @attributeDictionary.set_attribute(@dict, key, new_value)
                             material_editor = SU2LUX.get_editor(@scene_id,"material")
                             material_editor.updateSettingValue(key) if material_editor
                         end
 					else # not ui_refreshable
 						define_method("#{key}=") { |new_value|
-                            @attributedictionary.set_attribute(@dict, key, new_value)
+                            @attributeDictionary.set_attribute(@dict, key, new_value)
                         }
 				end #end case
 			end #end settings.each
@@ -302,7 +290,7 @@ class LuxrenderMaterial
 	def reset
             #puts "resetting material"
 			@@settings.each do |key, value|
-				@attributedictionary.set_attribute(@dict, key, value)
+				@attributeDictionary.set_attribute(@dict, key, value)
 			end
 	end #END reset
 	
@@ -310,7 +298,7 @@ class LuxrenderMaterial
 	#
 	##
 	def load_from_model
-		return @attributedictionary.load_from_model(@dict)
+		return @attributeDictionary.load_from_model(@dict)
 	end #END load_from_model
 	
 	##
@@ -319,7 +307,7 @@ class LuxrenderMaterial
 	def save_to_model
 		@model.start_operation "SU2LUX Material settings saved"
 		puts "SAVE TO MODEL CALLED FROM LUXRENDERMATERIAL"
-		@attributedictionary.save_to_model(@dict)
+		@attributeDictionary.save_to_model(@dict)
 		@model.commit_operation
 	end #END save_to_model
 	
@@ -363,13 +351,6 @@ class LuxrenderMaterial
 		color['blue'] = self.kd_B
         return color
 	end
-
-	##
-	#
-	##
-	def color_tos
-		specular = "#{"%.6f" %(self.kd_R)} #{"%.6f" %(self.kd_G)} #{"%.6f" %(self.kd_B)}"
-	end
     
     def channelcolor_tos(mattype)
         redstring = mattype+'_R'
@@ -378,29 +359,6 @@ class LuxrenderMaterial
         returncolor = "#{"%.6f" %(self.send(redstring))} #{"%.6f" %(self.send(greenstring))} #{"%.6f" %(self.send(bluestring))}"
     end
     
-    def km2_tos
-        channelcolor_tos('km2')
-    end
-    
-    def em_tos
-        channelcolor_tos('em')
-    end
-
-    def cl1kd_tos
-        channelcolor_tos('cl1kd')
-    end
-    
-    def cl1ks_tos
-        channelcolor_tos('cl1ks')
-    end
-    def cl2kd_tos
-        channelcolor_tos('cl2kd')
-    end
-    def cl2ks_tos
-        channelcolor_tos('cl2ks')
-    end
-
-
 	##
 	#
 	##
@@ -435,81 +393,10 @@ class LuxrenderMaterial
 	##
 	#
 	##
-	def specular
-		specular = {}
-		specular['red'] = self.ks_R
-		specular['green'] = self.ks_G
-		specular['blue'] = self.ks_B
-		# specular = [self.ks_R, self.ks_G, self.ks_B]
-	end
-
-	##
-	#
-	##
-	def specular_tos
-		specular = "#{"%.6f" %(self.ks_R)} #{"%.6f" %(self.ks_G)} #{"%.6f" %(self.ks_B)}"
-	end
-
-	##
-	#
-	##
 	def specular=(color)
 		self.ks_R = format("%.6f", color['red'])
 		self.ks_G = format("%.6f", color['green'])
 		self.ks_B = format("%.6f", color['blue'])
-	end
-	
-	##
-	#
-	##
-	def absorption
-		specular = [self.ka_R, self.ka_G, self.ka_B]
-	end
-	
-	##
-	#
-	##
-	def absorption_tos
-		specular = "#{"%.6f" %(self.ka_R)} #{"%.6f" %(self.ka_G)} #{"%.6f" %(self.ka_B)}"
-	end
-
-    ##
-    #   multiplication of mix image texture
-    ##
-    def skmixstrtwo
-        returnvalue = 1.0
-    end
-
-	##
-	#
-	##
-	def reflection
-		reflection = [self.kr_R, self.kr_G, self.kr_B]
-	end
-
-	##
-	#
-	##
-	def reflection_tos
-		specular = "#{"%.6f" %(self.kr_R)} #{"%.6f" %(self.kr_G)} #{"%.6f" %(self.kr_B)}"
-	end
-
-	##
-	#
-	##
-	def transmission
-		transmission = [self.kt_R, self.kt_G, self.kt_B]
-	end
-
-    def normalmap
-        normalmap = [1.0, 1.0, 1.0]
-    end
-
-	##
-	#
-	##
-	def transmission_tos
-		specular = "#{"%.6f" %(self.kt_R)} #{"%.6f" %(self.kt_G)} #{"%.6f" %(self.kt_B)}"
 	end
 
 	##
@@ -519,14 +406,14 @@ class LuxrenderMaterial
 		# uvs = {}
 		# (uvs[channel_number] ||= []) << uv_set
 		@uvs[channel_number] = uv_set
-		@attributedictionary.set_attribute(@dict, 'uv_set', @uvs)
+		@attributeDictionary.set_attribute(@dict, 'uv_set', @uvs)
 	end
 
 	##
 	#
 	##
 	def get_uv(channel_number)
-		uvs = @attributedictionary.get_attribute(@dict, 'uv_set', {})
+		uvs = @attributeDictionary.get_attribute(@dict, 'uv_set', {})
 		p "get"
 		p uvs
 		uv = uvs[channel_number]
@@ -536,7 +423,7 @@ class LuxrenderMaterial
 	#
 	##
 	def has_uvs?(channel_number=1)
-		uvs = @attributedictionary.get_attribute(@dict, 'uv_set', {})
+		uvs = @attributeDictionary.get_attribute(@dict, 'uv_set', {})
 		p "hasuvs"
 		p uvs
 		return uvs ? true : false
@@ -553,6 +440,8 @@ class LuxrenderMaterial
 				has_bump = true if SU2LUX.get_editor(@scene_id,"material").materials_skp_lux.index(self).texture
             elsif (self.bump_texturetype == 'imagemap')
 				has_bump = true if (not self.bump_imagemap_filename.empty?)
+			elsif (self.bump_texturetype == 'procedural')
+				has_bump = true if (not self.bump_imagemap_filename == 'noProcText')
 			end
 		end
 		return has_bump
@@ -568,6 +457,8 @@ class LuxrenderMaterial
 				has_normal = true if SU2LUX.get_editor(@scene_id,"material").materials_skp_lux.index(self).texture
             elsif (self.normal_texturetype == 'imagemap')
 				has_normal = true if (not self.normal_imagemap_filename.empty?)
+			elsif (self.normal_texturetype == 'procedural')
+				has_normal = true if (not self.normal_imagemap_filename	 == 'noProcText')
 			end
 		end
 		return has_normal
@@ -583,6 +474,8 @@ class LuxrenderMaterial
 				has_displacement = true if SU2LUX.get_editor(@scene_id,"material").materials_skp_lux.index(self).texture
 			elsif (self.dm_texturetype == 'imagemap')
 				has_displacement = true if (not self.dm_imagemap_filename.empty?)
+			elsif (self.dm_texturetype == 'procedural')
+				has_displacement = true if (not self.dm_imagemap_filename == 'noProcText')
 			end
 		end	
 		return has_displacement
@@ -595,10 +488,11 @@ class LuxrenderMaterial
 		has_texture = false
 		if (self.send(type + "_texturetype") != 'none')
 			if (self.send(type + "_texturetype") == 'sketchup')
-				# has_bump = true if (self.kd_texturetype == 'sketchup')
 				has_texture = true if (@mat.materialType > 0)
 			elsif (self.send(type + "_texturetype") == 'imagemap')
 				has_texture = true if (not self.send(type + "_imagemap_filename").empty?)
+			elsif (self.send(type + "_texturetype") == 'procedural')
+				has_texture = true if (not self.send(type + "_texturetype") == 'noProcText')
 			end
 		end	
 		return has_texture

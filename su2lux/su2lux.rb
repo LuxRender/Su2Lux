@@ -67,8 +67,8 @@ module SU2LUX
 	def SU2LUX.create_observers(model)
 		$SU2LUX_view_observer = SU2LUX_view_observer.new
 		model.active_view.add_observer($SU2LUX_view_observer)
-		$SU2LUX_rendering_options_observer = SU2LUX_rendering_options_observer.new
-		model.rendering_options.add_observer($SU2LUX_rendering_options_observer)
+		#$SU2LUX_rendering_options_observer = SU2LUX_rendering_options_observer.new
+		#model.rendering_options.add_observer($SU2LUX_rendering_options_observer)
 		$SU2LUX_materials_observer = SU2LUX_materials_observer.new
 		model.materials.add_observer($SU2LUX_materials_observer)
         $SU2LUX_model_observer = SU2LUX_model_observer.new
@@ -80,7 +80,7 @@ module SU2LUX
 	##
 	def SU2LUX.remove_observers(model)
 		model.active_view.remove_observer $SU2LUX_view_observer
-		model.rendering_options.remove_observer $SU2LUX_rendering_options_observer
+		#model.rendering_options.remove_observer $SU2LUX_rendering_options_observer
 		model.materials.remove_observer $SU2LUX_materials_observer
 	end
 	
@@ -104,6 +104,7 @@ module SU2LUX
 		@os_specific_vars = os.get_variables
         @lrs_hash = {}
         @sceneedit_hash = {}
+		@proctexture_hash = {}
         @renderedit_hash = {}
         @matedit_hash = {}
         
@@ -147,6 +148,12 @@ module SU2LUX
 		@selected=false
 		@model_name=""
 	end # END reset_variables
+	
+	def SU2LUX.test_proctext
+		puts
+		someTex = LuxrenderProceduralTexture.new(true, 'blender_musgrave')
+		someTex.printValues()
+	end
   
 	##
 	# exporting geometry, lights, materials and settings to a LuxRender file
@@ -162,7 +169,7 @@ module SU2LUX
         @material_editor = SU2LUX.get_editor(scene_id,"material")
         lrs = SU2LUX.get_lrs(scene_id)
         if File.extname(lrs.export_file_path) != ".lxs"
-            lrs.export_file_path += ".lxs"
+            lrs.export_file_path << ".lxs"
         end
         
         exportpath = lrs.export_file_path
@@ -201,7 +208,7 @@ module SU2LUX
                 end
         end
         
-		#Exporting geometry
+		# export geometry
 		out_geom = File.new(file_datafolder + file_basename  + SUFFIX_OBJECT, "w")
 		le.export_mesh(out_geom)
 		out_geom.close
@@ -215,6 +222,8 @@ module SU2LUX
 		# export all materials		
         relative_datafolder = file_basename+SU2LUX::SUFFIX_DATAFOLDER
         puts "RELATIVE DATA FOLDER: " + relative_datafolder
+		
+		le.export_procedural_textures(out_mat)
 		le.export_used_materials(materials, out_mat, lrs.texexport, relative_datafolder)
         le.export_distorted_materials(out_mat, relative_datafolder) # uses materials stored in LuxrenderExport
 		out_mat.close
@@ -312,7 +321,7 @@ module SU2LUX
 		else
 			dot_position = model_filename.rindex(".")
 			export_filename = model_filename.slice(0..(dot_position - 1))
-			export_filename += SCENE_EXTENSION
+			export_filename << SCENE_EXTENSION
 		end
 		#	if model.path.empty?
 		default_folder = SU2LUX.find_default_folder
@@ -329,7 +338,7 @@ module SU2LUX
 			lrs.export_file_path = user_input
 				
 			if lrs.export_file_path == lrs.export_file_path.chomp(SCENE_EXTENSION)
-				lrs.export_file_path += SCENE_EXTENSION
+				lrs.export_file_path << SCENE_EXTENSION
 				@luxrender_path = SU2LUX.get_luxrender_path
 			end
 			return true #user has selected a path
@@ -349,7 +358,7 @@ module SU2LUX
 		# else
 			# dot_position = model_filename.rindex(".")
 			# export_filename = model_filename.slice(0..(dot_position - 1))
-			# export_filename += SCENE_EXTENSION
+			# export_filename << SCENE_EXTENSION
 		# end
 		default_folder = SU2LUX.find_default_folder
 		export_folder = default_folder
@@ -388,8 +397,11 @@ module SU2LUX
 			user_input.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
 			user_input.gsub!(/\\/, '/') if user_input.include?('\\')
 			#store file path for quick exports
-			prefix += '_' unless prefix.empty?
-			object.send(prefix + method+"=", user_input)
+			if(prefix.empty?)
+				object.send(method+"=", user_input)
+			else
+				object.send(prefix + '_' + method + "=", user_input)
+			end
 			return true #user has selected a path
 		end
 		return false #user has not selected a path
@@ -414,28 +426,32 @@ module SU2LUX
 	##
 	#
 	##
-	def SU2LUX.change_luxrender_path 
-		# set path
-		providedpath = UI.openpanel("Locate LuxRender", "", "")
+	def SU2LUX.change_luxrender_path(passedPath = nil) 
+		if(passedPath)
+			providedpath = passedPath
+		else # ask user for path
+			providedpath = UI.openpanel("Locate LuxRender", "", "")
+			providedpath = providedpath.dump.tr('"', '')
+		end
 		# provide feedback in popup window
-		message = ""
 		if SU2LUX.luxrender_path_valid?(providedpath)
 			@luxrender_path = providedpath
-			Sketchup.write_default("SU2LUX", "luxrenderpath", providedpath.unpack('H*')[0])
-			message = "New path for LuxRender is : #{@luxrender_path}"
-            # result = UI.messagebox(message,MB_OK)
+			Sketchup.write_default("SU2LUX", "luxrenderpath", providedpath.dump.tr('"', '').unpack('H*')[0])
+			puts "new path for LuxRender is #{@luxrender_path}"
 		else
 			@luxrender_path = nil
-			message = "No valid path selected."
-            result = UI.messagebox(message,MB_OK)
+			UI.messagebox("No valid path selected.",MB_OK)
 		end	
 		# store settings
         lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
 		lrs.export_luxrender_path = @luxrender_path
         # update path in settings window
-        cmd = "document.getElementById('export_luxrender_path').value='" + @luxrender_path + "'"
-        scenesettingseditor = get_editor(Sketchup.active_model.definitions.entityID,"scenesettings")
-        scenesettingseditor.scene_settings_dialog.execute_script(cmd)
+		if(@luxrender_path && !passedPath)
+			puts "setting LuxRender path to " + @luxrender_path
+			cmd = "document.getElementById('export_luxrender_path').value='" + @luxrender_path + '"'
+			scenesettingseditor = get_editor(Sketchup.active_model.definitions.entityID,"scenesettings")
+			scenesettingseditor.scene_settings_dialog.execute_script(cmd)
+		end
 	end
 
 	##
@@ -506,7 +522,7 @@ module SU2LUX
     #
     ##
     def SU2LUX.luxrender_path_valid?(luxrender_path)
-        (! luxrender_path.nil? and File.exist?(luxrender_path) and (File.basename(luxrender_path).upcase.include?("LUXRENDER")))
+        (! luxrender_path.nil?  and (File.basename(luxrender_path).upcase.include?("LUXRENDER"))) # and File.exist?(eval(luxrender_path))
     end #END luxrender_path_valid?
   
 	##
@@ -579,14 +595,14 @@ module SU2LUX
             @matedit_hash[scene_id].refresh
             # todo 2014: set active material?
 		end
-    # set preview section height (OS X; for Windows this gets done in refresh function)
-    lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
-    setdivheightcmd = 'setpreviewheight(' + lrs.preview_size.to_s + ',' + lrs.preview_time.to_s + ')'
-    puts setdivheightcmd
-    @matedit_hash[scene_id].material_editor_dialog.execute_script(setdivheightcmd)
+		# set preview section height (OS X; for Windows this gets done in refresh function)
+		lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
+		setdivheightcmd = 'setpreviewheight(' + lrs.preview_size.to_s + ',' + lrs.preview_time.to_s + ')'
+		puts setdivheightcmd
+		@matedit_hash[scene_id].material_editor_dialog.execute_script(setdivheightcmd)
 	end # END show_material_editor
 
-	##
+	get_luxrender_path()	##
 	#
 	##
 	def SU2LUX.create_material_editor(scene_id)
@@ -607,6 +623,22 @@ module SU2LUX
     ##
     #
     ##
+    def SU2LUX.create_procedural_textures_editor(model_id)
+        @proctexture_hash[model_id] = LuxrenderProceduralTexturesEditor.new
+        return @proctexture_hash[model_id]
+    end
+	
+	##
+    #
+    ##
+    def SU2LUX.create_render_settings_editor(scene_id)
+        @renderedit_hash[scene_id]=LuxrenderRenderSettingsEditor.new
+        return @renderedit_hash[scene_id]
+    end
+	
+    ##
+    #
+    ##
     def SU2LUX.set_toolbar(toolbar)
         @toolbar = toolbar
     end
@@ -616,6 +648,7 @@ module SU2LUX
         @sceneedit_hash = Hash.new
         @renderedit_hash = Hash.new
         @matedit_hash = Hash.new
+		@proctexture_hash = Hash.new
     end
 
 
@@ -635,14 +668,6 @@ module SU2LUX
         end
     end
 
-    ##
-    #
-    ##
-    def SU2LUX.create_render_settings_editor(scene_id)
-        @renderedit_hash[scene_id]=LuxrenderRenderSettingsEditor.new
-        return @renderedit_hash[scene_id]
-    end
-
 	##
 	#
 	##
@@ -651,19 +676,32 @@ module SU2LUX
         #puts @sceneedit_hash[scene_id]
 		if not @sceneedit_hash[scene_id]
 			@sceneedit_hash[scene_id] = LuxrenderSceneSettingsEditor.new
-            #puts "new scene settings editor:"
-            #puts @sceneedit_hash[scene_id]
 		end
         if @sceneedit_hash[scene_id].visible?
-            #puts "hiding scene settings editor"
             @sceneedit_hash[scene_id].close
         else
-            #puts "showing scene settings editor"
             @sceneedit_hash[scene_id].show
         end
     end # END show_scene_settings_editor
 
-
+	##
+	#
+	##
+	def SU2LUX.show_procedural_textures_editor(scene_id)
+		if not @proctexture_hash[scene_id]
+			puts "no procedural texture editor found, creating new"
+			@proctexture_hash[scene_id] = LuxrenderProceduralTexturesEditor.new
+		end
+        if @proctexture_hash[scene_id].visible?
+			puts "hiding procedural texture editor"
+            @proctexture_hash[scene_id].close
+        else
+			puts "showing existing procedural texture editor: " +  @proctexture_hash[scene_id].to_s
+            @proctexture_hash[scene_id].showProcTexDialog
+        end
+		
+	end
+	
 	##
 	#
 	##
@@ -682,6 +720,7 @@ module SU2LUX
             #puts "showing render settings editor"
             @renderedit_hash[scene_id].show
         end
+		
     end # END show_scene_settings_editor
                       
     ##
@@ -747,6 +786,12 @@ module SU2LUX
                     @renderedit_hash[scene_id] = LuxrenderRenderSettingsEditor.new
                     editor = @renderedit_hash[scene_id]
                 end
+			when "proceduraltexture"	
+				if @proctexture_hash[scene_id]
+                    editor = @proctexture_hash[scene_id]
+				else
+					return nil
+				end				
             end
 		return editor
 	end # END get_editor
@@ -775,6 +820,7 @@ end # END module SU2LUX
 
 class SU2LUX_model_observer < Sketchup::ModelObserver
     #commented out following lines; attribute dictionaries should be updated instantly when updating settings
+	# note: in order to prevent SketchUp asking to save changes of unmodified models, consider changing attribute saving logic back to previous state
     #def onPreSaveModel(model)
     #scene_id = Sketchup.active_model.definitions.entityID
     # for all materials, save settings
@@ -835,6 +881,7 @@ class SU2LUX_app_observer < Sketchup::AppObserver
             oldmateditor = SU2LUX.get_editor(model_id,"material")
             oldrendersettingseditor = SU2LUX.get_editor(model_id,"rendersettings")
             oldscenesettingseditor = SU2LUX.get_editor(model_id,"scenesettings")
+			oldproceduraltextureeditor = SU2LUX.get_editor(model_id,"proceduraltexture")
 			if oldmateditor.visible?
 				oldmateditor.close
             end
@@ -843,6 +890,9 @@ class SU2LUX_app_observer < Sketchup::AppObserver
             end
 			if oldscenesettingseditor.visible?
 				oldscenesettingseditor.close
+			end
+			if oldproceduraltextureeditor.visible?
+				oldproceduraltextureeditor.close
 			end
             # reset hashes
             SU2LUX.reset_hashes
@@ -859,7 +909,10 @@ class SU2LUX_app_observer < Sketchup::AppObserver
         
         puts "onNewModel creating scene settings editor"
         scene_settings_editor = SU2LUX.create_scene_settings_editor(model_id)
-        
+		
+		puts "onNewModel creating procedural textures editor"
+		SU2LUX.create_procedural_textures_editor(model_id)
+		
         puts "onNewModel creating render settings editor"
         render_settings_editor = SU2LUX.create_render_settings_editor(model_id)
         
@@ -876,6 +929,7 @@ class SU2LUX_app_observer < Sketchup::AppObserver
             oldmateditor = SU2LUX.get_editor(model_id,"material")
             oldrendersettingseditor = SU2LUX.get_editor(model_id,"rendersettings")
             oldscenesettingseditor = SU2LUX.get_editor(model_id,"scenesettings")
+			oldproceduraltextureeditor = SU2LUX.get_editor(model_id,"proceduraltexture")
 			if oldmateditor.visible?
 				oldmateditor.close
             end
@@ -885,6 +939,10 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 			if oldscenesettingseditor.visible?
 				oldscenesettingseditor.close
 			end
+			if oldproceduraltextureeditor.visible?
+				oldproceduraltextureeditor.close
+			end
+			
         end
         
         puts "onOpenModel creating lrs"
@@ -895,10 +953,12 @@ class SU2LUX_app_observer < Sketchup::AppObserver
         
         puts "onOpenModel creating scene settings editor"
         scene_settings_editor = SU2LUX.create_scene_settings_editor(model_id)
-        #scene_settings_editor.sendDataFromSketchup # should run on DOM ready
+		
+		puts "onOpenModel creating procedural textures editor"
+		SU2LUX.create_procedural_textures_editor(model_id)
+		
         puts "onOpenModel creating render settings editor"
         render_settings_editor = SU2LUX.create_render_settings_editor(model_id)
-        #render_settings_editor.sendDataFromSketchup # should run on DOM ready
 
         puts "onOpenModel creating material editor"          
         material_editor = SU2LUX.create_material_editor(model_id)
@@ -910,21 +970,36 @@ class SU2LUX_app_observer < Sketchup::AppObserver
             luxmat.reset unless loaded
             material_editor.materials_skp_lux[mat] = luxmat
 		end
+		
+		# recreate procedural textures
+		
+        puts "onOpenModel processing procedural textures"
+				
+		# for each of the textures, create procedural texture object
+		nrProcTextures = lrs.nrProceduralTextures
+		puts "recreating procedural texture objects, number of objects: " + nrProcTextures.to_s
+		for i in 0..nrProcTextures-1
+			newTex = LuxrenderProceduralTexture.new(false, i)
+		end
+		
+		# refresh material editor only now, as it uses the procedural texture objects
+        puts "onOpenModel refreshing material editor interface"
         material_editor.refresh
+		
         puts "finished running onOpenModel"
         SU2LUX.create_observers(model)
 	end
 	
 end # END class SU2LUX_app_observer
 
-class SU2LUX_rendering_options_observer < Sketchup::RenderingOptionsObserver
-	def onRenderingOptionsChanged(renderoptions, type)
-		if (type == 12)
-			color = renderoptions["BackgroundColor"]
+# class SU2LUX_rendering_options_observer < Sketchup::RenderingOptionsObserver
+	# def onRenderingOptionsChanged(renderoptions, type)
+		# if (type == 12)
+			# color = renderoptions["BackgroundColor"]
 			# todo: set the background color radio button in settings editor
-		end
-	end
-end
+		# end
+	# end
+# end
 
 class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 	def onMaterialSetCurrent(materials, material)
@@ -1083,10 +1158,12 @@ if( not file_loaded?(__FILE__))
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderAttributeDictionary.rb")
     load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderSettings.rb")
     load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderRenderSettingsEditor.rb")
+    load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderProceduralTexturesEditor.rb")
     load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderSceneSettingsEditor.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderMaterial.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderMaterialEditor.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderTextureEditor.rb")
+	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderProceduralTexture.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderMeshCollector.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderExport.rb")
     load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderToolbar.rb")
@@ -1140,6 +1217,8 @@ if( not file_loaded?(__FILE__))
     SU2LUX.create_scene_settings_editor(model_id)
     puts "creating render settings editor"
     SU2LUX.create_render_settings_editor(model_id)
+    puts "creating procedural textures editor"
+    SU2LUX.create_procedural_textures_editor(model_id)
                     
     # dialog may not have fully loaded yet, therefore loading presets should happen later as reaction on DOM loaded
             

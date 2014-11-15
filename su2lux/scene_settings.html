@@ -35,8 +35,14 @@
         <input type="checkbox" id="use_clipping">
             <label for="use_clipping">Use clipping</label>
         <div class="collapse">
-            clipping start    <input type='text' id="hither" size="10">
-            clipping end   <input type='text' id="yon" size="10">
+			<div class=parameter_interface_single>
+				clipping start
+				<input type='text' id="hither" size="10" class="inputfield1">
+			</div>
+			<div class=parameter_interface_single>
+				clipping end
+				<input type='text' id="yon" size="10" class="inputfield1">
+			</div>
         </div>
     </div>
     
@@ -83,10 +89,14 @@
         <input type="checkbox" id="use_architectural">
         <label for="use_architectural">Use lens shift</label>
         <div class="collapse">
-            <label for="shiftX">lens shift X</label>
-            <input type='text' id="shiftX" size="10">
-            <label for="shiftY">lens shift Y</label>
-            <input type='text' id="shiftY" size="10">
+			<div class=parameter_interface_single>
+				<label for="shiftX">lens shift X</label>
+				<input type='text' id="shiftX" size="10"  class="inputfield1">
+            </div>
+			<div class=parameter_interface_single>
+				<label for="shiftY">lens shift Y</label>
+				<input type='text' id="shiftY" size="10" class="inputfield1">
+			</div>
             <!-- <br>
             <label for="use_ratio">Use custom aspect ratio</label>
             <input type="checkbox" id="use_ratio">
@@ -618,7 +628,8 @@
             <br>
             <label for="geomexport">Geometry file format:</label>
 			<select id="geomexport">
-				<option value="ply">PLY</option>
+				<option value="ply">PLY, ASCII</option>
+				<option value="binply">PLY, binary</option>
 				<option value="lxo">LXO</option>
 			</select>
 			<br>

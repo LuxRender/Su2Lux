@@ -1,0 +1,16 @@
+.header {
+	background-color: #393939;
+}
+
+body {overflow-x:hidden; overflow-y: auto}
+
+#head {padding: 12px}
+#texturelistarea, #texturechanneldropdownarea, #textypedropdownarea {padding: 6px; position: relative; height: 2.4em;}
+#textures_in_model, #texture_types, #procTexChannel{padding: 1px; margin: 3px; position: absolute; left: 9em; top: 4px}
+#create_procedural_texture {padding: 2px; margin: 2px; position: absolute; left: 18em; top: 4px}
+.parameter_label {padding: 12px; margin: 6px; position: absolute; left: 0px; top: 0px}
+.parameter_field {padding: 3px; margin: 6px; position: absolute; left: 12em; top: 4px}
+.header2 {padding: 6px}
+.parameter_container {position: relative; height: 3em;}
+
+input[type=text]{ width: 6em;}

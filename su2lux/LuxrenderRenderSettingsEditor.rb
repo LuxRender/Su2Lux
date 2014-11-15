@@ -35,7 +35,7 @@ class LuxrenderRenderSettingsEditor
             windowname = "LuxRender Render Settings Editor - " + filename
         end
 		@render_settings_dialog = UI::WebDialog.new(windowname, true, "LuxrenderEngineSettingsEditor", 450, 600, 480, 10, true)
-        @render_settings_dialog.max_width = 520
+        @render_settings_dialog.max_width = 800
 		setting_html_path = Sketchup.find_support_file("render_settings.html" , "Plugins/"+SU2LUX::PLUGIN_FOLDER)
 		@render_settings_dialog.set_file(setting_html_path)
         @scene_id = Sketchup.active_model.definitions.entityID
@@ -62,6 +62,7 @@ class LuxrenderRenderSettingsEditor
                         end
                     else
 						if (@lrs.respond_to?(key))
+							# process key and new value
 							method_name = key + "="
 							if (value.to_s.downcase == "true")
 								value = true
@@ -196,7 +197,6 @@ class LuxrenderRenderSettingsEditor
             self.sendDataFromSketchup
         }
 
-
 		@render_settings_dialog.add_action_callback("save_to_model") {|dialog, params|
 			@lrs.save_to_model
 		}
@@ -207,8 +207,6 @@ class LuxrenderRenderSettingsEditor
 			UI.start_timer(0.5, false) { self.show }
 			# self.show
 		}
-        
-        
         
         @render_settings_dialog.add_action_callback("render_setting_loaded") {|dialog, params|
             puts "adding preset files to dropdown menu"

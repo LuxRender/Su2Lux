@@ -1,17 +1,11 @@
 function expand_section(sender_id, section_id, closed_sign, opened_sign) {  // user interface: closes/opens panels
 	text = sender_id.text();
-	the_sign = text.substr(0, 1);
-	if (the_sign == closed_sign) {
-		text = text.replace(the_sign, opened_sign);
-	} else if (the_sign == opened_sign) {
-		text = text.replace(the_sign, closed_sign);
-	}
 	$(sender_id).html(text);
-	$(sender_id).next(section_id).slideToggle(300);
+	//$(sender_id).next(section_id).slideToggle(100);
+	$(sender_id).next(section_id).toggle();
 }
 
-function checkbox_expander(id)      // user interface, shows and hides interface fields for current material
-{
+function checkbox_expander(id){      // user interface, shows and hides interface fields for current material
     if ($("#" + id).attr("checked"))
 	{
 		$("#" + id).nextAll(".collapse_check").show();
@@ -22,24 +16,36 @@ function checkbox_expander(id)      // user interface, shows and hides interface
 	}
 }
 
-function startactivemattype(){
-    // loaded on opening SketchUp on OS X, on showing material dialog on Windows // triggered by window.location = 'skp:show_continued@'
-		if ($("#material_name").val() == "bogus"){
-			//alert ("not initialized");
-			window.location = 'skp:start_refresh_and_update@' + this.id;
-            
-            //window.location = 'skp:start_refresh@' + this.id;
-			//window.location = 'skp:active_mat_type@'; 	// shows options for current material's material type
-		}
+function startactivemattype(){ // loaded on opening SketchUp on OS X, on showing material dialog on Windows // triggered by window.location = 'skp:show_continued@'
+	if ($("#material_name").val() == "bogus"){
+		//alert ("not initialized");
+		window.location = 'skp:start_refresh_and_update@' + this.id;
 	}
+}
+
+function addToProcTextList(newName, channelType){
+	$("option[value='noProcText']").remove();
+	if(channelType == 'color'){
+		$('.proctex_dropdown_color').append( $('<option></option>').val(newName).html(newName));
+	} else if(channelType == 'float'){
+		$('.proctex_dropdown_float').append( $('<option></option>').val(newName).html(newName));
+	} else if(channelType == 'fresnel'){
+		$('.proctex_dropdown_fresnel').append( $('<option></option>').val(newName).html(newName));
+	}
+}
+
+function removeFromProcTextList(texName){
+	$("option[value='" + texName + "']").remove();
+}
 	
 function startmaterialchanged() {
     window.location = 'skp:material_changed@' + this.value;
 }
 
 function setpreviewheight(previewsize,previewtime){
+	//alert ("setpreviewheight")
     // image and element size
-    $("#preview").height(previewsize+16)
+    $("#preview").height(previewsize+28)
     $("#preview_image").height(previewsize)
     
     // dropdown values
@@ -47,7 +53,7 @@ function setpreviewheight(previewsize,previewtime){
     $("#previewsize").val(previewsize)
     
     // preview button location
-    verticalposition = previewsize - 20
+    verticalposition = previewsize - 18
     $("#update_material_preview").css('top',verticalposition+'px')
     
 }
@@ -119,8 +125,6 @@ $(document).ready(
                 }
 			}
 		)
-                  
-                  
 
 		$("#type").change(
 			function() {
@@ -140,8 +144,7 @@ $(document).ready(
                 }
 			}
 		)
-
-                  
+        
 		$("#light_L").change(
 			function() {
                 //alert ("javascript: light spectrum type change")
@@ -224,7 +227,7 @@ $(document).ready(
                 $(this).nextAll("span").hide();
                 $(this).nextAll("." + this.value).show();
             }
-        );
+        )
                   
         $("#imagemap_filename").change(
             function()
@@ -246,8 +249,7 @@ $(document).ready(
                     $("#microdisplacement").hide();
                 }
             }
-        );
-                  
+        )
  
         $("#specular_scheme").change(
             function()
@@ -273,9 +275,7 @@ $(document).ready(
             {
                  $('#spec_IOR_preset_value').text(parseFloat(this.value).toFixed(3));
             }
-        );
-            
-                  
+        )
         
         $('#previewsize').change(
             function()
@@ -354,8 +354,7 @@ $(document).ready(
             {
                 window.location = 'skp:update_material_preview';
             }
-        )
-		
+        )	
 	}		
 )
 

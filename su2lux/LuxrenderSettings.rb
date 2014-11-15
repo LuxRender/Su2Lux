@@ -330,6 +330,8 @@ class LuxrenderSettings
     'cl2kd_swatch' => ['cl2kd_R','cl2kd_G','cl2kd_B'],
     'cl2ks_swatch' => ['cl2ks_R','cl2ks_G','cl2ks_B'],
     'colorpicker' => "diffuse_swatch",
+	### helper value for proceduarl materials ###
+	'nrProceduralTextures' => 0,
     }
     
     
