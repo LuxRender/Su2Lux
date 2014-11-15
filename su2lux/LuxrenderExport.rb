@@ -811,7 +811,7 @@ class LuxrenderExport
 		case @lrs.environment_light_type
 			when 'sunsky'
                 if (@lrs.environment_use_sky)
-                    out.puts "\tLightSource \"sky\""
+                    out.puts "\tLightSource \"sky2\""
                     out.puts "\t\"float gain\" [#{"%.6f" %(@lrs.environment_sky_gain)}]"
                     out.puts "\t\"float turbidity\" [#{"%.6f" %(@lrs.environment_sky_turbidity)}]"
                     out.puts "\t\"vector sundir\" [#{"%.6f" %(sun_direction.x)} #{"%.6f" %(sun_direction.y)} #{"%.6f" %(sun_direction.z)}]"
@@ -1432,8 +1432,8 @@ class LuxrenderExport
                 out.puts "NamedMaterial \"" + matname + "\""
             end
 			# write IES file
-			if (luxrender_mat.IES_path != "")
-				out.puts "\"string iesname\" [\"" + luxrender_mat.IES_path + "\"]"  
+			if (luxrender_mat.ies_path != "")
+				out.puts "\"string iesname\" [\"" + luxrender_mat.ies_path + "\"]"  
 			end	
         when "portal"
             out.puts "ObjectBegin \"Portal_Shape\""
