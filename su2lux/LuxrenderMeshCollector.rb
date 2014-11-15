@@ -191,12 +191,12 @@ class LuxrenderMeshCollector
 	#
 	##
 	def store_textured_entities(e,mat,mat_dir)
-        verb=false #verbosity
-		tw=@texturewriter
+        verb = false #verbosity
+		tw = @texturewriter
 		#puts "MATERIAL: " + mat.display_name if verb==true
-		uvHelp=nil
-        distorted=nil
-		mat_name=mat.display_name.delete"<>[]" #TODO rename material name
+		uvHelp = nil
+        distorted = nil
+		mat_name = mat.display_name.delete"<>[]"
 
         # process groups and components
 		if (e.class==Sketchup::Group or e.class==Sketchup::ComponentInstance) and mat.respond_to?(:texture) and mat.texture!=nil

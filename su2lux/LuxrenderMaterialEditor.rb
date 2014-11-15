@@ -40,6 +40,7 @@ class LuxrenderMaterialEditor
 		@material_editor_dialog.set_file(material_editor_dialog_path)
 		# add procedural texture names to all dropdowns
 		for i in 0..@lrs.nrProceduralTextures-1
+			# note: procedural texture objects have not been initialised at this stage, so we have to use class methods
 			texName = "procMat_" + i.to_s
 			channel = LuxrenderProceduralTexture.getChannelType(texName)
 			@material_editor_dialog.execute_script('addToProcTextList("' + texName + '","' + channel + '")')
@@ -106,9 +107,9 @@ class LuxrenderMaterialEditor
 		@material_editor_dialog.add_action_callback("clear_IES") {|dialog, params|
 			puts "clear callback responding"
 			# set IES value 	
-			@current.send("IES_path=", "")
+			@current.send("ies_path=", "")
 			# update IES value in material interface
-            cmd = "$('#IES_path').val('');"
+            cmd = "$('#ies_path').val('');"
             @material_editor_dialog.execute_script(cmd)				
 		}
 	
@@ -124,9 +125,9 @@ class LuxrenderMaterialEditor
 				puts "new IES path:"
 				puts newIESpath
 				# set IES value 	
-				@current.send("IES_path=", newIESpath)
+				@current.send("ies_path=", newIESpath)
 				# update IES value in material interface
-                cmd = "$('#IES_path').val('" + newIESpath + "');"
+                cmd = "$('#ies_path').val('" + newIESpath + "');"
                 @material_editor_dialog.execute_script(cmd)				
 			end
 		}

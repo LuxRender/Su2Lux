@@ -1445,17 +1445,19 @@ class LuxrenderExport
    
 	def export_procedural_textures(out)
 		puts "exporting procedural textures"
-		# from luxrender_settings, get number of procedural textures
-		# for each of those:
-		for i in 0..@lrs.nrProceduralTextures-1
-			# write texture name
-			texName = "procMat_" + i.to_s
-			puts "processing texture " + texName
-			texType = LuxrenderProceduralTexture.getTexType(texName)
-			texChannelType = LuxrenderProceduralTexture.getChannelType(texName)
+		# from luxrender_settings, get procedural textures: LuxrenderProceduralTexturesEditor.textureCollection
+		
+		proctexeditor = SU2LUX.get_editor(@scene_id,"proceduraltexture")
+		textureHash = proctexeditor.getTextureCollection()
+		
+		textureHash.each do |texName, texObject|
+			puts texName
+			puts texObject
+			texType = texObject.getTexType()
+			texChannelType = texObject.getChannelType()
 			out.puts "Texture \"" + texName + "\" \"" + texChannelType + "\" \"" + texType + "\""
-			#	get and write texture properties
-			propLists = LuxrenderProceduralTexture.getFormattedValues(texName);
+			# get and write texture properties
+			propLists = texObject.getFormattedValues()
 			propLists.each {|propList|
 				puts "propList is:"
 				puts propList
@@ -1897,7 +1899,7 @@ class LuxrenderExport
 				count+=1
 			end
             
-			status='ok' #TODO
+			status='ok'
             
 			if status
                 stext = "SU2LUX: " + (count-1).to_s + " textures and model"

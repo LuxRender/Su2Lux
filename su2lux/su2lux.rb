@@ -790,7 +790,8 @@ module SU2LUX
 				if @proctexture_hash[scene_id]
                     editor = @proctexture_hash[scene_id]
 				else
-					return nil
+                    @proctexture_hash[scene_id] = LuxrenderProceduralTexturesEditor.new
+                    editor = @proctexture_hash[scene_id]
 				end				
             end
 		return editor

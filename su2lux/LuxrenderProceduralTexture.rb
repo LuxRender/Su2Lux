@@ -20,9 +20,6 @@ class LuxrenderProceduralTexture
 
 	attr_reader :name
 	
-	@@dict="luxrender_procedural_materials" # rename to luxrender_procedural_textures ?
-	@fakeVar = 3
-	
 	@@textureTypes = 
 	{
 		"add" => ["color","float"],
@@ -116,8 +113,6 @@ class LuxrenderProceduralTexture
 		@lrs = SU2LUX.get_lrs(@scene_id)
 		@procTexEditor = SU2LUX.get_editor(@scene_id,"proceduraltexture")
 		
-		
-		
 		# create attribute dictionary
 		@attributeDictionary = @procTexEditor.getTextureDictionary()
 		
@@ -158,27 +153,19 @@ class LuxrenderProceduralTexture
 	end
 
 	def setValue(property, value)
-		@@textureParameters[getTexType()].each do |propertyList|
-			if propertyList[0] == property
-				@attributeDictionary.set_attribute(@name, property, value)
-			end
-		end
+		@attributeDictionary.set_attribute(@name, property, value)
 	end
 	
 	def printValues()
 		@@textureParameters[getTexType()].each do |propertySet|
 			puts propertySet
 		end	
-	end
+	end	
 	
-	
-	def getValues()
-		# get texture type from attribute dictionary
-		puts "getValues operating on procedural texture object"
-		texType = @attributeDictionary.get_attribute(name, "textureType", "default")
-
-		# based on texture type, get and return values from attribute dictionary
+	def getValues() # todo: get texture type from procedural texture object instead of passing it
 		passedVariableLists = []
+		texType = getTexType()
+		puts texType
 		@@textureParameters[texType].each do |propertySet|
 			# get value from dictionary, or use default value if no value has been stored
 			varValue = @attributeDictionary.get_attribute(name, propertySet[0].to_s, propertySet[2])
@@ -187,24 +174,8 @@ class LuxrenderProceduralTexture
 		return passedVariableLists
 	end
 	
-	
-	def self.getValues(texName) # class method, as we want to be able to access data from the attribute dictionary without creating objects first - note: why?
-		# get texture type from attribute dictionary
-		thisDictObj = @attributeDictionary.returnDictionaryCollection(texName)
-		puts "getValues, using " + thisDictObj.to_s
-		texType = thisDictObj.get_attribute(texName, "textureType", "default")
-		passedVariableLists = []
-		# based on texture type, get and return values from attribute dictionary
-		@@textureParameters[texType].each do |propertySet|
-			# get value from dictionary, or use default value if no value has been stored
-			varValue = thisDictObj.get_attribute(texName, propertySet[0].to_s, propertySet[2])
-			passedVariableLists << [propertySet[0],propertySet[1],varValue]
-		end	
-		return passedVariableLists
-	end
-	
-	def self.getFormattedValues(texName)
-		unformattedValues = self.getValues(texName)
+	def getFormattedValues()
+		unformattedValues = getValues()
 		formattedValues = []
 		unformattedValues.each do |paramSet|
 		# deal with vector parameters
@@ -218,8 +189,7 @@ class LuxrenderProceduralTexture
 				paramSet[2] = paramSet[2].to_s
 				paramSet[2] = paramSet[2][1, paramSet[2].length - 2]
 				paramSet[2] = paramSet[2].gsub!(', ' , ' ')
-			end
-			
+			end			
 
 			# add formatted strings to array
 			if (paramSet[1] == "string" || paramSet[1] == "bool")
@@ -228,6 +198,8 @@ class LuxrenderProceduralTexture
 				formattedValues << [typeString, paramSet[2]]
 			end
 		end
+		puts "returning values:"
+		puts formattedValues
 		return formattedValues
 	end
 	
@@ -242,17 +214,31 @@ class LuxrenderProceduralTexture
 	end
 	
 	def self.setTexChannel(texName) # returns float, fresnel or color
-		thisDict = LuxrenderAttributeDictionary.returnDictionary(texName)
-		thisTexName = thisDict["textureType"]
-		thisDict["procTexChannel"] = @@textureTypes[thisTexName][0]
-		puts "running setTexChannel, returning " + thisDict["procTexChannel"]
+		thisDict = LuxrenderAttributeDictionary.returnDictionary(texName) # gets dictionary for this texture object
+		thisTexName = thisDict["textureType"] # gets the texture type of this texture
+		thisDict["procTexChannel"] = @@textureTypes[thisTexName][0]  # sets the texture channel to the first one that is listed
+		puts "running setTexChannel, returning " + thisDict["procTexChannel"] # returns the texture channel
 		return thisDict["procTexChannel"]
 	end
+	
+	def setTexChannel()
+		thisDict = LuxrenderAttributeDictionary.returnDictionary(name)
+		thisTexName = thisDict["textureType"]
+		thisDict["procTexChannel"] = @@textureTypes[thisTexName][0] 
+		return thisDict["procTexChannel"]
+	end
+	
 
 	def getTexType()
 		thisDict = LuxrenderAttributeDictionary.returnDictionary(name)
 		thisTexName = thisDict["textureType"]
 		return thisTexName
+	end
+	
+	def getChannelType()
+		thisDict = LuxrenderAttributeDictionary.returnDictionary(name)
+		thisTexType = thisDict["procTexChannel"]
+		return thisTexType
 	end
 	
 	

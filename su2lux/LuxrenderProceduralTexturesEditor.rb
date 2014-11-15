@@ -57,7 +57,10 @@ class LuxrenderProceduralTexturesEditor
 			# call javascript function that adds new name to texture list and sets that name in dropdown
 			@procedural_textures_dialog.execute_script('addToTextureList("' + texName + '")')
 			# also add add this to all dropdown dialogs in the material editor
-			channel = LuxrenderProceduralTexture.getChannelType(texName)
+			
+			#channel = LuxrenderProceduralTexture.getChannelType(texName)
+			channel = newTexture.getChannelType()
+			
 			@material_editor.material_editor_dialog.execute_script('addToProcTextList("' + texName + '","' + channel + '")')
 			# update channel list
 			updateChannelList(texType)
@@ -116,7 +119,9 @@ class LuxrenderProceduralTexturesEditor
 			else
 				paramName = paramNameList.last
 			end
-			LuxrenderProceduralTexture.setParameter(params[0],paramName,params[2])
+			texObject = @textureCollection[params[0]]
+			#LuxrenderProceduralTexture.setParameter(params[0],paramName,params[2])
+			texObject.setValue(paramName,params[2])
 			
 			# remove and add texture in material editor dropdowns
 			if(paramName == "procTexChannel")
@@ -130,25 +135,30 @@ class LuxrenderProceduralTexturesEditor
 		##
 		@procedural_textures_dialog.add_action_callback('update_texType') {|dialog, paramString|
             SU2LUX.dbg_p "callback: update_texType"
+			
 			puts paramString # procMat_9|textureTypeName|cloud|float
+			
 			params = paramString.split('|')
+			texObject = @textureCollection[params[0]]
+			puts "texObject is " + texObject.to_s
 			
 			# store texture type in material
 			puts "storing material type"
-			LuxrenderProceduralTexture.setParameter(params[0],params[1],params[2])
+			texObject.setValue("textureType",params[2])
+			puts "getTexType " + texObject.getTexType()
+			#LuxrenderProceduralTexture.setParameter(params[0],params[1],params[2])
 			
 			# show texture type _dropdown, _channel type dropdown, texture name bar + contents
-			puts "showing stuff in interface"
 			@procedural_textures_dialog.execute_script('displayTextureInterface("' + params[2] + '")')
+			
+			# store channel type and update channel list
+			puts "storing channel type"
+			setChannel = texObject.setTexChannel()
+			updateChannelList(params[2])
 			
 			# update parameters in procedural texture interface
 			puts "updating parameters in interface"
 			updateParams(params[0],params[2])
-						
-			# store channel type and update channel list
-			puts "storing channel type"
-			setChannel = LuxrenderProceduralTexture.setTexChannel(params[0])
-			updateChannelList(params[2])
 			
 			# remove and add texture in material editor dropdowns
 			@material_editor.material_editor_dialog.execute_script('removeFromProcTextList("' + params[0] + '")')
@@ -218,7 +228,6 @@ class LuxrenderProceduralTexturesEditor
 	
 	def updateParams(texName,texType)
 		# get values for all parameters
-		# todo: get texture object
 		textureObject = @textureCollection[texName]
 		varValues = textureObject.getValues()
 		varValues.each do |varList|
@@ -232,6 +241,14 @@ class LuxrenderProceduralTexturesEditor
 	
 	def getTextureDictionary()
 		return @textureDictionary
+	end
+		
+	def getTextureCollection()
+		return @textureCollection
+	end
+	
+	def getTextureObject(objectName)
+		return @textureCollection[objectName]
 	end
 	
  	##
