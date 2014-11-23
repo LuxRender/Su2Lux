@@ -99,6 +99,8 @@ class LuxrenderMaterial
 		'carpaint_name' => '',
 		'energyconserving' => true,
 		'bumpmap' => 0.005,
+		'volume_interior' => 'default',
+		'volume_exterior' => 'default',
 
 		'dm_scheme' => 'loop',
 		'dm_normalsmooth' => true,
@@ -305,12 +307,12 @@ class LuxrenderMaterial
 	##
 	#
 	##
-	def save_to_model
-		@model.start_operation "SU2LUX Material settings saved"
-		puts "SAVE TO MODEL CALLED FROM LUXRENDERMATERIAL"
-		@attributeDictionary.save_to_model(@dict)
-		@model.commit_operation
-	end #END save_to_model
+	#def save_to_model
+	#	@model.start_operation "SU2LUX Material settings saved"
+	#	puts "SAVE TO MODEL CALLED FROM LUXRENDERMATERIAL"
+	#	@attributeDictionary.save_to_model(@dict)
+	#	@model.commit_operation
+	#end #END save_to_model
 	
 	##
 	#

@@ -1195,7 +1195,7 @@ class LuxrenderExport
 			ply_file << "ply\n"
             ply_file << "format ascii 1.0\n"
         end
-        ply_file << "comment created by SU2Lux " << Time.new << "\n"
+        ply_file << "comment created by SU2LUX " << Time.new << "\n"
         ply_file << "element vertex #{pointcount}\n"
         ply_file << "property float x\n"
         ply_file << "property float y\n"
@@ -1413,7 +1413,7 @@ class LuxrenderExport
 			sanitized_path = original_path
 		end
 	end
-	
+		
     def output_material (mat, out,luxrender_mat, matname)
         puts "running output_material"
         case luxrender_mat.type
@@ -1440,6 +1440,17 @@ class LuxrenderExport
             @has_portals = true
         else
             out.puts "NamedMaterial \"" + matname.delete("[<>]") + "\""
+			#
+			volume_interior = luxrender_mat.volume_interior
+			volume_exterior = luxrender_mat.volume_exterior
+			if(volume_interior != 'default')
+				# add volume information here
+				out.puts 'Interior  "' + volume_interior + '"'
+			end
+			if(volume_exterior != 'default')
+				# add volume information here
+				out.puts 'Exterior  "' + volume_exterior + '"'
+			end
         end # end case
     end
    
@@ -1510,6 +1521,55 @@ class LuxrenderExport
             out.puts "\"float dmoffset\" [#{"%.6f" %(luxrender_mat.dm_offset)}]"
         end
     end
+	
+	def export_volumes(out)
+		volumeEditor = SU2LUX.get_editor(@scene_id,"volume")
+		volumeHash = volumeEditor.getVolumeCollection()
+		volumeHash.each do |volumeName, volumeObject|
+			export_single_volume(out, volumeName, volumeObject)
+		end
+	end
+	
+	def export_single_volume(out, volumeName, volumeObject)
+		volumeType = volumeObject.getValue("volumeType")
+		volumeParameterHash = volumeObject.getValueHash()
+		puts volumeParameterHash
+		
+		absorption = volumeParameterHash["vol_absorption_swatch"][1]
+		aScale = volumeParameterHash["absorption_scale"][1].to_f
+		absorption = (absorption[0]*aScale).to_s + " " + (absorption[1]*aScale).to_s + " " + (absorption[2]*aScale).to_s
+		
+		out.puts "MakeNamedVolume \""  + volumeName + "\" \""+ volumeType + "\""
+		out.puts "\t \"float fresnel\" [" + volumeParameterHash["fresnel"][1].to_s + "]"
+		case volumeType
+			when "clear"
+				out.puts "\t \"color absorption\" [" + absorption.to_s + "]"
+			when "homogeneous"
+				scattering = volumeParameterHash["vol_scattering_swatch"][1]
+				sScale = volumeParameterHash["scattering_scale"][1].to_f
+				scattering = (scattering[0]*sScale).to_s + " " + (scattering[1]*sScale).to_s + " " + (scattering[2]*sScale).to_s
+				out.puts "\t \"color sigma_a\" [" + absorption.to_s + "]"
+				out.puts "\t \"color sigma_s\" [" + scattering.to_s + "]"
+				if (volumeParameterHash["g"][1].class == String)
+					out.puts "\t \"float g\" [" + volumeParameterHash["g"][1].split(",").map{|s| s.to_f}.join(" ") + "]"
+				else
+					out.puts "\t \"float g\" [" + volumeParameterHash["g"][1].join(" ") + "]"
+				end
+			when "heterogeneous"
+				scattering = volumeParameterHash["vol_scattering_swatch"][1]
+				sScale = volumeParameterHash["scattering_scale"][1].to_f
+				scattering = (scattering[0]*sScale).to_s + " " + (scattering[1]*sScale).to_s + " " + (scattering[2]*sScale).to_s
+				out.puts "\t \"color sigma_a\" [" + absorption.to_s + "]"
+				out.puts "\t \"color sigma_s\" [" + scattering.to_s + "]"
+				if (volumeParameterHash["g"][1].class == String)
+					out.puts "\t \"float g\" [" + volumeParameterHash["g"][1].split(",").map{|s| s.to_f}.join(" ") + "]"
+				else
+					out.puts "\t \"float g\" [" + volumeParameterHash["g"][1].join(" ") + "]"
+				end
+				out.puts "\t \"float stepsize\" [" + volumeParameterHash["stepsize"][1].to_s + "]"
+		end
+		out.puts ""
+	end
 	
 	def export_used_materials(materials, out, texexport, datafolder)
         mateditor = SU2LUX.get_editor(@scene_id,"material")
@@ -1681,7 +1741,6 @@ class LuxrenderExport
                 #pre, post = self.export_IOR(mat, pre, post)
                 #pre, post = self.export_spec_IOR(mat, pre, post)
 
-                
                 if (mat.use_absorption)
                     pre, post = self.export_absorption_component(mat, pre, post)
                 end
@@ -1698,6 +1757,7 @@ class LuxrenderExport
                         pre, post = self.export_dispersive_refraction(mat, pre, post)
                     end
                 end
+			#when "glass2" - no parameters
 			when "roughglass"
                 pre, post = self.export_reflection_component(mat, pre, post)
                 pre, post = self.export_transmission_component(mat, pre, post)

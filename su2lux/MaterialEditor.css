@@ -63,7 +63,7 @@ input#divide_by_2, input#multiply_by_2 {
 	width: 5em;
 }
 
-input#save_to_model, input#reset {
+input#reset {
 	width: 16em;
     margin: 0.3em 0em 0.8em 0.8em;
 }
@@ -458,7 +458,7 @@ input#get_diffuse_color {
 	width: 3em;
 }
 
-#IES_path{
+#ies_path{
 	width: 16em;
 }
 

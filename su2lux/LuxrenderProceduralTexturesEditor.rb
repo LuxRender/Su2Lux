@@ -40,7 +40,6 @@ class LuxrenderProceduralTexturesEditor
 		setting_html_path = Sketchup.find_support_file("procedural_textures_dialog.html" , "Plugins/"+SU2LUX::PLUGIN_FOLDER)
 		@procedural_textures_dialog.set_file(setting_html_path)
         @lrs=SU2LUX.get_lrs(@scene_id)
-		@scene_id = Sketchup.active_model.definitions.entityID
 		@material_editor = SU2LUX.get_editor(@scene_id,"material")
 		
         puts "finished initializing procedural textures editor"
@@ -120,7 +119,6 @@ class LuxrenderProceduralTexturesEditor
 				paramName = paramNameList.last
 			end
 			texObject = @textureCollection[params[0]]
-			#LuxrenderProceduralTexture.setParameter(params[0],paramName,params[2])
 			texObject.setValue(paramName,params[2])
 			
 			# remove and add texture in material editor dropdowns
@@ -146,7 +144,6 @@ class LuxrenderProceduralTexturesEditor
 			puts "storing material type"
 			texObject.setValue("textureType",params[2])
 			puts "getTexType " + texObject.getTexType()
-			#LuxrenderProceduralTexture.setParameter(params[0],params[1],params[2])
 			
 			# show texture type _dropdown, _channel type dropdown, texture name bar + contents
 			@procedural_textures_dialog.execute_script('displayTextureInterface("' + params[2] + '")')
@@ -180,8 +177,7 @@ class LuxrenderProceduralTexturesEditor
 			# get procedural texture object to display: 
 			if (@lrs.nrProceduralTextures > 0)
 				activeTexture = @textureDictionary.returnDictionary("procMat_0")
-				
-				#activeTexType = LuxrenderProceduralTexture.getParamValue(activeTexture.name, "textureType")
+
 				activeTexType = activeTexture["textureType"]
 				
 				puts "activeTexture has textureType " + activeTexType

@@ -107,8 +107,8 @@ class LuxrenderProceduralTexture
 	##
 	#
 	##
-	def initialize(createNew, passedParam) # marble, checkerboard, ...
-		# get texture editor and procedural texture editor
+	def initialize(createNew, passedParam) # passedParam is texture type: marble, checkerboard, ...
+		# get procedural texture editor
         @scene_id = Sketchup.active_model.definitions.entityID
 		@lrs = SU2LUX.get_lrs(@scene_id)
 		@procTexEditor = SU2LUX.get_editor(@scene_id,"proceduraltexture")
@@ -162,7 +162,7 @@ class LuxrenderProceduralTexture
 		end	
 	end	
 	
-	def getValues() # todo: get texture type from procedural texture object instead of passing it
+	def getValues()
 		passedVariableLists = []
 		texType = getTexType()
 		puts texType
@@ -246,26 +246,6 @@ class LuxrenderProceduralTexture
 		thisDict = LuxrenderAttributeDictionary.returnDictionary(texName)
 		thisTexName = thisDict["textureType"]
 		return thisTexName
-	end
-	
-	def getParamValue(paramName, defaultValue = "")
-		thisDictObj = LuxrenderAttributeDictionary.returnDictionaryCollection(name)
-		thisParamValue = thisDictObj.get_attribute(name, paramName, defaultValue)
-		return thisParamValue
-	end
-	
-	def self.getParamValue(texName, paramName, defaultValue = "")
-		thisDictObj = LuxrenderAttributeDictionary.returnDictionaryCollection(texName)
-		thisParamValue = thisDictObj.get_attribute(texName, paramName, defaultValue)
-		return thisParamValue
-	end
-	
-	def self.setParameter(texName, parameter, value)
-		puts "setParameter setting parameter " + parameter + " to value " + value + " for texture " +  texName
-		thisDictObj = LuxrenderAttributeDictionary.returnDictionaryCollection(texName)
-		#puts thisDictObj
-		#puts thisDictObj.get_attribute(texName, "textureType", "0")
-		thisDictObj.set_attribute(texName, parameter, value)
 	end
 	
 end

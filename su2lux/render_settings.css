@@ -139,7 +139,7 @@ input#divide_by_2, input#multiply_by_2 {
 	width: 5em;
 }
 
-input#save_to_model, input#reset {
+iinput#reset {
 	width: 14em;
 }
 

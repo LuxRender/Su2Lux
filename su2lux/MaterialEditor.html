@@ -53,6 +53,7 @@
                     <option value="matte">Matte</option>
                     <option value="glossy">Glossy</option>
                     <option value="glass">Glass</option>
+                    <option value="glass2">Glass (volumetric)</option>
                     <option value="roughglass">Rough glass</option>
                     <!-- <option value="metal">Metal</option> -->
                     <option value="metal2">Metal</option>
@@ -469,7 +470,7 @@
                 </div> <!-- end panelcontent -->
 			</div> <!-- end mixmaterial -->
             
-            <div id="transmission" class="glass glass2 roughglass mattetranslucent glossytranslucent">
+            <div id="transmission" class="glass roughglass mattetranslucent glossytranslucent">
 				<p class="header2">Transmission</p>
                 <div class="panelcontent collapse">
                     <table id="swatch_transmission">
@@ -627,7 +628,6 @@
                 </div>
             </div>
             
-            
 			<div id="exponent_div" class="glossy metal metal2 roughglass shinymetal glossytranslucent">
 				<p class="header2">Glossiness</p>
                 <div class="panelcontent collapse">
@@ -720,6 +720,25 @@
 				<label for="use_architectural">Architectural (no refraction)</label>
                 </div>
             </div>
+			
+			
+			<div id="volume" class="glossy glossytranslucent glass glass2 metal2 mirror mattetranslucent glossytranslucent carpaint cloth velvet null">
+				<p class="header2">Volume</p>
+                <div class="panelcontent collapse">
+					<div class="parameter_interface_single">
+						<label for="volume_interior">Interior </label>
+						<select id="volume_interior" class="parameter_field">
+							<option value="default">default</option>
+						</select>
+					</div>
+					<div class="parameter_interface_single">
+						<label for="volume_exterior">Exterior </label>
+						<select id="volume_exterior" class="parameter_field">
+							<option value="default">default</option>
+						</select>
+					</div>
+                </div>
+			</div> <!-- END volume -->
             
             
 			<div id="asperity" class="glossy glossytranslucent">
@@ -794,7 +813,7 @@
                 </div>
 			</div> <!-- END absorption> -->
             
-			<div id="thin_film_coating" class="glass mirror shinymetal">
+			<div id="thin_film_coating" class="glass glass2 mirror shinymetal">
 				<p class="header2">Thin film coating</p>
                 <div class="panelcontent collapse">
                 <input type="checkbox" id="use_thin_film_coating" class="margin_bottom"><label for="use_thin_film_coating"> Use thin film coating</label>
@@ -851,7 +870,7 @@
 				</div> <!-- end collapse_check -->
 			</div> <!-- end thin film coating -->
             
-			<div id="dispersive_refraction"class="glass roughglass">
+			<div id="dispersive_refraction"class="glass glass2 roughglass">
 				<p class="header2">Dispersive refraction</p>
                 <div class="panelcontent collapse">
 				<input type="checkbox" id="use_dispersive_refraction" class="margin_bottom">
@@ -892,7 +911,7 @@
                 </div>
 			</div> <!-- END asperity -->
             
-			<div id="bump" class="matte glossy glass roughglass metal metal2 mirror shinymetal mattetranslucent glossytranslucent velvet cloth">
+			<div id="bump" class="matte glossy glass glass2 roughglass metal metal2 mirror shinymetal mattetranslucent glossytranslucent velvet cloth">
 				<p class="header2">Bump map</p>
 				<div class="panelcontent collapse">
                     <div class="parameter_interface">
@@ -922,7 +941,7 @@
                 </div><!-- end panelcontent -->
 			</div> <!-- END Bump -->
             
-            <div id="normal" class="matte glossy glass roughglass metal metal2 mirror shinymetal mattetranslucent glossytranslucent velvet cloth">
+            <div id="normal" class="matte glossy glass glass2 roughglass metal metal2 mirror shinymetal mattetranslucent glossytranslucent velvet cloth">
 				<p class="header2">Normal map</p>
 				<div class="panelcontent collapse">
                     <div class="parameter_interface">
@@ -1112,12 +1131,12 @@
             </div>
 			
             <div class="parameter_interface_single">
-                <label for="IES_path" class="parameter_label">IES file</label>
-		        <input type="text" id="IES_path" class="parameter_field_spectrum">
+                <label for="ies_path" class="parameter_label">IES file</label>
+		        <input type="text" id="ies_path" class="parameter_field_spectrum">
 			</div>
 			<div>
-				<input type="button" id="IES_path_button" value="Browse IES" class="IES_browse">
-				<input type="button" id="IES_path_clear" value="Clear IES" class="IES_clear">
+				<input type="button" id="ies_path_button" value="Browse IES" class="IES_browse">
+				<input type="button" id="ies_path_clear" value="Clear IES" class="IES_clear">
             </div>
 			
             
@@ -1146,7 +1165,6 @@
     
 </div> <!-- END material_type -->
 		<hr>
-		<!--<input type="button" id="save_to_model" value="Save settings to model"> -->
 		<input type="button" id="reset" value="reset material settings">
 	</div>
 </body>

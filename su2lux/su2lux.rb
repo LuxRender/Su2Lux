@@ -104,6 +104,7 @@ module SU2LUX
 		@os_specific_vars = os.get_variables
         @lrs_hash = {}
         @sceneedit_hash = {}
+        @volume_hash = {}
 		@proctexture_hash = {}
         @renderedit_hash = {}
         @matedit_hash = {}
@@ -215,6 +216,11 @@ module SU2LUX
 
 		# prepare lxm file
 		out_mat = File.new(file_datafolder + file_basename + SUFFIX_MATERIAL, "w")
+		
+		# add volumes
+		le.export_volumes(out_mat)
+		
+		# add helper null material
 		out_mat << "MakeNamedMaterial \"SU2LUX_helper_null\" \n"
 		out_mat << "	\"string type\" [\"null\"]"
 		out_mat << "\n\n"
@@ -620,6 +626,14 @@ module SU2LUX
         return @sceneedit_hash[model_id]
     end
 
+	##
+    #
+    ##
+    def SU2LUX.create_volume_editor(model_id)
+        @volume_hash[model_id] = LuxrenderVolumeEditor.new
+        return @volume_hash[model_id]
+    end
+
     ##
     #
     ##
@@ -684,6 +698,24 @@ module SU2LUX
         end
     end # END show_scene_settings_editor
 
+	##
+	#
+	##
+	def SU2LUX.show_volume_editor(scene_id)
+		if not @volume_hash[scene_id]
+			puts "no volume editor found, creating new"
+			@volume_hash[scene_id] = LuxrenderVolumeEditor.new
+		end
+        if @volume_hash[scene_id].visible?
+			puts "hiding volume editor"
+            @volume_hash[scene_id].close
+        else
+			puts "showing existing volume editor: " +  @volume_hash[scene_id].to_s
+            @volume_hash[scene_id].showVolumeDialog
+        end
+		
+	end
+	
 	##
 	#
 	##
@@ -778,6 +810,14 @@ module SU2LUX
                     @matedit_hash[scene_id] = LuxrenderMaterialEditor.new
                     editor = @matedit_hash[scene_id]
                 end
+			when "volume"
+			    if @volume_hash[scene_id]
+                    editor = @volume_hash[scene_id]
+                else
+                    #UI.messagebox "creating new volume editor"
+                    @volume_hash[scene_id] = LuxrenderVolumeEditor.new
+                    editor = @volume_hash[scene_id]
+                end			
             when "rendersettings"
                 if @renderedit_hash[scene_id]
                     editor = @renderedit_hash[scene_id]
@@ -821,7 +861,7 @@ end # END module SU2LUX
 
 class SU2LUX_model_observer < Sketchup::ModelObserver
     #commented out following lines; attribute dictionaries should be updated instantly when updating settings
-	# note: in order to prevent SketchUp asking to save changes of unmodified models, consider changing attribute saving logic back to previous state
+	# note: in order to prevent SketchUp asking to save changes of unmodified models, consider changing attribute saving logic
     #def onPreSaveModel(model)
     #scene_id = Sketchup.active_model.definitions.entityID
     # for all materials, save settings
@@ -931,6 +971,7 @@ class SU2LUX_app_observer < Sketchup::AppObserver
             oldrendersettingseditor = SU2LUX.get_editor(model_id,"rendersettings")
             oldscenesettingseditor = SU2LUX.get_editor(model_id,"scenesettings")
 			oldproceduraltextureeditor = SU2LUX.get_editor(model_id,"proceduraltexture")
+			oldvolumeeditor = SU2LUX.get_editor(model_id,"volume")
 			if oldmateditor.visible?
 				oldmateditor.close
             end
@@ -942,6 +983,9 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 			end
 			if oldproceduraltextureeditor.visible?
 				oldproceduraltextureeditor.close
+			end
+			if oldvolumeeditor.visible?
+				oldvolumeeditor.close
 			end
 			
         end
@@ -986,6 +1030,13 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 		# refresh material editor only now, as it uses the procedural texture objects
         puts "onOpenModel refreshing material editor interface"
         material_editor.refresh
+		
+		puts "onOpenModel creating volume editor"  
+        volume_editor = SU2LUX.create_volume_editor(model_id)
+		puts "processing volumes"
+		for volumeName in lrs.volumeNames
+			volume = LuxrenderVolume.new(false, volumeName)
+		end
 		
         puts "finished running onOpenModel"
         SU2LUX.create_observers(model)
@@ -1159,12 +1210,14 @@ if( not file_loaded?(__FILE__))
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderAttributeDictionary.rb")
     load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderSettings.rb")
     load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderRenderSettingsEditor.rb")
-    load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderProceduralTexturesEditor.rb")
     load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderSceneSettingsEditor.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderMaterial.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderMaterialEditor.rb")
-	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderTextureEditor.rb")
+	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderVolume.rb")
+	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderVolumeEditor.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderProceduralTexture.rb")
+    load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderProceduralTexturesEditor.rb")
+	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderTextureEditor.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderMeshCollector.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderExport.rb")
     load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderToolbar.rb")

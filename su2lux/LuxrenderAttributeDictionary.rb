@@ -98,19 +98,19 @@ class LuxrenderAttributeDictionary
 		return @dictionary
 	end #END choose
     
-	def save_to_model(name)
-        puts "attributeDictionary running save_to_model for: " + name.to_s
-		@dictionary = self.choose(name)
-		if (self.modified?(name))
-            puts "modified"
-			@dictionary.each { |key, value|
-                # puts key.to_s + " " + value.to_s
-				@model.set_attribute(name, key, value)
-			}
-        else
-            puts "not modified"
-		end
-	end #END save_to_model
+	#def save_to_model(name)
+    #    puts "attributeDictionary running save_to_model for: " + name.to_s
+	#	@dictionary = self.choose(name)
+	#	if (self.modified?(name))
+    #       puts "modified"
+	#		@dictionary.each { |key, value|
+    #            # puts key.to_s + " " + value.to_s
+	#			@model.set_attribute(name, key, value)
+	#		}
+    #   else
+    #       puts "not modified"
+	#	end
+	#end #END save_to_model
     
 	def load_from_model(name)
         puts "running load_from model for " + name.to_s + ", using attribute dictionary:"

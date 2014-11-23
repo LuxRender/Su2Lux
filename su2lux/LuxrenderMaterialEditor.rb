@@ -48,7 +48,7 @@ class LuxrenderMaterialEditor
         @collectedmixmaterials = []
         @collectedmixmaterials_i = 0
         
-        @color_picker = UI::WebDialog.new("Color Picker", false, "ColorPicker", 200, 220, 200, 350, true)
+        @color_picker = UI::WebDialog.new("Color Picker - material", false, "ColorPicker", 200, 220, 200, 350, true)
         color_picker_path = Sketchup.find_support_file("colorpicker.html", "Plugins/su2lux")
         @color_picker.set_file(color_picker_path)
 		@texture_editor_data = {}
@@ -226,9 +226,7 @@ class LuxrenderMaterialEditor
         }
 		
 		@color_picker.add_action_callback('provide_color') { |dialog, passedcolor|
-			puts "ruby asking color picker to start init_color command"
-			# @lrs.colorpicker stores which color swatch we are dealing with, but what is its current color?
-			# create a seprate function that returns the current rgb value based on @lrs.colorpicker
+			puts "material editor callback passing colour to colour picker init_color command"
 			swatchrgb = get_swatch_rgb()
 			
 			# set values in colorpicker RGB fields
@@ -243,13 +241,12 @@ class LuxrenderMaterialEditor
             @color_picker.execute_script(cmd2)
 		}
 		
-		
 		@color_picker.add_action_callback('colorfield_red_update') { |dialog, colorvalue|
 			puts "updating red for"
 			puts @lrs.colorpicker
 			@current.send(@lrs.send(@lrs.colorpicker)[0]+"=",colorvalue)
             update_swatches()
-		}		
+		}
 		
 		@color_picker.add_action_callback('colorfield_green_update') { |dialog, colorvalue|
 			puts "updating green for"
@@ -267,7 +264,7 @@ class LuxrenderMaterialEditor
 		
         
         @color_picker.add_action_callback('pass_color') { |dialog, passedcolor| # passedcolor is in #ffffff form
-            passedcolor="000000" if passedcolor.length != 7 # color picker may return NaN when mouse is dragged outside window
+            passedcolor="#000000" if passedcolor.length != 7 # color picker may return NaN when mouse is dragged outside window
             SU2LUX.dbg_p "passed color received"
 			@colorpicker_triggered = true
             puts "picked color is ", passedcolor
@@ -499,15 +496,6 @@ class LuxrenderMaterialEditor
 					@material_editor_dialog.execute_script(cmd)
 				end
 			}
-		}
-        
-		@material_editor_dialog.add_action_callback("save_to_model") {|dialog, params|
-            puts "callback: save_to_model"
-			materials = Sketchup.active_model.materials
-			for mat in materials
-				luxmat = self.find(mat.name)
-				luxmat.save_to_model
-			end
 		}
         
         @material_editor_dialog.add_action_callback("previewsize") {|dialog, params|
@@ -869,6 +857,14 @@ class LuxrenderMaterialEditor
         set_material_list("material_list1") # mix material 1
         set_material_list("material_list2") # mix material 2
         set_material_list("lightbase") # emitter base material
+		# volumes
+		for volumeName in @lrs.volumeNames
+			# add volume to interior and exterior dropdown
+			dropdown_add_interior = "$('#volume_interior').append( $('<option></option>').val('" + volumeName + "').html('" + volumeName + "'))"
+			dropdown_add_exterior = "$('#volume_exterior').append( $('<option></option>').val('" + volumeName + "').html('" + volumeName + "'))"
+			@material_editor_dialog.execute_script(dropdown_add_interior)
+			@material_editor_dialog.execute_script(dropdown_add_exterior)
+		end		
     end
     
 	

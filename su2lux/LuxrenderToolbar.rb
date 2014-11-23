@@ -2,6 +2,7 @@ def create_toolbar
 	main_menu = UI.menu("Plugins").add_submenu("LuxRender")
 	main_menu.add_item("Render") { (SU2LUX.export_dialog)}
 	main_menu.add_item("Material Editor") {(SU2LUX.show_material_editor(Sketchup.active_model.definitions.entityID))}
+	main_menu.add_item("Volume Editor") {(SU2LUX.show_volume_editor(Sketchup.active_model.definitions.entityID))}
 	main_menu.add_item("Scene Settings Editor") { (SU2LUX.show_scene_settings_editor(Sketchup.active_model.definitions.entityID))}
 	main_menu.add_item("Procedural Texture Editor") { (SU2LUX.show_procedural_textures_editor(Sketchup.active_model.definitions.entityID))}
 	main_menu.add_item("Render Engine Settings Editor") { (SU2LUX.show_render_settings_editor(Sketchup.active_model.definitions.entityID))}
@@ -26,7 +27,16 @@ def create_toolbar
     cmd_material.set_validation_proc{MF_UNCHECKED}
 	@materialbutton = toolbar.add_item(cmd_material)
 	
-	cmd_proceduraltexture = UI::Command.new("Material"){(SU2LUX.show_procedural_textures_editor(Sketchup.active_model.definitions.entityID))}
+	cmd_volume = UI::Command.new("Volume"){(SU2LUX.show_volume_editor(Sketchup.active_model.definitions.entityID))}
+	cmd_volume.small_icon = "icons\\su2lux_volume.png"
+	cmd_volume.large_icon = "icons\\su2lux_volume.png"
+	cmd_volume.tooltip = "Open SU2LUX Volume Editor"
+	cmd_volume.menu_text = "Volume Editor"
+	cmd_volume.status_bar_text = "Open SU2LUX Volume Editor"
+    cmd_volume.set_validation_proc{MF_UNCHECKED}
+	@materialbutton = toolbar.add_item(cmd_volume)
+	
+	cmd_proceduraltexture = UI::Command.new("Procedural_Textures"){(SU2LUX.show_procedural_textures_editor(Sketchup.active_model.definitions.entityID))}
 	cmd_proceduraltexture.small_icon = "icons\\su2lux_procedural_texture.png"
 	cmd_proceduraltexture.large_icon = "icons\\su2lux_procedural_texture.png"
 	cmd_proceduraltexture.tooltip = "Open SU2LUX Procedural Texture Editor"

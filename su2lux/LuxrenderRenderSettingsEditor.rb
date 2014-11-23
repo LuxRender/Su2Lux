@@ -196,10 +196,6 @@ class LuxrenderRenderSettingsEditor
             puts "running display_loaded_presets"
             self.sendDataFromSketchup
         }
-
-		@render_settings_dialog.add_action_callback("save_to_model") {|dialog, params|
-			@lrs.save_to_model
-		}
 		
 		@render_settings_dialog.add_action_callback("reset_to_default") {|dialog, params|
 			@lrs.reset

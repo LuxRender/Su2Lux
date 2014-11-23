@@ -298,12 +298,6 @@ $(document).ready(
 			}
 		)
 
-		$("#save_to_model").click(
-			function()
-			{
-				window.location = 'skp:save_to_model';
-			}
-		);
 		
 		$("#reset").click(
 			function()

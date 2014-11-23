@@ -300,7 +300,7 @@ class LuxrenderSettings
     'fleximage_colorspace_preset' => 'sRGB - HDTV (ITU-R BT.709-5)',
     
     ############   System   ############
-    'runluxrender' => "ask", # moved to 
+    'runluxrender' => "ask",
     'texexport' => "skp",
     'exp_distorted' => true, # export distorted textures
     'export_file_path' => "",
@@ -318,6 +318,7 @@ class LuxrenderSettings
     'renderpreset' => 'interior',
     ############   Color Swatches   ############
     'swatch_list' => ['diffuse_swatch','specular_swatch','reflection_swatch','metal2_swatch','em_swatch','transmission_swatch','absorption_swatch','cl1kd_swatch','cl1ks_swatch','cl2kd_swatch','cl2ks_swatch'],
+	'volume_swatch_list' => ['vol_absorption_swatch','vol_scattering_swatch'],
     'diffuse_swatch' => ['kd_R','kd_G','kd_B'],
     'specular_swatch'=> ['ks_R','ks_G','ks_B'],
     'reflection_swatch' => ['kr_R','kr_G','kr_B'],
@@ -329,9 +330,13 @@ class LuxrenderSettings
     'cl1ks_swatch' => ['cl1ks_R','cl1ks_G','cl1ks_B'],
     'cl2kd_swatch' => ['cl2kd_R','cl2kd_G','cl2kd_B'],
     'cl2ks_swatch' => ['cl2ks_R','cl2ks_G','cl2ks_B'],
+    'vol_absorption_swatch' => ['vol_abs_R','vol_abs_G','vol_abs_B'],
+    'vol_scattering_swatch' => ['vol_scat_R','vol_scat_G','vol_scat_B'],
     'colorpicker' => "diffuse_swatch",
-	### helper value for proceduarl materials ###
+	'colorpicker_volume' => "vol_absorption_swatch",
+	### helper value for procedural materials ###
 	'nrProceduralTextures' => 0,
+	'volumeNames' => [],
     }
     
     
@@ -423,15 +428,15 @@ class LuxrenderSettings
 		return @attributedictionary.load_from_model(@dict) # @dict is "luxrender_settings"
 	end #END load_from_model
 	
-	def save_to_model
-        puts "LuxrenderSettings.rb calling attribute dictionary to save settings to SketchUp file"
-		@model.start_operation "SU2LUX settings saved" # start undo operation block
-		puts "SAVE TO MODEL CALLED FROM LUXRENDERSETTINGS"
-        if(@dict)
-            @attributedictionary.save_to_model(@dict)
-        end
-		@model.commit_operation # end undo operation block
-	end #END load_from_model
+	#def save_to_model
+    #   puts "LuxrenderSettings.rb calling attribute dictionary to save settings to SketchUp file"
+	#	@model.start_operation "SU2LUX settings saved" # start undo operation block
+	#	puts "SAVE TO MODEL CALLED FROM LUXRENDERSETTINGS"
+    #   if(@dict)
+    #        @attributedictionary.save_to_model(@dict)
+    #    end
+	#	@model.commit_operation # end undo operation block
+	#end #END save_to_model
 	
 	def get_names
 		settings = []

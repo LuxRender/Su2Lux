@@ -188,14 +188,14 @@ $(document).ready(
             }
         )
         
-		$("#IES_path_button").click(
+		$("#ies_path_button").click(
 			function()
 			{
 				window.location = 'skp:select_IES@'; 
 			}
 		)
 		        
-		$("#IES_path_clear").click(
+		$("#ies_path_clear").click(
 			function()
 			{
 				window.location = 'skp:clear_IES@'; 
@@ -331,13 +331,6 @@ $(document).ready(
 			function()
 			{
 				window.location = 'skp:get_diffuse_color'
-			}
-		)
-		
-		$("#save_to_model").click(
-			function()
-			{
-				window.location = 'skp:save_to_model';
 			}
 		)
 		
