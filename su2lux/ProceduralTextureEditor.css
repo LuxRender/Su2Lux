@@ -11,7 +11,7 @@ body {
 #texturelistarea, #texturechanneldropdownarea, #textypedropdownarea {
 	padding: 0.5em;
 	position: relative;
-	height: 0.2em;
+	height: 2em;
 }
 #textures_in_model, #texture_types, #procTexChannel{
 	padding: 0.1em;
