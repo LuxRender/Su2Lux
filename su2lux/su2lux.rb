@@ -82,6 +82,7 @@ module SU2LUX
 		model.active_view.remove_observer $SU2LUX_view_observer
 		#model.rendering_options.remove_observer $SU2LUX_rendering_options_observer
 		model.materials.remove_observer $SU2LUX_materials_observer
+		model.remove_observer $SU2LUX_model_observer
 	end
 	
 	##
@@ -104,7 +105,7 @@ module SU2LUX
 		@os_specific_vars = os.get_variables
         @lrs_hash = {}
         @sceneedit_hash = {}
-        @volume_hash = {}
+        @volumeedit_hash = {}
 		@proctexture_hash = {}
         @renderedit_hash = {}
         @matedit_hash = {}
@@ -149,12 +150,6 @@ module SU2LUX
 		@selected=false
 		@model_name=""
 	end # END reset_variables
-	
-	def SU2LUX.test_proctext
-		puts
-		someTex = LuxrenderProceduralTexture.new(true, 'blender_musgrave')
-		someTex.printValues()
-	end
   
 	##
 	# exporting geometry, lights, materials and settings to a LuxRender file
@@ -175,7 +170,7 @@ module SU2LUX
         
         exportpath = lrs.export_file_path
 
-		le=LuxrenderExport.new(exportpath,@os_separator)
+		le=LuxrenderExport.new(exportpath, @os_separator, lrs, @material_editor)
 		le.reset
 		file_basename = File.basename(exportpath, SCENE_EXTENSION)
 		file_dirname = File.dirname(exportpath)
@@ -588,7 +583,7 @@ module SU2LUX
             SU2LUX.dbg_p "using existing material editor"
         else
             SU2LUX.dbg_p "creating new material editor"
-			@matedit_hash[scene_id]=LuxrenderMaterialEditor.new
+			@matedit_hash[scene_id]=LuxrenderMaterialEditor.new(scene_id)
 		end
         @matedit_hash[scene_id].set_material_lists
         if @matedit_hash[scene_id].visible?
@@ -611,51 +606,51 @@ module SU2LUX
 	get_luxrender_path()	##
 	#
 	##
-	def SU2LUX.create_material_editor(scene_id)
-		if not @matedit_hash[scene_id]
-			@matedit_hash[scene_id]=LuxrenderMaterialEditor.new
-		end
+	def SU2LUX.create_material_editor(scene_id, lrs)
+		#if not @matedit_hash[scene_id]
+			@matedit_hash[scene_id]=LuxrenderMaterialEditor.new(scene_id, lrs)
+		#end
 		return @matedit_hash[scene_id]
 	end # END create_material_editor
 
     ##
     #
     ##
-    def SU2LUX.create_scene_settings_editor(model_id)
-        @sceneedit_hash[model_id] = LuxrenderSceneSettingsEditor.new
+    def SU2LUX.create_scene_settings_editor(model_id, lrs)
+        @sceneedit_hash[model_id] = LuxrenderSceneSettingsEditor.new(model_id, lrs)
         return @sceneedit_hash[model_id]
     end
 
 	##
     #
     ##
-    def SU2LUX.create_volume_editor(model_id)
-        @volume_hash[model_id] = LuxrenderVolumeEditor.new
-        return @volume_hash[model_id]
+    def SU2LUX.create_volume_editor(model_id, material_editor, lrs)
+        @volumeedit_hash[model_id] = LuxrenderVolumeEditor.new(material_editor, lrs)
+        return @volumeedit_hash[model_id]
     end
 
     ##
     #
     ##
-    def SU2LUX.create_procedural_textures_editor(model_id)
-        @proctexture_hash[model_id] = LuxrenderProceduralTexturesEditor.new
+    def SU2LUX.create_procedural_textures_editor(model_id, material_editor, lrs)
+        @proctexture_hash[model_id] = LuxrenderProceduralTexturesEditor.new(material_editor, lrs)
         return @proctexture_hash[model_id]
     end
 	
 	##
     #
     ##
-    def SU2LUX.create_render_settings_editor(scene_id)
-        @renderedit_hash[scene_id]=LuxrenderRenderSettingsEditor.new
+    def SU2LUX.create_render_settings_editor(scene_id, lrs)
+        @renderedit_hash[scene_id]=LuxrenderRenderSettingsEditor.new(scene_id, lrs)
         return @renderedit_hash[scene_id]
     end
 	
     ##
     #
     ##
-    def SU2LUX.set_toolbar(toolbar)
-        @toolbar = toolbar
-    end
+    #def SU2LUX.set_toolbar(toolbar)
+    #    @toolbar = toolbar
+    #end
 
     def SU2LUX.reset_hashes()
         @lrs_hash = Hash.new
@@ -663,24 +658,25 @@ module SU2LUX
         @renderedit_hash = Hash.new
         @matedit_hash = Hash.new
 		@proctexture_hash = Hash.new
+		@volumeedit_hash = Hash.new
     end
 
 
     ##
     #
     ##
-    def SU2LUX.get_button(buttonname)
-        puts "returning toolbar button"
-        if buttonname=="render"
-            return @toolbar.entries[0]
-        elsif buttonname=="materialeditor"
-            return @toolbar.entries[1]
-        elsif buttonname=="scenesettings"
-            return @toolbar.entries[2]
-        elsif buttonname=="rendersettings"
-            return @toolbar.entries[3]
-        end
-    end
+    #def SU2LUX.get_button(buttonname)
+    #    puts "returning toolbar button"
+    #    if buttonname=="render"
+    #        return @toolbar.entries[0]
+    #    elsif buttonname=="materialeditor"
+    #        return @toolbar.entries[1]
+    #    elsif buttonname=="scenesettings"
+    #        return @toolbar.entries[2]
+    #    elsif buttonname=="rendersettings"
+    #        return @toolbar.entries[3]
+    #    end
+    #end
 
 	##
 	#
@@ -689,7 +685,7 @@ module SU2LUX
         puts "running show scene settings editor"
         #puts @sceneedit_hash[scene_id]
 		if not @sceneedit_hash[scene_id]
-			@sceneedit_hash[scene_id] = LuxrenderSceneSettingsEditor.new
+			return
 		end
         if @sceneedit_hash[scene_id].visible?
             @sceneedit_hash[scene_id].close
@@ -702,16 +698,15 @@ module SU2LUX
 	#
 	##
 	def SU2LUX.show_volume_editor(scene_id)
-		if not @volume_hash[scene_id]
-			puts "no volume editor found, creating new"
-			@volume_hash[scene_id] = LuxrenderVolumeEditor.new
+		if not @volumeedit_hash[scene_id]
+			puts "no volume editor found, aborting"
 		end
-        if @volume_hash[scene_id].visible?
+        if @volumeedit_hash[scene_id].visible?
 			puts "hiding volume editor"
-            @volume_hash[scene_id].close
+            @volumeedit_hash[scene_id].close
         else
-			puts "showing existing volume editor: " +  @volume_hash[scene_id].to_s
-            @volume_hash[scene_id].showVolumeDialog
+			puts "showing existing volume editor: " +  @volumeedit_hash[scene_id].to_s
+            @volumeedit_hash[scene_id].showVolumeDialog
         end
 		
 	end
@@ -721,8 +716,7 @@ module SU2LUX
 	##
 	def SU2LUX.show_procedural_textures_editor(scene_id)
 		if not @proctexture_hash[scene_id]
-			puts "no procedural texture editor found, creating new"
-			@proctexture_hash[scene_id] = LuxrenderProceduralTexturesEditor.new
+			puts "no procedural texture editor found, aborting"
 		end
         if @proctexture_hash[scene_id].visible?
 			puts "hiding procedural texture editor"
@@ -741,9 +735,7 @@ module SU2LUX
         puts "running show render settings editor"
         #puts @renderedit_hash[scene_id]
 		if not @renderedit_hash[scene_id]
-			@renderedit_hash[scene_id]=LuxrenderRenderSettingsEditor.new
-            #puts "new render settings editor:"
-            #puts @renderedit_hash[scene_id]
+			return
 		end
         if @renderedit_hash[scene_id].visible?
             #puts "hiding render settings editor"
@@ -800,43 +792,40 @@ module SU2LUX
                     editor = @sceneedit_hash[scene_id]
                 else
                     puts "scene settings editor not initialized"
-                    # don't create an editor here; this function is used by LuxrenderSettings to check if a settings editor exists
+					return nil
                 end
             when "material"
                 if @matedit_hash[scene_id]
                     editor = @matedit_hash[scene_id]
                 else
-                    #UI.messagebox "creating new material editor"
-                    @matedit_hash[scene_id] = LuxrenderMaterialEditor.new
-                    editor = @matedit_hash[scene_id]
+                    UI.messagebox "SU2LUX.get_editor did not find material editor - please report this issue on the forum"
+                    return  nil
                 end
 			when "volume"
-			    if @volume_hash[scene_id]
-                    editor = @volume_hash[scene_id]
+			    if @volumeedit_hash[scene_id]
+                    editor = @volumeedit_hash[scene_id]
                 else
-                    #UI.messagebox "creating new volume editor"
-                    @volume_hash[scene_id] = LuxrenderVolumeEditor.new
-                    editor = @volume_hash[scene_id]
+                    UI.messagebox "SU2LUX.get_editor did not find volume editor - please report this issue on the forum"
+                    return nil
                 end			
             when "rendersettings"
                 if @renderedit_hash[scene_id]
                     editor = @renderedit_hash[scene_id]
                 else
-                    #UI.messagebox "creating new render settings editor"
-                    @renderedit_hash[scene_id] = LuxrenderRenderSettingsEditor.new
-                    editor = @renderedit_hash[scene_id]
+                    UI.messagebox "SU2LUX.get_editor did not find settings editor - please report this issue on the forum"
+                    return nil
                 end
 			when "proceduraltexture"	
 				if @proctexture_hash[scene_id]
                     editor = @proctexture_hash[scene_id]
 				else
-                    @proctexture_hash[scene_id] = LuxrenderProceduralTexturesEditor.new
-                    editor = @proctexture_hash[scene_id]
+					UI.messagebox "SU2LUX.get_editor did not find procedural texture editor - please report this issue on the forum"
+                    return nil
 				end				
             end
 		return editor
 	end # END get_editor
-                    
+    
 	##
 	#
 	##
@@ -914,16 +903,19 @@ end # END class SU2LUX_view_observer
 class SU2LUX_app_observer < Sketchup::AppObserver
 	def onNewModel(model)
         puts "onNewModel observer triggered"
+		SU2LUX.remove_observers(Sketchup.active_model)
         model_id = Sketchup.active_model.definitions.entityID
 		
         # close editors, reset hashes on Windows; OS X has multiple editors in parallel
         if (SU2LUX.get_os == :windows)
-            # close editors
+			# note: model_id does not change between sessions, so even though we are using the new model_id, we are closing the old editors
             oldmateditor = SU2LUX.get_editor(model_id,"material")
             oldrendersettingseditor = SU2LUX.get_editor(model_id,"rendersettings")
             oldscenesettingseditor = SU2LUX.get_editor(model_id,"scenesettings")
 			oldproceduraltextureeditor = SU2LUX.get_editor(model_id,"proceduraltexture")
+			oldvolumeeditor = SU2LUX.get_editor(model_id,"volume")
 			if oldmateditor.visible?
+				oldmateditor.closeColorPicker
 				oldmateditor.close
             end
 			if oldrendersettingseditor.visible?
@@ -935,29 +927,40 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 			if oldproceduraltextureeditor.visible?
 				oldproceduraltextureeditor.close
 			end
+			if oldvolumeeditor.visible?
+				oldvolumeeditor.closeColorPicker
+				oldvolumeeditor.close
+			end
             # reset hashes
             SU2LUX.reset_hashes
         end
         
-        lrs = LuxrenderSettings.new
+        lrs = LuxrenderSettings.new(model_id)
         SU2LUX.add_lrs(lrs,model_id)
-		# loaded = lrs.load_from_model
-		# lrs.reset unless loaded
+		#lrs.reset # on Windows, try to make sure we don't use parameters from the previous model
+		#lrs.load_from_model
         lrs.reset_viewparams
         
-		Sketchup.active_model.materials.current = Sketchup.active_model.materials[0]
-        material_editor = SU2LUX.create_material_editor(model_id)
-        
+		puts "about to create material editor"
+        material_editor = SU2LUX.create_material_editor(model_id, lrs)
+		if(Sketchup.active_model.materials.current == nil)
+			Sketchup.active_model.materials.current = Sketchup.active_model.materials[0]
+        end
+		
         puts "onNewModel creating scene settings editor"
-        scene_settings_editor = SU2LUX.create_scene_settings_editor(model_id)
+        scene_settings_editor = SU2LUX.create_scene_settings_editor(model_id, lrs)
 		
 		puts "onNewModel creating procedural textures editor"
-		SU2LUX.create_procedural_textures_editor(model_id)
+		procEditor = SU2LUX.create_procedural_textures_editor(model_id, material_editor, lrs)
+		
+		puts "onNewModel creating volume editor"
+		volEditor = SU2LUX.create_volume_editor(model_id, material_editor, lrs)
 		
         puts "onNewModel creating render settings editor"
-        render_settings_editor = SU2LUX.create_render_settings_editor(model_id)
+        render_settings_editor = SU2LUX.create_render_settings_editor(model_id, lrs)
         
         SU2LUX.create_observers(model)
+				
         puts "finished running onNewModel"
 	end # END onNewModel
 
@@ -973,6 +976,7 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 			oldproceduraltextureeditor = SU2LUX.get_editor(model_id,"proceduraltexture")
 			oldvolumeeditor = SU2LUX.get_editor(model_id,"volume")
 			if oldmateditor.visible?
+				oldmateditor.closeColorPicker
 				oldmateditor.close
             end
 			if oldrendersettingseditor.visible?
@@ -985,28 +989,24 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 				oldproceduraltextureeditor.close
 			end
 			if oldvolumeeditor.visible?
+				oldvolumeeditor.closeColorPicker
 				oldvolumeeditor.close
 			end
 			
         end
         
         puts "onOpenModel creating lrs"
-        lrs = LuxrenderSettings.new
+        lrs = LuxrenderSettings.new(model_id)
         SU2LUX.add_lrs(lrs,model_id)
-        loaded = lrs.load_from_model
+        loaded = lrs.load_from_model # true if a (saved) SketchUp file is open, false if working with a new file
         lrs.reset unless loaded
         
-        puts "onOpenModel creating scene settings editor"
-        scene_settings_editor = SU2LUX.create_scene_settings_editor(model_id)
-		
-		puts "onOpenModel creating procedural textures editor"
-		SU2LUX.create_procedural_textures_editor(model_id)
-		
         puts "onOpenModel creating render settings editor"
-        render_settings_editor = SU2LUX.create_render_settings_editor(model_id)
+        render_settings_editor = SU2LUX.create_render_settings_editor(model_id, lrs)
 
         puts "onOpenModel creating material editor"          
-        material_editor = SU2LUX.create_material_editor(model_id)
+        material_editor = SU2LUX.create_material_editor(model_id, lrs)
+		
         material_editor.materials_skp_lux = Hash.new
         material_editor.current = nil
         for mat in model.materials
@@ -1016,27 +1016,26 @@ class SU2LUX_app_observer < Sketchup::AppObserver
             material_editor.materials_skp_lux[mat] = luxmat
 		end
 		
-		# recreate procedural textures
+        puts "onOpenModel creating scene settings editor"
+        scene_settings_editor = SU2LUX.create_scene_settings_editor(model_id, lrs)
 		
+		puts "onOpenModel creating procedural textures editor"
+		procEditor = SU2LUX.create_procedural_textures_editor(model_id, material_editor, lrs)
+		
+		# recreate procedural textures: for each of the textures, create procedural texture object
         puts "onOpenModel processing procedural textures"
-				
-		# for each of the textures, create procedural texture object
 		nrProcTextures = lrs.nrProceduralTextures
 		puts "recreating procedural texture objects, number of objects: " + nrProcTextures.to_s
 		for i in 0..nrProcTextures-1
-			newTex = LuxrenderProceduralTexture.new(false, i)
+			newTex = LuxrenderProceduralTexture.new(false, procEditor, lrs, i)
 		end
+		
+		puts "onOpenModel creating volume editor"  
+        volume_editor = SU2LUX.create_volume_editor(model_id, material_editor, lrs)
 		
 		# refresh material editor only now, as it uses the procedural texture objects
         puts "onOpenModel refreshing material editor interface"
         material_editor.refresh
-		
-		puts "onOpenModel creating volume editor"  
-        volume_editor = SU2LUX.create_volume_editor(model_id)
-		puts "processing volumes"
-		for volumeName in lrs.volumeNames
-			volume = LuxrenderVolume.new(false, volumeName)
-		end
 		
         puts "finished running onOpenModel"
         SU2LUX.create_observers(model)
@@ -1066,9 +1065,6 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 				puts "onMaterialSetCurrent reusing LuxRender material "
 			else
 				material_editor.refresh()
-				#material_editor.current = LuxrenderMaterial.new(current_mat)
-				#material_editor.materials_skp_lux[current_mat] = material_editor.current
-				#puts "onMaterialSetCurrent creating new LuxRender material" # , material_editor.current
 			end
 			material_editor.set_current(material_editor.current.name) # sets name of current material in dropdown, updates swatches
 			material_editor.sendDataFromSketchup
@@ -1101,7 +1097,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
     def onMaterialRemove(materials, material)
         SU2LUX.dbg_p "onMaterialRemove triggered"
         model_id = Sketchup.active_model.definitions.entityID
-        material_editor = SU2LUX.create_material_editor(model_id) # reuses material editor if it exists
+        material_editor = SU2LUX.get_editor(model_id, "material")
         material_editor.materials_skp_lux.delete(material)
 		material_editor.refresh() if (material_editor);
 	end
@@ -1237,8 +1233,8 @@ if( not file_loaded?(__FILE__))
     
     # create LuxrenderSettings
     puts "creating LuxRender settings for current model"
-    lrs = LuxrenderSettings.new
     model_id = Sketchup.active_model.definitions.entityID
+    lrs = LuxrenderSettings.new(model_id)
     SU2LUX.add_lrs(lrs,model_id)
 	loaded = lrs.load_from_model # true if a (saved) SketchUp file is open, false if working with a new file
   	lrs.reset_viewparams unless loaded
@@ -1248,7 +1244,7 @@ if( not file_loaded?(__FILE__))
     
     # create/load LuxRender materials
     puts "loading material settings"
-    material_editor = SU2LUX.create_material_editor(model_id)
+    material_editor = SU2LUX.create_material_editor(model_id, lrs)
     material_editor.materials_skp_lux = Hash.new
     material_editor.current = nil
     for mat in model.materials
@@ -1268,17 +1264,19 @@ if( not file_loaded?(__FILE__))
 
     # create scene settings editor and render settings editor
     puts "creating scene settings editor"
-    SU2LUX.create_scene_settings_editor(model_id)
+    SU2LUX.create_scene_settings_editor(model_id, lrs)
     puts "creating render settings editor"
-    SU2LUX.create_render_settings_editor(model_id)
+    SU2LUX.create_render_settings_editor(model_id, lrs)
     puts "creating procedural textures editor"
-    SU2LUX.create_procedural_textures_editor(model_id)
-                    
+    SU2LUX.create_procedural_textures_editor(model_id, material_editor, lrs)
+    puts "creating volume editor"
+    SU2LUX.create_volume_editor(model_id, material_editor, lrs)
+	
     # dialog may not have fully loaded yet, therefore loading presets should happen later as reaction on DOM loaded
-            
+ 
     # create toolbar
     toolbar = create_toolbar()
-    SU2LUX.set_toolbar(toolbar)
+    #SU2LUX.set_toolbar(toolbar)
 
     puts "finished 'no file loaded' procedure in su2lux.rb"
 end # end of no_file_loaded code

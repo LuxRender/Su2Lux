@@ -51,10 +51,10 @@ function add_to_dropdown(simplepreset){
 function update_subfield(field_class)
 {
     //alert(field_class)
-    $("#"+field_class).nextAll("."+field_class).hide();
+    $("#"+field_class).nextAll("."+field_class).hide(); // was nextAll instead of each //
     id_option_string = "#" + field_class + " option:selected"
     idvalue = $(id_option_string).val();
-    $("#"+field_class).nextAll("#"+idvalue).show();
+    $("#"+field_class).nextAll("#"+idvalue).show(); // was nextAll //
 }
 
 
@@ -64,8 +64,6 @@ $(document).ready(
 	{
         // alert ("settings DOM ready")
         
-		//$(".collapse").hide();
-		//$(".collapse2").hide();
         $(".continueprobability").hide();
                   
                   
@@ -115,6 +113,7 @@ $(document).ready(
 			{
 				$(this).nextAll().hide();
 				$(this).nextAll("#" + this.value).show();
+				$(".noiseaware").show();
 			}
 		);
                   

@@ -5,7 +5,7 @@ class LuxrenderMeshCollector
 	##
 	#
 	##
-	def initialize(model_name, os_separator, instances)
+	def initialize(lrs, mat_editor, model_name, os_separator, instances)
 		@model_name = model_name
 		@os_separator = os_separator
 		@parent_mat = []
@@ -18,8 +18,8 @@ class LuxrenderMeshCollector
         @instance_counter_cache = Hash.new
         @deduplicate = instances
         @deferred_instances = Hash.new
-        model_id = Sketchup.active_model.definitions.entityID
-        @lrs = SU2LUX.get_lrs(model_id)
+        @lrs = lrs
+		@material_editor = mat_editor
 	end # END initialize
     
     #####################################################################
@@ -142,9 +142,7 @@ class LuxrenderMeshCollector
 				else
 					mat = Sketchup.active_model.materials[SU2LUX::FRONT_FACE_MATERIAL]
 					mat = Sketchup.active_model.materials.add SU2LUX::FRONT_FACE_MATERIAL if mat.nil?
-                    scene_id = Sketchup.active_model.definitions.entityID
-                    mateditor = SU2LUX.get_editor(scene_id,"material")
-                    mateditor.find(SU2LUX::FRONT_FACE_MATERIAL) # creates LuxRender material
+                    @material_editor.find(SU2LUX::FRONT_FACE_MATERIAL) # creates LuxRender material
 					front_color = Sketchup.active_model.rendering_options["FaceFrontColor"]
 					scale = 0.8 / 255.0
 					mat.color = Sketchup::Color.new(front_color.red * scale, front_color.green * scale, front_color.blue * scale)

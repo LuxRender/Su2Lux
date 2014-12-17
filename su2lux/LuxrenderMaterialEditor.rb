@@ -22,10 +22,10 @@ class LuxrenderMaterialEditor
 	attr_accessor :current, :matname_changed, :materials_skp_lux, :material_editor_dialog
     attr_reader :material_editor_dialog
 	
-	def initialize
+	def initialize(scene_id, lrs)
         puts "initializing material editor"
-        @scene_id = Sketchup.active_model.definitions.entityID
-		@lrs = SU2LUX.get_lrs(@scene_id)
+        @scene_id = scene_id
+		@lrs = lrs
         @materials_skp_lux = Hash.new
 		@matname_changed = false
         filename = File.basename(Sketchup.active_model.path)
@@ -39,16 +39,16 @@ class LuxrenderMaterialEditor
 		@material_editor_dialog.max_width = 800
 		@material_editor_dialog.set_file(material_editor_dialog_path)
 		# add procedural texture names to all dropdowns
-		for i in 0..@lrs.nrProceduralTextures-1
-			# note: procedural texture objects have not been initialised at this stage, so we have to use class methods
-			texName = "procMat_" + i.to_s
-			channel = LuxrenderProceduralTexture.getChannelType(texName)
-			@material_editor_dialog.execute_script('addToProcTextList("' + texName + '","' + channel + '")')
-		end
+		#or i in 0..@lrs.nrProceduralTextures-1
+		#	# note: procedural texture objects have not been initialised at this stage, so we have to use class methods
+		#	texName = "procTex_" + i.to_s
+		#	channel = LuxrenderProceduralTexture.getChannelType(texName)
+		#	@material_editor_dialog.execute_script('addToProcTextList("' + texName + '","' + channel + '")')
+		#end
         @collectedmixmaterials = []
         @collectedmixmaterials_i = 0
         
-        @color_picker = UI::WebDialog.new("Color Picker - material", false, "ColorPicker", 200, 220, 200, 350, true)
+        @color_picker = UI::WebDialog.new("Color Picker - material", false, "ColorPicker", 410, 200, 200, 350, true)
         color_picker_path = Sketchup.find_support_file("colorpicker.html", "Plugins/su2lux")
         @color_picker.set_file(color_picker_path)
 		@texture_editor_data = {}
@@ -409,7 +409,7 @@ class LuxrenderMaterialEditor
 			generated_lxm_file << "\n"
 			
 			texture_subfolder = "LuxRender_luxdata/textures"
-			previewExport = LuxrenderExport.new(preview_path,path_separator) # preview path should define where preview files will be stored
+			previewExport = LuxrenderExport.new(preview_path, path_separator, @lrs, self) # preview path should define where preview files will be stored 
 			previewExport.export_procedural_textures(generated_lxm_file)
 			
             collect_mix_materials(@current) # check if the current material is a mix material; if so, recursively gather submaterials
@@ -537,7 +537,7 @@ class LuxrenderMaterialEditor
 				@texture_editor_data[texture_type + '_' + par] = lux_material.send(prefix + par) if (lux_material.respond_to?(prefix+par))
 			}
             
-            @texture_editor = LuxrenderTextureEditor.new(@texture_editor_data, data)
+            @texture_editor = LuxrenderTextureEditor.new(@texture_editor_data, data, @scene_id)
 
             puts "sending data to texture editor:"
             @texture_editor_data.each{|item| puts item}
@@ -720,7 +720,7 @@ class LuxrenderMaterialEditor
         elsif (mat)
             @numberOfLuxMaterials += 1
             #puts @numberOfLuxMaterials
-            newluxmat = LuxrenderMaterial.new(mat)
+            newluxmat = LuxrenderMaterial.new(mat, self)
             @materials_skp_lux[mat] = newluxmat
             return newluxmat
         else
@@ -812,13 +812,12 @@ class LuxrenderMaterialEditor
         @material_editor_dialog.execute_script(setdivheightcmd)
 		
 		# add procedural textures to dropdown
-		@lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
 		puts "LuxRenderMaterialEditor.rb adding " + @lrs.nrProceduralTextures.to_s + " procedural textures to texture dropdown menus"
 		for i in 0..@lrs.nrProceduralTextures-1
 			# get texture name, then texture type
-			texChannelType = LuxrenderProceduralTexture.getChannelType("procMat_" + i.to_s)
-			@material_editor_dialog.execute_script('addToProcTextList("procMat_' + i.to_s + '","' + texChannelType + '")')
-		end        
+			texChannelType = LuxrenderProceduralTexture.getChannelType("procTex_" + i.to_s)
+			@material_editor_dialog.execute_script('addToProcTextList("procTex_' + i.to_s + '","' + texChannelType + '")')
+		end   		
 	end
     
     def showhide_fields()
@@ -940,33 +939,30 @@ class LuxrenderMaterialEditor
 	##
 	#
 	##
-	def is_a_checkbox?(id) #much better to use objects for settings?!
-		lux_material = @current
-		if lux_material[id] == true or lux_material[id] == false
-			return id
-		end
-	end # END is_a_checkbox?
+	#def is_a_checkbox?(id) #much better to use objects for settings?!
+	#	lux_material = @current
+	#	if lux_material[id] == true or lux_material[id] == false
+	#		return id
+	#	end
+	#end # END is_a_checkbox?
 
 	##
 	#
 	##
 	def setValue(id, value) #extend to encompass different types (textbox, anchor, slider)
 		new_value=value.to_s
-		case id
-			when is_a_checkbox?(id)
-				self.fire_event("##{id}", "attr", "checked=#{value}")
-				cmd="checkbox_expander('#{id}');"
-				@material_editor_dialog.execute_script(cmd)
-				cmd = "$('##{id}').next('div.collapse').find('select').change();"
-				@material_editor_dialog.execute_script(cmd)
-
-			######### -- other -- #############
-			else
-				self.fire_event("##{id}", "val", new_value)
-				# cmd="$('##{id}').val('#{new_value}');"
-				# @material_editor_dialog.execute_script(cmd)
-			end
-			#############################
+		if(@current[id] == true or @current[id] == false)
+			self.fire_event("##{id}", "attr", "checked=#{value}")
+			cmd="checkbox_expander('#{id}');"
+			@material_editor_dialog.execute_script(cmd)
+			cmd = "$('##{id}').next('div.collapse').find('select').change();"
+			@material_editor_dialog.execute_script(cmd)
+		######### -- other -- #############
+		else
+			self.fire_event("##{id}", "val", new_value)
+			# cmd="$('##{id}').val('#{new_value}');"
+			# @material_editor_dialog.execute_script(cmd)
+		end
 	end # END setValue
 
 	##
@@ -991,6 +987,12 @@ class LuxrenderMaterialEditor
 				}
 		end
 		@material_editor_dialog.execute_script(cmd)
+	end
+	
+	def closeColorPicker
+		if (@color_picker.visible?)
+			@color_picker.close
+		end
 	end
 
 	def close

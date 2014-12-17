@@ -80,6 +80,7 @@ $(document).ready(
 			function()
 			{
 				$(this).nextAll().hide();
+				//$(".environment_common").show();
 				$(this).nextAll("." + this.value).show();
 			}
 		);

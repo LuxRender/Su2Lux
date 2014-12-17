@@ -72,13 +72,6 @@ input#get_diffuse_color {
 	width: 14em;
 }
 
-#current_view {
-/*	height: 45px;*/
-/*	float: right;*/
-	width: 14em;
-	margin-left: 0.5em;
-}
-
 .panelcontent{
     position: relative;
     padding: 0.7em;

@@ -2,9 +2,10 @@ class LuxrenderExport
 	attr_reader :count_tri
 	attr_reader :used_materials
     
-	def initialize(export_file_path,os_separator)
+	def initialize(export_file_path, os_separator, lrs, mat_editor)
         @scene_id = Sketchup.active_model.definitions.entityID
-		@lrs=SU2LUX.get_lrs(@scene_id)
+		@lrs = lrs
+		@material_editor = mat_editor
         #puts "exporting, using @lrs:", @lrs
 		@export_file_path=export_file_path
 		@model_name=File.basename(@export_file_path)
@@ -855,7 +856,7 @@ class LuxrenderExport
 	end # END export_light
 
 	def export_mesh(out)
-		mc=LuxrenderMeshCollector.new(@model_name,@os_separator,true)
+		mc=LuxrenderMeshCollector.new(@lrs, @material_editor, @model_name,@os_separator,true)
 		mc.collect_faces(Sketchup.active_model.entities, Geom::Transformation.new)
 		@materials=mc.materials
 		@fm_materials=mc.fm_materials # face me component materials
@@ -874,7 +875,7 @@ class LuxrenderExport
         # the instances we deferred also need to be exported
         mc.deferred_instances.each { | key , value |
             p "key: #{key} -> #{value.length}"
-            imc=LuxrenderMeshCollector.new(@model_name,@os_separator,false) #do not defer a second time
+            imc=LuxrenderMeshCollector.new(@lrs, @material_editor, @model_name,@os_separator,false) #do not defer a second time
             definition  = Sketchup.active_model.definitions.select { | d | d.class == Sketchup::ComponentDefinition && d.name.eql?(key) }
             if ! definition.empty?
                 p "Executing collect_faces for: #{definition[0].name} ->  #{@instance_name}"
@@ -923,7 +924,7 @@ class LuxrenderExport
 		luxmat_group.material = currentmaterial
 		
 		# create MeshCollector, store used material's textures
-		mcpre=LuxrenderMeshCollector.new(outputfolder,@os_separator,false)
+		mcpre=LuxrenderMeshCollector.new(@lrs, @material_editor, outputfolder,@os_separator,false)
 		mcpre.collect_faces(luxmat_group, Geom::Transformation.new) # this includes adding texture to meshcollector
 		@model_textures=mcpre.model_textures
 		@texturewriter=mcpre.texturewriter
@@ -1462,18 +1463,15 @@ class LuxrenderExport
 		textureHash = proctexeditor.getTextureCollection()
 		
 		textureHash.each do |texName, texObject|
-			puts texName
-			puts texObject
+			puts "exporting procedural texture " + texName
 			texType = texObject.getTexType()
 			texChannelType = texObject.getChannelType()
 			out.puts "Texture \"" + texName + "\" \"" + texChannelType + "\" \"" + texType + "\""
 			# get and write texture properties
 			propLists = texObject.getFormattedValues()
 			propLists.each {|propList|
-				puts "propList is:"
+				puts "getFormattedValues item:"
 				puts propList
-				puts propList[0]
-				puts propList[0][0..6]
 				out.puts "\t" + "\"" + propList[0] + "\" [" + propList[1].to_s + "]"
 			}
 			out.puts ""
@@ -1702,7 +1700,7 @@ class LuxrenderExport
 				foll << "\t" + "\"texture #{type_str}\" [\"" + procTexString + "\"]" + "\n"
 			end
 		elsif (material.send(tex_type + "_imagemap_colorize") == true) 
-			prec << "Texture \"#{@currenttexname_prefixed}::#{type_str}.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{@currenttexname_prefixed}::#{type_str}\"] \"#{type} tex2\" [#{material.send(type_str2)}]" + "\n"
+			prec << "Texture \"#{@currenttexname_prefixed}::#{type_str}.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{@currenttexname_prefixed}::#{type_str}\"] \"#{type} tex2\" [#{material.channelcolor_tos(type_str.downcase)}]" + "\n"
 			foll << "\t" + "\"texture #{type_str}\" [\"#{@currenttexname_prefixed}::#{type_str}.scale\"]" + "\n"
 		else # ordinary textures
 			foll << "\t" + "\"texture #{type_str}\" [\"#{@currenttexname_prefixed}::#{type_str}\"]" + "\n"
@@ -2015,7 +2013,7 @@ class LuxrenderExport
             
             # color = "#{"%.6f" %(material.color[0])} #{"%.6f" %(material.color[1])} #{"%.6f" %(material.color[2])}"
 			if (material.send("kd_imagemap_colorize") == true)
-                preceding << "Texture \"#{@currenttexname_prefixed}::Kd.scale\" \"color\" \"scale\" \"texture tex1\" [\"#{@currenttexname_prefixed}::Kd\"] \"color tex2\" [#{material.color_tos}]" + "\n"
+                preceding << "Texture \"#{@currenttexname_prefixed}::Kd.scale\" \"color\" \"scale\"" + "\n\t" + "\"texture tex1\" [\"#{@currenttexname_prefixed}::Kd\"]" + "\n\t" + "\"color tex2\" [#{material.channelcolor_tos('kd')}]" + "\n"
 				following << "\t" + "\"texture Kd\" [\"#{@currenttexname_prefixed}::Kd.scale\"]" + "\n"
 			else
 				following << "\t" + "\"texture Kd\" [\"#{@currenttexname_prefixed}::Kd\"]" + "\n"
@@ -2041,17 +2039,16 @@ class LuxrenderExport
         if (material.specular_scheme == "specular_scheme_preset")
             following << "\t" + "\"float index\" [#{material.specular_preset}]\n"
         elsif (material.specular_scheme == "specular_scheme_IOR")
-            if ( ! material.has_texture?("spec_IOR"))
-                following << "\t" + "\"float index\" [#{material.spec_IOR}]\n"
-            else
+            if (material.has_texture?("spec_IOR"))
                 preceding, following = self.export_texture(material, "spec_IOR", "float", before, after)
+            else
+                following << "\t" + "\"float index\" [#{material.spec_IOR}]\n"
             end
         else
-            if ( ! material.has_texture?("ks"))
-                following << "\t" + "\"color Ks\" [#{"%.6f" %(material.ks_R)} #{"%.6f" %(material.ks_G)} #{"%.6f" %(material.ks_B)}]" + "\n"
-				
-            else
+            if (material.has_texture?("ks"))	
                 preceding, following = self.export_texture(material, "ks", "color", before, after)
+            else
+                following << "\t" + "\"color Ks\" [#{"%.6f" %(material.ks_R)} #{"%.6f" %(material.ks_G)} #{"%.6f" %(material.ks_B)}]" + "\n"
             end
         end
 		return [before + preceding, after + following]

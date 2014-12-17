@@ -158,20 +158,19 @@
 				<input type="checkbox" id="environment_use_sky">
 				<label for="environment_use_sun">use sky</label><br>
                 
-                <div class="collapse">
+                <div class="collapse environment_common">
                     <div class=parameter_interface_single>
-                        <label for="environment_sky_lightgroup" class="label1">light group</label>
-                        <input type='text' id="environment_sky_lightgroup" size="10" class="inputfield1">
+                        <label for="environment_sky_lightgroup" class="label1 environment_common">light group</label>
+                        <input type='text' id="environment_sky_lightgroup" size="10" class="inputfield1 environment_common">
                     </div>
                     <div class=parameter_interface_single>
-                        <label for="environment_sky_gain" class="label1">gain</label>
-                        <input type='text' id="environment_sky_gain" size="10" class="inputfield1">
+                        <label for="environment_sky_gain" class="label1 environment_common">gain</label>
+                        <input type='text' id="environment_sky_gain" size="10" class="inputfield1 environment_common">
                     </div>
                     <div class=parameter_interface_single>
-                        <label for="environment_sky_turbidity" class="label1">turbidity</label>
-                        <input type='text' id="environment_sky_turbidity" size="3" class="inputfield1">
+                        <label for="environment_sky_turbidity" class="label1 environment_common">turbidity</label>
+                        <input type='text' id="environment_sky_turbidity" size="3" class="inputfield1 environment_common">
                     </div>
-                    
                 </div>
 			</div>
             
@@ -194,14 +193,14 @@
                     <input type='text' id="environment_infinite_gain" size="10" class="inputfield1">
                 </div>
             </div>
-            <div  class="environmentimage environmentcolor">
+            <div  class="environmentimage environmentcolor environment_light_type">
                 <div class=parameter_interface_single>
                     <label for="environment_infinite_lightgroup" class="label1">Light group</label>
                     <input type='text' id="environment_infinite_lightgroup" size="14" class="inputfield1">
                 </div>
             </div>
-            <div  class="environmentimage">
-                
+			
+            <div  class="environmentimage environment_light_type">
                 <div class=parameter_interface_single>
                     <label for="environment_infinite_gamma" class="label1">Gamma</label>
                     <input type='text' id="environment_infinite_gamma" size="10" class="inputfield1">
@@ -220,7 +219,7 @@
                 </div>
 			</div>
             
-            <div class="environmentcolor environmentimage environment_light_type">
+            <div class="environmentimage environmentcolor environment_light_type">
 				<input type="checkbox" id="use_environment_infinite_sun" class="environment_light_type">
                 <label for="use_environment_infinite_sun">add sun</label>
 				<div class="collapse use_environment_infinite_sun">

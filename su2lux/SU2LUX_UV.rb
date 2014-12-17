@@ -1,7 +1,8 @@
 class SU2LUX_UV
 
-	def initialize
+	def initialize(lrs)
 		@texturewriter = Sketchup.create_texture_writer
+		@lrs = lrs
 	end
 	
 	def get_selection_uvs(channel_number)

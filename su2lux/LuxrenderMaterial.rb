@@ -141,7 +141,7 @@ class LuxrenderMaterial
 	##
 	def lux_image_texture(material, name, texture, type)
 		material_prefix = material
-		material_prefix << "_" if ( ! material.empty?)
+		material_prefix << "_" if ( !material.empty?)
 		key_prefix = material_prefix + "#{name}"
 		key = "#{key_prefix}_#{texture}_"
         if (name=="aa")
@@ -164,7 +164,7 @@ class LuxrenderMaterial
 		@@settings[key + "vscale"] = 1.0
 		@@settings[key + "udelta"] = 0.0
 		@@settings[key + "vdelta"] = 0.0
-		@@settings[key + "proctex"] = "procMat_0"
+		@@settings[key + "proctex"] = "procTex_0"
 		@@settings[key + "maxanisotropy"] = 8.0
 		@@settings[key + "discardmipmaps"] = 0
 		# @@settings[key + "uvset"] = 0
@@ -208,9 +208,9 @@ class LuxrenderMaterial
 	##
 	#
 	##
-	def initialize(su_material) # creates LuxrenderMaterial object
-        @scene_id = Sketchup.active_model.definitions.entityID
+	def initialize(su_material, matEditor) # creates LuxrenderMaterial object
 		@model = Sketchup.active_model
+		@material_editor = matEditor
         if su_material.class == String
             if @model.materials[su_material].class == Sketchup::Material
                 @mat = @model.materials[su_material]
@@ -256,7 +256,7 @@ class LuxrenderMaterial
         @name_string = su_material.name.to_s
 		singleton_class = (class << self; self; end)
 		@view=@model.active_view
-		@dict = mat.name
+		@skp_mat_name = mat.name
         @attributeDictionary = LuxrenderAttributeDictionary.new(@model)
         
         # puts "singleton_class inspect ",singleton_class.inspect
@@ -264,23 +264,22 @@ class LuxrenderMaterial
 
 			define_method("[]") do |key|  # method [] for <LuxrenderMaterial:........>
 				value = @@settings[key]
-				return @attributeDictionary.get_attribute(@dict, key, value)
+				return @attributeDictionary.get_attribute(@skp_mat_name, key, value)
             end
 			
 			@@settings.each do |key, value|
 				######## -- get any attribute -- #######
-				define_method(key) { @attributeDictionary.get_attribute(@dict, key, value) }
+				define_method(key) { @attributeDictionary.get_attribute(@skp_mat_name, key, value) }
 
 				case key
 					when LuxrenderMaterial::ui_refreshable?(key)# set ui_refreshable
 						define_method("#{key}=") do |new_value|
-                            @attributeDictionary.set_attribute(@dict, key, new_value)
-                            material_editor = SU2LUX.get_editor(@scene_id,"material")
-                            material_editor.updateSettingValue(key) if material_editor
+                            @attributeDictionary.set_attribute(@skp_mat_name, key, new_value)
+                            @material_editor.updateSettingValue(key) if @material_editor
                         end
 					else # not ui_refreshable
 						define_method("#{key}=") { |new_value|
-                            @attributeDictionary.set_attribute(@dict, key, new_value)
+                            @attributeDictionary.set_attribute(@skp_mat_name, key, new_value)
                         }
 				end #end case
 			end #end settings.each
@@ -293,7 +292,7 @@ class LuxrenderMaterial
 	def reset
             #puts "resetting material"
 			@@settings.each do |key, value|
-				@attributeDictionary.set_attribute(@dict, key, value)
+				@attributeDictionary.set_attribute(@skp_mat_name, key, value)
 			end
 	end #END reset
 	
@@ -301,7 +300,7 @@ class LuxrenderMaterial
 	#
 	##
 	def load_from_model
-		return @attributeDictionary.load_from_model(@dict)
+		return @attributeDictionary.load_from_model(@skp_mat_name)
 	end #END load_from_model
 	
 	##
@@ -310,7 +309,7 @@ class LuxrenderMaterial
 	#def save_to_model
 	#	@model.start_operation "SU2LUX Material settings saved"
 	#	puts "SAVE TO MODEL CALLED FROM LUXRENDERMATERIAL"
-	#	@attributeDictionary.save_to_model(@dict)
+	#	@attributeDictionary.save_to_model(@skp_mat_name)
 	#	@model.commit_operation
 	#end #END save_to_model
 	
@@ -409,14 +408,14 @@ class LuxrenderMaterial
 		# uvs = {}
 		# (uvs[channel_number] ||= []) << uv_set
 		@uvs[channel_number] = uv_set
-		@attributeDictionary.set_attribute(@dict, 'uv_set', @uvs)
+		@attributeDictionary.set_attribute(@skp_mat_name, 'uv_set', @uvs)
 	end
 
 	##
 	#
 	##
 	def get_uv(channel_number)
-		uvs = @attributeDictionary.get_attribute(@dict, 'uv_set', {})
+		uvs = @attributeDictionary.get_attribute(@skp_mat_name, 'uv_set', {})
 		p "get"
 		p uvs
 		uv = uvs[channel_number]
@@ -426,7 +425,7 @@ class LuxrenderMaterial
 	#
 	##
 	def has_uvs?(channel_number=1)
-		uvs = @attributeDictionary.get_attribute(@dict, 'uv_set', {})
+		uvs = @attributeDictionary.get_attribute(@skp_mat_name, 'uv_set', {})
 		p "hasuvs"
 		p uvs
 		return uvs ? true : false
@@ -440,7 +439,7 @@ class LuxrenderMaterial
 		if (self.bump_texturetype != 'none')
 			if (self.bump_texturetype == 'sketchup')
                 # do not export if the material does not have a texture
-				has_bump = true if SU2LUX.get_editor(@scene_id,"material").materials_skp_lux.index(self).texture
+				has_bump = true if @material_editor.materials_skp_lux.index(self).texture
             elsif (self.bump_texturetype == 'imagemap')
 				has_bump = true if (not self.bump_imagemap_filename.empty?)
 			elsif (self.bump_texturetype == 'procedural')
@@ -457,7 +456,7 @@ class LuxrenderMaterial
 		has_normal = false
 		if (self.normal_texturetype != 'none')
 			if (self.normal_texturetype == 'sketchup')
-				has_normal = true if SU2LUX.get_editor(@scene_id,"material").materials_skp_lux.index(self).texture
+				has_normal = true if @material_editor.materials_skp_lux.index(self).texture
             elsif (self.normal_texturetype == 'imagemap')
 				has_normal = true if (not self.normal_imagemap_filename.empty?)
 			elsif (self.normal_texturetype == 'procedural')
@@ -474,7 +473,7 @@ class LuxrenderMaterial
 		has_displacement = false
 		if (self.dm_texturetype != 'none')
 			if (self.dm_texturetype == 'sketchup')
-				has_displacement = true if SU2LUX.get_editor(@scene_id,"material").materials_skp_lux.index(self).texture
+				has_displacement = true if @material_editor.materials_skp_lux.index(self).texture
 			elsif (self.dm_texturetype == 'imagemap')
 				has_displacement = true if (not self.dm_imagemap_filename.empty?)
 			elsif (self.dm_texturetype == 'procedural')

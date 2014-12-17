@@ -23,18 +23,15 @@ class LuxrenderVolume
 	@@volumeParamDicts =
 	{
 		# texture types, data format: [texture parameter name, parameter type, default value]
-		'clear' => {"volumeType"=>["string","clear"],"fresnel"=>["float",1.0],"vol_absorption_swatch"=>["color",[0.01,0.01,0.01]],"absorption_scale"=>["float",1.0]},
-		'homogeneous' => {"volumeType"=>["string","homogeneous"],"fresnel"=>["float",1.0],"vol_absorption_swatch"=>["color",[0.0,0.0,0.0]],"absorption_scale"=>["float",1.0],"vol_scattering_swatch"=>["color",[0.0,0.0,0.0]],"scattering_scale"=>["float",1.0],"g"=>["float",[0.0,0.0,0.0]]},
-		'heterogeneous' => {"volumeType"=>["string","heterogeneous"],"fresnel"=>["float",1.0],"vol_absorption_swatch"=>["color",[0.0,0.0,0.0]],"absorption_scale"=>["float",1.0],"vol_scattering_swatch"=>["color",[0.0,0.0,0.0]],"scattering_scale"=>["float",1.0],"g"=>["float",[0.0,0.0,0.0]],"stepsize"=>["float",1.0]}		
+		'clear' => {"volumeType"=>["string","clear"],"fresnel"=>["float",1.4],"vol_absorption_swatch"=>["color",[0.01,0.01,0.01]],"absorption_scale"=>["float",10.0]},
+		'homogeneous' => {"volumeType"=>["string","homogeneous"],"fresnel"=>["float",1.4],"vol_absorption_swatch"=>["color",[0.0,0.0,0.0]],"absorption_scale"=>["float",10.0],"vol_scattering_swatch"=>["color",[0.0,0.0,0.0]],"scattering_scale"=>["float",10.0],"g"=>["float",[0.0,0.0,0.0]]},
+		'heterogeneous' => {"volumeType"=>["string","heterogeneous"],"fresnel"=>["float",1.4],"vol_absorption_swatch"=>["color",[0.0,0.0,0.0]],"absorption_scale"=>["float",10.0],"vol_scattering_swatch"=>["color",[0.0,0.0,0.0]],"scattering_scale"=>["float",10.0],"g"=>["float",[0.0,0.0,0.0]],"stepsize"=>["float",1.0]}		
 	}
 		
-	def initialize(createNew, passedName, passedParameter = "") # passedParameter is volume type: clear, homogeneous, heterogeneous
-	
-		# get texture editor and procedural texture editor
-        @scene_id = Sketchup.active_model.definitions.entityID
-		@lrs = SU2LUX.get_lrs(@scene_id)
-		@volumeEditor = SU2LUX.get_editor(@scene_id,"volume")
-		@materialEditor = SU2LUX.get_editor(@scene_id,"material")
+	def initialize(createNew, parentEditor, matEditor, lrs, passedName, passedParameter = "") # passedParameter is volume type: clear, homogeneous, heterogeneous
+		@lrs = lrs
+		@volumeEditor = parentEditor
+		@materialEditor = matEditor
 		
 		# store name, create attribute dictionary to store parameters in
 		@name = passedName
@@ -46,14 +43,12 @@ class LuxrenderVolume
 			else
 				@volumeType = "clear"
 			end
-
-			# todo: check if name exists; if so, either modify it or abort
 			
 			# add texture to volume editor and @lrs (the latter in order to be able to reconstruct volumes when opening a file)
 			@volumeEditor.addVolume(passedName, self) # add texture to collection in current texture editor
 			volumeNameList = @lrs.volumeNames
 			volumeNameList << @name
-			@lrs.volumeNames = volumeNameList # was = [@name]
+			@lrs.volumeNames = volumeNameList
 
 			# write name and volume type name to attribute dictionary #
 			@attributeDictionary.set_attribute(@name, "volumeType", @volumeType)
@@ -65,10 +60,10 @@ class LuxrenderVolume
 			@attributeDictionary.load_from_model(@name)
 			@volumeType = @attributeDictionary.get_attribute(@name, "volumeType")
 		end
-		dropdown_add_interior = "$('#volume_interior').append( $('<option></option>').val('" + @name + "').html('" + @name + "'))"
-		dropdown_add_exterior = "$('#volume_exterior').append( $('<option></option>').val('" + @name + "').html('" + @name + "'))"
-		@materialEditor.material_editor_dialog.execute_script(dropdown_add_interior)
-		@materialEditor.material_editor_dialog.execute_script(dropdown_add_exterior)
+		
+		@volumeEditor.setActiveVolume(self)
+		
+		# addToGUI() # this method should be called separately, sometime when we can be certain there is an editor
 	end
 	
 	##
@@ -86,6 +81,15 @@ class LuxrenderVolume
 	#	instance methods
 	##
 
+	def addToGUI()
+		puts "adding volume to GUI:"
+		puts @name
+		dropdown_add_interior = "$('#volume_interior').append( $('<option></option>').val('" + @name + "').html('" + @name + "'))"
+		dropdown_add_exterior = "$('#volume_exterior').append( $('<option></option>').val('" + @name + "').html('" + @name + "'))"
+		@materialEditor.material_editor_dialog.execute_script(dropdown_add_interior)
+		@materialEditor.material_editor_dialog.execute_script(dropdown_add_exterior)
+	end
+	
 	def setValue(property, value)
 		@attributeDictionary.set_attribute(@name, property, value)
 	end

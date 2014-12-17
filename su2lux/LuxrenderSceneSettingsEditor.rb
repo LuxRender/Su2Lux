@@ -25,9 +25,9 @@ class LuxrenderSceneSettingsEditor
 	##
 	#
 	##
-	def initialize
+	def initialize(scene_id, lrs)
         puts "initializing scene settings editor"
-        @scene_id = Sketchup.active_model.definitions.entityID
+        @scene_id = scene_id
         filename = File.basename(Sketchup.active_model.path)
         if (filename == "")
             windowname = "LuxRender Scene Settings Editor"
@@ -38,7 +38,7 @@ class LuxrenderSceneSettingsEditor
         @scene_settings_dialog.max_width = 700
 		setting_html_path = Sketchup.find_support_file("scene_settings.html" , "Plugins/"+SU2LUX::PLUGIN_FOLDER)
 		@scene_settings_dialog.set_file(setting_html_path)
-        @lrs=SU2LUX.get_lrs(@scene_id)
+        @lrs = lrs
         puts "finished initializing scene settings editor"
         
 		##
@@ -416,11 +416,11 @@ class LuxrenderSceneSettingsEditor
 	##
 	#
 	##
-	def is_a_checkbox?(id)#much better to use objects for settings?!
-		if @lrs[id] == true or @lrs[id] == false # or @lrs[id] == "true" or @lrs[id] == "false"
-			return id
-		end
-	end # END is_a_checkbox?
+	#def is_a_checkbox?(id)#much better to use objects for settings?!
+	#	if @lrs[id] == true or @lrs[id] == false # or @lrs[id] == "true" or @lrs[id] == "false"
+	#		return id
+	#	end
+	#end # END is_a_checkbox?
 
 	##
 	#
@@ -428,15 +428,14 @@ class LuxrenderSceneSettingsEditor
 	def setValue(id,value) # update parameter values in scene settings dialog
         # puts "setting value in scene settings interface"
 		new_value=value.to_s
-		case id
-		when "export_file_path"
+		if (id == "export_file_path")
             #SU2LUX.dbg_p new_value
 			new_value.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
 			new_value.gsub!(/\\/, '/') if new_value.include?('\\')
 			cmd="$('##{id}').val('#{new_value}');" #different asignment method
 			# SU2LUX.dbg_p cmd
 			@scene_settings_dialog.execute_script(cmd)
-		when is_a_checkbox?(id)
+		elsif (@lrs.send(id) == true or @lrs.send(id) == false) # check box
             #puts "updating checkbox: " + id + " is "
             #puts value.class
 			cmd="$('##{id}').attr('checked', #{value});" #different asignment method
@@ -445,13 +444,12 @@ class LuxrenderSceneSettingsEditor
 			cmd="checkbox_expander('#{id}');"
 			# SU2LUX.dbg_p cmd
 			@scene_settings_dialog.execute_script(cmd)
-		when (id == "export_luxrender_path")
+		elsif  (id == "export_luxrender_path")
 			puts "getting luxrender path:"
 			puts value
 			puts value.dump.tr('"', '')
 			cmd="$('##{id}').val('#{value.dump.tr('"', '')}');" #syntax jquery
 			@scene_settings_dialog.execute_script(cmd)
-			
 		else
             #puts "updating other: " + id + " is "
             #puts value.class
@@ -464,7 +462,6 @@ class LuxrenderSceneSettingsEditor
 				@scene_settings_dialog.execute_script(cmd)
 			end
 		end
-		
 	end # END setValue
 
 	##

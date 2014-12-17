@@ -20,7 +20,7 @@
 class LuxrenderTextureEditor
 
 	
-	def initialize(texture_data, lux_parameter) # lux_parameter is texture type, for example "kd"
+	def initialize(texture_data, lux_parameter, scene_id) # lux_parameter is texture type, for example "kd"
         puts "creating new texture editor"
 		@texture_editor_dialog = UI::WebDialog.new("LuxRender Texture Editor", true, "LuxrenderTextureEditor", 600, 322, 900, 400, true)
 		texture_editor_dialog_path = Sketchup.find_support_file("TextureEditor.html", "Plugins/su2lux")
@@ -29,7 +29,7 @@ class LuxrenderTextureEditor
 
 		@texture_data = texture_data
 		@lux_parameter = lux_parameter
-        @scene_id = Sketchup.active_model.definitions.entityID
+        @scene_id = scene_id
 		material_editor = SU2LUX.get_editor(@scene_id,"material")
 		@current = material_editor.current
 
@@ -52,7 +52,6 @@ class LuxrenderTextureEditor
 		@texture_editor_dialog.add_action_callback("open_dialog") {|dialog, params|
 			data = params.to_s
 			material = Sketchup.active_model.materials.current
-			# lux_material = LuxrenderMaterial.new(material)
 			lux_material = @current
 			SU2LUX.load_image("Open image", lux_material, data, @lux_parameter)
 			puts "compound name:"
@@ -126,23 +125,6 @@ class LuxrenderTextureEditor
 		return hash
 	end
 
-	# ##
-	# #
-	# ##	
-	# def find(name) 
-		# # display_names = materials.collect {|m| m.display_name}
-		# # names=materials.collect {|m| m.name}
-		# # index=names.index(display_name)
-		# # mat=index ? materials[names[index]] : nil  #get the SU material
-		# materials=Sketchup.active_model.materials
-		# mat = materials[name]
-		# if mat
-			# return LuxrenderMaterial.new(mat)
-		# else
-			# return nil
-		# end
-	# end 
-
 	##
 	#
 	##	
@@ -172,14 +154,12 @@ class LuxrenderTextureEditor
 	##
 	#
 	##
-	def is_a_checkbox?(id)#much better to use objects for settings?!
-		# material = Sketchup.active_model.materials.current
-		# lux_material = LuxrenderMaterial.new(material)
-		lux_material = @current
-		if lux_material[id] == true or lux_material[id] == false
-			return id
-		end
-	end # END is_a_checkbox?
+	#def is_a_checkbox?(id) #much better to use objects for settings?!
+	#	lux_material = @current
+	#	if lux_material[id] == true or lux_material[id] == false
+	#		return id
+	#	end
+	#end # END is_a_checkbox?
 
 	##
 	#
@@ -189,27 +169,25 @@ class LuxrenderTextureEditor
         puts id
         puts value
 		new_value=value.to_s
-		case id
-			when is_a_checkbox?(id)
-				self.fire_event("##{id}", "attr", "checked=#{value}")
-				cmd="checkbox_expander('#{id}');"
-				@texture_editor_dialog.execute_script(cmd)
-				cmd = "$('##{id}').next('div.collapse').find('select').change();"
-				@texture_editor_dialog.execute_script(cmd)			
-			######### -- other -- #############
-			else
-				self.fire_event("##{id}", "val", new_value)
-				# cmd="$('##{id}').val('#{new_value}');"
-				# @texture_editor_dialog.execute_script(cmd)
-			end
-			#############################
+		if(@current[id] == true or @current[id] == false)
+			# checkbox 
+			self.fire_event("##{id}", "attr", "checked=#{value}")
+			cmd="checkbox_expander('#{id}');"
+			@texture_editor_dialog.execute_script(cmd)
+			cmd = "$('##{id}').next('div.collapse').find('select').change();"
+			@texture_editor_dialog.execute_script(cmd)	
+		else
+			# not a checkbox
+			self.fire_event("##{id}", "val", new_value)
+			# cmd="$('##{id}').val('#{new_value}');"
+			# @texture_editor_dialog.execute_script(cmd)
+		end
 	end # END setValue
 
 	##
 	#
 	##
 	def updateSettingValue(id, prefix)
-		# lux_material = LuxrenderMaterial.new(material)
 		lux_material = @current
 		setValue(id, lux_material[prefix + id]) if lux_material.respond_to?(prefix + id)
 	end # END updateSettingValue

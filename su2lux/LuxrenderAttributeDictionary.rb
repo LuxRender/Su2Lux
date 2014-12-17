@@ -55,9 +55,12 @@ class LuxrenderAttributeDictionary
 	##
 	def get_attribute(name, key, default = nil)
 		dictionary = self.choose(name)
-		if ( dictionary.key? key)
+		if (dictionary.key? key)
+			#puts "returning value from dictionary:"
+			puts dictionary[key]
 			return dictionary[key]
 		else
+			#puts "returning default"
 			return default
 		end
 	end # END get_attribute
@@ -77,7 +80,9 @@ class LuxrenderAttributeDictionary
 		dictionary = self.choose(name)
 		dictionary[key] = value
 		@dictionaries[name] = dictionary
-        @model.set_attribute(name, key, value) # store to model's attribute dictionary
+		#puts "storing value in model: " + value.to_s
+        valueCheck =  @model.set_attribute(name, key, value) # store to model's attribute dictionary
+		#puts valueCheck
 		
 		@model.commit_operation() # end undoable operation
 	end #END set_attribute
@@ -90,7 +95,7 @@ class LuxrenderAttributeDictionary
 			puts "returning @dictionary"
 			return @dictionary
 		end
-		if ( ! @dictionaries.key? name)
+		if ( !@dictionaries.key? name)
 			puts "adding new dictionary with name " + name + " to @dictionaries"
 			@dictionaries[name] = {}
 		end
@@ -125,6 +130,7 @@ class LuxrenderAttributeDictionary
 				puts "load_from_model updating attributes"
 				self.set_attribute(name, key, value) # set, because we're taking values from the model's attribute dictionary
                                                      # and setting them in the (temporary) LuxRender attribute dictionary
+													 # TODO 2014: prevent running this function on loading model; parameters that are not loaded in the attribute dictionary should be retrieved from the SketchUp file directly
 			}
 			@model.commit_operation()
 			

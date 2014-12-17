@@ -42,10 +42,16 @@
     height: 3em;
 }
 
+.sectiondropdown{
+	position: relative;
+	left: 2em;
+}
+
 .singlelinedropdown{
     position: absolute;
     top: 0em;
     left: 10em;
+	padding-bottom: 8em;
 }
 
 .inputfield1{
@@ -53,6 +59,13 @@
     top: 0px;
     left: 10em;
 	width: 2em;
+}
+
+.inputfield1w{
+    position: absolute;
+    top: 0px;
+    left: 10em;
+	width: 12em;
 }
 
 .inputfield2{
@@ -147,13 +160,6 @@ input#divide_by_2, input#multiply_by_2 {
 
 iinput#reset {
 	width: 14em;
-}
-
-#current_view {
-/*	height: 45px;*/
-/*	float: right;*/
-	width: 14em;
-	margin-left: 0.5em;
 }
 
 #flip_dim {

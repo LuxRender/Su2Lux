@@ -43,19 +43,46 @@
 			</select>
         </div>
     </p>
-    
+
+
     <p class="header" id="sampler">Sampler</p>
-		<div class="collapse">
-			<label for="sampler_type">Sampler type</label>
-			<select id="sampler_type" class="aligned_dropdown">
+	<div class="collapse">
+			<label for="sampler_type" class="mainlabel">Sampler type</label>
+			<select id="sampler_type" class="sectiondropdown">
 				<option value="metropolis">metropolis</option>
 				<!-- <option value="erpt">erpt</option> -->
 				<option value="lowdiscrepancy">lowdiscrepancy</option>
 				<!-- <option value="random">random</option> -->
 				<option value="sobol">sobol</option>
 			</select>
-			<div class="sampler_type" id="random">
-				<select id="sampler_random_pixelsampler">
+		<div class="sampler_type" id="random">
+			<select id="sampler_random_pixelsampler">
+				<option value="linear">linear</option>
+				<option value="tile">tile</option>
+				<option value="random">random</option>
+				<option value="vegas">vegas</option>
+				<option value="lowdiscrepancy">lowdiscrepancy</option>
+				<option value="hilbert">hilbert</option>
+			</select>
+			<label for="sampler_random_pixelsamples">pixel samples</label>
+			<input type='text' id="sampler_random_pixelsamples" size="10">
+		</div>
+		<div class="sampler_type" id="metropolis">
+			<div class="parameter_interface_single">
+				<label for="sampler_metropolis_largemutationprob" class="label1">Large mutation probability</label>
+				<input type='text' id="sampler_metropolis_largemutationprob" size="10" class="inputfield1xxx"><br>
+			</div>
+			<div class="parameter_interface_single">
+				<label for="sampler_metropolis_maxconsecrejects" class="label1">Max number of rejections</label>
+				<input type='text' id="sampler_metropolis_maxconsecrejects" size="10" class="inputfield1xxx"><br>
+			</div>
+			<input type="checkbox" id="sampler_metropolis_usevariance">
+			<label for="sampler_metropolis_usevariance">Use variance</label>
+		</div>
+		<div class="sampler_type" id="lowdiscrepancy">
+			<div class="parameter_interface_single">
+				<div class="label1">Pixel sampler</div>
+				<select id="sampler_lowdisc_pixelsampler" class="inputfield1w">
 					<option value="linear">linear</option>
 					<option value="tile">tile</option>
 					<option value="random">random</option>
@@ -63,47 +90,24 @@
 					<option value="lowdiscrepancy">lowdiscrepancy</option>
 					<option value="hilbert">hilbert</option>
 				</select>
-				<label for="sampler_random_pixelsamples">pixel samples</label>
-				<input type='text' id="sampler_random_pixelsamples" size="10">
 			</div>
-			<div class="sampler_type" id="metropolis">
-                <div class="parameter_interface_single">
-                    <label for="sampler_metropolis_largemutationprob" class="label1">Large mutation probability</label>
-                    <input type='text' id="sampler_metropolis_largemutationprob" size="10" class="inputfield1xxx"><br>
-                </div>
-                <div class="parameter_interface_single">
-                    <label for="sampler_metropolis_maxconsecrejects" class="label1">Max number of rejections</label>
-                    <input type='text' id="sampler_metropolis_maxconsecrejects" size="10" class="inputfield1xxx"><br>
-                </div>
-                <input type="checkbox" id="sampler_metropolis_usevariance">
-                <label for="sampler_metropolis_usevariance">Use variance</label>
+			<div class="parameter_interface_single">
+				<label for="sampler_lowdisc_pixelsamples" class="label1">Samples</label>
+				<input type='text' id="sampler_lowdisc_pixelsamples" size="10" class="inputfield1">
 			</div>
-			<div class="sampler_type" id="lowdiscrepancy">
-                <div class="parameter_interface_single">
-                    <div class="label1">Pixel sampler</div>
-                    <select id="sampler_lowdisc_pixelsampler" class="inputfield1">
-                        <option value="linear">linear</option>
-                        <option value="tile">tile</option>
-                        <option value="random">random</option>
-                        <option value="vegas">vegas</option>
-                        <option value="lowdiscrepancy">lowdiscrepancy</option>
-                        <option value="hilbert">hilbert</option>
-                    </select>
-                </div>
-                <div class="parameter_interface_single">
-                    <label for="sampler_lowdisc_pixelsamples" class="label1">Samples</label>
-                    <input type='text' id="sampler_lowdisc_pixelsamples" size="10" class="inputfield1">
-                </div>
-			</div>
-			<div class="sampler_type" id="erpt">
-				<label for="sampler_erpt_chainlength">chain length</label>
-				<input type='text' id="sampler_erpt_chainlength" size="10">
-			</div>
-            <div class="sampler_type" id="sobol">
-            </div>
-            <input type="checkbox" id="sampler_noiseaware">
-            <label for="sampler_noiseaware">Noise aware</label><br>
 		</div>
+		<div class="sampler_type" id="erpt">
+			<label for="sampler_erpt_chainlength">chain length</label>
+			<input type='text' id="sampler_erpt_chainlength" size="10">
+		</div>
+		<div class="sampler_type" id="sobol">
+		</div>
+		<div class="parameter_interface_single noiseaware">
+			<input type="checkbox" id="sampler_noiseaware" class="noiseaware">
+			<label for="sampler_noiseaware" class="noiseaware">Noise aware</label>
+		</div>
+	</div>
+
         
 <div id="sppm">
     <p class="header">Integrator, SPPM</p>
@@ -149,14 +153,12 @@
 </div>
         
 
-
-
-
+	
 <div id="integratorsection">
     <p class="header" id="integrator">Integrator</p>
 		<div class="collapse">
 			<label for="sintegrator_type">Integrator type</label>
-            <select id="sintegrator_type">
+            <select id="sintegrator_type"" class="sectiondropdown">
                 <option value="directlighting">direct lighting</option>
                 <option value="path">path</option>
                 <option value="bidirectional">bidirectional</option>

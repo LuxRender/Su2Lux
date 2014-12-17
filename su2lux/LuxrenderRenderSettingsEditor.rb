@@ -26,7 +26,7 @@ class LuxrenderRenderSettingsEditor
 	##
 	#
 	##
-	def initialize
+	def initialize(scene_id, lrs)
         puts "initializing render settings editor"
         filename = File.basename(Sketchup.active_model.path)
         if (filename == "")
@@ -38,8 +38,8 @@ class LuxrenderRenderSettingsEditor
         @render_settings_dialog.max_width = 800
 		setting_html_path = Sketchup.find_support_file("render_settings.html" , "Plugins/"+SU2LUX::PLUGIN_FOLDER)
 		@render_settings_dialog.set_file(setting_html_path)
-        @scene_id = Sketchup.active_model.definitions.entityID
-        @lrs=SU2LUX.get_lrs(@scene_id)
+        @scene_id = scene_id
+        @lrs = lrs
         @rendersettingkeys = @lrs.rendersettingkeys
         puts "finished initializing render settings editor"
         
@@ -240,7 +240,9 @@ class LuxrenderRenderSettingsEditor
             #puts ""
             #puts setting
             #puts @lrs.send(setting)
-            updateSettingValue(setting) # gets setting from @lrs
+            #updateSettingValue(setting) 
+			setValue(setting, @lrs[setting]) # gets setting from @lrs
+			
 		}
         # set setting areas based on dropdown settings
         subfield_categories = ["sampler_type", "sintegrator_type", "pixelfilter_type", "accelerator_type"]
@@ -271,11 +273,12 @@ class LuxrenderRenderSettingsEditor
 	##
 	#
 	##
-	def is_a_checkbox?(id)#much better to use objects for settings?!
-		if @lrs[id] == true or @lrs[id] == false # or @lrs[id] == "true" or @lrs[id] == "false"
-			return id
-		end
-	end # END is_a_checkbox?
+	#def is_a_checkbox?(id)#much better to use objects for settings?!
+	#	#if @lrs[id] == true or @lrs[id] == false # or @lrs[id] == "true" or @lrs[id] == "false"
+	#	if @lrs[id] == true or @lrs[id] == false # or @lrs[id] == "true" or @lrs[id] == "false"
+	#		return id
+	#	end
+	#end # END is_a_checkbox?
 
 	##
 	#
@@ -283,10 +286,8 @@ class LuxrenderRenderSettingsEditor
 	def setValue(id,value) #extend to encompass different types (textbox, anchor, slider)
 		# puts "updating value in render settings interface"
         new_value=value.to_s
-		case id
-		########  -- checkboxes -- ##########
-		when is_a_checkbox?(id)
-            #puts "updating checkbox: " + id + " is "
+		if(@lrs.send(id) == true or @lrs.send(id) == false)
+		    #puts "updating checkbox: " + id + " is "
             #puts value.class
 			cmd="$('##{id}').attr('checked', #{value});" #different asignment method
 			# SU2LUX.dbg_p cmd

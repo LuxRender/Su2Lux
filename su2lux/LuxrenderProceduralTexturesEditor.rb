@@ -16,18 +16,16 @@
 #
 # Authors      : Abel Groenewolt
 
-
 class LuxrenderProceduralTexturesEditor
 
 	attr_reader :procedural_textures_dialog
 	##
 	#
 	##
-	def initialize
+	def initialize(matEditor, lrs)
 		@textureDictionary = LuxrenderAttributeDictionary.new(Sketchup.active_model)
 		@textureCollection = {} # hash containing texture names and objects
         puts "initializing procedural textures editor"
-        @scene_id = Sketchup.active_model.definitions.entityID
         filename = File.basename(Sketchup.active_model.path)
         if (filename == "")
             windowname = "LuxRender Procedural Textures Editor"
@@ -39,8 +37,11 @@ class LuxrenderProceduralTexturesEditor
         @procedural_textures_dialog.max_width = 700
 		setting_html_path = Sketchup.find_support_file("procedural_textures_dialog.html" , "Plugins/"+SU2LUX::PLUGIN_FOLDER)
 		@procedural_textures_dialog.set_file(setting_html_path)
-        @lrs=SU2LUX.get_lrs(@scene_id)
-		@material_editor = SU2LUX.get_editor(@scene_id,"material")
+        @lrs = lrs
+		@material_editor = matEditor
+		
+		puts "material editor (created or found):"
+		puts @material_editor
 		
         puts "finished initializing procedural textures editor"
        
@@ -51,7 +52,7 @@ class LuxrenderProceduralTexturesEditor
 	   ##
 	   	@procedural_textures_dialog.add_action_callback("create_procedural_texture") { |dialog, texType|
 			puts "creating procedural texture"
-			newTexture = LuxrenderProceduralTexture.new(true, texType)
+			newTexture = LuxrenderProceduralTexture.new(true, self, @lrs, texType)
 			texName = newTexture.name
 			# call javascript function that adds new name to texture list and sets that name in dropdown
 			@procedural_textures_dialog.execute_script('addToTextureList("' + texName + '")')
@@ -109,12 +110,12 @@ class LuxrenderProceduralTexturesEditor
 		##
 		@procedural_textures_dialog.add_action_callback('set_param') {|dialog, paramString|
             SU2LUX.dbg_p "callback: set_param"
-			puts paramString # procMat_0|brick_procTexChannel|float
+			puts paramString # procTex_0|brick_procTexChannel|float
 			params = paramString.split('|')
 			paramNameList = params[1].split('_')
 			# removed #textype_ prefix
 			if paramNameList.size > 3
-				paramName = paramNameList[2] + '_' + paramNameList[3] # deal with blender_voronoi_minkowsky_exp
+				paramName = paramNameList[2] + '_' + paramNameList[3] # deal with blender_voronoi_minkowsky_exp etc.
 			else
 				paramName = paramNameList.last
 			end
@@ -134,7 +135,7 @@ class LuxrenderProceduralTexturesEditor
 		@procedural_textures_dialog.add_action_callback('update_texType') {|dialog, paramString|
             SU2LUX.dbg_p "callback: update_texType"
 			
-			puts paramString # procMat_9|textureTypeName|cloud|float
+			puts paramString # procTex_9|textureTypeName|cloud|float
 			
 			params = paramString.split('|')
 			texObject = @textureCollection[params[0]]
@@ -168,7 +169,7 @@ class LuxrenderProceduralTexturesEditor
 			# add all procedural textures to list # note: this code may not be functional
 			puts "adding textures to texture dropdown list"
 			for i in 0..@lrs.nrProceduralTextures-1
-				texName = "procMat_" + i.to_s
+				texName = "procTex_" + i.to_s
 				cmd = 'addToTextureList("' + texName + '")'
 				@procedural_textures_dialog.execute_script(cmd)
 			end
@@ -176,14 +177,14 @@ class LuxrenderProceduralTexturesEditor
 			puts "getting texture"
 			# get procedural texture object to display: 
 			if (@lrs.nrProceduralTextures > 0)
-				activeTexture = @textureDictionary.returnDictionary("procMat_0")
+				activeTexture = @textureDictionary.returnDictionary("procTex_0")
 
 				activeTexType = activeTexture["textureType"]
 				
 				puts "activeTexture has textureType " + activeTexType
 
 				# set texture name dropdown
-				cmd1 = 'setTextureNameDropdown("procMat_0")'
+				cmd1 = 'setTextureNameDropdown("procTex_0")'
 				@procedural_textures_dialog.execute_script(cmd1)	
 				
 				# show right texture parameter section
@@ -198,7 +199,7 @@ class LuxrenderProceduralTexturesEditor
 				@procedural_textures_dialog.execute_script('$("#procTexChannel").val("' + channelType + '")') 
 			
 				# set parameters 
-				updateParams("procMat_0", activeTexType)
+				updateParams("procTex_0", activeTexType)
 	
 			end
 					

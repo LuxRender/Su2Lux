@@ -50,7 +50,7 @@ $(document).ready(
             }
         )
 		
-		$("#textures_in_model").change( // procMat_1, procMat_2, ...
+		$("#textures_in_model").change( // procTex_1, procTex_2, ...
 			function()
 			{
 				// pass new active texture name to ruby function, which will then update texture type dropdown, channel type dropdown and relevant parameters

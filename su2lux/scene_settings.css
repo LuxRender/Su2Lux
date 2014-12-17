@@ -27,6 +27,11 @@
 	margin: 0 0 0 1.5em;
 	padding: 0.6em;
 }
+
+.collapse select{
+	margin: 0 0 0 0em;
+	padding: 0em;
+}
    
 .nopadding {
 	padding: 0em;
@@ -139,13 +144,6 @@ input#divide_by_2, input#multiply_by_2 {
 
 input#reset {
 	width: 14em;
-}
-
-#current_view {
-/*	height: 45px;*/
-/*	float: right;*/
-	width: 14em;
-	margin-left: 0.5em;
 }
 
 #flip_dim {

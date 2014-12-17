@@ -10,11 +10,6 @@ function showParameterSections(volumeType){
 	// then show appropriate parameter sections
 	$('.' + volumeType).show();
 }
-
-function getActiveVolume(){
-	var volumeName = $('#volumes_in_model').val();
-	window.location = 'skp:set_active_volume@' + volumeName;
-}
 	
 $(document).ready(
 		
