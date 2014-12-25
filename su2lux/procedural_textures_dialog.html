@@ -56,20 +56,20 @@
 			<!-- <option value="uvmask">uvmask</option> -->
 			<option value="windy">windy</option>
 			<option value="wrinkled">wrinkled</option>
-			<!-- <option value="blender_blend">blender_blend</option> -->
-			<option value="blender_clouds">blender_clouds</option>
-			<option value="blender_distortednoise">blender_distortednoise</option>
-			<option value="blender_noise">blender_noise</option>
-			<option value="blender_magic">blender_magic</option>
-			<option value="blender_marble">blender_marble</option>
-			<option value="blender_musgrave">blender_musgrave</option>
-			<option value="blender_stucci">blender_stucci</option>
-			<option value="blender_wood">blender_wood</option>
-			<option value="blender_voronoi">blender_voronoi</option>
+			<!-- <option value="blend">blend</option> -->
+			<option value="blender_clouds">clouds</option>
+			<option value="blender_distorted_noise">distorted_noise</option>
+			<option value="blender_noise">noise</option>
+			<option value="blender_magic">magic</option>
+			<option value="blender_marble">blender marble</option>
+			<option value="blender_musgrave">musgrave</option>
+			<option value="blender_stucci">stucci</option>
+			<option value="blender_wood">wood</option>
+			<option value="blender_voronoi">voronoi</option>
 		</select>
 	</div>
 
-	<div id="texturechanneldropdownarea">
+	<div id="texturechanneldropdownarea"> <!-- color or float -->
 		<label for="procTexChannel">channel type</label>
 		<select id="procTexChannel">
 			<option value="no_channel">not initialized</option>
@@ -79,1104 +79,407 @@
 </div>
 
 <div>
-
-	<!--<div id="add" class="texfield">
-		<p class="header2">add texture</p>
-		todo
-	</div> -->
-	<!-- <div id="band" class="texfield">
-		<p class="header2">band texture</p>
-		todo
-	</div> -->
-	<!-- <div id="bilerp" class="texfield">
-		<p class="header2">bilerp texture</p>
-		todo
-	</div> -->
-	<div id="blackbody" class="texfield">
-		<p class="header2">blackbody texture</p>
-		<div class="parameter_container">
-			<label for="blackbody_temperature" class="parameter_label">Temperature</label>
-			<input type='text' id="blackbody_temperature" class="parameter_field">
-		</div>
+	<div class="parameter_container blackbody">
+		<label for="temperature" class="parameter_label">Temperature</label>
+		<input type='text' id="temperature" class="parameter_field">
 	</div>
-	<div id="brick" class="texfield">
-		<p class="header2">brick texture</p>
-		<div class="parameter_container">
-			<label for="brick_brickwidth" class="parameter_label">Brick width</label>
-			<input type='text' id="brick_brickwidth" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="brick_brickheight" class="parameter_label">Brick height</label>
-			<input type='text' id="brick_brickheight" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="brick_brickdepth" class="parameter_label">Brick height</label>
-			<input type='text' id="brick_brickdepth" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="brick_mortarsize" class="parameter_label">Mortar size</label>
-			<input type='text' id="brick_mortarsize" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="brick_brickbevel" class="parameter_label">Brick bevel</label>
-			<input type='text' id="brick_brickbevel" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="brick_brickrun" class="parameter_label">Brick run</label>
-			<input type='text' id="brick_brickrun" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="brick_brickbond" class="parameter_label">Brick bond</label>
-			<select id="brick_brickbond"  class="parameter_field">	
-				<option value="stacked">stacked</option>
-				<option value="flemish">flemish</option>
-				<option value="english">english</option>
-				<option value="herringbone">herringbone</option>
-				<option value="basket">basket</option>
-				<option value="chain link">chain link</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="brick_bricktex" class="parameter_label">Brick color</label>
-			<input type='text' id="brick_bricktex" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="brick_mortartex" class="parameter_label">Mortar color</label>
-			<input type='text' id="brick_mortartex" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="brick_brickmodtex" class="parameter_label">Brick modulation</label>
-			<input type='text' id="brick_brickmodtex" class="parameter_field">
-		</div>
-		<br><br>
-		<div class="parameter_container">
-			<label for="brick_coordinates" class="parameter_label">Coordinates</label>
-			<select id="brick_coordinates"  class="parameter_field">	
-				<option value="global">global</option>
-				<option value="local">local</option>
-				<option value="globalnormal">global normal</option>
-				<option value="localnormal">local normal</option>
-				<option value="uv">uv</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="brick_vectortranslate" class="parameter_label">Translation</label>
-			<input type='text' id="brick_vectortranslate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="brick_vectorrotate" class="parameter_label">Rotation</label>
-			<input type='text' id="brick_vectorrotate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="brick_vectorscale" class="parameter_label">Scale</label>
-			<input type='text' id="brick_vectorscale" class="parameter_field">
-		</div>
+	<div class="parameter_container brick">
+		<label for="brickwidth" class="parameter_label">Brick width</label>
+		<input type='text' id="brickwidth" class="parameter_field">
+	</div>
+	<div class="parameter_container brick">
+		<label for="brickheight" class="parameter_label">Brick height</label>
+		<input type='text' id="brickheight" class="parameter_field">
+	</div>
+	<div class="parameter_container brick">
+		<label for="brickdepth" class="parameter_label">Brick height</label>
+		<input type='text' id="brickdepth" class="parameter_field">
+	</div>
+	<div class="parameter_container brick">
+		<label for="mortarsize" class="parameter_label">Mortar size</label>
+		<input type='text' id="mortarsize" class="parameter_field">
+	</div>
+	<div class="parameter_container brick">
+		<label for="brickbevel" class="parameter_label">Brick bevel</label>
+		<input type='text' id="brickbevel" class="parameter_field">
+	</div>
+	<div class="parameter_container brick">
+		<label for="brickrun" class="parameter_label">Brick run</label>
+		<input type='text' id="brickrun" class="parameter_field">
+	</div>
+	<div class="parameter_container brick">
+		<label for="brickbond" class="parameter_label">Brick bond</label>
+		<select id="brickbond"  class="parameter_field">	
+			<option value="stacked">stacked</option>
+			<option value="flemish">flemish</option>
+			<option value="english">english</option>
+			<option value="herringbone">herringbone</option>
+			<option value="basket">basket</option>
+			<option value="chain link">chain link</option>
+		</select>
+	</div>
+	<div class="parameter_container brick">
+		<label for="bricktex" class="parameter_label">Brick color</label>
+		<input type='text' id="bricktex" class="parameter_field">
+	</div>
+	<div class="parameter_container brick">
+		<label for="mortartex" class="parameter_label">Mortar color</label>
+		<input type='text' id="mortartex" class="parameter_field">
+	</div>
+	<div class="parameter_container brick">
+		<label for="brickmodtex" class="parameter_label">Brick modulation</label>
+		<input type='text' id="brickmodtex" class="parameter_field">
+	</div>	
+	
+	<div class="parameter_container checkerboard">
+		<label for="dimension" class="parameter_label">Dimensions</label>
+		<select id="dimension"  class="parameter_field">	
+			<option value="2">2D</option>
+			<option value="3">3D</option>
+		</select>
+	</div>
+	<div class="parameter_container checkerboard">
+		<label for="tex1" class="parameter_label">Texture 1</label>
+		<input type='text' id="tex1" class="parameter_field">
+	</div>
+	<div class="parameter_container checkerboard">
+		<label for="tex2" class="parameter_label">Texture 2</label>
+		<input type='text' id="tex2" class="parameter_field">
 	</div>
 	
-	<div id="checkerboard" class="texfield">
-		<p class="header2">checkerboard texture</p>
-		<!-- <div class="parameter_container">
-			<label for="checkerboard_dimension" class="parameter_label">Dimensions (2D/3D)</label>
-			<input type='text' id="checkerboard_dimension" class="parameter_field">
-		</div> -->
-		<div class="parameter_container">
-			<label for="checkerboard_dimension" class="parameter_label">Dimensions</label>
-			<select id="checkerboard_dimension"  class="parameter_field">	
-				<option value="2">2D</option>
-				<option value="3">3D</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="checkerboard_tex1" class="parameter_label">Texture 1</label>
-			<input type='text' id="checkerboard_tex1" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="checkerboard_tex2" class="parameter_label">Texture 2</label>
-			<input type='text' id="checkerboard_tex2" class="parameter_field">
-		</div>
-		<br><br>
-		<div class="parameter_container">
-			<label for="checkerboard_coordinates" class="parameter_label">Coordinates</label>
-			<select id="checkerboard_coordinates"  class="parameter_field">	
-				<option value="global">global</option>
-				<option value="local">local</option>
-				<option value="globalnormal">global normal</option>
-				<option value="localnormal">local normal</option>
-				<option value="uv">uv</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="checkerboard_vectortranslate" class="parameter_label">Translation</label>
-			<input type='text' id="checkerboard_vectortranslate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="checkerboard_vectorrotate" class="parameter_label">Rotation</label>
-			<input type='text' id="checkerboard_vectorrotate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="checkerboard_vectorscale" class="parameter_label">Scale</label>
-			<input type='text' id="checkerboard_vectorscale" class="parameter_field">
-		</div>
+	<div class="parameter_container cloud">
+		<label for="radius" class="parameter_label">Radius</label>
+		<input type='text' id="radius" class="parameter_field">
+	</div>
+	<div class="parameter_container cloud">
+		<label for="noisescale" class="parameter_label">Noise scale</label>
+		<input type='text' id="noisescale" class="parameter_field">
+	</div>
+	<div class="parameter_container cloud blender_marble blender_stucci blender_wood">
+		<label for="turbulence" class="parameter_label">Turbulence</label>
+		<input type='text' id="turbulence" class="parameter_field">
+	</div>
+	<div class="parameter_container blender_marble">
+		<label for="marbletype" class="parameter_label">Type</label>
+		<select id="marbletype"  class="parameter_field">	
+			<option value="soft">soft</option>
+			<option value="sharp">sharp</option>
+			<option value="sharper">sharper</option>
+		</select>
+	</div>
+	<div class="parameter_container cloud">
+		<label for="sharpness" class="parameter_label">Sharpness</label>
+		<input type='text' id="sharpness" class="parameter_field">
+	</div>
+	<div class="parameter_container cloud">
+		<label for="noiseoffset" class="parameter_label">Noise offset</label>
+		<input type='text' id="noiseoffset" class="parameter_field">
+	</div>
+	<div class="parameter_container cloud">
+		<label for="omega" class="parameter_label">Omega</label>
+		<input type='text' id="omega" class="parameter_field">
+	</div>
+	<div class="parameter_container cloud">
+		<label for="variability" class="parameter_label">Variability</label>
+		<input type='text' id="variability" class="parameter_field">
+	</div>
+	<div class="parameter_container cloud">
+		<label for="baseflatness" class="parameter_label">Base flatness</label>
+		<input type='text' id="baseflatness" class="parameter_field">
+	</div>
+	<div class="parameter_container cloud">
+		<label for="spheresize" class="parameter_label">Sphere size</label>
+		<input type='text' id="spheresize" class="parameter_field">
+	</div>
+	<div class="parameter_container cloud">
+		<label for="spheres" class="parameter_label">Spheres</label>
+		<input type='text' id="spheres" class="parameter_field">
+	</div>
+	<div class="parameter_container fbm marble wrinkled">
+		<label for="roughness" class="parameter_label">Roughness</label>
+		<input type='text' id="roughness" class="parameter_field">
+	</div>
+	<div class="parameter_container marble mix">
+		<label for="scale" class="parameter_label">Scale</label>
+		<input type='text' id="scale" class="parameter_field">
+	</div>
+	<div class="parameter_container cloud fbm marble wrinkled blender_musgrave">
+		<label for="octaves" class="parameter_label">Octaves</label>
+		<input type='text' id="octaves" class="parameter_field">
 	</div>
 	
-	<div id="cloud" class="texfield">
-		<p class="header2">cloud texture</p>
-		<div class="parameter_container">
-			<label for="cloud_radius" class="parameter_label">Radius</label>
-			<input type='text' id="cloud_radius" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="cloud_noisescale" class="parameter_label">Noise scale</label>
-			<input type='text' id="cloud_noisescale" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="cloud_turbulence" class="parameter_label">Turbulence</label>
-			<input type='text' id="cloud_turbulence" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="cloud_sharpness" class="parameter_label">Sharpness</label>
-			<input type='text' id="cloud_sharpness" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="cloud_noiseoffset" class="parameter_label">Noise offset</label>
-			<input type='text' id="cloud_noiseoffset" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="cloud_omega" class="parameter_label">Omega</label>
-			<input type='text' id="cloud_omega" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="cloud_variability" class="parameter_label">Variability</label>
-			<input type='text' id="cloud_variability" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="cloud_baseflatness" class="parameter_label">Base flatness</label>
-			<input type='text' id="cloud_baseflatness" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="cloud_spheresize" class="parameter_label">Sphere size</label>
-			<input type='text' id="cloud_spheresize" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="cloud_spheres" class="parameter_label">Spheres</label>
-			<input type='text' id="cloud_spheres" class="parameter_field">
-		</div>		
-		<div class="parameter_container">
-			<label for="cloud_octaves" class="parameter_label">Octaves</label>
-			<input type='text' id="cloud_octaves" class="parameter_field">
-		</div>
-		<br><br>
-		<div class="parameter_container">
-			<label for="cloud_coordinates" class="parameter_label">Coordinates</label>
-			<select id="cloud_coordinates"  class="parameter_field">	
-				<option value="global">global</option>
-				<option value="local">local</option>
-				<option value="globalnormal">global normal</option>
-				<option value="localnormal">local normal</option>
-				<option value="uv">uv</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="cloud_vectortranslate" class="parameter_label">Translation</label>
-			<input type='text' id="cloud_vectortranslate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="cloud_vectorrotate" class="parameter_label">Rotation</label>
-			<input type='text' id="cloud_vectorrotate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="cloud_vectorscale" class="parameter_label">Scale</label>
-			<input type='text' id="cloud_vectorscale" class="parameter_field">
-		</div>
+	<div class="parameter_container colordepth">
+		<label for="depth" class="parameter_label">Depth</label>
+		<input type='text' id="depth" class="parameter_field">
+	</div>
+	<div class="parameter_container colordepth">
+		<label for="Kt" class="parameter_label">Transmission color</label>
+		<input type='text' id="Kt" class="parameter_field">
+	</div>
+	<div class="parameter_container dots">
+		<label for="inside" class="parameter_label">Inside color</label>
+		<input type='text' id="inside" class="parameter_field">
+	</div>
+	<div class="parameter_container dots">
+		<label for="outside" class="parameter_label">Outside color</label>
+		<input type='text' id="outside" class="parameter_field">
+	</div>
+	<div class="parameter_container fresnelcolor">
+		<label for="Kr" class="parameter_label">Color</label>
+		<input type='text' id="Kr" class="parameter_field">
+	</div>
+	<div class="parameter_container fresnelname">
+		<label for="fresnelname_filename" class="parameter_label">Filename</label>
+		<input type='text' id="fresnelname_filename" class="parameter_field">
+	</div>
+	<div class="parameter_container">
+		<label for="fresnelname_name" class="parameter_label">Name</label>
+		<select id="fresnelname_name"  class="parameter_field">	
+			<option value="aluminium">aluminium</option>
+			<option value="amorphous carbon">amorphous carbon</option>
+			<option value="copper">copper</option>
+			<option value="gold">gold</option>
+			<option value="silver">silver</option>
+		</select>
+	</div>
+	<div class="parameter_container gaussian">
+		<label for="energy" class="parameter_label">Energy</label>
+		<input type='text' id="energy" class="parameter_field">
+	</div>
+	<div class="parameter_container gaussian">
+		<label for="wavelength" class="parameter_label">Wave length</label>
+		<input type='text' id="wavelength" class="parameter_field">
+	</div>
+	<div class="parameter_container gaussian">
+		<label for="width" class="parameter_label">Width</label>
+		<input type='text' id="width" class="parameter_field">
+	</div>
+	<div class="parameter_container mix">
+		<label for="tex1" class="parameter_label">Texture 1</label>
+		<input type='text' id="tex1" class="parameter_field">
+	</div>
+	<div class="parameter_container mix">
+		<label for="tex2" class="parameter_label">Texture 2</label>
+		<input type='text' id="tex2" class="parameter_field">
+	</div>
+	<div class="parameter_container marble mix">
+		<label for="variation" class="parameter_label">Variation</label>
+		<input type='text' id="variation" class="parameter_field">
+	</div>
+	<div class="parameter_container tabulateddata">
+		<label for="filename" class="parameter_label">File path</label>
+		<input type='text' id="filename" class="parameter_field">
+	</div>		
+	<div class="parameter_container blender_clouds blender_distorted_noise">
+		<label for="blender_noisetype" class="parameter_label">Noise type</label>
+		<select id="blender_noisetype"  class="parameter_field">	
+			<option value="soft_blender_noise">soft_blender_noise</option>
+			<option value="hard_blender_noise">hard_blender_noise</option>
+		</select>
+	</div>
+	<div class="parameter_container blender_clouds blender_distorted_noise">
+		<label for="blender_noisebasis" class="parameter_label">Noise basis</label>
+		<select id="blender_noisebasis"  class="parameter_field">	
+			<option value="original">original</option>
+			<option value="original_perlin">original_perlin</option>
+			<option value="improved_perlin">improved_perlin</option>
+			<option value="f1">f1</option>
+			<option value="f2">f2</option>
+			<option value="f3">f3</option>
+			<option value="f4">f4</option>
+			<option value="f2f1">f2f1</option>
+			<option value="crackle">crackle</option>
+			<option value="cell_blender_noise">cell_blender_noise</option>
+		</select>
+	</div>
+	<div class="parameter_container blender_clouds blender_distorted_noise blender_marble blender_wood blender_musgrave">
+		<label for="noisesize" class="parameter_label">Noise size</label>
+		<input type='text' id="noisesize" class="parameter_field">
 	</div>
 	
-	<div id="colordepth" class="texfield">
-		<p class="header2">colordepth texture</p>
-		<div class="parameter_container">
-			<label for="colordepth_depth" class="parameter_label">Depth</label>
-			<input type='text' id="colordepth_depth" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="colordepth_Kt" class="parameter_label">Transmission color</label>
-			<input type='text' id="colordepth_Kt" class="parameter_field">
-		</div>
+	<div class="parameter_container blender_distorted_noise">
+		<label for="distamount" class="parameter_label">Dist. amount</label>
+		<input type='text' id="distamount" class="parameter_field">
 	</div>
 	
-	<div id="dots" class="texfield">
-		<p class="header2">dots texture</p>
-		<div class="parameter_container">
-			<label for="dots_inside" class="parameter_label">Inside color</label>
-			<input type='text' id="dots_inside" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="dots_outside" class="parameter_label">Outside color</label>
-			<input type='text' id="dots_outside" class="parameter_field">
-		</div>
-		<br><br>
-		<div class="parameter_container">
-			<label for="dots_coordinates" class="parameter_label">Coordinates</label>
-			<select id="dots_coordinates"  class="parameter_field">	
-				<option value="global">global</option>
-				<option value="local">local</option>
-				<option value="globalnormal">global normal</option>
-				<option value="localnormal">local normal</option>
-				<option value="uv">uv</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="dots_vectortranslate" class="parameter_label">Translation</label>
-			<input type='text' id="dots_vectortranslate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="dots_vectorrotate" class="parameter_label">Rotation</label>
-			<input type='text' id="dots_vectorrotate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="dots_vectorscale" class="parameter_label">Scale</label>
-			<input type='text' id="dots_vectorscale" class="parameter_field">
-		</div>
-	</div>
-	
-	<!-- <div id="equalenergy" class="texfield">
-		<p class="header2">equalenergy texture</p>
-		todo
-	</div> -->
-	
-	<div id="fbm" class="texfield">
-		<p class="header2">fbm texture</p>
-		<div class="parameter_container">
-			<label for="fbm_roughness" class="parameter_label">Roughness</label>
-			<input type='text' id="fbm_roughness" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="fbm_octaves" class="parameter_label">Octaves</label>
-			<input type='text' id="fbm_octaves" class="parameter_field">
-		</div>
-		<br><br>
-		<div class="parameter_container">
-			<label for="fbm_coordinates" class="parameter_label">Coordinates</label>
-			<select id="fbm_coordinates"  class="parameter_field">	
-				<option value="global">global</option>
-				<option value="local">local</option>
-				<option value="globalnormal">global normal</option>
-				<option value="localnormal">local normal</option>
-				<option value="uv">uv</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="fbm_vectortranslate" class="parameter_label">Translation</label>
-			<input type='text' id="fbm_vectortranslate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="fbm_vectorrotate" class="parameter_label">Rotation</label>
-			<input type='text' id="fbm_vectorrotate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="fbm_vectorscale" class="parameter_label">Scale</label>
-			<input type='text' id="fbm_vectorscale" class="parameter_field">
-		</div>
-	</div>
-	
-	<div id="fresnelcolor" class="texfield">
-		<p class="header2">fresnelcolor texture</p>
-		<div class="parameter_container">
-			<label for="fresnelcolor_Kr" class="parameter_label">Color</label>
-			<input type='text' id="fresnelcolor_Kr" class="parameter_field">
-		</div>
-	</div>
-	
-	<div id="fresnelname" class="texfield">
-		<p class="header2">fresnelname texture</p>
-		<div class="parameter_container">
-			<label for="fresnelname_filename" class="parameter_label">Filename</label>
-			<input type='text' id="fresnelname_filename" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="fresnelname_name" class="parameter_label">Name</label>
-			<select id="fresnelname_name"  class="parameter_field">	
-				<option value="aluminium">aluminium</option>
-				<option value="amorphous carbon">amorphous carbon</option>
-				<option value="copper">copper</option>
-				<option value="gold">gold</option>
-				<option value="silver">silver</option>
-			</select>
-		</div>
-	</div>
-	
-	<div id="gaussian" class="texfield">
-		<p class="header2">gaussian texture</p>
-		<div class="parameter_container">
-			<label for="gaussian_energy" class="parameter_label">Energy</label>
-			<input type='text' id="gaussian_energy" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="gaussian_wavelength" class="parameter_label">Wave length</label>
-			<input type='text' id="gaussian_wavelength" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="gaussian_width" class="parameter_label">Width</label>
-			<input type='text' id="gaussian_width" class="parameter_field">
-		</div>
-	</div>
-	
-	<div id="harlequin" class="texfield">
-		<p class="header2">harlequin texture</p>
-		<div class="parameter_container">
-			<div class="parameter_label">no parameters</div>
-		</div>
-	</div>
-	
-	<!-- <div id="lampspectrum" class="texfield">
-		<p class="header2">lampspectrum texture</p>
-		todo
-	</div> -->
-	
-	<div id="marble" class="texfield">
-		<p class="header2">marble texture</p>
-		<div class="parameter_container">
-			<label for="marble_octaves" class="parameter_label">Octaves (integer)</label>
-			<input type='text' id="marble_octaves" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="marble_roughness" class="parameter_label">Roughness</label>
-			<input type='text' id="marble_roughness" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="marble_scale" class="parameter_label">Scale</label>
-			<input type='text' id="marble_scale" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="marble_variation" class="parameter_label">Variation</label>
-			<input type='text' id="marble_variation" class="parameter_field">
-		</div>
-		<br><br>
-		<div class="parameter_container">
-			<label for="marble_coordinates" class="parameter_label">Coordinates</label>
-			<select id="marble_coordinates"  class="parameter_field">	
-				<option value="global">global</option>
-				<option value="local">local</option>
-				<option value="globalnormal">global normal</option>
-				<option value="localnormal">local normal</option>
-				<option value="uv">uv</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="marble_vectortranslate" class="parameter_label">Translation</label>
-			<input type='text' id="marble_vectortranslate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="marble_vectorrotate" class="parameter_label">Rotation</label>
-			<input type='text' id="marble_vectorrotate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="marble_vectorscale" class="parameter_label">Scale</label>
-			<input type='text' id="marble_vectorscale" class="parameter_field">
-		</div>
-	</div>
-	
-	<div id="mix" class="texfield">
-		<p class="header2">mix texture</p>
-		<div class="parameter_container">
-			<label for="mix_tex1" class="parameter_label">Texture 1</label>
-			<input type='text' id="mix_tex1" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="mix_tex2" class="parameter_label">Texture 2</label>
-			<input type='text' id="mix_tex2" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="mix_scale" class="parameter_label">Scale</label>
-			<input type='text' id="mix_scale" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="mix_variation" class="parameter_label">Variation</label>
-			<input type='text' id="mix_variation" class="parameter_field">
-		</div>
-	</div>
-	
-	<!-- <div id="multimix" class="texfield">
-		<p class="header2">multimix texture</p>
-		todo
-	</div> -->
-	<!--<div id="normalmap" class="texfield">
-		<p class="header2">normalmap texture</p>
-		todo
-	</div> -->
-	<!-- <div id="scale" class="texfield">
-		<p class="header2">scale texture</p>
-		todo
-	</div> -->
-	<!-- <div id="subtract" class="texfield">
-		<p class="header2">subtract texture</p>
-		todo
-	</div> -->
-	
-	<div id="tabulateddata" class="texfield">
-		<p class="header2">tabulateddata texture</p>
-		<div class="parameter_container">
-			<label for="tabulateddata_filename" class="parameter_label">File path</label>
-			<input type='text' id="tabulateddata_filename" class="parameter_field">
-		</div>
-	</div>
-	
-	<div id="windy" class="texfield">
-		<p class="header2">windy texture</p>
-		<div class="parameter_container">
-			<label for="windy_coordinates" class="parameter_label">Coordinates</label>
-			<select id="windy_coordinates"  class="parameter_field">	
-				<option value="global">global</option>
-				<option value="local">local</option>
-				<option value="globalnormal">global normal</option>
-				<option value="localnormal">local normal</option>
-				<option value="uv">uv</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="windy_vectortranslate" class="parameter_label">Translation</label>
-			<input type='text' id="windy_vectortranslate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="windy_vectorrotate" class="parameter_label">Rotation</label>
-			<input type='text' id="windy_vectorrotate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="windy_vectorscale" class="parameter_label">Scale</label>
-			<input type='text' id="windy_vectorscale" class="parameter_field">
-		</div>
-	</div>
-	
-	<div id="wrinkled" class="texfield">
-		<p class="header2">wrinkled texture</p>
-		<div class="parameter_container">
-			<label for="wrinkled_octaves" class="parameter_label">Octaves</label>
-			<input type='text' id="wrinkled_octaves" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="wrinkled_roughness" class="parameter_label">Roughness</label>
-			<input type='text' id="wrinkled_roughness" class="parameter_field">
-		</div>
-		<br><br>
-		<div class="parameter_container">
-			<label for="wrinkled_coordinates" class="parameter_label">Coordinates</label>
-			<select id="wrinkled_coordinates"  class="parameter_field">	
-				<option value="global">global</option>
-				<option value="local">local</option>
-				<option value="globalnormal">global normal</option>
-				<option value="localnormal">local normal</option>
-				<option value="uv">uv</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="wrinkled_vectortranslate" class="parameter_label">Translation</label>
-			<input type='text' id="wrinkled_vectortranslate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="wrinkled_vectorrotate" class="parameter_label">Rotation</label>
-			<input type='text' id="wrinkled_vectorrotate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="wrinkled_vectorscale" class="parameter_label">Scale</label>
-			<input type='text' id="wrinkled_vectorscale" class="parameter_field">
-		</div>
-	</div>
-	
-	<div id="blender_clouds" class="texfield">
-		<p class="header2">blender_clouds texture</p>
-		<div class="parameter_container">
-			<label for="blender_clouds_noisetype" class="parameter_label">Name</label>
-			<select id="blender_clouds_noisetype"  class="parameter_field">	
-				<option value="soft_noise">soft_noise</option>
-				<option value="hard_noise">hard_noise</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="blender_clouds_noisebasis" class="parameter_label">Noise basis</label>
-			<select id="blender_clouds_noisebasis"  class="parameter_field">	
-				<option value="blender_original">blender_original</option>
-				<option value="original_perlin">original_perlin</option>
-				<option value="improved_perlin">improved_perlin</option>
-				<option value="voronoi_f1">voronoi_f1</option>
-				<option value="voronoi_f2">voronoi_f2</option>
-				<option value="voronoi_f3">voronoi_f3</option>
-				<option value="voronoi_f4">voronoi_f4</option>
-				<option value="voronoi_f2f1">voronoi_f2f1</option>
-				<option value="voronoi_crackle">voronoi_crackle</option>
-				<option value="cell_noise">cell_noise</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="blender_clouds_noisesize" class="parameter_label">Noise size</label>
-			<input type='text' id="blender_clouds_noisesize" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_clouds_noisedepth" class="parameter_label">Noise depth</label>
-			<input type='text' id="blender_clouds_noisedepth" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_clouds_bright" class="parameter_label">Brightness</label>
-			<input type='text' id="blender_clouds_bright" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_clouds_contrast" class="parameter_label">Contrast</label>
-			<input type='text' id="blender_clouds_contrast" class="parameter_field">
-		</div>
-		<br><br>
-		<div class="parameter_container">
-			<label for="blender_clouds_coordinates" class="parameter_label">Coordinates</label>
-			<select id="blender_clouds_coordinates"  class="parameter_field">	
-				<option value="global">global</option>
-				<option value="local">local</option>
-				<option value="globalnormal">global normal</option>
-				<option value="localnormal">local normal</option>
-				<option value="uv">uv</option>
-			</select>
-		</div>
-		<!-- following values seem to have no effect -->
-		<!-- <div class="parameter_container"> 
-			<label for="blender_clouds_vectortranslate" class="parameter_label">Translation</label>
-			<input type='text' id="blender_clouds_vectortranslate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_clouds_vectorrotate" class="parameter_label">Rotation</label>
-			<input type='text' id="blender_clouds_vectorrotate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_clouds_vectorscale" class="parameter_label">Scale</label>
-			<input type='text' id="blender_clouds_vectorscale" class="parameter_field">
-		</div> -->
-	</div>
-	
-	<div id="blender_distortednoise" class="texfield">
-		<p class="header2">blender_distortednoise texture</p>
-		<div class="parameter_container">
-			<label for="blender_distortednoise_type" class="parameter_label">Type</label>
-			<select id="blender_distortednoise_type"  class="parameter_field">	
-				<option value="blender_original">blender_original</option>
-				<option value="original_perlin">original_perlin</option>
-				<option value="improved_perlin">improved_perlin</option>
-				<option value="voronoi_f1">voronoi_f1</option>
-				<option value="voronoi_f2">voronoi_f2</option>
-				<option value="voronoi_f3">voronoi_f3</option>
-				<option value="voronoi_f4">voronoi_f4</option>
-				<option value="voronoi_f2f1">voronoi_f2f1</option>
-				<option value="voronoi_crackle">voronoi_crackle</option>
-				<option value="cell_noise">cell_noise</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="blender_distortednoise_noisebasis" class="parameter_label">Basis</label>
-			<select id="blender_distortednoise_noisebasis"  class="parameter_field">	
-				<option value="blender_original">blender_original</option>
-				<option value="original_perlin">original_perlin</option>
-				<option value="improved_perlin">improved_perlin</option>
-				<option value="voronoi_f1">voronoi_f1</option>
-				<option value="voronoi_f2">voronoi_f2</option>
-				<option value="voronoi_f3">voronoi_f3</option>
-				<option value="voronoi_f4">voronoi_f4</option>
-				<option value="voronoi_f2f1">voronoi_f2f1</option>
-				<option value="voronoi_crackle">voronoi_crackle</option>
-				<option value="cell_noise">cell_noise</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="blender_distortednoise_noisesize" class="parameter_label">Noise size</label>
-			<input type='text' id="blender_distortednoise_noisesize" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_distortednoise_distamount" class="parameter_label">Dist. amount</label>
-			<input type='text' id="blender_distortednoise_distamount" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_distortednoise_noisedepth" class="parameter_label">Noise depth</label>
-			<input type='text' id="blender_distortednoise_noisedepth" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_distortednoise_bright" class="parameter_label">Brightness</label>
-			<input type='text' id="blender_distortednoise_bright" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_distortednoise_contrast" class="parameter_label">Contrast</label>
-			<input type='text' id="blender_distortednoise_contrast" class="parameter_field">
-		</div>
-		<br><br>
-		<div class="parameter_container">
-			<label for="blender_distortednoise_coordinates" class="parameter_label">Coordinates</label>
-			<select id="blender_distortednoise_coordinates"  class="parameter_field">	
-				<option value="global">global</option>
-				<option value="local">local</option>
-				<option value="globalnormal">global normal</option>
-				<option value="localnormal">local normal</option>
-				<option value="uv">uv</option>
-			</select>
-		</div>
-		<!-- following values seem to have no effect -->
-		<!-- <div class="parameter_container"> 
-			<label for="blender_distortednoise_vectortranslate" class="parameter_label">Translation</label>
-			<input type='text' id="blender_distortednoise_vectortranslate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_distortednoise_vectorrotate" class="parameter_label">Rotation</label>
-			<input type='text' id="blender_distortednoise_vectorrotate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_distortednoise_vectorscale" class="parameter_label">Scale</label>
-			<input type='text' id="blender_distortednoise_vectorscale" class="parameter_field">
-		</div> -->
-	</div>
-	
-	<div id="blender_noise" class="texfield">
-		<p class="header2">blender_noise texture</p>
-		<div class="parameter_container">
-			<label for="blender_noise_coordinates" class="parameter_label">Coordinates</label>
-			<select id="blender_noise_coordinates"  class="parameter_field">	
-				<option value="global">global</option>
-				<option value="local">local</option>
-				<option value="globalnormal">global normal</option>
-				<option value="localnormal">local normal</option>
-				<option value="uv">uv</option>
-			</select>
-		</div>
-		<!-- following values seem to have no effect -->
-		<!-- <div class="parameter_container"> 
-			<label for="blender_noise_vectortranslate" class="parameter_label">Translation</label>
-			<input type='text' id="blender_noise_vectortranslate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_noise_vectorrotate" class="parameter_label">Rotation</label>
-			<input type='text' id="blender_noise_vectorrotate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_noise_vectorscale" class="parameter_label">Scale</label>
-			<input type='text' id="blender_noise_vectorscale" class="parameter_field">
-		</div> -->
-	</div>
-	
-	<div id="blender_magic" class="texfield">
-		<p class="header2">blender_magic texture</p>
-		<div class="parameter_container">
-			<label for="blender_magic_coordinates" class="parameter_label">Coordinates</label>
-			<select id="blender_x_coordinates"  class="parameter_field">	
-				<option value="global">global</option>
-				<option value="local">local</option>
-				<option value="globalnormal">global normal</option>
-				<option value="localnormal">local normal</option>
-				<option value="uv">uv</option>
-			</select>
-		</div>
-		<!-- following values seem to have no effect -->
-		<!-- <div class="parameter_container"> 
-			<label for="blender_magic_vectortranslate" class="parameter_label">Translation</label>
-			<input type='text' id="blender_magic_vectortranslate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_magic_vectorrotate" class="parameter_label">Rotation</label>
-			<input type='text' id="blender_magic_vectorrotate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_magic_vectorscale" class="parameter_label">Scale</label>
-			<input type='text' id="blender_magic_vectorscale" class="parameter_field">
-		</div> -->
-	</div>
-	
-	<div id="blender_marble" class="texfield">
-		<p class="header2">blender_marble texture</p>
-		<div class="parameter_container">
-			<label for="blender_marble_noisesize" class="parameter_label">Noise size</label>
-			<input type='text' id="blender_marble_noisesize" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_marble_noisedepth" class="parameter_label">Noise depth</label>
-			<input type='text' id="blender_marble_noisedepth" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_marble_turbulence" class="parameter_label">Turbulence</label>
-			<input type='text' id="blender_marble_turbulence" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_marble_type" class="parameter_label">Type</label>
-			<select id="blender_marble_type"  class="parameter_field">	
-				<option value="soft">soft</option>
-				<option value="sharp">sharp</option>
-				<option value="sharper">sharper</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="blender_marble_noisetype" class="parameter_label">Noise type</label>
-			<select id="blender_marble_noisetype"  class="parameter_field">	
-				<option value="soft_noise">soft noise</option>
-				<option value="hard_noise">hard noise</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="blender_marble_noisebasis" class="parameter_label">Noise basis</label>
-			<select id="blender_marble_noisebasis"  class="parameter_field">	
-				<option value="sin">sin</option>
-				<option value="saw">saw</option>
-				<option value="tri">tri</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="blender_marble_noisebasis2" class="parameter_label">Noise basis 2</label>
-			<select id="blender_marble_noisebasis2"  class="parameter_field">	
-				<option value="blender_original">blender_original</option>
-				<option value="original_perlin">original_perlin</option>
-				<option value="improved_perlin">improved_perlin</option>
-				<option value="voronoi_f1">voronoi_f1</option>
-				<option value="voronoi_f2">voronoi_f2</option>
-				<option value="voronoi_f3">voronoi_f3</option>
-				<option value="voronoi_f4">voronoi_f4</option>
-				<option value="voronoi_f2f1">voronoi_f2f1</option>
-				<option value="voronoi_crackle">voronoi_crackle</option>
-				<option value="cell_noise">cell_noise</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="blender_marble_bright" class="parameter_label">Brightness</label>
-			<input type='text' id="blender_marble_bright" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_marble_contrast" class="parameter_label">Contrast</label>
-			<input type='text' id="blender_marble_contrast" class="parameter_field">
-		</div>
-		<br><br>
-		<div class="parameter_container">
-			<label for="blender_marble_coordinates" class="parameter_label">Coordinates</label>
-			<select id="blender_marble_coordinates"  class="parameter_field">	
-				<option value="global">global</option>
-				<option value="local">local</option>
-				<option value="globalnormal">global normal</option>
-				<option value="localnormal">local normal</option>
-				<option value="uv">uv</option>
-			</select>
-		</div>
-		<!-- following values seem to have no effect -->
-		<!-- <div class="parameter_container"> 
-			<label for="blender_marble_vectortranslate" class="parameter_label">Translation</label>
-			<input type='text' id="blender_marble_vectortranslate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_marble_vectorrotate" class="parameter_label">Rotation</label>
-			<input type='text' id="blender_marble_vectorrotate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_marble_vectorscale" class="parameter_label">Scale</label>
-			<input type='text' id="blender_marble_vectorscale" class="parameter_field">
-		</div> -->
-	</div>
-	
-	<div id="blender_musgrave" class="texfield">
-		<p class="header2">blender_musgrave texture</p>
-		<div class="parameter_container">
-			<label for="blender_musgrave_h" class="parameter_label">H parameter</label>
-			<input type='text' id="blender_musgrave_h" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_musgrave_lacu" class="parameter_label">Lacu parameter</label>
-			<input type='text' id="blender_musgrave_lacu" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_musgrave_octs" class="parameter_label">Octaves</label>
-			<input type='text' id="blender_musgrave_octs" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_musgrave_gain" class="parameter_label">Gain</label>
-			<input type='text' id="blender_musgrave_gain" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_musgrave_offset" class="parameter_label">Offset</label>
-			<input type='text' id="blender_musgrave_offset" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_musgrave_noisesize" class="parameter_label">Noise size</label>
-			<input type='text' id="blender_musgrave_noisesize" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_musgrave_outscale" class="parameter_label">Out scale</label>
-			<input type='text' id="blender_musgrave_outscale" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_musgrave_type" class="parameter_label">Type</label>
-			<select id="blender_musgrave_type"  class="parameter_field">	
-				<option value="multifractal">multifractal</option>
-				<option value="ridged_multifractal">ridged_multifractal</option>
-				<option value="hybrid_multifractal">hybrid_multifractal</option>
-				<option value="hetero_terrain">hetero_terrain</option>
-				<option value="fbm">fbm</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="blender_musgrave_noisebasis" class="parameter_label">Noise basis</label>
-			<select id="blender_musgrave_noisebasis"  class="parameter_field">	
-				<option value="blender_original">blender_original</option>
-				<option value="original_perlin">original_perlin</option>
-				<option value="improved_perlin">improved_perlin</option>
-				<option value="voronoi_f1">voronoi_f1</option>
-				<option value="voronoi_f2">voronoi_f2</option>
-				<option value="voronoi_f3">voronoi_f3</option>
-				<option value="voronoi_f4">voronoi_f4</option>
-				<option value="voronoi_f2f1">voronoi_f2f1</option>
-				<option value="voronoi_crackle">voronoi_crackle</option>
-				<option value="cell_noise">cell_noise</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="blender_musgrave_bright" class="parameter_label">Brightness</label>
-			<input type='text' id="blender_musgrave_bright" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_musgrave_contrast" class="parameter_label">Contrast</label>
-			<input type='text' id="blender_musgrave_contrast" class="parameter_field">
-		</div>
-		<br><br>
-		<div class="parameter_container">
-			<label for="blender_musgrave_coordinates" class="parameter_label">Coordinates</label>
-			<select id="blender_musgrave_coordinates"  class="parameter_field">	
-				<option value="global">global</option>
-				<option value="local">local</option>
-				<option value="globalnormal">global normal</option>
-				<option value="localnormal">local normal</option>
-				<option value="uv">uv</option> 
-			</select>
-		</div>
-		<!-- following values seem to have no effect -->
-		<!-- <div class="parameter_container"> 
-			<label for="blender_musgrave_vectortranslate" class="parameter_label">Translation</label>
-			<input type='text' id="blender_musgrave_vectortranslate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_musgrave_vectorrotate" class="parameter_label">Rotation</label>
-			<input type='text' id="blender_musgrave_vectorrotate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_musgrave_vectorscale" class="parameter_label">Scale</label>
-			<input type='text' id="blender_musgrave_vectorscale" class="parameter_field">
-		</div> -->
-	</div> 
-	
-	<div id="blender_stucci" class="texfield">
-		<p class="header2">blender_stucci texture</p>
-		<div class="parameter_container">
-			<label for="blender_stucci_type" class="parameter_label">Pattern type</label>
-			<select id="blender_stucci_type"  class="parameter_field">	
-				<option value="plastic">plastic</option>
-				<option value="wall_in">wall_in</option>
-				<option value="wall_out">wall_out</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="blender_stucci_noisetype" class="parameter_label">Noise type</label>
-			<select id="blender_stucci_noisetype"  class="parameter_field">	
-				<option value="soft_noise">soft noise</option>
-				<option value="hard_noise">hard noise</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="blender_stucci_noisebasis" class="parameter_label">Noise basis</label>
-			<select id="blender_stucci_noisebasis"  class="parameter_field">	
-				<option value="blender_original">blender_original</option>
-				<option value="original_perlin">original_perlin</option>
-				<option value="improved_perlin">improved_perlin</option>
-				<option value="voronoi_f1">voronoi_f1</option>
-				<option value="voronoi_f2">voronoi_f2</option>
-				<option value="voronoi_f3">voronoi_f3</option>
-				<option value="voronoi_f4">voronoi_f4</option>
-				<option value="voronoi_f2f1">voronoi_f2f1</option>
-				<option value="voronoi_crackle">voronoi_crackle</option>
-				<option value="cell_noise">cell_noise</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="blender_stucci_turbulence" class="parameter_label">Turbulence</label>
-			<input type='text' id="blender_stucci_turbulence" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_stucci_bright" class="parameter_label">Brightness</label>
-			<input type='text' id="blender_stucci_bright" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_stucci_contrast" class="parameter_label">Contrast</label>
-			<input type='text' id="blender_stucci_contrast" class="parameter_field">
-		</div>
-		<br><br>
-		<div class="parameter_container">
-			<label for="blender_stucci_coordinates" class="parameter_label">Coordinates</label>
-			<select id="blender_stucci_coordinates"  class="parameter_field">	
-				<option value="global">global</option>
-				<option value="local">local</option>
-				<option value="globalnormal">global normal</option>
-				<option value="localnormal">local normal</option>
-				<option value="uv">uv</option>
-			</select>
-		</div>
-		<!-- following values seem to have no effect -->
-		<!-- <div class="parameter_container"> 
-			<label for="blender_stucci_vectortranslate" class="parameter_label">Translation</label>
-			<input type='text' id="blender_stucci_vectortranslate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_stucci_vectorrotate" class="parameter_label">Rotation</label>
-			<input type='text' id="blender_stucci_vectorrotate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_stucci_vectorscale" class="parameter_label">Scale</label>
-			<input type='text' id="blender_stucci_vectorscale" class="parameter_field">
-		</div> -->
-	</div>
-	
-	<div id="blender_wood" class="texfield">
-		<p class="header2">blender_wood texture</p>
-		<div class="parameter_container">
-			<label for="blender_wood_type" class="parameter_label">Type</label>
-			<select id="blender_wood_type"  class="parameter_field">	
-				<option value="bands">bands</option>
-				<option value="rings">rings</option>
-				<option value="bandnoise">bandnoise</option>
-				<option value="ringnoise">ringnoise</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="blender_wood_noisetype" class="parameter_label">Noise type</label>
-			<select id="blender_wood_noisetype"  class="parameter_field">	
-				<option value="soft_noise">soft noise</option>
-				<option value="hard_noise">hard noise</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="blender_wood_noisebasis" class="parameter_label">Noise basis</label>
-			<select id="blender_wood_noisebasis"  class="parameter_field">	
-				<option value="blender_original">blender_original</option>
-				<option value="original_perlin">original_perlin</option>
-				<option value="improved_perlin">improved_perlin</option>
-				<option value="voronoi_f1">voronoi_f1</option>
-				<option value="voronoi_f2">voronoi_f2</option>
-				<option value="voronoi_f3">voronoi_f3</option>
-				<option value="voronoi_f4">voronoi_f4</option>
-				<option value="voronoi_f2f1">voronoi_f2f1</option>
-				<option value="voronoi_crackle">voronoi_crackle</option>
-				<option value="cell_noise">cell_noise</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="blender_wood_noisebasis2" class="parameter_label">Noise basis 2</label>
-			<select id="blender_wood_noisebasis2"  class="parameter_field">	
-				<option value="soft_noise">soft noise</option>
-				<option value="hard_noise">hard noise</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="blender_wood_noisesize" class="parameter_label">Noise size</label>
-			<input type='text' id="blender_wood_noisesize" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_wood_turbulence" class="parameter_label">Turbulence</label>
-			<input type='text' id="blender_wood_turbulence" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_wood_bright" class="parameter_label">Brightness</label>
-			<input type='text' id="blender_wood_bright" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_wood_contrast" class="parameter_label">Contrast</label>
-			<input type='text' id="blender_wood_contrast" class="parameter_field">
-		</div>
-		<br><br>
-		<div class="parameter_container">
-			<label for="blender_wood_coordinates" class="parameter_label">Coordinates</label>
-			<select id="blender_wood_coordinates"  class="parameter_field">	
-				<option value="global">global</option>
-				<option value="local">local</option>
-				<option value="globalnormal">global normal</option>
-				<option value="localnormal">local normal</option>
-				<option value="uv">uv</option>
-			</select>
-		</div>
-		<!-- following values seem to have no effect -->
-		<!-- <div class="parameter_container"> 
-			<label for="blender_wood_vectortranslate" class="parameter_label">Translation</label>
-			<input type='text' id="blender_wood_vectortranslate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_wood_vectorrotate" class="parameter_label">Rotation</label>
-			<input type='text' id="blender_wood_vectorrotate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_wood_vectorscale" class="parameter_label">Scale</label>
-			<input type='text' id="blender_wood_vectorscale" class="parameter_field">
-		</div> -->
-	</div>
-	
-	<div id="blender_voronoi" class="texfield">
-		<p class="header2">blender_voronoi texture</p>
-		<div class="parameter_container">
-			<label for="blender_voronoi_distmetric" class="parameter_label">Distance metric</label>
-			<select id="blender_voronoi_distmetric"  class="parameter_field">	
-				<option value="actual distance">actual distance</option>
-				<option value="distance_squared">distance_squared</option>
-				<option value="chebychev">chebychev</option>
-				<option value="manhattan">manhattan</option>
-				<option value="minkovsky">minkovsky</option>
-				<option value="minkovsky_half">minkovsky_half</option>
-				<option value="minkovsky_four">minkovsky_four</option>
-			</select>
-		</div>
-		<div class="parameter_container">
-			<label for="blender_voronoi_minkowsky_exp" class="parameter_label">Minkowsky exponent</label>
-			<input type='text' id="blender_voronoi_minkowsky_exp" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_voronoi_nabla" class="parameter_label">Nabla</label>
-			<input type='text' id="blender_voronoi_nabla" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_voronoi_w1" class="parameter_label">w1</label>
-			<input type='text' id="blender_voronoi_w1" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_voronoi_w2" class="parameter_label">w2</label>
-			<input type='text' id="blender_voronoi_w2" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_voronoi_w3" class="parameter_label">w3</label>
-			<input type='text' id="blender_voronoi_w3" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_voronoi_w4" class="parameter_label">w4</label>
-			<input type='text' id="blender_voronoi_w4" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_voronoi_bright" class="parameter_label">Brightness</label>
-			<input type='text' id="blender_voronoi_bright" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_voronoi_contrast" class="parameter_label">Contrast</label>
-			<input type='text' id="blender_voronoi_contrast" class="parameter_field">
-		</div>
-		<br><br>
-		<div class="parameter_container">
-			<label for="blender_voronoi_coordinates" class="parameter_label">Coordinates</label>
-			<select id="blender_voronoi_coordinates"  class="parameter_field">	
-				<option value="global">global</option>
-				<option value="local">local</option>
-				<option value="globalnormal">global normal</option>
-				<option value="localnormal">local normal</option>
-				<option value="uv">uv</option>
-			</select>
-		</div>
-		<!-- following values seem to have no effect -->
-		<!-- <div class="parameter_container"> 
-			<label for="blender_voronoi_vectortranslate" class="parameter_label">Translation</label>
-			<input type='text' id="blender_voronoi_vectortranslate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_voronoi_vectorrotate" class="parameter_label">Rotation</label>
-			<input type='text' id="blender_voronoi_vectorrotate" class="parameter_field">
-		</div>
-		<div class="parameter_container">
-			<label for="blender_voronoi_vectorscale" class="parameter_label">Scale</label>
-			<input type='text' id="blender_voronoi_vectorscale" class="parameter_field">
-		</div> -->
+	<div class="parameter_container blender_clouds blender_distorted_noise blender_marble">
+		<label for="noisedepth" class="parameter_label">Noise depth</label>
+		<input type='text' id="noisedepth" class="parameter_field">
 	</div>
 
+	<div class="parameter_container blender_marble">
+		<label for="blender_marblenoisebasis" class="parameter_label">Noise basis</label>
+		<select id="blender_marblenoisebasis"  class="parameter_field">	
+			<option value="sin">sin</option>
+			<option value="saw">saw</option>
+			<option value="tri">tri</option>
+		</select>
+	</div>
+	<div class="parameter_container blender_marble">
+		<label for="blender_noisebasis2" class="parameter_label">Noise basis 2</label>
+		<select id="blender_noisebasis2"  class="parameter_field">	
+			<option value="original">original</option>
+			<option value="original_perlin">original_perlin</option>
+			<option value="improved_perlin">improved_perlin</option>
+			<option value="f1">f1</option>
+			<option value="f2">f2</option>
+			<option value="f3">f3</option>
+			<option value="f4">f4</option>
+			<option value="f2f1">f2f1</option>
+			<option value="crackle">crackle</option>
+			<option value="cell_blender_noise">cell_blender_noise</option>
+		</select>
+	</div>
+	<div class="parameter_container blender_musgrave blender_stucci blender_wood">
+		<label for="blender_noisebasis" class="parameter_label">Noise basis</label>
+		<select id="blender_noisebasis"  class="parameter_field">	
+			<option value="original">original</option>
+			<option value="original_perlin">original_perlin</option>
+			<option value="improved_perlin">improved_perlin</option>
+			<option value="f1">f1</option>
+			<option value="f2">f2</option>
+			<option value="f3">f3</option>
+			<option value="f4">f4</option>
+			<option value="f2f1">f2f1</option>
+			<option value="crackle">crackle</option>
+			<option value="cell_blender_noise">cell_blender_noise</option>
+		</select>
+	</div>
+	<div class="parameter_container blender_wood">
+		<label for="blender_woodnoisebasis2" class="parameter_label">Noise basis 2</label>
+		<select id="blender_woodnoisebasis2"  class="parameter_field">	
+			<option value="soft_blender_noise">soft blender_noise</option>
+			<option value="hard_blender_noise">hard blender_noise</option>
+		</select>
+	</div>
+	<div class="parameter_container blender_clouds blender_marble blender_musgrave blender_stucci blender_wood blender_voronoi blender_distorted_noise">
+		<label for="bright" class="parameter_label">Brightness</label>
+		<input type='text' id="bright" class="parameter_field">
+	</div>
+	<div class="parameter_container blender_clouds blender_marble blender_musgrave blender_stucci blender_wood blender_voronoi blender_distorted_noise">
+		<label for="contrast" class="parameter_label">Contrast</label>
+		<input type='text' id="contrast" class="parameter_field">
+	</div>
+	<div class="parameter_container blender_musgrave">
+		<label for="h" class="parameter_label">H parameter</label>
+		<input type='text' id="h" class="parameter_field">
+	</div>
+	<div class="parameter_container blender_musgrave">
+		<label for="lacu" class="parameter_label">Lacu parameter</label>
+		<input type='text' id="lacu" class="parameter_field">
+	</div>
+	<div class="parameter_container blender_musgrave">
+		<label for="gain" class="parameter_label">Gain</label>
+		<input type='text' id="gain" class="parameter_field">
+	</div>
+	<div class="parameter_container blender_musgrave">
+		<label for="offset" class="parameter_label">Offset</label>
+		<input type='text' id="offset" class="parameter_field">
+	</div>
+	<div class="parameter_container blender_musgrave">
+		<label for="outscale" class="parameter_label">Out scale</label>
+		<input type='text' id="outscale" class="parameter_field">
+	</div>
+	<div class="parameter_container blender_musgrave">
+		<label for="type" class="parameter_label">Type</label>
+		<select id="type"  class="parameter_field">	
+			<option value="multifractal">multifractal</option>
+			<option value="ridged_multifractal">ridged_multifractal</option>
+			<option value="hybrid_multifractal">hybrid_multifractal</option>
+			<option value="hetero_terrain">hetero_terrain</option>
+			<option value="fbm">fbm</option>
+		</select>
+	</div>
+	<div class="parameter_container blender_stucci">
+		<label for="type" class="parameter_label">Pattern type</label>
+		<select id="type"  class="parameter_field">	
+			<option value="plastic">plastic</option>
+			<option value="wall_in">wall_in</option>
+			<option value="wall_out">wall_out</option>
+		</select>
+	</div>
+	<div class="parameter_container blender_stucci blender_marble blender_wood">
+		<label for="blender_noisetype" class="parameter_label">Noise type</label>
+		<select id="blender_noisetype"  class="parameter_field">	
+			<option value="soft_blender_noise">soft blender_noise</option>
+			<option value="hard_blender_noise">hard blender_noise</option>
+		</select>
+	</div>
+	<div class="parameter_container  blender_wood">
+		<label for="type" class="parameter_label">Type</label>
+		<select id="type"  class="parameter_field">	
+			<option value="bands">bands</option>
+			<option value="rings">rings</option>
+			<option value="bandblender_noise">bandblender_noise</option>
+			<option value="ringblender_noise">ringblender_noise</option>
+		</select>
+	</div>
+	<div class="parameter_container blender_voronoi">
+		<label for="distmetric" class="parameter_label">Distance metric</label>
+		<select id="distmetric"  class="parameter_field">	
+			<option value="actual distance">actual distance</option>
+			<option value="distance_squared">distance_squared</option>
+			<option value="chebychev">chebychev</option>
+			<option value="manhattan">manhattan</option>
+			<option value="minkovsky">minkovsky</option>
+			<option value="minkovsky_half">minkovsky_half</option>
+			<option value="minkovsky_four">minkovsky_four</option>
+		</select>
+	</div>
+	<div class="parameter_container blender_voronoi">
+		<label for="minkowsky_exp" class="parameter_label">Minkowsky exponent</label>
+		<input type='text' id="minkowsky_exp" class="parameter_field">
+	</div>
+	<div class="parameter_container blender_voronoi">
+		<label for="nabla" class="parameter_label">Nabla</label>
+		<input type='text' id="nabla" class="parameter_field">
+	</div>
+	<div class="parameter_container blender_voronoi">
+		<label for="w1" class="parameter_label">w1</label>
+		<input type='text' id="w1" class="parameter_field">
+	</div>
+	<div class="parameter_container blender_voronoi">
+		<label for="w2" class="parameter_label">w2</label>
+		<input type='text' id="w2" class="parameter_field">
+	</div>
+	<div class="parameter_container blender_voronoi">
+		<label for="w3" class="parameter_label">w3</label>
+		<input type='text' id="w3" class="parameter_field">
+	</div>
+	<div class="parameter_container blender_voronoi">
+		<label for="w4" class="parameter_label">w4</label>
+		<input type='text' id="w4" class="parameter_field">
+	</div>
+
+	<br><br>
+	<div class="parameter_container brick checkerboard cloud dots fbm marble windy wrinkled blender_clouds blender_distorted_noise blender_noise blender_magic blender_marble blender_musgrave blender_stucci blender_wood blender_voronoi">
+		<label for="coordinates" class="parameter_label">Coordinates</label>
+		<select id="coordinates"  class="parameter_field">	
+			<option value="global">global</option>
+			<option value="local">local</option>
+			<option value="globalnormal">global normal</option>
+			<option value="localnormal">local normal</option>
+			<option value="uv">uv</option>
+		</select>
+	</div>
+	<div class="parameter_container brick checkerboard cloud dots fbm marble windy wrinkled blender_clouds blender_distorted_noise blender_noise blender_magic blender_marble blender_musgrave blender_stucci blender_wood blender_voronoi">
+		<label for="vectortranslate" class="parameter_label">Translation (X, Y, Z)</label>
+		<input type='text' id="vectortranslateX" class="parameter_X XYZ vectorparam">
+		<input type='text' id="vectortranslateY" class="parameter_Y XYZ vectorparam">
+		<input type='text' id="vectortranslateZ" class="parameter_Z XYZ vectorparam">
+	</div>
+	<div class="parameter_container brick checkerboard cloud dots fbm marble windy wrinkled blender_clouds blender_distorted_noise blender_noise blender_magic blender_marble blender_musgrave blender_stucci blender_wood blender_voronoi">
+		<label for="vectorrotate" class="parameter_label">Rotation (X, Y, Z)</label>
+		<input type='text' id="vectorrotateX" class="parameter_X XYZ vectorparam">
+		<input type='text' id="vectorrotateY" class="parameter_Y XYZ vectorparam">
+		<input type='text' id="vectorrotateZ" class="parameter_Z XYZ vectorparam">
+	</div>
+	<div class="parameter_container brick checkerboard cloud dots fbm marble windy wrinkled blender_clouds blender_distorted_noise blender_noise blender_magic blender_marble blender_musgrave blender_stucci blender_wood blender_voronoi">
+		<label for="vectorscale" class="parameter_label">Scale (X, Y, Z)</label>
+		<input type='text' id="vectorscaleX" class="parameter_X XYZ vectorparam">
+		<input type='text' id="vectorscaleY" class="parameter_Y XYZ vectorparam">
+		<input type='text' id="vectorscaleZ" class="parameter_Z XYZ vectorparam">
+	</div>
 </div>
 </body>
 </html>

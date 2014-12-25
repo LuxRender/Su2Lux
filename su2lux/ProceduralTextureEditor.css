@@ -40,6 +40,8 @@ body {
 	left: 12em;
 	top: 4px;
 }
+
+
 .header2 {
 	padding: 6px
 }
@@ -49,4 +51,29 @@ body {
 }
 input[type=text]{
 	width: 7em;
+}
+
+.parameter_X {
+	position: absolute;
+	margin: 0.5em;
+	left: 12em;
+	top: 4px;
+}
+.parameter_Y {
+	position: absolute;
+	margin: 0.5em;
+	left: 15em;
+	top: 4px;
+}
+.parameter_Z {
+	position: absolute;
+	margin: 0.5em;
+	left: 18em;
+	top: 4px;
+	width: 1em;
+}
+
+
+input.XYZ[type=text]{
+	width: 2em;
 }

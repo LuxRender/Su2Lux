@@ -27,6 +27,7 @@ class LuxrenderProceduralTexturesEditor
 		@textureCollection = {} # hash containing texture names and objects
         puts "initializing procedural textures editor"
         filename = File.basename(Sketchup.active_model.path)
+		@activeProcTex = nil
         if (filename == "")
             windowname = "LuxRender Procedural Textures Editor"
         else
@@ -52,21 +53,56 @@ class LuxrenderProceduralTexturesEditor
 	   ##
 	   	@procedural_textures_dialog.add_action_callback("create_procedural_texture") { |dialog, texType|
 			puts "creating procedural texture"
-			newTexture = LuxrenderProceduralTexture.new(true, self, @lrs, texType)
-			texName = newTexture.name
-			# call javascript function that adds new name to texture list and sets that name in dropdown
-			@procedural_textures_dialog.execute_script('addToTextureList("' + texName + '")')
-			# also add add this to all dropdown dialogs in the material editor
+			puts texType
 			
-			#channel = LuxrenderProceduralTexture.getChannelType(texName)
-			channel = newTexture.getChannelType()
+			# todo: query for texture name
+			generatedName = ""
+			nameFree = false
+			texNumber = 0
+			while(nameFree == false)
+				texNumber += 1
+				generatedName = "procTex_" + texNumber.to_s
+				if(@textureCollection[generatedName] == nil)
+					nameFree = true
+				end
+			end
 			
-			@material_editor.material_editor_dialog.execute_script('addToProcTextList("' + texName + '","' + channel + '")')
-			# update channel list
-			updateChannelList(texType)
-			# update parameters
-			updateParams(texName,texType)
-			
+			texName = UI.inputbox(["volume name"], [generatedName], "Enter new volume name")
+			if(texName != false)		
+				# create volume object, or warn user of duplicate name
+				texName = texName[0]
+				if(@textureCollection[texName] == nil)
+					puts "creating texture with name " + texName
+
+					newTexture = LuxrenderProceduralTexture.new(true, self, @lrs, texType, texName)
+					
+					# call javascript function that adds new name to texture list and sets that name in dropdown
+					@procedural_textures_dialog.execute_script('addToTextureList("' + texName + '")')
+					
+					# add this to all dropdown dialogs in the material editor
+					channel = newTexture.getChannelType()
+					@material_editor.material_editor_dialog.execute_script('addToProcTextList("' + texName + '","' + channel + '")')
+					
+					# update channel list in procedural texture editor (color, float, fresnel)
+					updateChannelList(texType)
+					
+					# show parameters in interface
+					puts "updating interface"
+					@procedural_textures_dialog.execute_script("$('#textypedropdownarea').show()")
+					@procedural_textures_dialog.execute_script("$('#texturechanneldropdownarea').show()")
+					@procedural_textures_dialog.execute_script("$('#texture_types').val('" + texType + "')")
+					
+										
+					@procedural_textures_dialog.execute_script("$('.parameter_container').hide()")
+					showTexParams = "$(\".#{texType}\").show()"
+					@procedural_textures_dialog.execute_script(showTexParams)
+					
+					# update parameters
+					updateParams(texName,texType)
+				else
+					UI.messagebox("Texture name exists already, please choose a different name")
+				end
+			end		
 		}
 		
 		##
@@ -75,33 +111,36 @@ class LuxrenderProceduralTexturesEditor
 		@procedural_textures_dialog.add_action_callback('show_procedural_texture') {|dialog, texName|
 			puts "callback: show_procedural_texture"
 			
+			# get texture library, get texture type
+			#activeTextureLib = @textureDictionary.returnDictionary(texName)
+			#texType = activeTextureLib["textureType"]
+			
+			# set active texture
+			@activeProcTex = @textureCollection[texName]
+			texType = @activeProcTex.getTexType()
+			
 			# update texture type dropdown
 			puts "setting texture type dropdown"
-			
-			# get texture object, get texture type
-			activeTexture = @textureDictionary.returnDictionary(texName)
-			texType = activeTexture["textureType"]
-			
-			# update texture channel list
 			updateChannelList(texType)			
 			@procedural_textures_dialog.execute_script('$("#texture_types").val("' + texType + '")')
 			
 			# show relevant parameter section in html
-			hideFields = "$('.texfield').hide()";
+			hideFields = "$('.parameter_container').hide()";
 			@procedural_textures_dialog.execute_script(hideFields)
-			showField =	"$(\"##{texType}\").show()"
+			showField =	"$(\".#{texType}\").show()"
+			puts showField
 			@procedural_textures_dialog.execute_script(showField)
-			
+						
 			# update parameters for relevant texture type
 			puts "setting parameters"
 			updateParams(texName, texType)	
 			
 			# update channel type dropdown items
 			updateChannelList(texType)
-						
+			
 			# set active channel type
 			puts "setting channel type dropdown"
-			channelType = activeTexture["procTexChannel"]			
+			channelType = @activeProcTex.getChannelType()	
 			@procedural_textures_dialog.execute_script('$("#procTexChannel").val("' + channelType + '")') 
 		}
 		
@@ -110,22 +149,16 @@ class LuxrenderProceduralTexturesEditor
 		##
 		@procedural_textures_dialog.add_action_callback('set_param') {|dialog, paramString|
             SU2LUX.dbg_p "callback: set_param"
-			puts paramString # procTex_0|brick_procTexChannel|float
-			params = paramString.split('|')
-			paramNameList = params[1].split('_')
-			# removed #textype_ prefix
-			if paramNameList.size > 3
-				paramName = paramNameList[2] + '_' + paramNameList[3] # deal with blender_voronoi_minkowsky_exp etc.
-			else
-				paramName = paramNameList.last
-			end
-			texObject = @textureCollection[params[0]]
-			texObject.setValue(paramName,params[2])
+			puts paramString # noisesize|0.4
+			puts paramString
 			
-			# remove and add texture in material editor dropdowns
-			if(paramName == "procTexChannel")
-				@material_editor.material_editor_dialog.execute_script('removeFromProcTextList("' + params[0] + '")')
-				@material_editor.material_editor_dialog.execute_script('addToProcTextList("' + params[0] + '","' + params[2] + '")')
+			params = paramString.split('|')
+			@activeProcTex.setValue(params[0],params[1])
+			
+			# remove and add texture in material editor dropdowns if type changes from float to color or vice versa
+			if(params[0] == "procTexChannel")
+				@material_editor.material_editor_dialog.execute_script('removeFromProcTextList("' + @activeProcTex.name + '")')
+				@material_editor.material_editor_dialog.execute_script('addToProcTextList("' + @activeProcTex.name + '","' + params[0] + '")')
 			end
 		}
 		
@@ -142,7 +175,7 @@ class LuxrenderProceduralTexturesEditor
 			puts "texObject is " + texObject.to_s
 			
 			# store texture type in material
-			puts "storing material type"
+			puts "storing material type: " + params[2]
 			texObject.setValue("textureType",params[2])
 			puts "getTexType " + texObject.getTexType()
 			
@@ -166,25 +199,22 @@ class LuxrenderProceduralTexturesEditor
 		@procedural_textures_dialog.add_action_callback('show_texData') {|dialog, paramString|
 			puts "procedural texture interface loaded, call received by ruby"
 			
-			# add all procedural textures to list # note: this code may not be functional
+			# add all procedural textures to list
 			puts "adding textures to texture dropdown list"
-			for i in 0..@lrs.nrProceduralTextures-1
-				texName = "procTex_" + i.to_s
-				cmd = 'addToTextureList("' + texName + '")'
-				@procedural_textures_dialog.execute_script(cmd)
+			for texName in @lrs.proceduralTextureNames
+				@procedural_textures_dialog.execute_script('addToTextureList("' + texName + '")')
 			end
 			
 			puts "getting texture"
 			# get procedural texture object to display: 
-			if (@lrs.nrProceduralTextures > 0)
-				activeTexture = @textureDictionary.returnDictionary("procTex_0")
-
+			if (@lrs.proceduralTextureNames.count > 0)
+				activeTexture = @textureDictionary.returnDictionary(@activeProcTex.name)
 				activeTexType = activeTexture["textureType"]
 				
 				puts "activeTexture has textureType " + activeTexType
 
 				# set texture name dropdown
-				cmd1 = 'setTextureNameDropdown("procTex_0")'
+				cmd1 = 'setTextureNameDropdown("' + @activeProcTex.name + '")'
 				@procedural_textures_dialog.execute_script(cmd1)	
 				
 				# show right texture parameter section
@@ -192,14 +222,14 @@ class LuxrenderProceduralTexturesEditor
 				@procedural_textures_dialog.execute_script(cmd2)
 				
 				# add channel types to list
-				updateChannelList(activeTexType)
+				updateChannelList(activeTexType)				
 				
-				# select right channel type
+				# select right channel type (float, color)
 				channelType = activeTexture["procTexChannel"]
 				@procedural_textures_dialog.execute_script('$("#procTexChannel").val("' + channelType + '")') 
 			
 				# set parameters 
-				updateParams("procTex_0", activeTexType)
+				updateParams(@activeProcTex.name, activeTexType)
 	
 			end
 					
@@ -207,6 +237,35 @@ class LuxrenderProceduralTexturesEditor
     
 	end # END initialize
 
+	def updateGUI()
+		puts "updating procedural texture interface"
+		puts @activeProcTex.name
+		puts @activeProcTex.getTexType()
+		puts @activeProcTex.getChannelType()
+	
+		# set active texture in texture list
+		@procedural_textures_dialog.execute_script("$('#textures_in_model').val('" + @activeProcTex.name + "')")
+		
+		# set texture type 
+		texType = @activeProcTex.getTexType()
+		@procedural_textures_dialog.execute_script("$('#texture_types').val('" + texType + "')")
+		
+		# set channels
+		channelType = @activeProcTex.getChannelType()
+		@procedural_textures_dialog.execute_script('$("#procTexChannel").val("' + channelType + '")') 
+		
+		# show parameters
+		@procedural_textures_dialog.execute_script('displayTextureInterface("' + texType + '")')
+		
+		# load parameters?
+		updateParams(@activeProcTex.name, texType)
+	end
+	
+	
+	##
+	#	update channel list in interface (float, color, fresnel)
+	##
+	
 	def updateChannelList(texType)
 		# remove all items from dropdown
 		@procedural_textures_dialog.execute_script('$("#procTexChannel").empty()');
@@ -224,16 +283,26 @@ class LuxrenderProceduralTexturesEditor
 	##
 	
 	def updateParams(texName,texType)
-		# get values for all parameters
+		# get values for ordinary parameters
 		textureObject = @textureCollection[texName]
 		varValues = textureObject.getValues()
+		puts "updateParams: ordinary parameters"
 		varValues.each do |varList|
 			# update parameter in interface using jQuery command
-			divId = texType + "_" + varList[0]
+			divId = varList[0]
 			cmd = '$("#' + divId + '").val("' + varList[2].to_s + '")'
 			puts cmd
 			@procedural_textures_dialog.execute_script(cmd)
 		end
+		# get values for transformation parameters
+		puts "updateParams: transformation parameters"
+		transValues = textureObject.getTranformationValues()
+		transValues.each do |varList|
+			cmd = '$("#' + varList[0] + '").val("' + varList[1].to_s + '")'
+			puts cmd
+			@procedural_textures_dialog.execute_script(cmd)
+		end
+		
 	end
 	
 	def getTextureDictionary()
@@ -248,17 +317,18 @@ class LuxrenderProceduralTexturesEditor
 		return @textureCollection[objectName]
 	end
 	
- 	##
-	#
-	##
 	def showProcTexDialog
 		@procedural_textures_dialog.show{} # note: code inserted in the show block will run when the dialog is initialized
-		puts "number of textures in model: " + @lrs.nrProceduralTextures.to_s
-		# note: interface will be updated by code that is called when the procedural texture editor is loaded
+		puts "number of textures in model: " + @lrs.proceduralTextureNames.count.to_s
+		# note: interface should be updated by code that is called when the procedural texture editor is loaded
 	end
 	
 	def addTexture(name, texObject)
 		@textureCollection[name] = texObject
+	end
+	
+	def setActiveTexture(passedProcTex)
+		@activeProcTex = passedProcTex
 	end
 
 	def close

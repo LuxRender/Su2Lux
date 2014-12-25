@@ -27,32 +27,32 @@ class LuxrenderProceduralTexture
 		"bilerp" => ["color","float","fresnel"],
 		"blackbody" => ["color"],
 		"brick" => ["color","float"],
-		#"cauchy" => ["fresnel"],
+		"cauchy" => ["fresnel"],
 		"checkerboard" => ["float"],
 		"cloud" => ["float"],
 		"colordepth" => ["color"],
-		#"constant" => ["float","color","fresnel"],
+		"constant" => ["float","color","fresnel"],
 		"dots" => ["float"],
-		#"equalenergy" => ["color"],
+		"equalenergy" => ["color"],
 		"fbm" => ["float"],
 		"fresnelcolor" => ["fresnel"],
 		"fresnelname" => ["fresnel"],
 		"gaussian" => ["color"],
 		"harlequin" => ["color"],
-		#"lampspectrum" => ["color"],
+		"lampspectrum" => ["color"],
 		"marble" => ["color"],
 		"mix" => ["float","color","fresnel"],
-		#"multimix" => ["float","color","fresnel"],
+		"multimix" => ["float","color","fresnel"],
 		"normalmap" => ["float"],
 		"scale" => ["float","color","fresnel"],
-		#"sellmeier" => ["fresnel"],
+		"sellmeier" => ["fresnel"],
 		"subtract" => ["float","color"],
 		"tabulateddata" => ["color"],
 		"uv" => ["color"],
-		#"uvmask" => ["float"],
+		"uvmask" => ["float"],
 		"windy" => ["float"],
 		"wrinkled" => ["float"],
-		#"blender_blend" => ["float"],
+		"blender_blend" => ["float"],
 		"blender_clouds" => ["float"],
 		"blender_distortednoise" => ["float"],
 		"blender_noise" => ["float"],
@@ -66,65 +66,79 @@ class LuxrenderProceduralTexture
 	
 	@@textureParameters =
 	{
-		# texture types, data format: [texture parameter name, parameter type, default value]
-		'add' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["tex1","color",[1.0,1.0,1.0]],["tex2","color",[1.0,1.0,1.0]]],
-		'band' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["tex1","color",[1.0,1.0,1.0]],["tex2","color",[0.0,0.0,0.0]],["tex3","color",[1.0,1.0,1.0]],["tex4","color",[0.0,0.0,0.0]],["tex5","color",[1.0,1.0,1.0]],["tex6","color",[0.0,0.0,0.0]],["tex7","color",[1.0,1.0,1.0]],["tex8","color",[0.0,0.0,0.0]],["offsets","arrayf",""],["amount","texf",""]],
-		'bilerp' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["v00","color",[0.8,0.8,0.8]],["v01","color",[0.0,0.0,0.0]],["v10","color",[0.8,0.8,0.8]],["v11","color",[0.0,0.0,0.0]]],
-		'blackbody' =>  [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["temperature","float",6500.0]],
-		'brick' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["brickwidth","float",0.3],
+		# texture types, data format: [parameter SU2LUX name, parameter LuxRender name, parameter type, default value]
+		'add' => [["tex1","color",[1.0,1.0,1.0]],["tex2","color",[1.0,1.0,1.0]]],
+		'band' => [["tex1","color",[1.0,1.0,1.0]],["tex2","color",[0.0,0.0,0.0]],["tex3","color",[1.0,1.0,1.0]],["tex4","color",[0.0,0.0,0.0]],["tex5","color",[1.0,1.0,1.0]],["tex6","color",[0.0,0.0,0.0]],["tex7","color",[1.0,1.0,1.0]],["tex8","color",[0.0,0.0,0.0]],["offsets","arrayf",""],["amount","texf",""]],
+		'bilerp' => [["v00","color",[0.8,0.8,0.8]],["v01","color",[0.0,0.0,0.0]],["v10","color",[0.8,0.8,0.8]],["v11","color",[0.0,0.0,0.0]]],
+		'blackbody' => [["temperature","float",6500.0]],
+		'brick' => [["brickwidth","float",0.3],
 		["brickheight","float",0.1],["brickdepth","float",0.15],["mortarsize","float",0.01],["brickbevel","float",0.0],["brickrun","float",0.75],["brickbond","string","stacked"],["bricktex","color",[0.4,0.2,0.2]],["mortartex","color",[0.2,0.2,0.2]],["brickmodtex","float",1.0]],
-		'checkerboard' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["dimension","integer",2],["aamode","string","none"],["tex1","float",1.0],["tex2","float",0.0]],
-		'cloud' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["radius","float",0.5],["noisescale","float",0.5],["turbulence","float",0.01],["sharpness","float",6.0],["noiseoffset","float",0.0],["omega","float",0.75],["variability","float",0.9],["baseflatness","float",0.8],["spheresize","float",0.15],["spheres","integer",0],["octaves","integer",1]],
-		'colordepth' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["depth","float",1.0],["Kt","color",[0.0,0.0,0.0]]],
-		'densitygrid' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["density","floats",""],["nx","integer",1],["ny","integer",1],["nz","integer",1],["wrap","string","repeat"]],
-		'dots' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["inside","color",[1.0,1.0,1.0]],["outside","color",[0.0,0.0,0.0]]],
-		'exponential' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["origin","point",[0.0,0.0,0.0]],["updir","vector",[0.0,0.0,1.0]],["decay","float",1.0]],
-		'fbm' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["roughness","float",0.8],["octaves","integer",8]],
-		'fresnelname' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["filename","string",""],["name","string","aluminium"]],
-		'fresnelcolor' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["Kr","color",[0.5,0.5,0.5]]],
-		'gaussian' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["energy","float",1.0],["wavelength","float",550.0],["width","float",50.0]],
+		'checkerboard' => [["dimension","integer",2],["aamode","string","none"],["tex1","float",1.0],["tex2","float",0.0]],
+		'cloud' => [["radius","float",0.5],["noisescale","float",0.5],["turbulence","float",0.01],["sharpness","float",6.0],["noiseoffset","float",0.0],["omega","float",0.75],["variability","float",0.9],["baseflatness","float",0.8],["spheresize","float",0.15],["spheres","integer",0],["octaves","integer",1]],
+		'colordepth' => [["depth","float",1.0],["Kt","color",[0.0,0.0,0.0]]],
+		'densitygrid' => [["density","floats",""],["nx","integer",1],["ny","integer",1],["nz","integer",1],["wrap","string","repeat"]],
+		'dots' => [["inside","color",[1.0,1.0,1.0]],["outside","color",[0.0,0.0,0.0]]],
+		'exponential' => [["origin","point",[0.0,0.0,0.0]],["updir","vector",[0.0,0.0,1.0]],["decay","float",1.0]],
+		'fbm' => [["roughness","float",0.8],["octaves","integer",8]],
+		'fresnelname' => [["filename","string",""],["name","string","aluminium"]],
+		'fresnelcolor' => [["Kr","color",[0.5,0.5,0.5]]],
+		'gaussian' => [["energy","float",1.0],["wavelength","float",550.0],["width","float",50.0]],
 		'harlequin' => [],
-		'imagemap' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["filename","string",""],["wrap","string",""],["filtertype","string","bilinear"],["maxanisotropy","float",8.0],["trilinear","boolean",false],["channel","string","mean"],["gamma","float",2.2],["gain","float",1.0]],
-		'marble' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["octaves","integer",8],["roughness","float",0.5],["scale","float",1.0],["variation","float",0.2]],
-		'mix' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["tex1","color",[0.0,0.0,0.0]],["tex2","color",[1.0,1.0,1.0]],["scale","float",1.0],["variation","float",0.2]],
-		'normalmap' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["filename","string",""],["wrap","string",""],["filtertype","string","bilinear"],["maxanisotropy","float",8.0],["trilinear","boolean",false],["channel","string","mean"],["gamma","float",1.0],["gain","float",1.0]],
-		'scale' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["value","color",[1.0,1.0,1.0]],["tex1","color",[1.0,1.0,1.0]],["tex2","color",[1.0,1.0,1.0]]],
-		'subtract' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["tex1","color",[1.0,1.0,1.0]],["tex2","color",[1.0,1.0,1.0]]],
-		'tabulateddata' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["filename","string",""]],
-		'windy' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],],
-		'wrinkled' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["octaves","integer",8],["roughness","float",0.5]],
-		'blender_clouds' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["noisetype","string","soft_noise"],["noisebasis","string","blender_original"],["noisesize","float",0.25],["noisedepth","integer",2],["bright","float",1.0],["contrast","float",1.0]],
-		'blender_distortednoise' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["type","string","blender_original"],["noisebasis","string","blender_original"],["noisesize","float",0.25],["distamount","float",1.0],["noisedepth","integer",2],["bright","float",1.0],["contrast","float",1.0]],
-		'blender_noise' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"]],
-		'blender_magic' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"]],
-		'blender_marble' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["noisesize","float",0.25],["noisedepth","integer",2],["turbulence","float",5.0],["type","string","soft"],["noisetype","string","hard_noise"],["noisebasis","string","sin"],["noisebasis2","string","blender_original"],["bright","float",1.0],["contrast","float",1.0]],
-		'blender_musgrave' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["h","float",1.0],["lacu","float",2.0],["octs","float",2.0],["gain","float",1.0],["offset","float",1.0],["noisesize","float",0.25],["outscale","float",1.0],["type","string","multifractal"],["noisebasis","string","blender_original"],["bright","float",1.0],["contrast","float",1.0]],
-		'blender_stucci' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["type","string","plastic"],["noisetype","string","soft_noise"],["noisebasis","string","blender_original"],["turbulence","float",5.0],["bright","float",1.0],["contrast","float",1.0]],
-		'blender_wood' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["type","string","bands"],["noisetype","string","soft_noise"],["noisebasis","string","blender_original"],["noisebasis2","string","sin"],["noisesize","float",0.25],["turbulence","float",5.0],["bright","float",1.0],["contrast","float",1.0]],
-		'blender_voronoi' => [["vectortranslate","vector",[0.0,0.0,0.0]],["vectorrotate","vector",[0.0,0.0,0.0]],["vectorscale","vector",[1.0,1.0,1.0]],["coordinates","string","global"],["distmetric","string","actual_distance"],["minkowsky_exp","float",2.5],["noisesize","float",0.25],["nabla","float",0.025],["w1","float",1.0],["w2","float",0.0],["w3","float",0.0],["w4","float",0.0],["bright","float",1.0],["contrast","float",1.0]]
+		'imagemap' => [["filename","string",""],["wrap","string",""],["filtertype","string","bilinear"],["maxanisotropy","float",8.0],["trilinear","boolean",false],["channel","string","mean"],["gamma","float",2.2],["gain","float",1.0]],
+		'marble' => [["octaves","integer",8],["roughness","float",0.5],["scale","float",1.0],["variation","float",0.2]],
+		'mix' => [["tex1","color",[0.0,0.0,0.0]],["tex2","color",[1.0,1.0,1.0]],["scale","float",1.0],["variation","float",0.2]],
+		'normalmap' => [["filename","string",""],["wrap","string",""],["filtertype","string","bilinear"],["maxanisotropy","float",8.0],["trilinear","boolean",false],["channel","string","mean"],["gamma","float",1.0],["gain","float",1.0]],
+		'scale' => [["value","color",[1.0,1.0,1.0]],["tex1","color",[1.0,1.0,1.0]],["tex2","color",[1.0,1.0,1.0]]],
+		'subtract' => [["tex1","color",[1.0,1.0,1.0]],["tex2","color",[1.0,1.0,1.0]]],
+		'tabulateddata' => [["filename","string",""]],
+		'windy' => [],
+		'wrinkled' => [["octaves","integer",8],["roughness","float",0.5]],
+		'blender_clouds' => [["noisetype","string","soft_noise"],["noisebasis","string","blender_original"],["noisesize","float",0.25],["noisedepth","integer",2],["bright","float",1.0],["contrast","float",1.0]],
+		'blender_distortednoise' => [["type","string","blender_original"],["noisebasis","string","blender_original"],["noisesize","float",0.25],["distamount","float",1.0],["noisedepth","integer",2],["bright","float",1.0],["contrast","float",1.0]],
+		'blender_noise' => [["coordinates","string","global"]],
+		'blender_magic' => [["coordinates","string","global"]],
+		'blender_marble' => [["noisesize","float",0.25],["noisedepth","integer",2],["turbulence","float",5.0],["type","string","soft"],["noisetype","string","hard_noise"],["noisebasis","string","sin"],["noisebasis2","string","blender_original"],["bright","float",1.0],["contrast","float",1.0]],
+		'blender_musgrave' => [["h","float",1.0],["lacu","float",2.0],["octs","float",2.0],["gain","float",1.0],["offset","float",1.0],["noisesize","float",0.25],["outscale","float",1.0],["type","string","multifractal"],["noisebasis","string","blender_original"],["bright","float",1.0],["contrast","float",1.0]],
+		'blender_stucci' => [["type","string","plastic"],["noisetype","string","soft_noise"],["noisebasis","string","blender_original"],["turbulence","float",5.0],["bright","float",1.0],["contrast","float",1.0]],
+		'blender_wood' => [["type","string","bands"],["noisetype","string","soft_noise"],["noisebasis","string","blender_original"],["noisebasis2","string","sin"],["noisesize","float",0.25],["turbulence","float",5.0],["bright","float",1.0],["contrast","float",1.0]],
+		'blender_voronoi' => [["distmetric","string","actual_distance"],["minkowsky_exp","float",2.5],["noisesize","float",0.25],["nabla","float",0.025],["w1","float",1.0],["w2","float",0.0],["w3","float",0.0],["w4","float",0.0],["bright","float",1.0],["contrast","float",1.0]]
 	}
+	
+	@@transformationParameters = # parameter, default
+	{
+		'vectortranslateX' => 0.0,
+		'vectortranslateY' => 0.0,
+		'vectortranslateZ' => 0.0,
+		'vectorrotateX' => 0.0,
+		'vectorrotateY' => 0.0,
+		'vectorrotateZ' => 0.0,
+		'vectorscaleX' => 1.0,
+		'vectorscaleY' => 1.0,
+		'vectorscaleZ' => 1.0,
+	}
+	
+	@@hasTransformation = ["brick", "checkerboard", "cloud", "dots", "fbm", "marble", "windy", "wrinkled", "blender_clouds", "blender_distorted_noise", "blender_noise", "blender_magic", "blender_marble", "blender_musgrave", "blender_stucci", "blender_wood", "blender_voronoi"]
 	
 	##
 	#
 	##
-	def initialize(createNew, procEditor, lrs, passedParam) # passedParam is texture type: marble, checkerboard, ...
+	def initialize(createNew, procEditor, lrs, passedParam, texName) # passedParam is texture type (marble, checkerboard) or object number
 		@lrs = lrs
 		@procTexEditor = procEditor
+		@name = texName
 		
 		# create attribute dictionary
 		@attributeDictionary = @procTexEditor.getTextureDictionary()
 		
 		if createNew == true # create new object from scratch
 			textureType = passedParam
-		
-			# create name based on number of stored procedural materials in scene
-			@name = "procTex_" + @lrs.nrProceduralTextures.to_s
-			@procTexEditor.addTexture(name, self) # add texture to collection in current texture editor
 			
-			# update number of procedural materials in the scene
-			@lrs.nrProceduralTextures += 1
+			# add texture name to @lrs
+			namesArray = @lrs.proceduralTextureNames
+			namesArray << name
+			@lrs.proceduralTextureNames = namesArray
 
-			# write texture type name to attribute dictionary # marble, checkerboard, ...
+			# write texture type and name to attribute dictionary # marble, checkerboard, ...
 			@attributeDictionary.set_attribute(@name, "textureType", textureType)
 			@attributeDictionary.set_attribute(@name, "name", @name)
 			
@@ -132,21 +146,20 @@ class LuxrenderProceduralTexture
 			@attributeDictionary.set_attribute(@name, "procTexChannel", @@textureTypes[textureType][0])
 			
 			# for all textureType parameters, write values to attribute dictionary
-			propertyList = @@textureParameters[passedParam]
-			propertyList.each do |propertySet| 
-				@attributeDictionary.set_attribute(@name, propertySet[0], propertySet[2])
-			end
+			#propertyList = @@textureParameters[textureType]
+			#propertyList.each do |propertySet| 
+			#	@attributeDictionary.set_attribute(@name, propertySet[0], propertySet[2])
+			#end
 		
 		else # create object based on existing data in attribute dictionary
-			objectNr = passedParam
-			
 			# set @name and @attributeDictionary
-			@name = "procTex_" + objectNr.to_s
-			@procTexEditor.addTexture(name, self) # add texture to collection in current texture editor
 			@attributeDictionary.set_attribute(@name, "name", @name)
 			puts "getting dictionary object"
 			@attributeDictionary.load_from_model(@name)
 		end
+		
+		@procTexEditor.addTexture(name, self) # add texture to collection in current texture editor
+		@procTexEditor.setActiveTexture(self)
 	end
 
 	def setValue(property, value)
@@ -162,17 +175,25 @@ class LuxrenderProceduralTexture
 	def getValues()
 		passedVariableLists = []
 		texType = getTexType()
-		puts texType
 		@@textureParameters[texType].each do |propertySet|
 			puts propertySet
 			# get value from dictionary, or use default value if no value has been stored
 			varValue = @attributeDictionary.get_attribute(name, propertySet[0].to_s, propertySet[2])
 			passedVariableLists << [propertySet[0],propertySet[1],varValue]
-		end	
-		puts "passedVariableList:"
-		puts passedVariableLists
+		end
 		return passedVariableLists
 	end
+	
+	def getTranformationValues()
+		passedVariableLists = []
+		texType = getTexType()
+		@@transformationParameters.each do |key, value|
+			varValue = @attributeDictionary.get_attribute(name, key, value)
+			passedVariableLists << [key, varValue]
+		end
+		return passedVariableLists
+	end
+	
 	
 	def getFormattedValues()
 		unformattedValues = getValues()
@@ -202,6 +223,30 @@ class LuxrenderProceduralTexture
 		puts "returning values:"
 		puts formattedValues
 		return formattedValues
+	end
+	
+	def getTransformations()
+		# create empty list	
+		transformList = []
+		# check if item has transformation
+		if @@hasTransformation.include? getTexType()
+			# if so, combine properties into nice strings
+			co = @attributeDictionary.get_attribute(name, "coordinates", "global")
+			transformList << '"string coordinates" ["' + co + '"]'     
+			tX = @attributeDictionary.get_attribute(name, "vectortranslateX", 0.0).to_s
+			tY = @attributeDictionary.get_attribute(name, "vectortranslateY", 0.0).to_s
+			tZ = @attributeDictionary.get_attribute(name, "vectortranslateZ", 0.0).to_s
+			transformList << '"vector translate" [' + tX + ' ' + tY + ' ' + tX + ']'
+			rX = @attributeDictionary.get_attribute(name, "vectorrotateX", 0.0).to_s
+			rY = @attributeDictionary.get_attribute(name, "vectorrotateY", 0.0).to_s
+			rZ = @attributeDictionary.get_attribute(name, "vectorrotateZ", 0.0).to_s
+			transformList << '"vector rotate" [' + rX + ' ' + rY + ' ' + rZ + ']'
+			sX = @attributeDictionary.get_attribute(name, "vectorscaleX", 1.0).to_s
+			sY = @attributeDictionary.get_attribute(name, "vectorscaleY", 1.0).to_s
+			sZ = @attributeDictionary.get_attribute(name, "vectorscaleZ", 1.0).to_s
+			transformList << '"vector scale" [' + sX + ' ' + sY + ' ' + sZ + ']'
+		end
+		return transformList
 	end
 	
 	def self.getTexChannels(texType)

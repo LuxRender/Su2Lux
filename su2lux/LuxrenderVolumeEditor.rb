@@ -100,10 +100,10 @@ class LuxrenderVolumeEditor
 					# create a volume object
 					volumeObject = LuxrenderVolume.new(true, self, @material_editor, @lrs, volumeName[0])
 				
-					# add texture to dropdown 
+					# add volume to dropdown 
 					@volume_dialog.execute_script('addToVolumeList("' + volumeName[0] + '")')
 				
-					# show texture type chooser in interface	
+					# show volume type chooser in interface	
 					@volume_dialog.execute_script('$("#volume_type_area").show()')			
 				
 					# show relevant parameters in interface
@@ -150,7 +150,7 @@ class LuxrenderVolumeEditor
 			puts "volumeObject is " + volumeObject.to_s
 			
 			# store texture type in material
-			puts "storing material type"
+			puts "storing volume type"
 			volumeObject.setValue("volumeType",params[0])
 			puts "getTexType " + volumeObject.getValue("volumeType")
 			

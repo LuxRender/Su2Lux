@@ -38,14 +38,7 @@ class LuxrenderMaterialEditor
 		material_editor_dialog_path = Sketchup.find_support_file("materialeditor.html", "Plugins/su2lux")
 		@material_editor_dialog.max_width = 800
 		@material_editor_dialog.set_file(material_editor_dialog_path)
-		# add procedural texture names to all dropdowns
-		#or i in 0..@lrs.nrProceduralTextures-1
-		#	# note: procedural texture objects have not been initialised at this stage, so we have to use class methods
-		#	texName = "procTex_" + i.to_s
-		#	channel = LuxrenderProceduralTexture.getChannelType(texName)
-		#	@material_editor_dialog.execute_script('addToProcTextList("' + texName + '","' + channel + '")')
-		#end
-        @collectedmixmaterials = []
+	    @collectedmixmaterials = []
         @collectedmixmaterials_i = 0
         
         @color_picker = UI::WebDialog.new("Color Picker - material", false, "ColorPicker", 410, 200, 200, 350, true)
@@ -812,11 +805,11 @@ class LuxrenderMaterialEditor
         @material_editor_dialog.execute_script(setdivheightcmd)
 		
 		# add procedural textures to dropdown
-		puts "LuxRenderMaterialEditor.rb adding " + @lrs.nrProceduralTextures.to_s + " procedural textures to texture dropdown menus"
-		for i in 0..@lrs.nrProceduralTextures-1
+		puts "LuxRenderMaterialEditor.rb adding procedural textures to texture dropdown menus"
+		for texName in @lrs.proceduralTextureNames
 			# get texture name, then texture type
-			texChannelType = LuxrenderProceduralTexture.getChannelType("procTex_" + i.to_s)
-			@material_editor_dialog.execute_script('addToProcTextList("procTex_' + i.to_s + '","' + texChannelType + '")')
+			texChannelType = LuxrenderProceduralTexture.getChannelType(texName)
+			@material_editor_dialog.execute_script('addToProcTextList("' + texName + '","' + texChannelType + '")')
 		end   		
 	end
     

@@ -1470,9 +1470,16 @@ class LuxrenderExport
 			# get and write texture properties
 			propLists = texObject.getFormattedValues()
 			propLists.each {|propList|
-				puts "getFormattedValues item:"
+				puts "getFormattedValues writing item:"
 				puts propList
 				out.puts "\t" + "\"" + propList[0] + "\" [" + propList[1].to_s + "]"
+			}
+			# get and write texture transformation
+			transLists = texObject.getTransformations()
+			transLists.each{|transformItem|
+				puts "getFormattedValues writing transformation:"
+				puts transformItem
+				out.puts "\t" + transformItem
 			}
 			out.puts ""
 		end

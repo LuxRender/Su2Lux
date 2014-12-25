@@ -1024,11 +1024,12 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 		
 		# recreate procedural textures: for each of the textures, create procedural texture object
         puts "onOpenModel processing procedural textures"
-		nrProcTextures = lrs.nrProceduralTextures
-		puts "recreating procedural texture objects, number of objects: " + nrProcTextures.to_s
-		for i in 0..nrProcTextures-1
-			newTex = LuxrenderProceduralTexture.new(false, procEditor, lrs, i)
+		procTextureNames = lrs.proceduralTextureNames
+		puts "recreating procedural texture objects"
+		for texName in procTextureNames
+			newTex = LuxrenderProceduralTexture.new(false, procEditor, lrs, nil, texName)
 		end
+		procEditor.updateGUI()
 		
 		puts "onOpenModel creating volume editor"  
         volume_editor = SU2LUX.create_volume_editor(model_id, material_editor, lrs)

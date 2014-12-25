@@ -192,7 +192,8 @@ class LuxrenderSettings
 		
 		@settings_texture_and_volume = {
 			### helper value for procedural materials ###
-			'nrProceduralTextures' => 0,
+			'proceduralTextureNames' => [],
+			#'nrProceduralTextures' => 0,
 			'volumeNames' => [],
 			'colorpicker' => "diffuse_swatch",
 			'colorpicker_volume' => "vol_absorption_swatch",

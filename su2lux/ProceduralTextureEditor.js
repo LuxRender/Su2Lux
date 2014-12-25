@@ -15,7 +15,7 @@ function displayTextureInterface(texType){
 	$('#textypedropdownarea').show();
 	$("#texture_types").val(texType)
 	$('#texturechanneldropdownarea').show();
-	$("#" + texType).show();
+	$("." + texType).show();
 }
 
 function setTextureNameDropdown(texName){
@@ -26,26 +26,26 @@ function setTextureNameDropdown(texName){
 
 $(document).ready(	
     function() {
-		// hide texture and chanel type dropdowns if no material has been created
+		// hide texture and channel type dropdowns if no material has been created
 		if ($('#textures_in_model').val() == 'bogus'){
 			$('#textypedropdownarea').hide();
 			$('#texturechanneldropdownarea').hide();
 		}
 		
-		$('.texfield').hide(); // hides irrelevant material properties
+		$('.parameter_container').hide(); // hides irrelevant material properties
 		
 		window.location = 'skp:show_texData@'
              
 		$('input[id="create_procedural_texture"]').click(
             function()
             {
-				$('#textypedropdownarea').show();
-				$('#texturechanneldropdownarea').show();
+				//$('#textypedropdownarea').show(); // this should only happen if a valid name is provided, we do not yet know if this is the case
+				//$('#texturechanneldropdownarea').show();
 				//alert('setting marble');
 				var defaultType = "marble";
-				$("#texture_types").val(defaultType); // sets type in dropdown
-				$('.texfield').hide(); // hide all texture fields
-				$("#"+defaultType).show(); // show right texture field
+				//$("#texture_types").val(defaultType); // sets type in dropdown
+				//$('.parameter_container').hide(); // hide all texture fields
+				//$("."+defaultType).show(); // show right texture field
                 window.location = 'skp:create_procedural_texture@' + defaultType; // creates new procedural texture
             }
         )
@@ -61,8 +61,8 @@ $(document).ready(
 		$("#texture_types").change( // add, band, bilerp, ...
 			function()
 			{
-				$('.texfield').hide(); // hide all texture fields
-				$("#"+this.value).show(); // show selected field
+				$('.parameter_container').hide(); // hide all texture fields
+				$("."+this.value).show(); // show selected field
 				paramString = $('#textures_in_model').val() + '|textureType|' + $('#texture_types').val() + '|' + $('#procTexChannel').val();
 				//alert(paramString);
 				window.location = 'skp:update_texType@' + paramString;
@@ -74,7 +74,7 @@ $(document).ready(
 			{
 				// call ruby function that deals with change
 				var texType = $("#textures_in_model").val();
-				var passedParameters = texType + "|" +  $("#texture_types").val() + "_procTexChannel|" + this.value;
+				var passedParameters = "procTexChannel|" + this.value;
 				window.location = 'skp:set_param@' + passedParameters;
 			}
 		)
@@ -84,14 +84,22 @@ $(document).ready(
 			function()
 			{
 				// get parameter name and value
-				var texType = $("#textures_in_model").val();
+				//var texType = $("#textures_in_model").val();
 				var parameterName = this.id; // for example marble_octaves
 				var parameterValue = this.value; // for example 3
 				// call ruby function that deals with change
-				var passedParameters = texType + "|" + parameterName + "|" + parameterValue;
+				var passedParameters = parameterName + "|" + parameterValue;
 				window.location = 'skp:set_param@' + passedParameters;
 			}
 		)		
+				
+		$(".vectorparam").change(
+			function()
+			{
+				window.location = 'skp:set_param@' + this.id + "|" + this.value;
+			}
+		)		
+				
 		
 	}		
 )
