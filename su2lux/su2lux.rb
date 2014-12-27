@@ -120,7 +120,7 @@ module SU2LUX
         Dir.mkdir(@material_preview_path) unless File.exists?(@material_preview_path)
         required_files = ["preview.lxs01","preview.lxs02","preview.lxs03","ansi.txt"]
         for required_file_name in required_files
-            old_path = File.dirname(File.expand_path(__FILE__)) + "\/su2lux\/" + required_file_name
+            old_path = File.dirname(File.expand_path(__FILE__)) + "\/" + required_file_name
             new_path = os.get_variables["material_preview_path"] + required_file_name
             FileUtils.copy_file(old_path,new_path) unless File.exists?(new_path)
         end
