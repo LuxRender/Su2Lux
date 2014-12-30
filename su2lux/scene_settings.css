@@ -123,6 +123,12 @@
     left: 0em;
 }
 
+#pickfocaldistance{
+	position: absolute;
+	top: -0.1em;
+	left: 23em;
+}
+
 #view{
     position: relative;
     top: 1em;

@@ -33,8 +33,8 @@ end
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.44rc"
-    SU2LUX_DATE = "27 December 2014" # to be updated in about.html manually
+    SU2LUX_VERSION = "0.44rc2"
+    SU2LUX_DATE = "29 December 2014" # to be updated in about.html manually
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
 	PLUGIN_FOLDER = "su2lux"
@@ -150,6 +150,18 @@ module SU2LUX
 		@selected=false
 		@model_name=""
 	end # END reset_variables
+  
+	##
+	#	run focus script
+	##
+	
+	def SU2LUX.focus
+		puts "running focus tool"
+		focusTest = FocusTool.new(Sketchup.active_model.definitions.entityID)
+		Sketchup.active_model.select_tool(focusTest)
+		#focusTest.activate()
+		puts "done running focus tool"
+	end
   
 	##
 	# exporting geometry, lights, materials and settings to a LuxRender file
@@ -1029,8 +1041,9 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 		for texName in procTextureNames
 			newTex = LuxrenderProceduralTexture.new(false, procEditor, lrs, nil, texName)
 		end
-		procEditor.updateGUI()
-		
+		if(procEditor.activeProcTex)
+			procEditor.updateGUI()
+		end
 		puts "onOpenModel creating volume editor"  
         volume_editor = SU2LUX.create_volume_editor(model_id, material_editor, lrs)
 		
@@ -1218,6 +1231,7 @@ if( not file_loaded?(__FILE__))
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderMeshCollector.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderExport.rb")
     load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderToolbar.rb")
+	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderFocus.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "SU2LUX_UV.rb")
 
     # initialize, set active material

@@ -18,7 +18,7 @@
 
 class LuxrenderProceduralTexturesEditor
 
-	attr_reader :procedural_textures_dialog
+	attr_reader :procedural_textures_dialog, :activeProcTex
 	##
 	#
 	##

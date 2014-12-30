@@ -211,7 +211,7 @@ class LuxrenderSettings
 			'aperture' => 2.8,
 			'focaldistance' => 1.0,
 			'frameaspectratio' => 1.333333,
-			'autofocus' => true,
+			'autofocus' => false,
 			'fov' => format("%.2f", Sketchup.active_model.active_view.camera.fov), # camera angle, not currently in use
 			'distribution' => 'uniform',
 			'power' => 1,
@@ -219,7 +219,7 @@ class LuxrenderSettings
 			'camera_scale' => 7.31, #seems to work only in Blender
 			'use_clipping' => false, #GUI
 			'use_dof_bokeh'=>false, #GUI
-			'focus_type' => 'autofocus', #GUI
+			'focus_type' => 'manual', #GUI
 			'use_architectural'=>false, #GUI
 			'shiftX' => 0.0, #GUI
 			'shiftY' => 0.0, #GUI

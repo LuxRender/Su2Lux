@@ -263,6 +263,13 @@ class LuxrenderSceneSettingsEditor
 			UI.start_timer(0.5, false) { self.show }
 			# self.show
 		}
+		
+		@scene_settings_dialog.add_action_callback("set_focal_distance"){|dialog, params|
+			puts "running focus tool from scene settings editor"
+			focusTest = FocusTool.new(@scene_id, @lrs)
+			Sketchup.active_model.select_tool(focusTest)
+			puts "done running focus tool"
+		}
         
         @scene_settings_dialog.add_action_callback("scene_setting_loaded"){|dialog,params|
             sendDataFromSketchup

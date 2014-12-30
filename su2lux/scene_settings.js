@@ -299,6 +299,12 @@ $(document).ready(
 			}
 		)
 
+		$("#pickfocaldistance").click(
+			function()
+			{
+				window.location = 'skp:set_focal_distance@'
+			}
+		)
 		
 		$("#reset").click(
 			function()
