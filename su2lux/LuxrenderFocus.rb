@@ -56,7 +56,7 @@ def onLButtonDown(flags, x, y, view)
 			@lrs.send('focaldistance=', focusDistance)
 	
 			# prevent further input
-			Sketchup::set_status_text("focus distance set to " focusDistance.to_s, SB_VCB_LABEL)
+			Sketchup::set_status_text("focus distance set to " + focusDistance.to_s, SB_VCB_LABEL)
 			@gotPoint = true
 		end
 	end
