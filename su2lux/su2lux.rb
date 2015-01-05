@@ -33,8 +33,8 @@ end
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.44rc2"
-    SU2LUX_DATE = "29 December 2014" # to be updated in about.html manually
+    SU2LUX_VERSION = "0.44rc3"
+    SU2LUX_DATE = "5 January 2014" # to be updated in about.html manually
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
 	PLUGIN_FOLDER = "su2lux"
@@ -65,8 +65,8 @@ module SU2LUX
 	#
 	##
 	def SU2LUX.create_observers(model)
-		$SU2LUX_view_observer = SU2LUX_view_observer.new
-		model.active_view.add_observer($SU2LUX_view_observer)
+		#$SU2LUX_view_observer = SU2LUX_view_observer.new
+		#model.active_view.add_observer($SU2LUX_view_observer)
 		#$SU2LUX_rendering_options_observer = SU2LUX_rendering_options_observer.new
 		#model.rendering_options.add_observer($SU2LUX_rendering_options_observer)
 		$SU2LUX_materials_observer = SU2LUX_materials_observer.new
@@ -877,40 +877,39 @@ class SU2LUX_model_observer < Sketchup::ModelObserver
     #end
 end
 
-class SU2LUX_view_observer < Sketchup::ViewObserver
-	include SU2LUX
-	def onViewChanged(view)
+#class SU2LUX_view_observer < Sketchup::ViewObserver
+	#include SU2LUX
+	#def onViewChanged(view)
         #puts "onViewChanged observer triggered" # note: floods the ruby console when adjusting view
-        scene_id = Sketchup.active_model.definitions.entityID
-		scene_settings_editor = SU2LUX.get_editor(scene_id,"scenesettings")
-		lrs = SU2LUX.get_lrs(scene_id)
+        #scene_id = Sketchup.active_model.definitions.entityID
+		#scene_settings_editor = SU2LUX.get_editor(scene_id,"scenesettings")
+		#lrs = SU2LUX.get_lrs(scene_id)
         # if not environment:
-        if (lrs.camera_type != 'environment')
-            if Sketchup.active_model.active_view.camera.perspective?
-			    lrs.camera_type = 'perspective'
-			    # camera_type = 'perspective'
-		    else
-			    lrs.camera_type = 'orthographic'
-			    # camera_type = 'orthographic'
-            end
-        end
+        #if (lrs.camera_type != 'environment')
+        #    if Sketchup.active_model.active_view.camera.perspective?
+		#	    lrs.camera_type = 'perspective'
+		#	    # camera_type = 'perspective'
+		#    else
+		#	    lrs.camera_type = 'orthographic'
+		#	    # camera_type = 'orthographic'
+        #	end
+        #end
                       
-		if (scene_settings_editor)
-			if (Sketchup.active_model.active_view.camera.perspective?)
-				fov = Sketchup.active_model.active_view.camera.fov
-				fov = format("%.2f", fov)
-				lrs.fov = fov
-				scene_settings_editor.setValue("fov", fov)
-				focal_length = Sketchup.active_model.active_view.camera.focal_length
-				focal_length = format("%.2f", focal_length)
-				lrs.focal_length = focal_length
-				scene_settings_editor.setValue("focal_length", focal_length)
-			end
-			scene_settings_editor.setValue("camera_type", lrs.camera_type)
-		end
-	end # END onViewChanged
-	
-end # END class SU2LUX_view_observer
+		#if (scene_settings_editor)
+		#	if (Sketchup.active_model.active_view.camera.perspective?)
+		#		fov = Sketchup.active_model.active_view.camera.fov
+		#		fov = format("%.2f", fov)
+		#		lrs.fov = fov
+		#		scene_settings_editor.setValue("fov", fov)
+		#		focal_length = Sketchup.active_model.active_view.camera.focal_length
+		#		focal_length = format("%.2f", focal_length)
+		#		#lrs.focal_length = focal_length
+		#		#scene_settings_editor.setValue("focal_length", focal_length)
+		#	end
+		#	scene_settings_editor.setValue("camera_type", lrs.camera_type)
+		#end
+	#end # END onViewChanged
+#end # END class SU2LUX_view_observer
 
 class SU2LUX_app_observer < Sketchup::AppObserver
 	def onNewModel(model)

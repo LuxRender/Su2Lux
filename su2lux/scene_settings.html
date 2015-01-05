@@ -15,23 +15,22 @@
 <p class="header" id="camera">Camera</p>
 <div class="collapse">
     Select camera type:	<select id="camera_type">
-        <option value="perspective">perspective</option>
-        <option value="orthographic">orthographic</option>
+        <option value="SketchUp">SketchUp</option>
         <option value="environment">environment</option>
     </select><br><br>
-    <div id="view" class="perspective">
+    <!--- <div id="view" class="perspective">
         <label for="fov">fov:</label>
         <input type='text' id="fov" size="10">
         <label for="focal_length">focal length:</label>
         <input type='text' id="focal_length" size="10">
-    </div>
+    </div> -->
     <!-- the scale parameter is not currently used; this should be reimplemented in such a way
          that the user can either specify an exact scale (image size in meters) or use the current 3d view scale
         <div id="scale_view" class="orthographic">
         <label for="camera_scale">scale:</label>
         <input type='text' id="camera_scale" size="4">
     </div> -->
-    <div id="near_far_clipping_block" class="perspective orthographic environment">
+    <div id="near_far_clipping_block" class="SketchUp environment">
         <input type="checkbox" id="use_clipping">
             <label for="use_clipping">Use clipping</label>
         <div class="collapse">
@@ -46,7 +45,7 @@
         </div>
     </div>
     
-    <div id="dof_bokeh_block" class="perspective orthographic">
+    <div id="dof_bokeh_block" class="SketchUp">
         <div>
             <input type="checkbox" id="use_dof_bokeh">
             <label for="use_dof_bokeh">Use depth of field</label>
@@ -86,7 +85,7 @@
         
     </div> <!-- END dof_bokeh_block -->
     
-    <div id="architectural_block" class="perspective"> <!-- removed for orthographic view, shift can be more easily set in 3d view -->
+    <!-- <div id="architectural_block" class="SketchUp"> # removed for orthographic view, shift can be more easily set in 3d view 
         <input type="checkbox" id="use_architectural">
         <label for="use_architectural">Use lens shift</label>
         <div class="collapse">
@@ -103,9 +102,9 @@
             <input type="checkbox" id="use_ratio">
             <div class ="collapse">
                 Aspect ratio<input type='text' id="frameaspectratio" size="10">
-            </div> -->
+            </div>
         </div>
-    </div> <!-- END architectural_block -->
+    </div> # END architectural_block -->
     
     <!-- <div id="motion_blur_block" class="perspective orthographic environment">
     <p class="header2">Motion Blur</p>

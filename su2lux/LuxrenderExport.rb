@@ -105,13 +105,21 @@ class LuxrenderExport
 
 		camera_scale = 1.0
         
-		out.puts "Camera \"#{@lrs.camera_type}\""
-		case @lrs.camera_type
+		camType = 'environment'
+		if (@lrs.camera_type == 'SketchUp')
+			# check if sketchup view is perspective
+			camType = Sketchup.active_model.active_view.camera.perspective? ? 'perspective' : 'orthographic'
+		end
+		
+		out.puts "Camera \"#{camType}\""
+		case camType
 			when "perspective"
                 #puts "perspective camera, resolution:"
                 #puts @lrs.fleximage_xresolution
                 #puts @lrs.fleximage_yresolution
+				
 				fov = compute_fov(@lrs.fleximage_xresolution, @lrs.fleximage_yresolution)
+				
                 #puts "fov:"
                 #puts fov
 				out.puts "	\"float fov\" [%.6f" %(fov) + "]"
@@ -128,7 +136,8 @@ class LuxrenderExport
 		
 		
 		if (@lrs.use_dof_bokeh)
-            radiusfromaperture = 0.0005 * @lrs.focal_length.to_f / @lrs.aperture.to_f
+			focal_length = format("%.2f", Sketchup.active_model.active_view.camera.focal_length)
+            radiusfromaperture = 0.0005 * focal_length.to_f / @lrs.aperture.to_f
 			out.puts "\t\"float lensradius\" [%.6f" %(radiusfromaperture) + "]"
 			case @lrs.focus_type
 				when "autofocus"
@@ -154,7 +163,7 @@ class LuxrenderExport
 			out.puts "\t\"string shutterdistribution\" [\"" + @lrs.shutterdistribution + "\"]"
 		end
         puts "about to compute screen window"
-		sw = compute_screen_window
+		sw = compute_screen_window(camType)
 		out.puts	"\t\"float screenwindow\" [" + "%.6f" %(sw[0]) + " " + "%.6f" %(sw[1]) + " " + "%.6f" %(sw[2]) + " " + "%.6f" %(sw[3]) +"]\n"
 		out.print "\n"
 	end # END export_camera
@@ -241,7 +250,7 @@ class LuxrenderExport
 		return fov
 	end # END compute_fov
 
-	def compute_screen_window
+	def compute_screen_window(camType)
         cam_shiftX = 0.0
 		cam_shiftY = 0.0
         # if lens shift is on
@@ -295,16 +304,16 @@ class LuxrenderExport
         #puts target_fraction_y_skp
         # end two point perspective logic
         
-        if (@lrs.camera_type=='orthographic')
+        if(camType == 'orthographic')
             imageheight = Sketchup.active_model.active_view.camera.height.to_m
             imagewidth = ratio * imageheight
             screen_window = [-0.5*imagewidth, 0.5*imagewidth, -0.5*imageheight, 0.5*imageheight] # lens shift not used here
         else # perspective or environment
-        if (ratio > 1.0)
-            screen_window = [2 * cam_shiftX - ratio + offsetx, 2 * cam_shiftX + ratio + offsetx, 2 * cam_shiftY - 1.0 + offsety, 2 * cam_shiftY + 1.0 + offsety]
-            #screen_window = [2 * cam_shiftX - ratio, 2 * cam_shiftX + ratio, 2 * cam_shiftY - 1.0, 2 * cam_shiftY + 1.0]
-            else
-            screen_window = [2 * cam_shiftX - 1.0 + offsetx, 2 * cam_shiftX + 1.0 + offsetx, 2 * cam_shiftY - inv_ratio + offsety, 2 * cam_shiftY + inv_ratio + offsety]
+			if(ratio > 1.0)
+				screen_window = [2 * cam_shiftX - ratio + offsetx, 2 * cam_shiftX + ratio + offsetx, 2 * cam_shiftY - 1.0 + offsety, 2 * cam_shiftY + 1.0 + offsety]
+				#screen_window = [2 * cam_shiftX - ratio, 2 * cam_shiftX + ratio, 2 * cam_shiftY - 1.0, 2 * cam_shiftY + 1.0]
+				else
+				screen_window = [2 * cam_shiftX - 1.0 + offsetx, 2 * cam_shiftX + 1.0 + offsetx, 2 * cam_shiftY - inv_ratio + offsety, 2 * cam_shiftY + inv_ratio + offsety]
             end
         end
 	end # END compute_screen_window
@@ -1126,7 +1135,7 @@ class LuxrenderExport
         end
         
         geometrytype = @lrs.geomexport()
-        if ( geometrytype=="ply" || geometrytype=="binply") # Write ply filename for all materials
+        if (geometrytype=="ply" || geometrytype=="binply") # Write ply filename for all materials
             puts "using .ply export"
             
             ply_path_base = File.dirname(@export_file_path) + "/" +  File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER + SU2LUX::GEOMETRYFOLDER

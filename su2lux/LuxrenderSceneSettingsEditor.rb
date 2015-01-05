@@ -52,10 +52,10 @@ class LuxrenderSceneSettingsEditor
                 puts key
                 puts value
 				case key
-					when "fov"
-						Sketchup.active_model.active_view.camera.fov = value.to_f
-					when "focal_length"
-						Sketchup.active_model.active_view.camera.focal_length = value.to_f
+					#when "fov"
+					#	Sketchup.active_model.active_view.camera.fov = value.to_f
+					#when "focal_length"
+					#	Sketchup.active_model.active_view.camera.focal_length = value.to_f
 					when "fleximage_xresolution"
 						@lrs.fleximage_xresolution=value.to_i
                         update_resolutions(key,value.to_i)

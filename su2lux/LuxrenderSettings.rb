@@ -201,7 +201,7 @@ class LuxrenderSettings
 		
 		@settings_scene = {
 			############    Camera   ############
-			'camera_type' => 'perspective',
+			'camera_type' => 'SketchUp',
 			'hither'=> 0.1,
 			'yon' => 100,
 			'shutteropen' => 0.0,
@@ -212,7 +212,7 @@ class LuxrenderSettings
 			'focaldistance' => 1.0,
 			'frameaspectratio' => 1.333333,
 			'autofocus' => false,
-			'fov' => format("%.2f", Sketchup.active_model.active_view.camera.fov), # camera angle, not currently in use
+			#'fov' => format("%.2f", Sketchup.active_model.active_view.camera.fov), # camera angle, not currently in use
 			'distribution' => 'uniform',
 			'power' => 1,
 			'blades' => 6,
@@ -225,7 +225,7 @@ class LuxrenderSettings
 			'shiftY' => 0.0, #GUI
 			'use_ratio' => false, #GUI
 			'use_motion_blur'=>false, #GUI
-			'focal_length' => format("%.5f", Sketchup.active_model.active_view.camera.focal_length), #GUI
+			#'focal_length' => format("%.5f", Sketchup.active_model.active_view.camera.focal_length), #GUI
 			
 			############   Environment   ############
 			'environment_light_type'=> 'sunsky',
@@ -391,8 +391,8 @@ class LuxrenderSettings
 			@settings.each do |key, value|
 				@attributedictionary.set_attribute("luxrender_settings", key, value)
 			end
-			@attributedictionary.set_attribute("luxrender_settings", 'fov', format("%.2f", @model.active_view.camera.fov))
-			@attributedictionary.set_attribute("luxrender_settings", 'focal_length', format("%.2f", @model.active_view.camera.focal_length))
+			#@attributedictionary.set_attribute("luxrender_settings", 'fov', format("%.2f", @model.active_view.camera.fov))
+			#@attributedictionary.set_attribute("luxrender_settings", 'focal_length', format("%.2f", @model.active_view.camera.focal_length))
 			@attributedictionary.set_attribute("luxrender_settings", 'fleximage_xresolution', @model.active_view.vpwidth)
 			@attributedictionary.set_attribute("luxrender_settings", 'fleximage_yresolution', @model.active_view.vpheight)
 	end #END reset
@@ -418,8 +418,8 @@ class LuxrenderSettings
 	end # END LuxrenderSettings::ui_refreshable?
     
     def reset_viewparams
-        @attributedictionary.set_attribute("luxrender_settings", 'fov', format("%.2f", @model.active_view.camera.fov))
-        @attributedictionary.set_attribute("luxrender_settings", 'focal_length', format("%.2f", @model.active_view.camera.focal_length))
+        #@attributedictionary.set_attribute("luxrender_settings", 'fov', format("%.2f", @model.active_view.camera.fov))
+        #@attributedictionary.set_attribute("luxrender_settings", 'focal_length', format("%.2f", @model.active_view.camera.focal_length))
         @attributedictionary.set_attribute("luxrender_settings", 'fleximage_xresolution', @model.active_view.vpwidth)
         @attributedictionary.set_attribute("luxrender_settings", 'fleximage_yresolution', @model.active_view.vpheight)
     end
