@@ -354,7 +354,7 @@ module SU2LUX
 				lrs.export_file_path << SCENE_EXTENSION
 				@luxrender_path = SU2LUX.get_luxrender_path
 			end
-			return true #user has selected a path
+			return (@luxrender_path ? true : false) # user may have selected a path
 		end
 		return false #user has not selected a path
 	end # END new_export_file_path
@@ -427,13 +427,17 @@ module SU2LUX
 		storedpath = Sketchup.read_default("SU2LUX","luxrenderpath")
 		if (storedpath.nil?)
 			# prompt user for path
-			storedpath = UI.openpanel("Locate LuxRender", "", "")
-			Sketchup.write_default("SU2LUX", "luxrenderpath", storedpath.unpack('H*')[0])
+			storedpath = UI.openpanel("Please locate LuxRender", "", "")
+			if(storedpath)
+				Sketchup.write_default("SU2LUX", "luxrenderpath", storedpath.unpack('H*')[0])
+			else
+				UI.messagebox("LuxRender not found, SU2LUX will not be able to launch LuxRender after exporting scene files.")
+			end
         else
             # convert path back to usable form
             storedpath = Array(storedpath).pack('H*')
 		end
-		return storedpath
+		return storedpath # note: can be nil if user cancels the file selection prompt
 	end #END get_luxrender_path
 
 	##
@@ -443,8 +447,10 @@ module SU2LUX
 		if(passedPath)
 			providedpath = passedPath
 		else # ask user for path
-			providedpath = UI.openpanel("Locate LuxRender", "", "")
-			providedpath = providedpath.dump.tr('"', '')
+			providedpath = UI.openpanel("Please locate LuxRender", "", "")
+			if(providedpath)
+				providedpath = providedpath.dump.tr('"', '')
+			end
 		end
 		# provide feedback in popup window
 		if SU2LUX.luxrender_path_valid?(providedpath)
@@ -453,7 +459,7 @@ module SU2LUX
 			puts "new path for LuxRender is #{@luxrender_path}"
 		else
 			@luxrender_path = nil
-			UI.messagebox("No valid path selected.",MB_OK)
+			UI.messagebox("LuxRender could not be found. SU2LUX can still export LuxRender files, but will not be able to launch LuxRender.",MB_OK)
 		end	
 		# store settings
         lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
@@ -555,7 +561,7 @@ module SU2LUX
         else
             fullpath = @luxrender_path + @os_specific_vars["file_appendix"]
 			Thread.new do
-				system(`#{fullpath} "#{export_path}"`)
+				system('#{fullpath} "#{export_path}"')
 			end
 		end
 	end # END launch_luxrender
