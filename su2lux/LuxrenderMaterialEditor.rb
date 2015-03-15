@@ -391,7 +391,8 @@ class LuxrenderMaterialEditor
 			active_material_name = SU2LUX.sanitize_path(active_material.name)
             
 			# generate preview lxm file and export bitmap images
-			lxm_path = preview_path+ SU2LUX.sanitize_path(active_material_name)+".lxm"
+			lxm_path = File.join(preview_path, SU2LUX.sanitize_path(active_material_name)+".lxm")
+			puts "lxm path is " + lxm_path
 			base_file = preview_path + "ansi.txt"
 			FileUtils.copy_file(base_file,lxm_path)
 			generated_lxm_file = File.new(lxm_path,"a")
@@ -418,9 +419,9 @@ class LuxrenderMaterialEditor
 			puts "finished texture output for material preview"
 			
 			# generate preview lxs file
-			lxs_path = preview_path + SU2LUX.sanitize_path(Sketchup.active_model.title)+"_"+active_material_name+".lxs"
+			lxs_path = File.join(preview_path, SU2LUX.sanitize_path(Sketchup.active_model.title)+"_"+active_material_name+".lxs")
 			
-			base_file_2 = preview_path + "ansi.txt"
+			base_file_2 = File.join(preview_path, "ansi.txt")
 			FileUtils.copy_file(base_file_2,lxs_path)
 			generated_lxs_file = File.new(lxs_path,"a")
             
@@ -445,7 +446,7 @@ class LuxrenderMaterialEditor
 			generated_lxs_file.close
             
 			# start rendering preview using luxconsole
-			@filename = preview_path+SU2LUX.sanitize_path(Sketchup.active_model.title) + "_" + active_material_name + ".png"
+			@filename = File.join(preview_path, SU2LUX.sanitize_path(Sketchup.active_model.title) + "_" + active_material_name + ".png")
 			luxconsole_path = SU2LUX.get_luxrender_console_path()
 			@time_out = previewtime.to_f + 5
 			@retry_interval = 0.5
@@ -569,7 +570,7 @@ class LuxrenderMaterialEditor
             filename.gsub!(/\#/, '	%23')
             cmd = 'document.getElementById("preview_image").src = "' + filename + '"'
 		else
-			puts "file doesn't exist, showing default image"
+			puts "material preview file doesn't exist for this material, showing default image instead"
 			cmd = 'document.getElementById("preview_image").src = "empty_preview.png"'
 		end
 		@material_editor_dialog.execute_script(cmd)
@@ -798,7 +799,7 @@ class LuxrenderMaterialEditor
         @material_editor_dialog.execute_script(setdivheightcmd)
 		
 		# add procedural textures to dropdown
-		puts "LuxRenderMaterialEditor.rb adding procedural textures to texture dropdown menus"
+		puts "LuxRenderMaterialEditor.rb adding " + @lrs.proceduralTextureNames.size.to_s + " procedural textures to texture dropdown menus"
 		for texName in @lrs.proceduralTextureNames
 			# get texture name, then texture type
 			texChannelType = LuxrenderProceduralTexture.getChannelType(texName)
@@ -857,7 +858,7 @@ class LuxrenderMaterialEditor
 	#
 	##
 	def set_current(passedname)
-		SU2LUX.dbg_p "call to set_current: #{passedname}"
+		#SU2LUX.dbg_p "call to set_current: #{passedname}"
         if (@current) # prevent update_swatches function from running before a luxmaterial has been created
             update_swatches()
         end

@@ -7,7 +7,10 @@ class LuxrenderExport
 		@lrs = lrs
 		@material_editor = mat_editor
         #puts "exporting, using @lrs:", @lrs
-		@export_file_path = SU2LUX.sanitize_path(export_file_path)
+		#puts "exporting to file path:"
+		puts export_file_path
+		@export_file_path = export_file_path # assume that this is sanitised already # File.join(File.dirname(export_file_path), SU2LUX.sanitize_path(File.basename(export_file_path)))
+		puts @export_file_path
 		@model_name = File.basename(@export_file_path)
 		@model_name=@model_name.split(".")[0]
         @instance_name = 0
@@ -917,12 +920,31 @@ class LuxrenderExport
 		
 		# prepare texture paths
         outputfolder = "LuxRender_luxdata/textures"
+		@texfolder = File.join(preview_path, outputfolder)
         
 		# check for textures folder in temporary location, create if missing
-		outputfolder_temp= preview_path+"/LuxRender_luxdata"
-		Dir.mkdir(outputfolder_temp) unless File.exists?(outputfolder_temp)
-		outputfolder_temp= outputfolder_temp+"/textures"
-		Dir.mkdir(outputfolder_temp) unless File.exists?(outputfolder_temp)
+		luxdata_folder = preview_path+"/LuxRender_luxdata"
+		Dir.mkdir(luxdata_folder) unless File.exists?(luxdata_folder)
+		texture_folder = luxdata_folder+"/textures"
+		Dir.mkdir(texture_folder) unless File.exists?(texture_folder)
+		
+		# copy image textures if paths contain non-supported characters
+		collectedtextures = []
+		for channel in luxmat.texturechannels
+			texturepath = luxmat.send(channel+"_imagemap_filename")
+			if (texturepath != "" && texturepath != SU2LUX.sanitize_path(texturepath))
+				collectedtextures << texturepath
+			end
+		end
+		# write collected images to luxdata folder
+		if (collectedtextures.length > 0)
+			puts  "copying " + collectedtextures.length.to_s + " image textures" 
+			for texturepath in collectedtextures.uniq
+				#puts "texture found: " + texturepath
+				destinationfolder = File.join(texture_folder, SU2LUX.sanitize_path(File.basename(texturepath)))
+				FileUtils.cp(texturepath, destinationfolder)
+			end
+        end
 		
 		# create temporary group and face, apply current material
 		luxmat_group = Sketchup.active_model.entities.add_group
@@ -934,7 +956,7 @@ class LuxrenderExport
 		luxmat_face.material = currentmaterial
 		luxmat_group.material = currentmaterial
 		
-		# create MeshCollector, store used material's textures
+		# create MeshCollector, store used material's SketchUp textures
 		mcpre=LuxrenderMeshCollector.new(@lrs, @material_editor, outputfolder,@os_separator,false)
 		mcpre.collect_faces(luxmat_group, Geom::Transformation.new) # this includes adding texture to meshcollector
 		@model_textures=mcpre.model_textures
@@ -950,7 +972,7 @@ class LuxrenderExport
 			if (File.exist?(texturefilename)) # texture from file
 				texture_name=mcpre.get_texture_name(currentmaterialname,currentmaterial)
 				puts "copying material preview texture from:", texturefilename
-				outputpath = preview_path+texture_path+"/"+File.basename(SU2LUX.sanitize_path(texture_name))  # last part was File.basename(texturefilename)
+				outputpath = File.join(preview_path, texture_path, File.basename(SU2LUX.sanitize_path(texture_name)))  # last part was File.basename(texturefilename)
 				texturefilename = texturefilename
                 puts "copying texture:"
                 puts texturefilename
@@ -1145,9 +1167,9 @@ class LuxrenderExport
             ply_path_relative = File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER + SU2LUX::GEOMETRYFOLDER
             
             if mat.class==String
-                ply_path = SU2LUX.sanitize_path(ply_path_relative + @instance_name.to_s + '_' + mat+'.ply')
+                ply_path = File.join(ply_path_relative, SU2LUX.sanitize_path(@instance_name.to_s + '_' + mat) +'.ply')
             else
-                ply_path = SU2LUX.sanitize_path(ply_path_relative + @instance_name.to_s + '_' + luxrender_name +'.ply') # mat.name was mat.display_name
+                ply_path = File.join(ply_path_relative, SU2LUX.sanitize_path(@instance_name.to_s + '_' + luxrender_name) +'.ply') # mat.name was mat.display_name
             end
 			if(geometrytype=="binply")
 				output_ply_geometry((File.dirname(@export_file_path)+"/"+ply_path), meshes, mirrored, mat_dir, @rest, has_texture, matname, pointcount, polycount, default_mat, distorted_uv, (!has_texture and @exp_default_uvs==true), true)
@@ -1196,7 +1218,7 @@ class LuxrenderExport
         
     def output_ply_geometry(ply_path, meshes, mirrored, mat_dir, rest, has_texture, matname, pointcount, polycount, default_mat, distorted_uv, no_texture_uvs, binary)
         startindex = 0
-        ply_path = SU2LUX.sanitize_path(ply_path)
+        ply_path = File.join(File.dirname(ply_path), SU2LUX.sanitize_path(File.basename(ply_path)))
 
         if ( binary == true)       
 			ply_file=File.new(ply_path,"wb")
@@ -1418,7 +1440,7 @@ class LuxrenderExport
         end
     end
 		
-    def output_material (mat, out,luxrender_mat, matname)
+    def output_material (mat, out, luxrender_mat, matname) # writes link to material and volumes, not material itself
         puts "running output_material"
         case luxrender_mat.type
         when "light"
@@ -1583,7 +1605,7 @@ class LuxrenderExport
         mateditor = SU2LUX.get_editor(@scene_id,"material")
         puts "@texexport: " + texexport
         @texexport = texexport
-        @texfolder = datafolder
+        @texfolder = File.join(datafolder, SU2LUX::TEXTUREFOLDER)
 		# mix materials should be last, so first we write normal materials
         materials.each { |mat|
 			puts "preparing material export for:"
@@ -1607,7 +1629,7 @@ class LuxrenderExport
     
 	def export_distorted_materials(out, datafolder)
         mateditor = SU2LUX.get_editor(@scene_id,"material")
-        @texfolder = datafolder
+        @texfolder = File.join(datafolder, SU2LUX::TEXTUREFOLDER)
         
         # step one: process @model_textures, get only distorted textures
         puts "DISTORTED TEXTURE SEARCH: processing #{@model_textures.length} textures"
@@ -1669,7 +1691,7 @@ class LuxrenderExport
 			when "sketchup"
                 if (@model_textures.has_key?(material.name))
                     filename = @currentfilename
-                    filename = File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER + SU2LUX::TEXTUREFOLDER + filename
+                    filename = File.join(File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER, SU2LUX::TEXTUREFOLDER, filename)
 				else
                     puts "export_texture: no texture file path found"
                     return [preceding, following]
@@ -1677,7 +1699,7 @@ class LuxrenderExport
                 preceding << "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
 			when "imagemap"
                 if (@texexport == "all")
-                    imagemap_filename = @texfolder + "/" + File.basename(SU2LUX.sanitize_path(material.send(mat_type + "_imagemap_filename")))
+                    imagemap_filename = File.join(@texfolder, File.basename(SU2LUX.sanitize_path(material.send(mat_type + "_imagemap_filename"))))
                 else
                     imagemap_filename = SU2LUX.sanitize_path(material.send(mat_type + "_imagemap_filename"))
                 end
@@ -1826,6 +1848,7 @@ class LuxrenderExport
                 @currentfilename = SU2LUX.sanitize_path(@model_textures[mat.name][4])
                 @currenttexname = @currenttexname_prefixed = File.basename(@currentfilename, '.*')
             else
+				@currenttexname = SU2LUX.sanitize_path(mat.name)
 				@currenttexname_prefixed = SU2LUX.sanitize_path(mat.name)
                 puts "creating file name from material name"
             end
@@ -1927,7 +1950,7 @@ class LuxrenderExport
 		out.puts("\n")
 	end # END export_mat
  
-	def write_textures
+	def write_textures # writes SketchUp textures
 		puts ("using LuxrenderExport write_textures function")
 		if (@lrs.copy_textures == true and @model_textures!={}) # if textures have been gathered
             tex_path_base = File.dirname(@export_file_path) + "/" +  File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER + SU2LUX::TEXTUREFOLDER
@@ -1997,9 +2020,8 @@ class LuxrenderExport
 	end # END write_textures
 
 	def export_diffuse_component(material, before, after)
-		puts "exporting diffuse component for material: "
-		puts material
-		puts material.kd_texturetype
+		puts "exporting diffuse component for material " + material.name
+		#puts material.kd_texturetype
 		preceding = ""
 		following = ""
 		case material.kd_texturetype
@@ -2015,17 +2037,18 @@ class LuxrenderExport
 					if (@model_textures.has_key?(material.name))
 						filename = @currentfilename
                         # add texture subfolder path
-                        filename = File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER + SU2LUX::TEXTUREFOLDER + filename
+                        filename = File.join(File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER, SU2LUX::TEXTUREFOLDER, filename)
 					else
 						return [before, after]
 					end
 
 					preceding << "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
 				when "imagemap"
-                    if (@texexport == "all")
-                        imagemapfilepath = @texfolder + "/" + File.basename(SU2LUX.sanitize_path(material.kd_imagemap_filename))
+					sanitized_imagemap_filename = SU2LUX.sanitize_path(material.kd_imagemap_filename)
+                    if (@texexport == "all" || sanitized_imagemap_filename != material.kd_imagemap_filename) # if all textures are copied and/or if this texture name is not valid, we copy the file to our textures folder
+                        imagemapfilepath = File.join(@texfolder, File.basename(sanitized_imagemap_filename))
                     else
-                        imagemapfilepath = SU2LUX.sanitize_path(material.kd_imagemap_filename)
+                        imagemapfilepath = sanitized_imagemap_filename
                     end
 					preceding << "\t" + "\"string filename\" [\"#{imagemapfilepath}\"]" + "\n"
 			end

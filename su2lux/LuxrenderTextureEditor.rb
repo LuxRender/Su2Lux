@@ -165,9 +165,9 @@ class LuxrenderTextureEditor
 	#
 	##
 	def setValue(id, value) #extend to encompass different types (textbox, anchor, slider)
-        puts "setting value:"
-        puts id
-        puts value
+        #puts "setting value:"
+        #puts id
+        #puts value
 		new_value=value.to_s
 		if(@current[id] == true or @current[id] == false)
 			# checkbox 

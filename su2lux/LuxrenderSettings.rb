@@ -339,7 +339,7 @@ class LuxrenderSettings
 		'preview_size' => 140,
 		'preview_time' => 2,
 	}
-		
+	@@allSettings = @@settings_render.merge(@@settings_texture_and_volume).merge(@@settings_global).merge(@@settings_scene)	
 		
 	##
 	#
@@ -361,17 +361,15 @@ class LuxrenderSettings
 		@settings_interface = @settings_render.merge(@settings_scene).merge(@settings_texture_and_volume)
 		@settings = @settings_interface.merge(@@settings_global.clone)
 		
-		singleton_class.module_eval do
-			@allSettings = @@settings_render.merge(@@settings_texture_and_volume).merge(@@settings_global).merge(@@settings_scene)
-			
+		singleton_class.module_eval do			
 			define_method("[]") do |key| 
-				defaultValue = @allSettings[key]
+				defaultValue = @@allSettings[key]
 				return @attributedictionary.get_attribute("luxrender_settings", key, defaultValue)
 			end
 				
 			puts "creating methods to access and modify LuxRender settings"
 			   			
-			@allSettings.each do |key, defaultValue|
+			@@allSettings.each do |key, defaultValue|
 				# create getter methods to access any parameter; calling @lrs.someattribute will actually call @attributedictionary.get_attribute("luxrender_settings", someattribute, someattributesdefaultvalue)
 				define_method(key) {@attributedictionary.get_attribute("luxrender_settings", key, defaultValue) }
 				# create setter methods for all parameters

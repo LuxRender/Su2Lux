@@ -37,10 +37,8 @@ class LuxrenderVolumeEditor
             windowname = "LuxRender Volume - " + filename
         end
 		
-		puts "processing volumes"
-		puts self
-		puts @lrs
-		puts @lrs.volumeNames.size
+		puts "processing " + @lrs.volumeNames.size.to_s + " volumes"
+		
 		for volumeName in @lrs.volumeNames
 			puts "volume found in @lrs: " + volumeName
 			volume = LuxrenderVolume.new(false, self, @material_editor, @lrs, volumeName)

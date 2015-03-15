@@ -57,7 +57,7 @@ class LuxrenderAttributeDictionary
 		dictionary = self.choose(name)
 		if (dictionary.key? key)
 			#puts "returning value from dictionary:"
-			puts dictionary[key]
+			#puts dictionary[key]
 			return dictionary[key]
 		else
 			#puts "returning default"
@@ -96,7 +96,7 @@ class LuxrenderAttributeDictionary
 			return @dictionary
 		end
 		if ( !@dictionaries.key? name)
-			puts "adding new dictionary with name " + name + " to @dictionaries"
+			#puts "adding new dictionary with name " + name + " to @dictionaries"
 			@dictionaries[name] = {}
 		end
 		@dictionary = @dictionaries[name]
@@ -118,13 +118,12 @@ class LuxrenderAttributeDictionary
 	#end #END save_to_model
     
 	def load_from_model(name)
-        puts "running load_from model for " + name.to_s + ", using attribute dictionary:"
-		puts self
+        puts "loading material " + name.to_s
 		@dictionary = self.choose(name) # self is #<LuxrenderAttributeDictionary:.....>
 		model_dictionary = @model.attribute_dictionary(name)
 		if (model_dictionary)
-            puts "number of attribute dictionary items:"
-            puts model_dictionary.length
+            #puts "number of attribute dictionary items:"
+            #puts model_dictionary.length
 			@model.start_operation("SU2LUX load model data", true, false, true)
 			model_dictionary.each { |key, value|
 				# puts "load_from_model updating attributes"

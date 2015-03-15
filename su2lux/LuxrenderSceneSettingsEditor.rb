@@ -242,7 +242,13 @@ class LuxrenderSceneSettingsEditor
 		@scene_settings_dialog.add_action_callback("open_dialog") {|dialog, params|
 			case params.to_s
 				when "new_export_file_path"
-					SU2LUX.new_export_file_path
+					newPath = SU2LUX.new_export_file_path
+					if(newPath)
+						puts "new lxs path set"
+						cmd = '$("#export_file_path").val("' + @lrs.export_file_path + '");'
+						puts cmd
+						@scene_settings_dialog.execute_script(cmd)
+					end
 				when "load_env_image"
 					SU2LUX.load_env_image
                 when "change_luxpath"
@@ -452,9 +458,8 @@ class LuxrenderSceneSettingsEditor
 			# SU2LUX.dbg_p cmd
 			@scene_settings_dialog.execute_script(cmd)
 		elsif  (id == "export_luxrender_path")
-			puts "getting luxrender path:"
-			puts value
-			puts value.dump.tr('"', '')
+			puts "luxrender path: " + value
+			#puts value.dump.tr('"', '')
 			cmd="$('##{id}').val('#{value.dump.tr('"', '')}');" #syntax jquery
 			@scene_settings_dialog.execute_script(cmd)
 		else

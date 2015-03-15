@@ -41,8 +41,8 @@ class LuxrenderProceduralTexturesEditor
         @lrs = lrs
 		@material_editor = matEditor
 		
-		puts "material editor (created or found):"
-		puts @material_editor
+		#puts "material editor (created or found):"
+		#puts @material_editor
 		
         puts "finished initializing procedural textures editor"
        

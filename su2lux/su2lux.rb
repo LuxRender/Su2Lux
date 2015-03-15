@@ -180,40 +180,54 @@ module SU2LUX
             lrs.export_file_path << ".lxs"
         end
         
-        exportpath = SU2LUX.sanitize_path(lrs.export_file_path)
+        exportpath = File.join(File.dirname(lrs.export_file_path), SU2LUX.sanitize_path(File.basename(lrs.export_file_path))) #SU2LUX.sanitize_path(lrs.export_file_path)
 
 		le=LuxrenderExport.new(exportpath, @os_separator, lrs, @material_editor)
 		le.reset
 		file_basename = File.basename(exportpath, SCENE_EXTENSION)
 		file_dirname = File.dirname(exportpath)
-		file_fullname = file_dirname + @os_separator + file_basename
+		file_fullname = File.join(file_dirname, file_basename) # was: string + @os_separator + string
         file_datafolder = file_fullname+SU2LUX::SUFFIX_DATAFOLDER + @os_separator
         
         # create scene data folder
         if !FileTest.exist?(file_fullname+SU2LUX::SUFFIX_DATAFOLDER)
             Dir.mkdir(file_fullname+SU2LUX::SUFFIX_DATAFOLDER)
+            Dir.mkdir(File.join(file_fullname+SU2LUX::SUFFIX_DATAFOLDER, TEXTUREFOLDER))
         end
         
-        # copy image textures to luxdata folder (SketchUp textures will be exported later by le.write_textures)
+        # collect image texture paths from all materials (excluding SketchUp textures, those will be exported later by le.write_textures)
+        collectedtextures = []
         if (lrs.texexport=="all")
-                collectedtextures = []
-                puts "EXPORTING ALL TEXTURES"
-                # collect material paths from image textures
-                @material_editor.materials_skp_lux.values.each {|luxmat|
-                    for channel in luxmat.texturechannels
-                        texturepath = luxmat.send(channel+"_imagemap_filename")
-                        if (texturepath != "")
-                            collectedtextures << texturepath
-                        end
-                    end
-                }
-                
-                puts collectedtextures.length
-                destinationfolder = (file_fullname+SU2LUX::SUFFIX_DATAFOLDER)
-                for texturepath in collectedtextures.uniq
-                    puts "texture found: " + texturepath
-                    FileUtils.cp(texturepath,destinationfolder)
-                end
+			puts "Exporting all textures"
+			# collect material paths from image textures
+			@material_editor.materials_skp_lux.values.each {|luxmat|
+				for channel in luxmat.texturechannels
+					texturepath = luxmat.send(channel+"_imagemap_filename")
+					if (texturepath != "")
+						collectedtextures << texturepath
+					end
+				end
+			}
+        else
+			puts "Looking for invalid texture paths"
+			# iterate image paths, save the ones that are invalid
+			@material_editor.materials_skp_lux.values.each {|luxmat|
+				for channel in luxmat.texturechannels
+					texturepath = luxmat.send(channel+"_imagemap_filename")
+					if (texturepath != "" && texturepath != SU2LUX.sanitize_path(texturepath))
+						collectedtextures << texturepath
+					end
+				end
+			}
+		end
+		# copy collected images to luxdata folder
+		if (collectedtextures.length > 0)
+			puts  "copying " + collectedtextures.length.to_s + " image textures" 
+			for texturepath in collectedtextures.uniq
+				#puts "texture found: " + texturepath
+				destinationfolder = File.join(file_fullname+SU2LUX::SUFFIX_DATAFOLDER, TEXTUREFOLDER, SU2LUX.sanitize_path(File.basename(texturepath)))
+				FileUtils.cp(texturepath,destinationfolder)
+			end
         end
         
 		# export geometry
@@ -329,22 +343,20 @@ module SU2LUX
 		model = Sketchup.active_model
 		model_filename = File.basename(model.path)
         lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
-		if model_filename.empty?
-			export_filename = SCENE_NAME
-		else
-			dot_position = model_filename.rindex(".")
-			export_filename = model_filename.slice(0..(dot_position - 1))
+		export_filename = SCENE_NAME
+		if !model_filename.empty?
+			export_filename = File.basename(model_filename)
 			export_filename << SCENE_EXTENSION
 		end
-		#	if model.path.empty?
+
 		default_folder = SU2LUX.find_default_folder
 		export_folder = default_folder
-		export_folder = File.dirname(model.path) if ! model.path.empty?
+		export_folder = File.dirname(model.path) if !model.path.empty?
 		
 		user_input = UI.savepanel("Save lxs file", export_folder, export_filename)
-		
 		#check whether user has pressed cancel
 		if user_input
+			puts user_input
 			user_input.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
 			user_input.gsub!(/\\/, '/') if user_input.include?('\\')
 			#store file path for quick exports
@@ -354,6 +366,10 @@ module SU2LUX
 				lrs.export_file_path << SCENE_EXTENSION
 				@luxrender_path = SU2LUX.get_luxrender_path
 			end
+			
+			# todo: set new value in dialog
+			
+			
 			return (@luxrender_path ? true : false) # user may have selected a path
 		end
 		return false #user has not selected a path
@@ -475,7 +491,7 @@ module SU2LUX
 
 	
 	def SU2LUX.sanitize_path(original_path)
-		if (ENV['OS'] =~ /windows/i)
+		if (ENV['OS'] =~ /windows/i && RUBY_VERSION >= "1.9")
 			#sanitized_path = original_path.unpack('U*').pack('C*') # converts string to ISO-8859-1
 			#sanitized_path.gsub!(/[^0-9A-Za-z.\-]/, '_')
 			sanitized_path = ''
@@ -486,9 +502,11 @@ module SU2LUX
 					sanitized_path += original_path[pos]
 				end
 			end
-			return sanitized_path.delete("[<>]")
-		else
-			sanitized_path = original_path
+			return sanitized_path
+		elsif (ENV['OS'] =~ /windows/i) # ruby 1.8 does not support the 'ord' method
+			return original_path.dump.gsub!(/[^0-9A-Za-z.\-]/, '')
+		else # on OS X, all seems to be fine
+			return original_path
 		end
 	end
 	
@@ -571,7 +589,7 @@ module SU2LUX
         lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
 		return if @luxrender_path.nil?
 		Dir.chdir(File.dirname(@luxrender_path))
-		export_path = SU2LUX.sanitize_path("#{lrs.export_file_path}")
+		export_path = File.join(File.dirname(lrs.export_file_path), SU2LUX.sanitize_path(File.basename(lrs.export_file_path))) # SU2LUX.sanitize_path("#{lrs.export_file_path}")
 		export_path = File.join(export_path.split(@os_separator))
 		if (ENV['OS'] =~ /windows/i)
 		 command_line = "start \"max\" \/#{lrs.priority} \"#{@luxrender_path}\" \"#{export_path}\""
@@ -636,7 +654,7 @@ module SU2LUX
 		# set preview section height (OS X; for Windows this gets done in refresh function)
 		lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
 		setdivheightcmd = 'setpreviewheight(' + lrs.preview_size.to_s + ',' + lrs.preview_time.to_s + ')'
-		puts setdivheightcmd
+		#puts setdivheightcmd
 		@matedit_hash[scene_id].material_editor_dialog.execute_script(setdivheightcmd)
 	end # END show_material_editor
 
