@@ -47,7 +47,7 @@ class LuxrenderRenderSettingsEditor
 		#
 		##
 		@render_settings_dialog.add_action_callback("param_generate") {|dialog, params|
-				SU2LUX.dbg_p "param_generate run by render settings editor"
+				#SU2LUX.dbg_p "param_generate run by render settings editor"
 				pair = params.split("=")
 				key = pair[0]		   
 				value = pair[1]

@@ -333,7 +333,7 @@ class LuxrenderMaterial
 	def name
         # puts mat.display_name.delete("[<>]")
 		# return mat.display_name.gsub(/[<>]/, '*')  #replaces <> characters with *
-		return mat.display_name.delete("[<>]")  #replaces <> characters with *
+		return mat.display_name #.delete("[<>]")  #replaces <> characters with *
 	end
   
 	##

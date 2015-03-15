@@ -140,7 +140,7 @@ class LuxrenderMaterialEditor
 			existingluxmat = "none"
 			@materials_skp_lux.values.each {|value| 
 				# puts "checking material name ", value.name
-				if value.name == material_name.delete("[<>]")
+				if value.name == material_name #.delete("[<>]")
 					existingluxmat = value
 				end
 			}
@@ -310,7 +310,7 @@ class LuxrenderMaterialEditor
             update_texture_names(@current)
             if (material_type=="mix") # check if mix materials have been set
                 if (@current.material_list1 == '')
-                    matname0 = Sketchup.active_model.materials[0].name.delete("[<>]")
+                    matname0 = Sketchup.active_model.materials[0].name #.delete("[<>]")
                     puts "COMPARING NAMES:"
                     puts matname0
                     puts @current.name
@@ -318,8 +318,8 @@ class LuxrenderMaterialEditor
                         @current.material_list1 = matname0
                         @current.material_list2 = matname0
                     else
-                        @current.material_list1 = Sketchup.active_model.materials[1].name.delete("[<>]")
-                        @current.material_list2 = Sketchup.active_model.materials[1].name.delete("[<>]")
+                        @current.material_list1 = Sketchup.active_model.materials[1].name #.delete("[<>]")
+                        @current.material_list2 = Sketchup.active_model.materials[1].name #.delete("[<>]")
                     end
                     cmd = "$('#material_list1 option').filter(function(){return ($(this).text() == '" + @current.material_list1 + "');}).attr('selected', true);"
                     @material_editor_dialog.execute_script(cmd)
@@ -563,7 +563,7 @@ class LuxrenderMaterialEditor
 	def load_preview_image()
 		puts "running load_preview_image function"			
 		os = OSSpecific.new
-		filename = os.get_variables["material_preview_path"] + Sketchup.active_model.title + "_" + @current.name.delete("[<>]") + ".png"
+		filename = os.get_variables["material_preview_path"] + Sketchup.active_model.title + "_" + @current.name + ".png" #.delete("[<>]")
 		filename = filename.gsub('\\', '/')
 		if (File.exists?(filename))
 			puts "preview image exists, loading " + filename
@@ -862,7 +862,7 @@ class LuxrenderMaterialEditor
         if (@current) # prevent update_swatches function from running before a luxmaterial has been created
             update_swatches()
         end
-        passedname = passedname.delete("[<>]")
+        #passedname = passedname.delete("[<>]")
         # show right material in material editor dropdown menu
         puts "setting active material in SU2LUX material editor dropdown"
         cmd = "$('#material_name option').filter(function(){return ($(this).text() == \"#{passedname}\");}).attr('selected', true);"

@@ -209,7 +209,7 @@ module SU2LUX
 				end
 			}
         else
-			puts "Looking for invalid texture paths"
+			puts "Checking texture path validity"
 			# iterate image paths, save the ones that are invalid
 			@material_editor.materials_skp_lux.values.each {|luxmat|
 				for channel in luxmat.texturechannels
@@ -502,7 +502,7 @@ module SU2LUX
 					sanitized_path += original_path[pos]
 				end
 			end
-			return sanitized_path
+			return sanitized_path.delete("[<>]")
 		elsif (ENV['OS'] =~ /windows/i) # ruby 1.8 does not support the 'ord' method
 			return original_path.dump.gsub!(/[^0-9A-Za-z.\-]/, '')
 		else # on OS X, all seems to be fine

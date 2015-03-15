@@ -984,7 +984,7 @@ class LuxrenderExport
                 if (!imageexport) # catch missing file extension
                     puts "writing file, adding missing file extension"
                     # use material name instead of texture name as texture is written that way:
-                    mattexfilename = mcpre.get_texture_name(currentmaterial.name,currentmaterial).delete("[<>]") # adds .jpg if necessary
+                    mattexfilename = mcpre.get_texture_name(currentmaterial.name,currentmaterial) # adds .jpg if necessary # .delete("[<>])"
                     @texturewriter.write(luxmat_face, true, preview_path+texture_path+"/" + mattexfilename)
                 end
 			end
@@ -1067,7 +1067,7 @@ class LuxrenderExport
         
 		has_texture = false
 		if mat.respond_to?(:name)
-			matname = mat.display_name.delete("[<>]")
+			matname = mat.display_name #.delete("[<>]")
 			has_texture = true if mat.texture!=nil
         #else
             #matname = mat
@@ -1690,7 +1690,7 @@ class LuxrenderExport
 		case material.send(mat_type + "_texturetype")
 			when "sketchup"
                 if (@model_textures.has_key?(material.name))
-                    filename = @currentfilename
+                    filename = SU2LUX.sanitize_path(@currentfilename)
                     filename = File.join(File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER, SU2LUX::TEXTUREFOLDER, filename)
 				else
                     puts "export_texture: no texture file path found"
@@ -1831,10 +1831,10 @@ class LuxrenderExport
         @currentluxmat = mat
         #puts "texdistorted:" + texdistorted.to_s
         if(distortedname && texdistorted)
-            @currentmatname = File.basename(SU2LUX.sanitize_path(distortedname), '.*') + SU2LUX::SUFFIX_DISTORTED_TEXTURE
+            @currentmatname = SU2LUX.sanitize_path(File.basename(distortedname, '.*') + SU2LUX::SUFFIX_DISTORTED_TEXTURE)
             @currenttexname = File.basename(SU2LUX.sanitize_path(distortedname), '.*')
-            @currenttexname_prefixed =  SU2LUX::PREFIX_DISTORTED_TEXTURE + @currenttexname
-            @currentfilename = SU2LUX::PREFIX_DISTORTED_TEXTURE + distortedname
+            @currenttexname_prefixed =  SU2LUX.sanitize_path(SU2LUX::PREFIX_DISTORTED_TEXTURE + @currenttexname)
+            @currentfilename = SU2LUX.sanitize_path(SU2LUX::PREFIX_DISTORTED_TEXTURE + distortedname)
             
         elsif(distortedname)
             @currentmatname = File.basename(SU2LUX.sanitize_path(distortedname), '.*')
@@ -1972,7 +1972,7 @@ class LuxrenderExport
 				if value[1].class== Sketchup::Face
                     distprefix = ""
                     if (value[6] && @lrs.exp_distorted==true)
-                        distprefix = SU2LUX::PREFIX_DISTORTED_TEXTURE
+                        distprefix = SU2LUX.sanitize_path(SU2LUX::PREFIX_DISTORTED_TEXTURE)
                         return_val0 = tw.load value[1], value[2]
                         return_val = tw.write value[1], value[2], (tex_path_base+distprefix+value[4]) # face, face side, output path
 						# if undistorted texture doesn't exist, export that texture as well
@@ -2172,8 +2172,8 @@ class LuxrenderExport
 		puts "MATERIAL.MX_TEXTURETYPE: " + material.mx_texturetype
 		preceding = ""
 		following = ""
-        mixmat1 = material.material_list1.delete("[<>]")
-        mixmat2 = material.material_list2.delete("[<>]")
+        mixmat1 = material.material_list1 #.delete("[<>]")
+        mixmat2 = material.material_list2 #.delete("[<>]")
         case material.mx_texturetype
             when "none"
                 following << "\t" + "\"string namedmaterial1\" [\"#{mixmat1}\"]" + "\n"

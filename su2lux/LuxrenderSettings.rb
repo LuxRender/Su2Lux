@@ -168,7 +168,7 @@ class LuxrenderSettings
 		'volume_integrator_stepsize' => 1.0,
 
 		############  Accelerator   ############
-		'accelerator_type' => "kdtree",
+		'accelerator_type' => "qbvh",
 		'kdtree_intersectcost' => 80,
 		'kdtree_traversalcost' => 1,
 		'kdtree_emptybonus' => 0.5,
