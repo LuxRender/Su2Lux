@@ -153,7 +153,7 @@ class LuxrenderMeshCollector
         # store texture if material has any
 		if (mat.respond_to?(:texture) and mat.texture !=nil)
             #puts "material responds to texture"
-            puts "getting uv coordinates using store_textured_entities function"
+            #puts "getting uv coordinates using store_textured_entities function"
 			ret=store_textured_entities(e,mat,mat_dir)
 			mat=ret[0]
 			uvHelp=ret[1]

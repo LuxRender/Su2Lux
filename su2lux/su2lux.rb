@@ -180,7 +180,7 @@ module SU2LUX
             lrs.export_file_path << ".lxs"
         end
         
-        exportpath = lrs.export_file_path
+        exportpath = SU2LUX.sanitize_path(lrs.export_file_path)
 
 		le=LuxrenderExport.new(exportpath, @os_separator, lrs, @material_editor)
 		le.reset
@@ -473,6 +473,25 @@ module SU2LUX
 		end
 	end
 
+	
+	def SU2LUX.sanitize_path(original_path)
+		if (ENV['OS'] =~ /windows/i)
+			#sanitized_path = original_path.unpack('U*').pack('C*') # converts string to ISO-8859-1
+			#sanitized_path.gsub!(/[^0-9A-Za-z.\-]/, '_')
+			sanitized_path = ''
+			for pos in 0..original_path.length-1
+				if original_path[pos].ord > 255
+					sanitized_path += '&'+ original_path[pos].ord.to_s
+				else
+					sanitized_path += original_path[pos]
+				end
+			end
+			return sanitized_path.delete("[<>]")
+		else
+			sanitized_path = original_path
+		end
+	end
+	
 	##
 	#
 	##
@@ -552,7 +571,7 @@ module SU2LUX
         lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
 		return if @luxrender_path.nil?
 		Dir.chdir(File.dirname(@luxrender_path))
-		export_path = "#{lrs.export_file_path}"
+		export_path = SU2LUX.sanitize_path("#{lrs.export_file_path}")
 		export_path = File.join(export_path.split(@os_separator))
 		if (ENV['OS'] =~ /windows/i)
 		 command_line = "start \"max\" \/#{lrs.priority} \"#{@luxrender_path}\" \"#{export_path}\""

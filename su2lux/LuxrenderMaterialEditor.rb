@@ -387,16 +387,14 @@ class LuxrenderMaterialEditor
             settings = @lrs
             previewtime = settings.preview_time
             
-            active_material = @materials_skp_lux.index(@current) ## was Sketchup.active_model.materials.current  
-			active_material_name = active_material.name.delete("[<>]") # following LuxrenderMaterial.rb convention ## was Sketchup.active_model.materials.
-			active_material_name_converted = sanitize_path(active_material_name)
+            active_material = @materials_skp_lux.index(@current)
+			active_material_name = SU2LUX.sanitize_path(active_material.name)
             
 			# generate preview lxm file and export bitmap images
-			lxm_path = preview_path+active_material_name+".lxm"
-			lxm_path_8859_1 = sanitize_path(lxm_path)
+			lxm_path = preview_path+ SU2LUX.sanitize_path(active_material_name)+".lxm"
 			base_file = preview_path + "ansi.txt"
-			FileUtils.copy_file(base_file,lxm_path_8859_1)
-			generated_lxm_file = File.new(lxm_path_8859_1,"a")
+			FileUtils.copy_file(base_file,lxm_path)
+			generated_lxm_file = File.new(lxm_path,"a")
 			generated_lxm_file << "MakeNamedMaterial \"SU2LUX_helper_null\" \n"
 			generated_lxm_file << "	\"string type\" [\"null\"]"
 			generated_lxm_file << "\n"
@@ -409,12 +407,9 @@ class LuxrenderMaterialEditor
             puts "collected materials:"
             puts @collectedmixmaterials
             for prmat in @collectedmixmaterials
-                active_material = @materials_skp_lux.index(prmat)
-                active_material_name = active_material.name.delete("[<>]") # following LuxrenderMaterial.rb convention
-                active_material_name_converted = sanitize_path(active_material_name)
-                previewExport.export_preview_material(preview_path,generated_lxm_file,active_material_name_converted,active_material,texture_subfolder,prmat)
-				
-				
+                activeMat = @materials_skp_lux.index(prmat)
+                activeMat_name = SU2LUX.sanitize_path(activeMat.name) # following LuxrenderMaterial.rb convention
+                previewExport.export_preview_material(preview_path,generated_lxm_file,activeMat_name,activeMat,texture_subfolder,prmat)				
             end
             @collectedmixmaterials = []
             @collectedmixmaterials_i = 0
@@ -423,12 +418,11 @@ class LuxrenderMaterialEditor
 			puts "finished texture output for material preview"
 			
 			# generate preview lxs file
-			lxs_path = preview_path+Sketchup.active_model.title+"_"+active_material_name+".lxs"
-			lxs_path_8859_1 = sanitize_path(lxs_path)
+			lxs_path = preview_path + SU2LUX.sanitize_path(Sketchup.active_model.title)+"_"+active_material_name+".lxs"
 			
 			base_file_2 = preview_path + "ansi.txt"
-			FileUtils.copy_file(base_file_2,lxs_path_8859_1)
-			generated_lxs_file = File.new(lxs_path_8859_1,"a")
+			FileUtils.copy_file(base_file_2,lxs_path)
+			generated_lxs_file = File.new(lxs_path,"a")
             
 			lxs_section_1 = File.readlines(preview_path+"preview.lxs01")
             lxs_section_2 = File.readlines(preview_path+"preview.lxs02")
@@ -438,12 +432,12 @@ class LuxrenderMaterialEditor
             generated_lxs_file.puts("\t\"integer xresolution\" [" + settings.preview_size.to_s + "]")
             generated_lxs_file.puts("\t\"integer yresolution\" [" + settings.preview_size.to_s + "]")
             generated_lxs_file.puts("\t\"integer halttime\" [" + settings.preview_time.to_s + "]")
-            generated_lxs_file.puts("\t\"string filename\" \[\""+Sketchup.active_model.title+"_"+active_material_name_converted+"\"]")
+            generated_lxs_file.puts("\t\"string filename\" \[\""+SU2LUX.sanitize_path(Sketchup.active_model.title)+"_"+active_material_name+"\"]")
             generated_lxs_file.puts("")
             generated_lxs_file.puts("WorldBegin")
-			generated_lxs_file.puts("Include \""+active_material_name_converted+".lxm\"")
+			generated_lxs_file.puts("Include \""+active_material_name+".lxm\"")
             generated_lxs_file.puts(lxs_section_2)
-            previewExport.output_material(active_material, generated_lxs_file, @current, active_material.name) # writes "NamedMaterial #active_material_name.." or light definition
+            previewExport.output_material(active_material, generated_lxs_file, @current, active_material_name) # writes "NamedMaterial #active_material_name.." or light definition
             generated_lxs_file.puts(lxs_section_3)
             previewExport.export_displacement_textures(active_material, generated_lxs_file, @current)
             generated_lxs_file.puts("AttributeEnd")
@@ -451,14 +445,13 @@ class LuxrenderMaterialEditor
 			generated_lxs_file.close
             
 			# start rendering preview using luxconsole
-			@preview_lxs = preview_path+Sketchup.active_model.title+"_"+active_material_name_converted+".lxs"
-			@filename = preview_path+Sketchup.active_model.title+"_"+active_material_name_converted+".png"
+			@filename = preview_path+SU2LUX.sanitize_path(Sketchup.active_model.title) + "_" + active_material_name + ".png"
 			luxconsole_path = SU2LUX.get_luxrender_console_path()
 			@time_out = previewtime.to_f + 5
 			@retry_interval = 0.5
 			@luxconsole_options = " -x "
-			pipe = IO.popen("\"" + luxconsole_path + "\"" + @luxconsole_options + " \"" + @preview_lxs + "\"","r") # start rendering
-            puts ("\"" + luxconsole_path + "\"" + @luxconsole_options + " \"" + @preview_lxs + "\"")
+			pipe = IO.popen("\"" + luxconsole_path + "\"" + @luxconsole_options + " \"" + lxs_path + "\"","r") # start rendering
+            puts ("\"" + luxconsole_path + "\"" + @luxconsole_options + " \"" + lxs_path + "\"")
 			
 			# wait for rendering to get ready, then update image
 			@times_waited = 0.0

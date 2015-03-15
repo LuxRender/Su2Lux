@@ -7,8 +7,8 @@ class LuxrenderExport
 		@lrs = lrs
 		@material_editor = mat_editor
         #puts "exporting, using @lrs:", @lrs
-		@export_file_path=export_file_path
-		@model_name=File.basename(@export_file_path)
+		@export_file_path = SU2LUX.sanitize_path(export_file_path)
+		@model_name = File.basename(@export_file_path)
 		@model_name=@model_name.split(".")[0]
         @instance_name = 0
 		@os_separator=os_separator
@@ -105,14 +105,16 @@ class LuxrenderExport
 
 		camera_scale = 1.0
         
-		camType = 'environment'
-		if (@lrs.camera_type == 'SketchUp')
+		tempCamType = 'perspective' # can be environment, perspective or orthographic; @lrs.camera_type can only be 'SketchUp' or 'environment' 
+		if (@lrs.camera_type == 'SketchUp' || @lrs.camera_type == 'perspective') # some old files have the type defined as perspective, hence the second check
 			# check if sketchup view is perspective
-			camType = Sketchup.active_model.active_view.camera.perspective? ? 'perspective' : 'orthographic'
+			tempCamType = Sketchup.active_model.active_view.camera.perspective? ? 'perspective' : 'orthographic'
+		else
+			tempCamType = 'environment' 
 		end
 		
-		out.puts "Camera \"#{camType}\""
-		case camType
+		out.puts "Camera \"#{tempCamType}\""
+		case tempCamType
 			when "perspective"
                 #puts "perspective camera, resolution:"
                 #puts @lrs.fleximage_xresolution
@@ -163,7 +165,7 @@ class LuxrenderExport
 			out.puts "\t\"string shutterdistribution\" [\"" + @lrs.shutterdistribution + "\"]"
 		end
         puts "about to compute screen window"
-		sw = compute_screen_window(camType)
+		sw = compute_screen_window(tempCamType)
 		out.puts	"\t\"float screenwindow\" [" + "%.6f" %(sw[0]) + " " + "%.6f" %(sw[1]) + " " + "%.6f" %(sw[2]) + " " + "%.6f" %(sw[3]) +"]\n"
 		out.print "\n"
 	end # END export_camera
@@ -948,15 +950,15 @@ class LuxrenderExport
 			if (File.exist?(texturefilename)) # texture from file
 				texture_name=mcpre.get_texture_name(currentmaterialname,currentmaterial)
 				puts "copying material preview texture from:", texturefilename
-				outputpath = preview_path+texture_path+"/"+File.basename(texture_name)  # last part was File.basename(texturefilename)
-				texturefilename = sanitize_path(texturefilename)
+				outputpath = preview_path+texture_path+"/"+File.basename(SU2LUX.sanitize_path(texture_name))  # last part was File.basename(texturefilename)
+				texturefilename = texturefilename
                 puts "copying texture:"
                 puts texturefilename
 				FileUtils.copy_file(texturefilename, outputpath)
             else
                 puts "exporting SketchUp texture to preview texture folder"
                 imageexport = @texturewriter.write_all(preview_path+texture_path+"/", false)
-                @texturewriter.write(luxmat_face, true, preview_path+texture_path+"/" + sanitize_path(currentmaterial.name)+File.extname(texturefilename))
+                @texturewriter.write(luxmat_face, true, preview_path+texture_path+"/" + SU2LUX.sanitize_path(currentmaterial.name)+File.extname(texturefilename))
                 if (!imageexport) # catch missing file extension
                     puts "writing file, adding missing file extension"
                     # use material name instead of texture name as texture is written that way:
@@ -1016,8 +1018,8 @@ class LuxrenderExport
 
 	def export_face(out,mat,fm_mat,is_instance,matname,distorted)
         p 'export face' # this function runs once for each material
-        @currenttexname = @currenttexname_prefixed = matname.delete("[<>]")
-        @currentmatname = matname.delete("[<>]")
+        @currenttexname = @currenttexname_prefixed = SU2LUX.sanitize_path(matname)
+        @currentmatname = SU2LUX.sanitize_path(@currenttexname)
         skpmatname = mat.name
         puts "skpmatname is " + skpmatname
         #puts out,mat,fm_mat,is_instance,matname,distorted
@@ -1143,9 +1145,9 @@ class LuxrenderExport
             ply_path_relative = File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER + SU2LUX::GEOMETRYFOLDER
             
             if mat.class==String
-                ply_path=ply_path_relative + @instance_name.to_s + '_' + mat+'.ply'
+                ply_path = SU2LUX.sanitize_path(ply_path_relative + @instance_name.to_s + '_' + mat+'.ply')
             else
-                ply_path=ply_path_relative + @instance_name.to_s + '_' + luxrender_name +'.ply' # mat.name was mat.display_name
+                ply_path = SU2LUX.sanitize_path(ply_path_relative + @instance_name.to_s + '_' + luxrender_name +'.ply') # mat.name was mat.display_name
             end
 			if(geometrytype=="binply")
 				output_ply_geometry((File.dirname(@export_file_path)+"/"+ply_path), meshes, mirrored, mat_dir, @rest, has_texture, matname, pointcount, polycount, default_mat, distorted_uv, (!has_texture and @exp_default_uvs==true), true)
@@ -1194,7 +1196,7 @@ class LuxrenderExport
         
     def output_ply_geometry(ply_path, meshes, mirrored, mat_dir, rest, has_texture, matname, pointcount, polycount, default_mat, distorted_uv, no_texture_uvs, binary)
         startindex = 0
-        
+        ply_path = SU2LUX.sanitize_path(ply_path)
 
         if ( binary == true)       
 			ply_file=File.new(ply_path,"wb")
@@ -1415,14 +1417,6 @@ class LuxrenderExport
             end
         end
     end
-	
-	def sanitize_path(original_path)
-		if (ENV['OS'] =~ /windows/i)
-			sanitized_path = original_path.unpack('U*').pack('C*') # converts string to ISO-8859-1
-		else
-			sanitized_path = original_path
-		end
-	end
 		
     def output_material (mat, out,luxrender_mat, matname)
         puts "running output_material"
@@ -1438,8 +1432,8 @@ class LuxrenderExport
 			if (luxrender_mat.lightbase == 'invisible')
 				out.puts "NamedMaterial \"SU2LUX_helper_null\"" 
             elsif (luxrender_mat.lightbase != 'default')
-                matname = luxrender_mat.lightbase.delete("[<>]")
-                out.puts "NamedMaterial \"" + matname + "\""
+                matname = SU2LUX.sanitize_path(luxrender_mat.lightbase)
+                out.puts "NamedMaterial \"" + SU2LUX.sanitize_path(matname) + "\""
             end
 			# write IES file
 			if (luxrender_mat.ies_path != "")
@@ -1449,7 +1443,7 @@ class LuxrenderExport
             out.puts "ObjectBegin \"Portal_Shape\""
             @has_portals = true
         else
-            out.puts "NamedMaterial \"" + matname.delete("[<>]") + "\""
+            out.puts "NamedMaterial \"" + SU2LUX.sanitize_path(matname) + "\""
 			#
 			volume_interior = luxrender_mat.volume_interior
 			volume_exterior = luxrender_mat.volume_exterior
@@ -1683,9 +1677,9 @@ class LuxrenderExport
                 preceding << "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
 			when "imagemap"
                 if (@texexport == "all")
-                    imagemap_filename = @texfolder + "/" + File.basename(sanitize_path(material.send(mat_type + "_imagemap_filename")))
+                    imagemap_filename = @texfolder + "/" + File.basename(SU2LUX.sanitize_path(material.send(mat_type + "_imagemap_filename")))
                 else
-                    imagemap_filename = sanitize_path(material.send(mat_type + "_imagemap_filename"))
+                    imagemap_filename = SU2LUX.sanitize_path(material.send(mat_type + "_imagemap_filename"))
                 end
                 preceding << "\t" + "\"string filename\" [\"#{imagemap_filename}\"]" + "\n"
         end
@@ -1815,24 +1809,24 @@ class LuxrenderExport
         @currentluxmat = mat
         #puts "texdistorted:" + texdistorted.to_s
         if(distortedname && texdistorted)
-            @currentmatname = File.basename(sanitize_path(distortedname), '.*') + SU2LUX::SUFFIX_DISTORTED_TEXTURE
-            @currenttexname = File.basename(sanitize_path(distortedname), '.*')
+            @currentmatname = File.basename(SU2LUX.sanitize_path(distortedname), '.*') + SU2LUX::SUFFIX_DISTORTED_TEXTURE
+            @currenttexname = File.basename(SU2LUX.sanitize_path(distortedname), '.*')
             @currenttexname_prefixed =  SU2LUX::PREFIX_DISTORTED_TEXTURE + @currenttexname
             @currentfilename = SU2LUX::PREFIX_DISTORTED_TEXTURE + distortedname
             
         elsif(distortedname)
-            @currentmatname = File.basename(sanitize_path(distortedname), '.*')
-            @currentfilename = sanitize_path(@model_textures[mat.name][4])
-            @currenttexname = "xx_" + File.basename(sanitize_path(@model_textures[mat.name][4]), '.*')
-            @currenttexname_prefixed = "tex" + File.basename(sanitize_path(@model_textures[mat.name][4]), '.*')
+            @currentmatname = File.basename(SU2LUX.sanitize_path(distortedname), '.*')
+            @currentfilename = SU2LUX.sanitize_path(@model_textures[mat.name][4])
+            @currenttexname = "xx_" + File.basename(SU2LUX.sanitize_path(@model_textures[mat.name][4]), '.*')
+            @currenttexname_prefixed = "tex" + File.basename(SU2LUX.sanitize_path(@model_textures[mat.name][4]), '.*')
         else
-            @currentmatname = sanitize_path(mat.name)
+            @currentmatname = SU2LUX.sanitize_path(mat.name)
             if (@model_textures.has_key?(mat.name))
                 puts "getting file name from @model_textures"
-                @currentfilename = sanitize_path(@model_textures[mat.name][4])
+                @currentfilename = SU2LUX.sanitize_path(@model_textures[mat.name][4])
                 @currenttexname = @currenttexname_prefixed = File.basename(@currentfilename, '.*')
             else
-				@currenttexname_prefixed = sanitize_path(mat.name)
+				@currenttexname_prefixed = SU2LUX.sanitize_path(mat.name)
                 puts "creating file name from material name"
             end
         end
@@ -1895,9 +1889,9 @@ class LuxrenderExport
                     end
                else ## image texture
                     if (@texexport == "all")
-                        imagemap_filename = @texfolder + "/" + File.basename(sanitize_path(mat.send("aa_imagemap_filename")))
+                        imagemap_filename = @texfolder + "/" + File.basename(SU2LUX.sanitize_path(mat.send("aa_imagemap_filename")))
                     else
-                        imagemap_filename = sanitize_path(mat.send("aa_imagemap_filename"))
+                        imagemap_filename = SU2LUX.sanitize_path(mat.send("aa_imagemap_filename"))
                     end
                 end
                 out.puts "\t" + "\"string filename\" [\"#{imagemap_filename}\"]" + "\n"
@@ -1947,6 +1941,7 @@ class LuxrenderExport
             puts "@model_textures.length: ", texnumber
 			@model_textures.each do |key, value|
 				Sketchup.set_status_text("Exporting texture "+count.to_s+"/"+texnumber.to_s)
+				value[4] = SU2LUX.sanitize_path(value[4])
                 #puts ("Exporting texture "+count.to_s+"/"+texnumber.to_s)
 				SU2LUX.dbg_p  "model_textures key, value:"
 				SU2LUX.dbg_p  key
@@ -1957,10 +1952,23 @@ class LuxrenderExport
                         distprefix = SU2LUX::PREFIX_DISTORTED_TEXTURE
                         return_val0 = tw.load value[1], value[2]
                         return_val = tw.write value[1], value[2], (tex_path_base+distprefix+value[4]) # face, face side, output path
+						# if undistorted texture doesn't exist, export that texture as well
+						if(!File.exists?(tex_path_base+ SU2LUX.sanitize_path(value[5].name) + File.extname(value[4])))
+							# create temporary group and face, apply current material
+							luxmat_group = Sketchup.active_model.entities.add_group
+							pt1 = [-3,-3,-3]
+							pt2 = [-3, -3, -4]
+							pt3 = [-3, -4, -3]
+							luxmat_face = luxmat_group.entities.add_face(pt1, pt2, pt3)
+							luxmat_face.material = value[5]
+							luxmat_group.material = value[5]
+							tw.load luxmat_face, true
+							tw.write luxmat_face, true, (tex_path_base+ SU2LUX.sanitize_path(value[5].name) + File.extname(value[4]))
+						end
                     else
-                        puts "WRITING UNDISTORTED TEXTURE: " + tex_path_base + value[5].name.delete("[<>]") + File.extname(value[4])
+                        puts "WRITING UNDISTORTED TEXTURE: " + tex_path_base + SU2LUX.sanitize_path(value[5].name) + File.extname(value[4])
                         return_val0 = tw.load value[1], value[2]
-                        return_val = tw.write value[1], value[2], (tex_path_base+value[5].name.delete("[<>]")+File.extname(value[4])) # face, face side, output path
+                        return_val = tw.write value[1], value[2], (tex_path_base+ SU2LUX.sanitize_path(value[5].name) + File.extname(value[4])) # face, face side, output path
                     end
 					p 'path: '+tex_path_base+value[4]
 					p return_val
@@ -2015,9 +2023,9 @@ class LuxrenderExport
 					preceding << "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"
 				when "imagemap"
                     if (@texexport == "all")
-                        imagemapfilepath = @texfolder + "/" + File.basename(sanitize_path(material.kd_imagemap_filename))
+                        imagemapfilepath = @texfolder + "/" + File.basename(SU2LUX.sanitize_path(material.kd_imagemap_filename))
                     else
-                        imagemapfilepath = sanitize_path(material.kd_imagemap_filename)
+                        imagemapfilepath = SU2LUX.sanitize_path(material.kd_imagemap_filename)
                     end
 					preceding << "\t" + "\"string filename\" [\"#{imagemapfilepath}\"]" + "\n"
 			end

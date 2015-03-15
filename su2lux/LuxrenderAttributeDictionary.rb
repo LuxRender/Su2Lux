@@ -127,7 +127,7 @@ class LuxrenderAttributeDictionary
             puts model_dictionary.length
 			@model.start_operation("SU2LUX load model data", true, false, true)
 			model_dictionary.each { |key, value|
-				puts "load_from_model updating attributes"
+				# puts "load_from_model updating attributes"
 				self.set_attribute(name, key, value) # set, because we're taking values from the model's attribute dictionary
                                                      # and setting them in the (temporary) LuxRender attribute dictionary
 													 # TODO 2014: prevent running this function on loading model; parameters that are not loaded in the attribute dictionary should be retrieved from the SketchUp file directly
