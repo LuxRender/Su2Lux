@@ -63,7 +63,7 @@ $(document).ready(
 			{
 				$(this).nextAll().hide();
 				$(this).nextAll("." + this.value).show();
-				window.location = 'skp:camera_change@' + this.value
+				//window.location = 'skp:camera_change@' + this.value
 			}
 		);
 		

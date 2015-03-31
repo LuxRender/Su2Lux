@@ -231,9 +231,9 @@ class LuxrenderSceneSettingsEditor
             # puts @lrs.camera_type
             @lrs.camera_type = cameratype
 
-            if (cameratype != "environment")
-                Sketchup.active_model.active_view.camera.perspective = (cameratype=='perspective')
-            end
+            #if (cameratype != "environment")
+            #    Sketchup.active_model.active_view.camera.perspective = (cameratype=='perspective')
+            #end
 		}
         
 		##
