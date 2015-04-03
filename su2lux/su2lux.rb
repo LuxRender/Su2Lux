@@ -1086,6 +1086,8 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 		if(procEditor.activeProcTex)
 			procEditor.updateGUI()
 		end
+		
+		# create volume editor
 		puts "onOpenModel creating volume editor"  
         volume_editor = SU2LUX.create_volume_editor(model_id, material_editor, lrs)
 		

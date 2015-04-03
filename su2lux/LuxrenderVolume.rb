@@ -23,9 +23,9 @@ class LuxrenderVolume
 	@@volumeParamDicts =
 	{
 		# texture types, data format: [texture parameter name, parameter type, default value]
-		'clear' => {"volumeType"=>["string","clear"],"fresnel"=>["float",1.4],"vol_absorption_swatch"=>["color",[0.01,0.01,0.01]],"absorption_scale"=>["float",10.0]},
-		'homogeneous' => {"volumeType"=>["string","homogeneous"],"fresnel"=>["float",1.4],"vol_absorption_swatch"=>["color",[0.0,0.0,0.0]],"absorption_scale"=>["float",10.0],"vol_scattering_swatch"=>["color",[0.0,0.0,0.0]],"scattering_scale"=>["float",10.0],"g"=>["float",[0.0,0.0,0.0]]},
-		'heterogeneous' => {"volumeType"=>["string","heterogeneous"],"fresnel"=>["float",1.4],"vol_absorption_swatch"=>["color",[0.0,0.0,0.0]],"absorption_scale"=>["float",10.0],"vol_scattering_swatch"=>["color",[0.0,0.0,0.0]],"scattering_scale"=>["float",10.0],"g"=>["float",[0.0,0.0,0.0]],"stepsize"=>["float",1.0]}		
+		'clear' => {"volume_type"=>["string","clear"],"fresnel"=>["float",1.4],"vol_absorption_swatch"=>["color",[0.01,0.01,0.01]],"absorption_scale"=>["float",10.0]},
+		'homogeneous' => {"volume_type"=>["string","homogeneous"],"fresnel"=>["float",1.4],"vol_absorption_swatch"=>["color",[0.0,0.0,0.0]],"absorption_scale"=>["float",10.0],"vol_scattering_swatch"=>["color",[0.0,0.0,0.0]],"scattering_scale"=>["float",10.0],"g"=>["float",[0.0,0.0,0.0]]},
+		'heterogeneous' => {"volume_type"=>["string","heterogeneous"],"fresnel"=>["float",1.4],"vol_absorption_swatch"=>["color",[0.0,0.0,0.0]],"absorption_scale"=>["float",10.0],"vol_scattering_swatch"=>["color",[0.0,0.0,0.0]],"scattering_scale"=>["float",10.0],"g"=>["float",[0.0,0.0,0.0]],"stepsize"=>["float",1.0]}		
 	}
 		
 	def initialize(createNew, parentEditor, matEditor, lrs, passedName, passedParameter = "") # passedParameter is volume type: clear, homogeneous, heterogeneous
@@ -51,14 +51,14 @@ class LuxrenderVolume
 			@lrs.volumeNames = volumeNameList
 
 			# write name and volume type name to attribute dictionary #
-			@attributeDictionary.set_attribute(@name, "volumeType", @volumeType)
+			@attributeDictionary.set_attribute(@name, "volume_type", @volumeType)
 			@attributeDictionary.set_attribute(@name, "name", @name)
 		
 		else # create object based on existing data in attribute dictionary
 			@volumeEditor.addVolume(passedName, self) # add texture to collection in current texture editor
 			puts "getting dictionary object"
 			@attributeDictionary.load_from_model(@name)
-			@volumeType = @attributeDictionary.get_attribute(@name, "volumeType")
+			@volumeType = @attributeDictionary.get_attribute(@name, "volume_type")
 		end
 		
 		@volumeEditor.setActiveVolume(self)
@@ -73,7 +73,7 @@ class LuxrenderVolume
 		
 	def self.getVolumeType(texName)
 		thisDict = LuxrenderAttributeDictionary.returnDictionary(texName)
-		thisTexName = thisDict["volumeType"]
+		thisTexName = thisDict["volume_type"]
 		return thisTexName
 	end
 	
@@ -95,13 +95,13 @@ class LuxrenderVolume
 	end
 	
 	def getValue(property)
-		texType = @attributeDictionary.get_attribute(@name, "volumeType")
+		texType = @attributeDictionary.get_attribute(@name, "volume_type")
 		return @attributeDictionary.get_attribute(@name, property, @@volumeParamDicts[texType][property][1]) # returns default value if no value is found in this object's dictionary
 	end
 	
 	def getValueHash()
 		passedVariableLists = Hash.new
-		texType = @attributeDictionary.get_attribute(@name, "volumeType")
+		texType = @attributeDictionary.get_attribute(@name, "volume_type")
 		@@volumeParamDicts[texType].each do |key, value|
 			# get value from dictionary, or use default value if no value has been stored
 			varValue = @attributeDictionary.get_attribute(@name, key, value[1])

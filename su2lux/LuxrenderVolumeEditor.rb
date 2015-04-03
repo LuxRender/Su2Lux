@@ -105,7 +105,7 @@ class LuxrenderVolumeEditor
 					@volume_dialog.execute_script('$("#volume_type_area").show()')			
 				
 					# show relevant parameters in interface
-					@volume_dialog.execute_script('showParameterSections("' + volumeObject.getValue("volumeType")  +  '")')
+					@volume_dialog.execute_script('showParameterSections("' + volumeObject.getValue("volume_type")  +  '")')
 					volumeObject.addToGUI
 				
 					# get parameter values from object and show in interface
@@ -149,8 +149,8 @@ class LuxrenderVolumeEditor
 			
 			# store texture type in material
 			puts "storing volume type"
-			volumeObject.setValue("volumeType",params[0])
-			puts "getTexType " + volumeObject.getValue("volumeType")
+			volumeObject.setValue("volume_type",params[0])
+			puts "getTexType " + volumeObject.getValue("volume_type")
 			
 			# get values from object, show in interface
 			puts "updating parameters in interface"
@@ -165,7 +165,7 @@ class LuxrenderVolumeEditor
 			setActiveVolume(volumeObject)
 			
 			# set texture type dropdown
-			volumeType = volumeObject.getValue("volumeType")
+			volumeType = volumeObject.getValue("volume_type")
 			puts "setting dropdown to " + volumeType
 			@volume_dialog.execute_script("$('#volume_type').val('" + volumeType +"');")
 			
@@ -244,13 +244,16 @@ class LuxrenderVolumeEditor
 		end
 		
 		if(@volumeCollection.keys.count > 0)
+			puts 'updating volume editor interface'
 			# pick a volume object
 			displayVolumeName = @volumeCollection.keys[0]
 			displayVolumeObject = @volumeCollection[displayVolumeName]
-			displayVolumeType = displayVolumeObject.getValue("volumeType")
+			displayVolumeType = displayVolumeObject.getValue("volume_type")
+			
+			puts displayVolumeType
 			
 			# set object name in dropdown
-			@volume_dialog.execute_script("$('#volumes_in_model').val('" + displayVolumeName + "');")
+			@volume_dialog.execute_script('$("#volumes_in_model").val("' + displayVolumeName + '");')
 			
 			# show volume type area
 			@volume_dialog.execute_script('$("#volume_type_area").show();')
@@ -308,7 +311,7 @@ class LuxrenderVolumeEditor
 			@volume_dialog.execute_script(cmd)
 		end
 		
-		if(varValues["volumeType"][1] != "clear")
+		if(varValues["volume_type"][1] != "clear")
 			# set scattering swatch
 			@lrs.colorpicker_volume = "vol_scattering_swatch"
 			puts varValues
