@@ -535,11 +535,24 @@ module SU2LUX
     end
 
 	##
-    # access LuxRender settings from the Ruby console
+    # access LuxRender properties from the Ruby console
     ##
-    def SU2LUX.this_lrs()
+    def SU2LUX.settings()
         return @lrs_hash[Sketchup.active_model.definitions.entityID]
     end
+	
+	def SU2LUX.volumes()
+		return @volumeedit_hash[Sketchup.active_model.definitions.entityID]
+	end
+	
+	def SU2LUX.textures()
+		return @proctexture_hash[Sketchup.active_model.definitions.entityID]
+	end
+	
+	def SU2LUX.materials()
+		return @matedit_hash[Sketchup.active_model.definitions.entityID]
+	end
+	
 	
     ##
     #
