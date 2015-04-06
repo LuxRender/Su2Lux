@@ -34,7 +34,7 @@ module SU2LUX
 
     # Module constants
     SU2LUX_VERSION = "0.44rc5"
-    SU2LUX_DATE = "6 April 2014" # to be updated in about.html manually
+    SU2LUX_DATE = "6 April 2015" # to be updated in about.html manually
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
 	PLUGIN_FOLDER = "su2lux"
