@@ -117,20 +117,20 @@ $(document).ready(
 			}
 		);
                   
-      $("#renderer").change(
-            function()
-            {
+   //   $("#renderer").change(
+     //       function()
+       //     {
                // alert (this.value)
-                    if (this.value=="sppm"){
-                        $("#sppm").show();
-                        $("#integratorsection").hide();
-                    }else{
-                        $("#sppm").hide();
-                        $("#integratorsection").show();
-                    }
+                    //if (this.value=="sppm"){
+                    //    $("#sppm").show();
+                    //    $("#integratorsection").hide();
+                    //}else{
+                    //    $("#sppm").hide();
+                    //    $("#integratorsection").show();
+                    //}
                 //$(this).nextAll("#" + this.value).show();
-            }
-            );
+         //   }
+           // );
                   
 		$("#sintegrator_path_rrstrategy, #sintegrator_exphoton_rrstrategy").change(
 			function()
@@ -213,7 +213,7 @@ $(document).ready(
 			{
 				//alert("#"+this.value);
 				nodes = $(this).nextAll().hide();
-				nodes = $(this).nextAll("#" + this.value).show();
+				nodes = $(this).nextAll("." + this.value).show();
 			}
 		);
 
