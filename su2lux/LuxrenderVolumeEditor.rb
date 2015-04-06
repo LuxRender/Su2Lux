@@ -37,11 +37,12 @@ class LuxrenderVolumeEditor
             windowname = "LuxRender Volume - " + filename
         end
 		
-		puts "processing " + @lrs.volumeNames.size.to_s + " volumes"
-		
-		for volumeName in @lrs.volumeNames
-			puts "volume found in @lrs: " + volumeName
-			volume = LuxrenderVolume.new(false, self, @material_editor, @lrs, volumeName)
+		if(@lrs.volumeNames != nil)
+			puts "processing " + @lrs.volumeNames.size.to_s + " volumes"
+			for volumeName in @lrs.volumeNames
+				puts "volume found in @lrs: " + volumeName
+				volume = LuxrenderVolume.new(false, self, @material_editor, @lrs, volumeName)
+			end	
 		end		
 		
 		@volume_dialog = UI::WebDialog.new(windowname, true, "LuxrenderVolumeEditor", 450, 600, 10, 10, true)

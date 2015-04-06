@@ -179,16 +179,28 @@ module SU2LUX
         if File.extname(lrs.export_file_path) != ".lxs"
             lrs.export_file_path << ".lxs"
         end
-        
+		
+		
+        # check if export folder exists
+		if !File.directory?(File.dirname(lrs.export_file_path))
+			# set lrs.export_file_path to provided path
+			lrs.export_file_path = UI.openpanel("Please select output file name", "", Sketchup.active_model.name + ".lxs")			
+		end
+		
         exportpath = File.join(File.dirname(lrs.export_file_path), SU2LUX.sanitize_path(File.basename(lrs.export_file_path))) #SU2LUX.sanitize_path(lrs.export_file_path)
 
 		le=LuxrenderExport.new(exportpath, @os_separator, lrs, @material_editor)
 		le.reset
+		
+
+		
 		file_basename = File.basename(exportpath, SCENE_EXTENSION)
 		file_dirname = File.dirname(exportpath)
 		file_fullname = File.join(file_dirname, file_basename) # was: string + @os_separator + string
         file_datafolder = file_fullname+SU2LUX::SUFFIX_DATAFOLDER + @os_separator
         
+
+		
         # create scene data folder
         if !FileTest.exist?(file_fullname+SU2LUX::SUFFIX_DATAFOLDER)
             Dir.mkdir(file_fullname+SU2LUX::SUFFIX_DATAFOLDER)
@@ -1093,8 +1105,10 @@ class SU2LUX_app_observer < Sketchup::AppObserver
         puts "onOpenModel processing procedural textures"
 		procTextureNames = lrs.proceduralTextureNames
 		puts "recreating procedural texture objects"
-		for texName in procTextureNames
-			newTex = LuxrenderProceduralTexture.new(false, procEditor, lrs, nil, texName)
+		if(procTextureNames != nil)
+			for texName in procTextureNames
+				newTex = LuxrenderProceduralTexture.new(false, procEditor, lrs, nil, texName)
+			end
 		end
 		if(procEditor.activeProcTex)
 			procEditor.updateGUI()

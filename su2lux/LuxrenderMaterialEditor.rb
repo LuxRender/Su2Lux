@@ -799,12 +799,14 @@ class LuxrenderMaterialEditor
         @material_editor_dialog.execute_script(setdivheightcmd)
 		
 		# add procedural textures to dropdown
-		puts "LuxRenderMaterialEditor.rb adding " + @lrs.proceduralTextureNames.size.to_s + " procedural textures to texture dropdown menus"
-		for texName in @lrs.proceduralTextureNames
-			# get texture name, then texture type
-			texChannelType = LuxrenderProceduralTexture.getChannelType(texName)
-			@material_editor_dialog.execute_script('addToProcTextList("' + texName + '","' + texChannelType + '")')
-		end   		
+		if(@lrs.proceduralTextureNames != nil)
+			puts "LuxRenderMaterialEditor.rb adding " + @lrs.proceduralTextureNames.size.to_s + " procedural textures to texture dropdown menus"
+			for texName in @lrs.proceduralTextureNames
+				# get texture name, then texture type
+				texChannelType = LuxrenderProceduralTexture.getChannelType(texName)
+				@material_editor_dialog.execute_script('addToProcTextList("' + texName + '","' + texChannelType + '")')
+			end   	
+		end		
 	end
     
     def showhide_fields()
@@ -844,13 +846,15 @@ class LuxrenderMaterialEditor
         set_material_list("material_list2") # mix material 2
         set_material_list("lightbase") # emitter base material
 		# volumes
-		for volumeName in @lrs.volumeNames
-			# add volume to interior and exterior dropdown
-			dropdown_add_interior = "$('#volume_interior').append( $('<option></option>').val('" + volumeName + "').html('" + volumeName + "'))"
-			dropdown_add_exterior = "$('#volume_exterior').append( $('<option></option>').val('" + volumeName + "').html('" + volumeName + "'))"
-			@material_editor_dialog.execute_script(dropdown_add_interior)
-			@material_editor_dialog.execute_script(dropdown_add_exterior)
-		end		
+		if(@lrs.volumeNames != nil)
+			for volumeName in @lrs.volumeNames
+				# add volume to interior and exterior dropdown
+				dropdown_add_interior = "$('#volume_interior').append( $('<option></option>').val('" + volumeName + "').html('" + volumeName + "'))"
+				dropdown_add_exterior = "$('#volume_exterior').append( $('<option></option>').val('" + volumeName + "').html('" + volumeName + "'))"
+				@material_editor_dialog.execute_script(dropdown_add_interior)
+				@material_editor_dialog.execute_script(dropdown_add_exterior)
+			end
+		end
     end
     
 	
