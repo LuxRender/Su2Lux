@@ -1562,7 +1562,7 @@ class LuxrenderExport
 	end
 	
 	def export_single_volume(out, volumeName, volumeObject)
-		volumeType = volumeObject.getValue("volumeType")
+		volumeType = volumeObject.getValue("volume_type")
 		volumeParameterHash = volumeObject.getValueHash()
 		puts volumeParameterHash
 		
