@@ -33,7 +33,7 @@ end
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.45"
+    SU2LUX_VERSION = "0.44"
     SU2LUX_DATE = "9 May 2015" # to be updated in about.html manually
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
