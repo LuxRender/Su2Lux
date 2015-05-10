@@ -300,7 +300,7 @@ class LuxrenderSettings
 		'fleximage_tonemapkernel' => 'reinhard',
 		'fleximage_reinhard_prescale' => 1.0,
 		'fleximage_reinhard_postscale' => 1.0,
-		'fleximage_reinhard_burn' => 6.0,
+		'fleximage_reinhard_burn' => 1.2,
 		'fleximage_linear_sensitivity' => 50.0,
 		'fleximage_linear_exposure' => 1.0,
 		'fleximage_linear_fstop' => 2.8,
