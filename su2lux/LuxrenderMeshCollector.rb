@@ -22,41 +22,36 @@ class LuxrenderMeshCollector
 		@material_editor = mat_editor
 	end # END initialize
     
-    #####################################################################
-    ## method returns true if graph contains no further instances.
-    ## These can safely be instantiated
-    #####################################################################
+    ##
+    # check if object is a leaf node (having no components as children), and thus if it can be safely instantiated
+    ##
     def instance_is_leaf(object)
         if ( object.class != Sketchup::ComponentInstance && object.class != Sketchup::Group ) # note 2015: class statements were missing
             return true
         end
         object.definition.entities.each { | child |
             if child.class == Sketchup::ComponentInstance
-                #UI.messagebox("Definition: #{object.definition.name} contains instances")
-                return false
-            end
-            if child.class == Sketchup::Group
+                return false # object is not a leaf node
+            elsif child.class == Sketchup::Group
                 child.entities.each { | grandchild |
-                    if ! instance_is_leaf(grandchild)
-                        return false
-                        #UI.messagebox("Group failed on ")
+                    if !instance_is_leaf(grandchild)
+                        return false # object is not a leaf node
                     end
                 }
             end
         }
-        #UI.messagebox("Component: #{object.definition.name} is a leaf node")
-        return true
+        return true # object is a leaf node
     end
     
     #####################################################################
     
     #####################################################################
-    def instances_copies(object)
-        if ! @instance_counter_cache.key?(object.definition.name)
-            @instance_counter_cache[object.definition.name] = object.definition.instances.length
-        end
-        return @instance_counter_cache[object.definition.name]
-    end  
+    #def instances_copies(object)
+    #    if ! @instance_counter_cache.key?(object.definition.name)
+    #        @instance_counter_cache[object.definition.name] = object.definition.instances.length
+    #    end
+    #    return @instance_counter_cache[object.definition.name]
+    #end  
     
 	##
 	# sort faces by material
