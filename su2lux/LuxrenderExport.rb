@@ -872,20 +872,74 @@ class LuxrenderExport
         
 	end # END export_light
 
-	def export_mesh(out)
-		mc=LuxrenderMeshCollector.new(@lrs, @material_editor, @model_name,@os_separator,true)
+	def export_mesh(out) # note: "out" is a file object for the lxo file, to which all relevant data will be added through this method
+		# process_components
+		processed_components = process_components
+		puts processed_components[0].size.to_s + ' processed component(s)'
+		components = processed_components[0]
+		component_mat_geometry = processed_components[1]
+		component_children = processed_components[2]
+		
+		ply_folder = File.dirname(@export_file_path) + "/" +  File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER + SU2LUX::GEOMETRYFOLDER
+		
+		# write component definitions:
+		out.puts '# component definitions exported by new export logic'
+		out.puts ''
+		
+		## for each component
+		components.each{|comp|
+			componentname = comp.guid.to_s
+			out.puts 'ObjectBegin "' + componentname + '" # ' + comp.name  											# ObjectBegin "df9eb8e0-8ac4-4d8f-8fc6-7ab8c3435ef8"
+			out.puts '  Transform ' + comp.local_transformation.to_a.to_s.delete(',')								# Transform [ 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.2655228805630811 0.9555405993216953 0.0 1.0 ] 
+			
+			## write reference to material and geometry for every used material
+			
+			component_mat_geometry[comp].each{|skpmat, facelist|
+				if(facelist != nil and facelist.size > 0)	
+					matname = @material_editor.materials_skp_lux[skpmat].name
+					component_ply_name = componentname + '_' + matname
+					ply_path = File.join(ply_folder, component_ply_name + '.ply')
+					out.puts '  NamedMaterial "' + matname + '"' 	# NamedMaterial "df9eb8e0-8ac4-4d8f-8fc6-7ab8c3435ef8_materialname"
+					out.puts '  Shape "plymesh"' 															# Shape "plymesh"
+					out.puts '  "string filename" ["' +  ply_path + '"]'										#	"string filename" ["Untitled_luxdata/geometry/1_boxes.ply"]
+					# write ply file, passing ply_path and facelist
+					output_single_ply_file(ply_path, facelist, false) # false: write ASCII file, not binary
+					
+				end
+			}			
+			out.puts 'ObjectEnd'																		# ObjectEnd
+			out.puts ''																					# 
+		}
+				
+		# store paths to ply files: component_guid_+_luxmatname		
+		
+		# process other geometry: sort faces by material
+		# write ordinary geometry 
+		# write ordinary geometry ply files
+		
+		# write component instances
+
+		# check which materials are used (material_geometry.keys that have at least one face)
+		
+	end # END export_mesh
+	
+	def export_mesh_old(out) # note: "out" is a file object for the lxo file, to which all relevant data will be added through this method
+		mc = LuxrenderMeshCollector.new(@lrs, @material_editor, @model_name,@os_separator,true)
 		mc.collect_faces(Sketchup.active_model.entities, Geom::Transformation.new)
-		@materials=mc.materials
-		@fm_materials=mc.fm_materials # face me component materials
-		# @used_materials = @materials.merge(@fm_materials)
-		@model_textures=mc.model_textures
+		@materials = mc.materials
+		@fm_materials = mc.fm_materials # face me component materials
+		@model_textures = mc.model_textures
         puts "number of textures to export: " + @model_textures.length.to_s
-		@texturewriter=mc.texturewriter
-		@count_faces=mc.count_faces
+		@texturewriter = mc.texturewriter
+		@count_faces = mc.count_faces
 		@current_mat_step = 1
-		p 'export faces'
+		
+		p 'exporting geometry'
+		Sketchup.set_status_text 'exporting geometry'
 		export_faces(out,[])
-		p 'export fmfaces'
+		
+		p 'exporting face me component geometry'
+		Sketchup.set_status_text 'exporting face me component geometry'
 		export_fm_faces(out,[])
         
         # the instances we deferred also need to be exported
@@ -913,7 +967,7 @@ class LuxrenderExport
                 export_fm_faces(out,value)
             end
         }
-	end # END export_mesh
+	end # END export_mesh_old
 
 	def export_preview_material(preview_path,generated_lxm_file,currentmaterialname,currentmaterial,texture_path,luxmat)
 		puts "\n"
@@ -1005,13 +1059,13 @@ class LuxrenderExport
 		@materials.each{|matname,value|
 			if (value!=nil and value!=[])
                 #puts "@materials values:"
-                #puts value[0][0]
-                #puts value[0][1]
-                #puts value[0][2]
-                #puts value[0][3]
-                #puts value[0][4]
-                #puts value[0][5]
-                #puts value[0][6]
+                #puts value[0][0] # geometry
+                #puts value[0][1] # transformation
+                #puts value[0][2] # SketchUp UV helper
+                #puts value[0][3] # face direction
+                #puts value[0][4] # material
+                #puts value[0][5] # ?
+                #puts value[0][6] # distorted texture (boolean)
 				export_face(out,value[0][4],false,is_instance,matname,value[0][6])
 				@materials[matname]=nil
 			end}
@@ -1217,17 +1271,111 @@ class LuxrenderExport
         #Exporting Material
         @instance_name += 1
     end
+	
+	def output_single_ply_file(ply_path, facelist, binary = false)
+		# create folder if it doesn't exist yet
+		geometry_folder = File.dirname(ply_path)
+		puts "creating geometry folder:"
+		puts geometry_folder
+		Dir.mkdir(geometry_folder) unless File.exists?(geometry_folder)
+	
+	    # create file, write header lines
+		if (binary)       
+			ply_file = File.new(ply_path, "wb")
+			ply_file << "ply\n"
+            ply_file << "format binary_little_endian 1.0\n"
+        else
+			ply_file = File.new(ply_path, "w")
+			ply_file << "ply\n"
+            ply_file << "format ascii 1.0\n"
+        end
+        ply_file << "comment created by SU2LUX " << Time.new << "\n"
+	
+		#
+		#	process faces: create meshes from all faces; add their triangles to a single list
+		#
+		meshpointcounter = 0
+		meshfacelist = []
+		vertexlist = []
+		vertexnormallist = []
+		vertexuvlist = []
+		facelist.each{|skp_face|
+			polygonmesh = skp_face.mesh(5)
+			
+			# get points (defined as Point3d)
+			polygonmesh.points.each{|p3d|
+				vertexlist << p3d
+				meshpointcounter += 1
+			}
+			
+			# get normals and uvs for each point
+			for i in 1..polygonmesh.points.count
+				vertexnormallist << polygonmesh.normal_at(i) 
+				vertexuvlist << polygonmesh.uv_at(i, true) # true: front face # note/todo: type is Length, may need to be scaled, and needs to be converted to float
+			end
+				
+			# get faces (defined as point indices)
+			polygonmesh.polygons.each{|face_vertex_indices|
+				globalfaceindices = []
+				face_vertex_indices.each{|face_vertex_index|
+					globalfaceindices << (meshpointcounter + face_vertex_index.abs)
+				}
+				meshfacelist << globalfaceindices
+			}			
+		}
+		
+		# write element, vertex count, vertex parameters, face count, face parameters, end of header
+        ply_file << "element vertex #{vertexlist.count.to_s}\n"
+        ply_file << "property float x\n"
+        ply_file << "property float y\n"
+        ply_file << "property float z\n"
+        ply_file << "property float nx\n"
+        ply_file << "property float ny\n"
+        ply_file << "property float nz\n"
+        ply_file << "property float s\n"
+        ply_file << "property float t\n"
+        ply_file << "element face #{meshfacelist.count.to_s}\n"
+        ply_file << "property list uchar uint vertex_indices\n"
+        ply_file << "end_header\n"
+
+		# write vertices
+		for i in 0..vertexlist.count-1
+			if (binary)
+				ply_file << [vertexlist[i].x.to_f*@scale, vertexlist[i].y.to_f*@scale, vertexlist[i].z.to_f*@scale, vertexnormallist[i].x, vertexnormallist[i].y, vertexnormallist[i].z, vertexuvlist[i].x, 1-vertexuvlist[i].y].pack('e*.')
+			else
+				position_string = (vertexlist[i].x.to_f * @scale).to_s + " " + (vertexlist[i].y.to_f * @scale).to_s + " " + (vertexlist[i].z.to_f * @scale).to_s
+				normal_string = vertexnormallist[i].x.to_s + " " + vertexnormallist[i].y.to_s + " " + vertexnormallist[i].z.to_s
+				uv_string = vertexuvlist[i].x.to_f.to_s + " " + vertexuvlist[i].y.to_f.to_s
+				ply_file << (position_string + " " + normal_string + " " + uv_string + "\n")
+			end	
+		end
+		
+		# write faces
+		for f in 0..meshfacelist.count-1
+			faceindices = meshfacelist[f]
+			facedef = faceindices.size.to_s + ' '
+			faceindices.each{|fi|
+				facedef = facedef + fi.to_s 
+			}
+			if (binary)
+				ply_file << facedef.pack('CVVV')
+			else
+				ply_file << facedef + "\n"
+			end 
+		end
+		ply_file.close
+	end
         
     def output_ply_geometry(ply_path, meshes, mirrored, mat_dir, rest, has_texture, matname, pointcount, polycount, default_mat, distorted_uv, no_texture_uvs, binary)
         startindex = 0
         ply_path = File.join(File.dirname(ply_path), SU2LUX.sanitize_path(File.basename(ply_path)))
 
         if ( binary == true)       
-			ply_file=File.new(ply_path,"wb")
+			ply_file = File.new(ply_path,"wb")
 			ply_file << "ply\n"
             ply_file << "format binary_little_endian 1.0\n"
         else
-			ply_file=File.new(ply_path,"w")
+			ply_file = File.new(ply_path,"w")
 			ply_file << "ply\n"
             ply_file << "format ascii 1.0\n"
         end
@@ -1294,21 +1442,21 @@ class LuxrenderExport
                 v2 = (poly[1]>=0?poly[1]:-poly[1])+startindex
                 v3 = (poly[2]>=0?poly[2]:-poly[2])+startindex
                 if !mirrored_tmp
-                    if mat_dir_tmp==true
+                    if mat_dir_tmp == true
                         out_a = [ 3, v1-1, v2-1, v3-1 ]
-                        else
+					else
                         out_a = [ 3, v1-1, v3-1, v2-1 ]
                     end
-                    else
-                    if mat_dir_tmp==true
+                else
+                    if mat_dir_tmp == true
                         out_a = [ 3, v2-1, v1-1, v3-1 ]
-                        else
+					else
                         out_a = [ 3, v2-1, v3-1, v1-1 ]
                     end
                 end		
                 if ( binary == true)
                     ply_file << out_a.pack('CVVV')
-                    else
+                else
                     ply_file << "3 #{out_a[1]} #{out_a[2]} #{out_a[3]} \n"
                 end 	
                 @count_tri = @count_tri + 1
@@ -1337,13 +1485,13 @@ class LuxrenderExport
                 if !mirrored_tmp
                     if mat_dir_tmp==true
                         out.print "#{v1-1} #{v2-1} #{v3-1}\n"
-                        else
+                    else
                         out.print "#{v1-1} #{v3-1} #{v2-1}\n"
                     end
                     else
                     if mat_dir_tmp==true
                         out.print "#{v2-1} #{v1-1} #{v3-1}\n"
-                        else
+                    else
                         out.print "#{v2-1} #{v3-1} #{v1-1}\n"
                     end
                 end
@@ -1828,6 +1976,108 @@ class LuxrenderExport
         return pre, post
     end # end export_material_parameters
 
+	def process_components()
+		component_data = [] # will contain: guid, transformation, component luxrender material, hash of materials and ply paths, list of (list with child components, child luxrender materials, child transformations)
+		# iterate through all components (Sketchup.active_model.definitions)
+		
+		relevant_components = []
+		Sketchup.active_model.definitions.each{ |comp|
+			# check if the components are geometric components and are used (this_component.count_instances > 0) (todo: and is visible)
+			if(comp.is_a?(Sketchup::ComponentDefinition) or comp.is_a?(Sketchup::Group))
+			puts "processing component"
+				if comp.count_instances > 0
+					relevant_components << comp
+				end
+			end
+		}
+		
+		# sort components in such a way that a component never depends on any subsequent components
+		relevant_components = sort_components(relevant_components)
+		relevant_component_children = {}
+		component_material_geometry = {}
+		
+		relevant_components.each{|comp|
+			relevant_component_children[comp] = []
+			component_material_geometry[comp] = []
+			
+			# process faces and child components 
+			material_geometry = {}
+			@material_editor.materials_skp_lux.keys.each{|skpmat|
+				material_geometry[skpmat] = [] # note: distorted materials still need to be added one by one
+			}
+			material_geometry["SU2LUX_no_material"] = []
+			comp_children = []
+			
+			comp.entities.each{|e|
+				if(e.class == Sketchup::Face and e.layer.visible? and e.visible?)
+					# sort faces in lists with [luxrender material, [triangles]] (for now, ignore distorted textures; later: check for distorted textures, create luxrender materials for those)
+					facemat = e.material
+					if(facemat == nil)
+						material_geometry["SU2LUX_no_material"] << e
+					else
+						material_geometry[facemat] << e
+					end
+				elsif(e.class == Sketchup::ComponentInstance and e.layer.visible? and e.visible?)
+					# for each child component, store "[component guid, component luxrender material, component transformation]}
+					comp_children << [e.guid, e.material, e.local_transformation.to_a]
+				end
+				# todo: process groups
+			}
+
+			component_material_geometry[comp] = material_geometry
+			relevant_component_children[comp] = comp_children
+		}
+		return [relevant_components, component_material_geometry, relevant_component_children]	
+	end
+	
+	def sort_components(passed_components)
+		relevant_components = []
+		passed_components.each{|d|
+			if d.is_a?(Sketchup::ComponentDefinition)
+				relevant_components << d
+			end
+		}
+
+		#store components as {component => [childcomponent0, childcomponent5, childcomponent6]}
+		component_hashes = {}
+
+		# process relevant components; get child component definitions
+		relevant_components.each{|c|
+			child_components = []
+			c.entities.each{|e|
+				if e.is_a?(Sketchup::ComponentInstance)
+					puts "adding child"
+					child_components << e.definition
+				end
+			}
+			component_hashes[c] = child_components
+		}
+
+		sorted_components = []
+		maxtries = 30 # maximum recursion depth - used as a safety net infinite loops
+
+		#go through all definitions
+		while(relevant_components.size > 0 and maxtries > 0)
+			maxtries = maxtries - 1
+			unselected_components = []
+			#check if definition has children; if not, add to list and remove from original; also remove from all child component lists
+			relevant_components.each{|c|
+				if(component_hashes[c] == [])
+					sorted_components << c
+					# remove from child component lists
+					relevant_components.each{|d|
+						component_hashes[d].delete(c)
+					}
+				else
+					unselected_components << c
+				end
+			}
+			relevant_components = unselected_components
+		end
+		return sorted_components
+	end
+	
+	
 	def export_mat(mat, out, distortedname, texdistorted)
         @currentluxmat = mat
         #puts "texdistorted:" + texdistorted.to_s
