@@ -36,7 +36,7 @@ class LuxrenderExport
 		@count_faces = 0
 		@clay=false
 		@exp_default_uvs = false
-		@scale = 0.0254
+		@scale = 1.0 # 0.0254
 		@count_tri = 0
 		@model_textures={}
         @instance_name = 0
@@ -872,52 +872,97 @@ class LuxrenderExport
         
 	end # END export_light
 
-	def export_mesh(out) # note: "out" is a file object for the lxo file, to which all relevant data will be added through this method
+	def export_mesh(geometry_file, model) # note: "geometry_file" is a file object (.lxo file), to which all relevant data will be added through this method
 		# process_components
 		processed_components = process_components
 		puts processed_components[0].size.to_s + ' processed component(s)'
 		components = processed_components[0]
 		component_mat_geometry = processed_components[1]
-		component_children = processed_components[2]
+		component_children = processed_components[2] # [e.guid, e.material, e.local_transformation.to_a]
 		
 		ply_folder = File.dirname(@export_file_path) + "/" +  File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER + SU2LUX::GEOMETRYFOLDER
 		
-		# write component definitions:
-		out.puts '# component definitions exported by new export logic'
-		out.puts ''
+		# write component definitions: (note/todo: move component stuff to separate method
+		geometry_file.puts "# created by SU2LUX " + SU2LUX::SU2LUX_VERSION + " " + Time.new.to_s
+		geometry_file.puts ''
 		
+		puts 'writing component definitions'
 		## for each component
 		components.each{|comp|
 			componentname = comp.guid.to_s
-			out.puts 'ObjectBegin "' + componentname + '" # ' + comp.name  											# ObjectBegin "df9eb8e0-8ac4-4d8f-8fc6-7ab8c3435ef8"
-			out.puts '  Transform ' + comp.local_transformation.to_a.to_s.delete(',')								# Transform [ 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.2655228805630811 0.9555405993216953 0.0 1.0 ] 
-			
+			geometry_file.puts 'ObjectBegin "' + componentname + '" # ' + comp.name  			# ObjectBegin "df9eb8e0-8ac4-4d8f-8fc6-7ab8c3435ef8"
+			# geometry_file.puts '  Transform ' + comp.local_transformation.to_a.to_s.delete(',')	# Transform [ 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.2655228805630811 0.9555405993216953 0.0 1.0] 
+
 			## write reference to material and geometry for every used material
-			
 			component_mat_geometry[comp].each{|skpmat, facelist|
 				if(facelist != nil and facelist.size > 0)	
 					matname = @material_editor.materials_skp_lux[skpmat].name
 					component_ply_name = componentname + '_' + matname
 					ply_path = File.join(ply_folder, component_ply_name + '.ply')
-					out.puts '  NamedMaterial "' + matname + '"' 	# NamedMaterial "df9eb8e0-8ac4-4d8f-8fc6-7ab8c3435ef8_materialname"
-					out.puts '  Shape "plymesh"' 															# Shape "plymesh"
-					out.puts '  "string filename" ["' +  ply_path + '"]'										#	"string filename" ["Untitled_luxdata/geometry/1_boxes.ply"]
+					geometry_file.puts '  NamedMaterial "' + matname + '"' 			# NamedMaterial "df9eb8e0-8ac4-4d8f-8fc6-7ab8c3435ef8_materialname"
+					geometry_file.puts '  Shape "plymesh"' 							#   Shape "plymesh"
+					geometry_file.puts '  "string filename" ["' +  ply_path + '"]'	#	"string filename" ["Untitled_luxdata/geometry/1_boxes.ply"]
 					# write ply file, passing ply_path and facelist
 					output_single_ply_file(ply_path, facelist, false) # false: write ASCII file, not binary
-					
 				end
-			}			
-			out.puts 'ObjectEnd'																		# ObjectEnd
-			out.puts ''																					# 
+			}
+			
+			## write references to child components
+			component_children[comp].each{|child_component|
+				puts "processing child components"
+				#puts child_component
+				geometry_file.puts 'AttributeBegin'
+				geometry_file.puts "\t ConcatTransform " + child_component[2].to_a.to_s.delete(',') 
+				if (child_component[1] != nil && child_component[1] != [] && child_component != "")
+					puts "child component material:"
+					puts child_component[1]
+					geometry_file.puts "\t NamedMaterial \"" + @material_editor.materials_skp_lux[child_component[1]].name + '"'
+				end
+				geometry_file.puts "\t ObjectInstance \"" + child_component[0].to_s + '"'
+				geometry_file.puts 'AttributeEnd'
+			}
+			geometry_file.puts 'ObjectEnd'
+			geometry_file.puts ''
 		}
-				
-		# store paths to ply files: component_guid_+_luxmatname		
 		
-		# process other geometry: sort faces by material
+		geometry_file.puts ''
+		
+		#
+		# iterate objects in scene
+		#
+		
+		puts 'exporting real and instanced geometry'
+		
+		geometry_file.puts "# geometry definition - first change global transformation from inches to meters"
+		geometry_file.puts "ConcatTransform [0.0254 0.0 0.0 0.0 0.0 0.0254 0.0 0.0 0.0 0.0 0.0254 0.0 0.0 0.0 0.0 1.0]" # convert from scene units (inches) to meters
+		geometry_file.puts ''
+		
+		model.entities.each{|ent|
+			# check if it is an instance, if so, check if it is visible, if so, write
+			if ent.class == Sketchup::ComponentInstance
+				# get transformation
+				# get id
+				# write instance
+				geometry_file.puts 'AttributeBegin'
+				geometry_file.puts "\t ConcatTransform " + ent.transformation.to_a.to_s.delete(',') 
+				if(ent.material != nil)
+					geometry_file.puts "\t NamedMaterial \"" + @material_editor.materials_skp_lux[ent.material].name + '"'
+				end
+				geometry_file.puts "\t ObjectInstance \"" + ent.definition.guid + '"'
+				geometry_file.puts 'AttributeEnd'
+				
+			end
+			# todo: check if it is something else, deal with ordinary geometry
+		}
+		
+		
+		# if it is a group, treat it like a component?
+		
+		
+		# todo: process other geometry: sort faces by material
 		# write ordinary geometry 
 		# write ordinary geometry ply files
 		
-		# write component instances
 
 		# check which materials are used (material_geometry.keys that have at least one face)
 		
@@ -1275,21 +1320,19 @@ class LuxrenderExport
 	def output_single_ply_file(ply_path, facelist, binary = false)
 		# create folder if it doesn't exist yet
 		geometry_folder = File.dirname(ply_path)
-		puts "creating geometry folder:"
-		puts geometry_folder
 		Dir.mkdir(geometry_folder) unless File.exists?(geometry_folder)
 	
 	    # create file, write header lines
 		if (binary)       
 			ply_file = File.new(ply_path, "wb")
-			ply_file << "ply\n"
-            ply_file << "format binary_little_endian 1.0\n"
+			ply_file.puts "ply"
+            ply_file.puts "format binary_little_endian 1.0"
         else
 			ply_file = File.new(ply_path, "w")
-			ply_file << "ply\n"
-            ply_file << "format ascii 1.0\n"
+			ply_file.puts "ply"
+            ply_file.puts "format ascii 1.0"
         end
-        ply_file << "comment created by SU2LUX " << Time.new << "\n"
+        ply_file.puts "comment created by SU2LUX " + SU2LUX::SU2LUX_VERSION + " " + Time.new.to_s
 	
 		#
 		#	process faces: create meshes from all faces; add their triangles to a single list
@@ -1305,7 +1348,6 @@ class LuxrenderExport
 			# get points (defined as Point3d)
 			polygonmesh.points.each{|p3d|
 				vertexlist << p3d
-				meshpointcounter += 1
 			}
 			
 			# get normals and uvs for each point
@@ -1318,35 +1360,36 @@ class LuxrenderExport
 			polygonmesh.polygons.each{|face_vertex_indices|
 				globalfaceindices = []
 				face_vertex_indices.each{|face_vertex_index|
-					globalfaceindices << (meshpointcounter + face_vertex_index.abs)
+					globalfaceindices << meshpointcounter + face_vertex_index.abs - 1
 				}
 				meshfacelist << globalfaceindices
-			}			
+			}	
+			meshpointcounter += polygonmesh.points.count		
 		}
 		
 		# write element, vertex count, vertex parameters, face count, face parameters, end of header
-        ply_file << "element vertex #{vertexlist.count.to_s}\n"
-        ply_file << "property float x\n"
-        ply_file << "property float y\n"
-        ply_file << "property float z\n"
-        ply_file << "property float nx\n"
-        ply_file << "property float ny\n"
-        ply_file << "property float nz\n"
-        ply_file << "property float s\n"
-        ply_file << "property float t\n"
-        ply_file << "element face #{meshfacelist.count.to_s}\n"
-        ply_file << "property list uchar uint vertex_indices\n"
-        ply_file << "end_header\n"
+        ply_file.puts "element vertex #{vertexlist.count.to_s}\n"
+        ply_file.puts "property float x"
+        ply_file.puts "property float y"
+        ply_file.puts "property float z"
+        ply_file.puts "property float nx"
+        ply_file.puts "property float ny"
+        ply_file.puts "property float nz"
+        ply_file.puts "property float s"
+        ply_file.puts "property float t"
+        ply_file.puts "element face #{meshfacelist.count.to_s}"
+        ply_file.puts "property list uchar uint vertex_indices"
+        ply_file.puts "end_header"
 
 		# write vertices
 		for i in 0..vertexlist.count-1
 			if (binary)
-				ply_file << [vertexlist[i].x.to_f*@scale, vertexlist[i].y.to_f*@scale, vertexlist[i].z.to_f*@scale, vertexnormallist[i].x, vertexnormallist[i].y, vertexnormallist[i].z, vertexuvlist[i].x, 1-vertexuvlist[i].y].pack('e*.')
+				ply_file << [vertexlist[i].x.to_f, vertexlist[i].y.to_f, vertexlist[i].z.to_f, vertexnormallist[i].x, vertexnormallist[i].y, vertexnormallist[i].z, vertexuvlist[i].x, 1-vertexuvlist[i].y].pack('e*.')
 			else
-				position_string = (vertexlist[i].x.to_f * @scale).to_s + " " + (vertexlist[i].y.to_f * @scale).to_s + " " + (vertexlist[i].z.to_f * @scale).to_s
+				position_string = vertexlist[i].x.to_f.to_s + " " + vertexlist[i].y.to_f.to_s + " " + vertexlist[i].z.to_f.to_s
 				normal_string = vertexnormallist[i].x.to_s + " " + vertexnormallist[i].y.to_s + " " + vertexnormallist[i].z.to_s
 				uv_string = vertexuvlist[i].x.to_f.to_s + " " + vertexuvlist[i].y.to_f.to_s
-				ply_file << (position_string + " " + normal_string + " " + uv_string + "\n")
+				ply_file.puts position_string + " " + normal_string + " " + uv_string
 			end	
 		end
 		
@@ -1355,12 +1398,12 @@ class LuxrenderExport
 			faceindices = meshfacelist[f]
 			facedef = faceindices.size.to_s + ' '
 			faceindices.each{|fi|
-				facedef = facedef + fi.to_s 
+				facedef = facedef + fi.to_s + ' '
 			}
 			if (binary)
 				ply_file << facedef.pack('CVVV')
 			else
-				ply_file << facedef + "\n"
+				ply_file.puts facedef
 			end 
 		end
 		ply_file.close
@@ -2018,8 +2061,8 @@ class LuxrenderExport
 						material_geometry[facemat] << e
 					end
 				elsif(e.class == Sketchup::ComponentInstance and e.layer.visible? and e.visible?)
-					# for each child component, store "[component guid, component luxrender material, component transformation]}
-					comp_children << [e.guid, e.material, e.local_transformation.to_a]
+					# for each child component, store "[component guid, component sketchup material, component transformation]}
+					comp_children << [e.definition.guid, e.material, e.transformation.to_a]
 				end
 				# todo: process groups
 			}
