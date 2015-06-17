@@ -122,7 +122,7 @@ class LuxrenderMaterial
 		'light_power' => 100.0,
 		'light_efficacy' => 17.0,
 		'light_gain' => 1.0,
-        'lightbase' => 'default',
+        'lightbase' => 'invisible',
 		'ies_path' => '',
 
 		'use_architectural' => false,
@@ -141,7 +141,7 @@ class LuxrenderMaterial
 	##
 	def lux_image_texture(material, name, texture, type)
 		material_prefix = material
-		material_prefix << "_" if ( !material.empty?)
+		material_prefix << "_" if (!material.empty?)
 		key_prefix = material_prefix + "#{name}"
 		key = "#{key_prefix}_#{texture}_"
         if (name=="aa")
@@ -164,7 +164,7 @@ class LuxrenderMaterial
 		@@settings[key + "vscale"] = 1.0
 		@@settings[key + "udelta"] = 0.0
 		@@settings[key + "vdelta"] = 0.0
-		@@settings[key + "proctex"] = "procTex_0"
+		@@settings[key + "proctex"] = "procTex_1"
 		@@settings[key + "maxanisotropy"] = 8.0
 		@@settings[key + "discardmipmaps"] = 0
 		# @@settings[key + "uvset"] = 0
@@ -285,6 +285,40 @@ class LuxrenderMaterial
 			end #end settings.each
 		end #end module_eval
 	end #end initialize
+	
+	def get_texture_channels()
+		return @@settings['texturechannels']
+	end
+	
+	def get_used_image_paths
+		used_image_paths = []
+		# go through all of this material's texturechannels
+		@@settings['texturechannels'].each{|textype|
+			# check if this channel uses an image texture
+			textype_string = textype + '_texturetype'
+			texture_type = self.send(textype_string)
+			# store image 
+			if(texture_type == 'imagemap')
+				image_path = self.send(textype + '_imagemap_filename')
+				if(image_path != '' && image_path != nil)
+					used_image_paths << image_path
+				end
+			end
+		}
+		return used_image_paths
+	end
+	
+	def uses_skp_texture
+		skp_texture_used = false
+		# check if any texture channel uses a sketchup texture
+		@@settings['texturechannels'].each{|textype|
+			textype_string = textype + '_texturetype'
+			if(self.send(textype_string) == 'sketchup')
+				skp_texture_used = true
+			end
+		}
+		return skp_texture_used
+	end
 
 	##
 	#

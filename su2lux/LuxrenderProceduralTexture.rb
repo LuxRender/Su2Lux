@@ -85,7 +85,7 @@ class LuxrenderProceduralTexture
 		'gaussian' => [["energy","float",1.0],["wavelength","float",550.0],["width","float",50.0]],
 		'harlequin' => [],
 		'imagemap' => [["filename","string",""],["wrap","string",""],["filtertype","string","bilinear"],["maxanisotropy","float",8.0],["trilinear","boolean",false],["channel","string","mean"],["gamma","float",2.2],["gain","float",1.0]],
-		'marble' => [["octaves","integer",8],["roughness","float",0.5],["scale","float",1.0],["variation","float",0.2]],
+		'marble' => [["octaves","integer",12],["roughness","float",0.6],["scale","float",1.0],["variation","float",0.7]],
 		'mix' => [["tex1","color",[0.0,0.0,0.0]],["tex2","color",[1.0,1.0,1.0]],["scale","float",1.0],["variation","float",0.2]],
 		'normalmap' => [["filename","string",""],["wrap","string",""],["filtertype","string","bilinear"],["maxanisotropy","float",8.0],["trilinear","boolean",false],["channel","string","mean"],["gamma","float",1.0],["gain","float",1.0]],
 		'scale' => [["value","color",[1.0,1.0,1.0]],["tex1","color",[1.0,1.0,1.0]],["tex2","color",[1.0,1.0,1.0]]],
@@ -176,7 +176,7 @@ class LuxrenderProceduralTexture
 		passedVariableLists = []
 		texType = getTexType()
 		@@textureParameters[texType].each do |propertySet|
-			puts propertySet
+			#puts propertySet
 			# get value from dictionary, or use default value if no value has been stored
 			varValue = @attributeDictionary.get_attribute(name, propertySet[0].to_s, propertySet[2])
 			passedVariableLists << [propertySet[0],propertySet[1],varValue]
@@ -199,7 +199,7 @@ class LuxrenderProceduralTexture
 		unformattedValues = getValues()
 		formattedValues = []
 		unformattedValues.each do |paramSet|
-			puts paramSet
+			# puts paramSet
 			# deal with vector parameters
 			texParamName = paramSet[0]
 			if (texParamName[0..5] == "vector")
@@ -220,8 +220,8 @@ class LuxrenderProceduralTexture
 				formattedValues << [typeString, paramSet[2]]
 			end
 		end
-		puts "returning values:"
-		puts formattedValues
+		#puts "returning values:"
+		#puts formattedValues
 		return formattedValues
 	end
 	

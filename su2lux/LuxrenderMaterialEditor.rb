@@ -383,12 +383,9 @@ class LuxrenderMaterialEditor
 			os = OSSpecific.new
             preview_path = os.get_variables["material_preview_path"]
             path_separator = os.get_variables["path_separator"]
-		
-            settings = @lrs
-            previewtime = settings.preview_time
             
-            active_material = @materials_skp_lux.index(@current)
-			active_material_name = SU2LUX.sanitize_path(active_material.name)
+            active_luxmat = @materials_skp_lux.index(@current)
+			active_material_name = SU2LUX.sanitize_path(active_luxmat.name)
             
 			# generate preview lxm file and export bitmap images
 			lxm_path = File.join(preview_path, SU2LUX.sanitize_path(active_material_name)+".lxm")
@@ -401,16 +398,16 @@ class LuxrenderMaterialEditor
 			generated_lxm_file << "\n"
 			
 			texture_subfolder = "LuxRender_luxdata/textures"
+			
 			previewExport = LuxrenderExport.new(preview_path, path_separator, @lrs, self) # preview path should define where preview files will be stored 
 			previewExport.export_procedural_textures(generated_lxm_file)
+			previewExport.export_volumes(generated_lxm_file)
 			
             collect_mix_materials(@current) # check if the current material is a mix material; if so, recursively gather submaterials
-            puts "collected materials:"
-            puts @collectedmixmaterials
             for prmat in @collectedmixmaterials
                 activeMat = @materials_skp_lux.index(prmat)
                 activeMat_name = SU2LUX.sanitize_path(activeMat.name) # following LuxrenderMaterial.rb convention
-                previewExport.export_preview_material(preview_path,generated_lxm_file,activeMat_name,activeMat,texture_subfolder,prmat)				
+                previewExport.export_preview_material(preview_path, generated_lxm_file, activeMat_name, activeMat, texture_subfolder,prmat)				
             end
             @collectedmixmaterials = []
             @collectedmixmaterials_i = 0
@@ -419,28 +416,28 @@ class LuxrenderMaterialEditor
 			puts "finished texture output for material preview"
 			
 			# generate preview lxs file
-			lxs_path = File.join(preview_path, SU2LUX.sanitize_path(Sketchup.active_model.title)+"_"+active_material_name+".lxs")
+			lxs_path = File.join(preview_path, SU2LUX.sanitize_path(Sketchup.active_model.title) + "_" + active_material_name + ".lxs")
 			
 			base_file_2 = File.join(preview_path, "ansi.txt")
 			FileUtils.copy_file(base_file_2,lxs_path)
 			generated_lxs_file = File.new(lxs_path,"a")
             
-			lxs_section_1 = File.readlines(preview_path+"preview.lxs01")
-            lxs_section_2 = File.readlines(preview_path+"preview.lxs02")
-            lxs_section_3 = File.readlines(preview_path+"preview.lxs03")
+			lxs_section_1 = File.readlines(preview_path + "preview.lxs01")
+            lxs_section_2 = File.readlines(preview_path + "preview.lxs02")
+            lxs_section_3 = File.readlines(preview_path + "preview.lxs03")
             generated_lxs_file.puts lxs_section_1
             
-            generated_lxs_file.puts("\t\"integer xresolution\" [" + settings.preview_size.to_s + "]")
-            generated_lxs_file.puts("\t\"integer yresolution\" [" + settings.preview_size.to_s + "]")
-            generated_lxs_file.puts("\t\"integer halttime\" [" + settings.preview_time.to_s + "]")
+            generated_lxs_file.puts("\t\"integer xresolution\" [" + @lrs.preview_size.to_s + "]")
+            generated_lxs_file.puts("\t\"integer yresolution\" [" + @lrs.preview_size.to_s + "]")
+            generated_lxs_file.puts("\t\"integer halttime\" [" + @lrs.preview_time.to_s + "]")
             generated_lxs_file.puts("\t\"string filename\" \[\""+SU2LUX.sanitize_path(Sketchup.active_model.title)+"_"+active_material_name+"\"]")
             generated_lxs_file.puts("")
             generated_lxs_file.puts("WorldBegin")
-			generated_lxs_file.puts("Include \""+active_material_name+".lxm\"")
+			generated_lxs_file.puts("Include \"" + active_material_name+".lxm\"")
             generated_lxs_file.puts(lxs_section_2)
-            previewExport.output_material(active_material, generated_lxs_file, @current, active_material_name) # writes "NamedMaterial #active_material_name.." or light definition
+            previewExport.output_material(generated_lxs_file, @current, active_material_name) # writes "NamedMaterial #active_material_name.." or light definition
             generated_lxs_file.puts(lxs_section_3)
-            previewExport.export_displacement_textures(active_material, generated_lxs_file, @current)
+            previewExport.export_displacement_textures(active_luxmat, generated_lxs_file, @current, active_material_name)
             generated_lxs_file.puts("AttributeEnd")
             generated_lxs_file.puts("WorldEnd")
 			generated_lxs_file.close
@@ -448,7 +445,7 @@ class LuxrenderMaterialEditor
 			# start rendering preview using luxconsole
 			@filename = File.join(preview_path, SU2LUX.sanitize_path(Sketchup.active_model.title) + "_" + active_material_name + ".png")
 			luxconsole_path = SU2LUX.get_luxrender_console_path()
-			@time_out = previewtime.to_f + 5
+			@time_out = @lrs.preview_time.to_f + 5
 			@retry_interval = 0.5
 			@luxconsole_options = " -x "
 			pipe = IO.popen("\"" + luxconsole_path + "\"" + @luxconsole_options + " \"" + lxs_path + "\"","r") # start rendering
@@ -456,7 +453,7 @@ class LuxrenderMaterialEditor
 			
 			# wait for rendering to get ready, then update image
 			@times_waited = 0.0
-			@d = UI.start_timer(previewtime.to_f+1, false){ 		# sets timer one second longer than rendering time
+			@d = UI.start_timer(@lrs.preview_time.to_f + 1, false){ 		# sets timer one second longer than rendering time
 				file_exists = File.file? @filename
 				while (!file_exists && (@times_waited < @time_out)) 	# if no image is found, wait for file to be rendered
 					print("no image found, timing out in ", @time_out-@times_waited, " seconds\n")
@@ -464,7 +461,7 @@ class LuxrenderMaterialEditor
 					sleep 0.2
 					@times_waited += 0.2
 				end	
-				while (file_exists && ((Time.now()-File.mtime(@filename)) > previewtime.to_f) && (@times_waited < @time_out))
+				while (file_exists && ((Time.now() - File.mtime(@filename)) > @lrs.preview_time.to_f) && (@times_waited < @time_out))
 					puts("old preview found, waiting for update...")				# if an old image is found, wait for update
 					sleep 1
 					@times_waited += 1
@@ -473,7 +470,7 @@ class LuxrenderMaterialEditor
 					puts("preview is taking too long, aborting")
 					# UI.messagebox("The preview rendering process is taking longer than expected.")
 				end
-				if (@times_waited <= @time_out && (Time.now()-File.mtime(@filename)) < (previewtime.to_f+@time_out))
+				if (@times_waited <= @time_out && (Time.now()-File.mtime(@filename)) < (@lrs.preview_time.to_f + @time_out))
 					puts("updating preview")
 					# the file name on the following line includes ?timestamp, forcing the image to be refreshed as the link has changed
                     filename = @filename.gsub('\\', '\\\\\\\\')
@@ -526,9 +523,9 @@ class LuxrenderMaterialEditor
             
             @texture_editor = LuxrenderTextureEditor.new(@texture_editor_data, data, @scene_id)
 
-            puts "sending data to texture editor:"
-            @texture_editor_data.each{|item| puts item}
-            puts data
+            #puts "sending data to texture editor:"
+            #@texture_editor_data.each{|item| puts item}
+            #puts data
             
 			@texture_editor.show()
 		}
@@ -882,8 +879,8 @@ class LuxrenderMaterialEditor
 		cmd = "$('#" + dropdownname + "').empty()"
 		@material_editor_dialog.execute_script(cmd)
         if (dropdownname == "lightbase")
-            defcmd1 = "$('#lightbase').append($('<option></option>').val('default').html('default'))"
-            @material_editor_dialog.execute_script(defcmd1)
+            #defcmd1 = "$('#lightbase').append($('<option></option>').val('default').html('default'))"
+            #@material_editor_dialog.execute_script(defcmd1)
             defcmd2 = "$('#lightbase').append($('<option></option>').val('invisible').html('invisible'))"
             @material_editor_dialog.execute_script(defcmd2)
         end

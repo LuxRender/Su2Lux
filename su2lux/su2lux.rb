@@ -145,10 +145,9 @@ module SU2LUX
 	# resetting values of all instance variables
 	##
 	def SU2LUX.reset_variables
-		@model_textures={} 
-		@texturewriter=Sketchup.create_texture_writer
-		@selected=false
-		@model_name=""
+		@texturewriter = Sketchup.create_texture_writer
+		@selected = false
+		@model_name = ""
 	end # END reset_variables
   
 	##
@@ -169,9 +168,6 @@ module SU2LUX
 	def SU2LUX.export
 		SU2LUX.reset_variables
 		model = Sketchup.active_model
-		entities = model.active_entities
-		selection = model.selection
-		materials = model.materials
 		@luxrender_path = SU2LUX.get_luxrender_path # path to LuxRender executable
         scene_id = Sketchup.active_model.definitions.entityID
         @material_editor = SU2LUX.get_editor(scene_id,"material")
@@ -180,36 +176,32 @@ module SU2LUX
             lrs.export_file_path << ".lxs"
         end
 		
-		
-        # check if export folder exists
+        # check if export folder exists, if not, set lrs.export_file_path to provided path
 		if !File.directory?(File.dirname(lrs.export_file_path))
-			# set lrs.export_file_path to provided path
 			lrs.export_file_path = UI.openpanel("Please select output file name", "", Sketchup.active_model.name + ".lxs")			
 		end
 		
         exportpath = File.join(File.dirname(lrs.export_file_path), SU2LUX.sanitize_path(File.basename(lrs.export_file_path))) #SU2LUX.sanitize_path(lrs.export_file_path)
 
-		le=LuxrenderExport.new(exportpath, @os_separator, lrs, @material_editor)
+		# create LuxrenderExport object
+		le = LuxrenderExport.new(exportpath, @os_separator, lrs, @material_editor)
 		le.reset
-		
 
-		
 		file_basename = File.basename(exportpath, SCENE_EXTENSION)
 		file_dirname = File.dirname(exportpath)
 		file_fullname = File.join(file_dirname, file_basename) # was: string + @os_separator + string
         file_datafolder = file_fullname+SU2LUX::SUFFIX_DATAFOLDER + @os_separator
-        
-
+		filepath_textures = File.join(file_fullname + SU2LUX::SUFFIX_DATAFOLDER, TEXTUREFOLDER)
 		
         # create scene data folder
         if !FileTest.exist?(file_fullname+SU2LUX::SUFFIX_DATAFOLDER)
             Dir.mkdir(file_fullname+SU2LUX::SUFFIX_DATAFOLDER)
-            Dir.mkdir(File.join(file_fullname+SU2LUX::SUFFIX_DATAFOLDER, TEXTUREFOLDER))
+            Dir.mkdir(filepath_textures)
         end
         
         # collect image texture paths from all materials (excluding SketchUp textures, those will be exported later by le.write_textures)
         collectedtextures = []
-        if (lrs.texexport=="all")
+        if (lrs.texexport == "all")
 			puts "Exporting all textures"
 			# collect material paths from image textures
 			@material_editor.materials_skp_lux.values.each {|luxmat|
@@ -221,8 +213,8 @@ module SU2LUX
 				end
 			}
         else
-			puts "Checking texture path validity"
-			# iterate image paths, save the ones that are invalid
+			puts "Checking texture path validity" 
+			# iterate image paths, save the ones that are invalid; those need to be copied as otherwise LuxRender will not find those images
 			@material_editor.materials_skp_lux.values.each {|luxmat|
 				for channel in luxmat.texturechannels
 					texturepath = luxmat.send(channel+"_imagemap_filename")
@@ -243,29 +235,25 @@ module SU2LUX
         end
         
 		# export geometry
-		out_geom = File.new(file_datafolder + file_basename  + SUFFIX_OBJECT, "w")
-		le.export_mesh(out_geom)
-		out_geom.close
+		lxo_file = File.new(file_datafolder + file_basename  + SUFFIX_OBJECT, "w")
+		le.export_mesh(lxo_file, model)
+		lxo_file.close
 
 		# prepare lxm file
-		out_mat = File.new(file_datafolder + file_basename + SUFFIX_MATERIAL, "w")
+		lxm_file = File.new(file_datafolder + file_basename + SUFFIX_MATERIAL, "w")
+		lxm_file << "MakeNamedMaterial \"SU2LUX_helper_null\" \n" # add helper null material
+		lxm_file << "	\"string type\" [\"null\"]"
+		lxm_file << "\n\n"
 		
 		# add volumes
-		le.export_volumes(out_mat)
+		le.export_volumes(lxm_file)
 		
-		# add helper null material
-		out_mat << "MakeNamedMaterial \"SU2LUX_helper_null\" \n"
-		out_mat << "	\"string type\" [\"null\"]"
-		out_mat << "\n\n"
-		
-		# export all materials		
-        relative_datafolder = file_basename+SU2LUX::SUFFIX_DATAFOLDER
-        puts "RELATIVE DATA FOLDER: " + relative_datafolder
-		
-		le.export_procedural_textures(out_mat)
-		le.export_used_materials(materials, out_mat, lrs.texexport, relative_datafolder)
-        le.export_distorted_materials(out_mat, relative_datafolder) # uses materials stored in LuxrenderExport
-		out_mat.close
+		# export all textures and materials		
+        relative_datafolder = file_basename + SU2LUX::SUFFIX_DATAFOLDER
+		le.export_procedural_textures(lxm_file)
+		le.export_used_materials(model.materials, lxm_file, lrs.texexport, relative_datafolder) # LuxRender materials for all SketchUp materials
+        le.export_distorted_materials(lxm_file, relative_datafolder) # materials created in LuxrenderExport for distorted textures
+		lxm_file.close
         
         # write lxs file
 		out = File.new(exportpath,"w")
@@ -274,17 +262,15 @@ module SU2LUX
 		le.export_camera(model.active_view, out)
 		le.export_film(out,file_basename)
 		le.export_render_settings(out)
-		entity_list=model.entities
 		out.puts 'WorldBegin'
-		out.puts "Include \"" + file_basename+SU2LUX::SUFFIX_DATAFOLDER + '/' + file_basename + SUFFIX_MATERIAL + "\"\n\n"
-		out.puts "Include \"" + file_basename+SU2LUX::SUFFIX_DATAFOLDER + '/' + file_basename + SUFFIX_OBJECT + "\"\n\n"
-		le.export_light(out)
+		out.puts "Include \"" + file_basename + SU2LUX::SUFFIX_DATAFOLDER + '/' + file_basename + SUFFIX_MATERIAL + "\"\n\n"
+		out.puts "Include \"" + file_basename + SU2LUX::SUFFIX_DATAFOLDER + '/' + file_basename + SUFFIX_OBJECT + "\"\n\n"
+		le.export_light(out) # sun/environment lights
 		out.puts 'WorldEnd'
 		out.close
         
         # write texture files
-		le.write_textures
-		@count_tri = le.count_tri
+		le.export_textures(filepath_textures)
 	end # END export
 
 	##
@@ -578,22 +564,20 @@ module SU2LUX
 	##
 	def SU2LUX.report_window(start_time, ask_render=true)
 		SU2LUX.dbg_p "SU2LUX.report_window"
-		end_time=Time.new
-		elapsed=end_time-start_time
-		time=" exported in "
-			(time=time+"#{(elapsed/3600).floor}h ";elapsed-=(elapsed/3600).floor*3600) if (elapsed/3600).floor>0
-			(time=time+"#{(elapsed/60).floor}m ";elapsed-=(elapsed/60).floor*60) if (elapsed/60).floor>0
-			time=time+"#{elapsed.round}s. "
+		end_time = Time.new
+		elapsed = end_time-start_time
+		time = " exported in "
+			(time = time+"#{(elapsed/3600).floor}h ";elapsed-=(elapsed/3600).floor*3600) if (elapsed/3600).floor>0
+			(time = time+"#{(elapsed/60).floor}m ";elapsed-=(elapsed/60).floor*60) if (elapsed/60).floor>0
+			time = time+"#{elapsed.round}s. "
 
-		SU2LUX.status_bar(time+" Triangles = #{@count_tri}")
-		export_text="Model & Lights saved to file:\n"
-		#export_text="Selection saved in file:\n" if @selected==true
+		export_text = "Model & Lights saved to file:\n"
         
         lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
 		if ask_render
-			result=UI.messagebox(export_text + lrs.export_file_path +  " \n\nOpen exported model in LuxRender?",MB_YESNO)
+			result = UI.messagebox(export_text + lrs.export_file_path +  " \n\nOpen exported model in LuxRender?",MB_YESNO)
 		else
-			result=UI.messagebox(export_text + lrs.export_file_path,MB_OK)
+			result = UI.messagebox(export_text + lrs.export_file_path,MB_OK)
 		end
         
 		return result
@@ -622,9 +606,9 @@ module SU2LUX
 		 system(command_line)
         else
             fullpath = @luxrender_path + @os_specific_vars["file_appendix"]
-			Thread.new do
-				system('#{fullpath} "#{export_path}"')
-			end
+			#Thread.new do
+				system("#{fullpath} \"#{export_path}\"")
+			#end
 		end
 	end # END launch_luxrender
 
