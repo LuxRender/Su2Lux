@@ -1871,19 +1871,19 @@ class LuxrenderExport
 		# export additional material properties
         if (lux_mat.use_thin_film_coating)
 			puts 'adding thin film coating'
-            pre, post = self.export_thin_film(lux_mat, pre, post, texture_name)
+            pre, post = self.export_thin_film(lux_mat, pre, post, currentmatname, distorted_index)
         end
 		if (lux_mat.has_bump?)
 			puts 'adding bump map'
-            pre, post = self.export_bump(lux_mat, pre, post, texture_name)
+            pre, post = self.export_bump(lux_mat, pre, post, currentmatname, distorted_index)
 		end
         if (lux_mat.has_normal?)
 			puts 'adding normal map'
-            pre, post = self.export_normal(lux_mat, pre, post, texture_name)
+            pre, post = self.export_normal(lux_mat, pre, post, currentmatname, distorted_index)
 		end
         if (lux_mat.has_displacement?)
 			puts "adding displacement map"
-			pre, post = self.export_displacement(lux_mat, pre, post, texture_name)
+			pre, post = self.export_displacement(lux_mat, pre, post, currentmatname, distorted_index)
 		end
         
         matnamecomment = "# Material '" + currentmatname + "'\n"
@@ -2289,7 +2289,7 @@ class LuxrenderExport
 			preceding << "\t" + "\"float tex1\" [#{material.bumpmap}]" + "\n"
 			preceding << "\t" + "\"texture tex2\" [\"#{tex_name}::bumpmap_unscaled\"]" + "\n"
 		else # procedural
-			preceding, following = write_texture_reference(material, "bump", material.type, preceding, following)
+			preceding, following = write_texture_reference(material, "bump", material.type, preceding, following, tex_name)
 			preceding << "Texture \"#{material.bump_imagemap_proctex}_scale\" \"float\" \"scale\"" + "\n"
 			preceding << "\t" + "\"float tex1\" [#{material.bumpmap}]" + "\n"
 			preceding << "\t" + "\"texture tex2\" [\"#{material.bump_imagemap_proctex}\"]" + "\n"
