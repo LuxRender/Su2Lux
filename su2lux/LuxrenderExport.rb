@@ -947,6 +947,16 @@ class LuxrenderExport
 				matname = skp_mat_name + (dist_index == 0 ? "" : '_dist' + dist_index.to_s) # @material_editor.materials_skp_lux[skp_mat].name
 				ply_path = File.join(ply_folder, matname + '.ply')
 				geometry_file.puts '  NamedMaterial "' + matname + '"' 			# NamedMaterial "materialname"
+				if(skp_mat != "SU2LUX_no_material")
+					lux_mat = @material_editor.materials_skp_lux[skp_mat]
+					if(lux_mat.type == 'light')
+						geometry_file.puts '  LightGroup "mesh_light"'
+						light_def_lines = output_light_definition(lux_mat, matname)
+						light_def_lines.each{|lightdef_line|
+							geometry_file.puts "  " + lightdef_line
+						}					
+					end
+				end
 				geometry_file.puts '  Shape "plymesh"' 							#   Shape "plymesh"
 				geometry_file.puts '  "string filename" ["' +  ply_path + '"]'	#	"string filename" ["Untitled_luxdata/geometry/1_boxes.ply"]
 				geometry_file.puts 'AttributeEnd'
@@ -1029,7 +1039,7 @@ class LuxrenderExport
 						light_def_lines = output_light_definition(luxmat, skpmat.name)
 						light_def_lines.each{|lightdef_line|
 							compdef_lines << "  " + lightdef_line
-						} # todo: add base material to used material list, to make sure it gets exported?
+						}
 					end
 					compdef_lines << '    NamedMaterial "' + luxmat.name + '"'	# NamedMaterial "df9eb8e0-8ac4-4d8f-8fc6-7ab8c3435ef8_materialname"
 					compdef_lines << '    Shape "plymesh"'						#   Shape "plymesh"
@@ -1324,7 +1334,7 @@ class LuxrenderExport
 	end
         
 		
-    def output_light_definition (luxrender_mat, matname) # writes link to material and volumes, not material itself
+    def output_light_definition (luxrender_mat, matname) # writes light definition (for geometry file)
         #puts "running output_material"
 		light_definition = []
 		light_definition << "AreaLightSource \"area\""
@@ -1906,9 +1916,9 @@ class LuxrenderExport
 				matdefinition <<  pre
 				matdefinition <<  matnamecomment
 				matdefinition <<  matdeclaration_statement1
-				matdefinition <<  '"string type" ["mix"]'
-				matdefinition <<  '"string namedmaterial1" ["' + lux_mat.lightbase + '"]' + "\n"
-				matdefinition <<  '"string namedmaterial2" ["' + lux_mat.lightbase + '"]' + "\n"
+				matdefinition <<  "\t" + '"string type" ["mix"]' + "\n"
+				matdefinition <<  "\t" + '"string namedmaterial1" ["' + lux_mat.lightbase + '"]' + "\n"
+				matdefinition <<  "\t" + '"string namedmaterial2" ["' + lux_mat.lightbase + '"]' + "\n"
 			end	
         else
             if (lux_mat.use_auto_alpha == true)
@@ -2324,6 +2334,7 @@ class LuxrenderExport
             preceding << "Texture \"" + material.name + ":light:L\"" + "\n"
             preceding << "\t" + "\"color\" \"blackbody\"" + "\n"
             preceding << "\t" + "\"float temperature\" [#{material.light_temperature}]" + "\n"
+			
         elsif material.light_L == "emit_preset"
             preceding << "Texture \"" + material.name + ":light:L\"" + "\n"
             preceding << "\t" + "\"color\" \"lampspectrum\""  + "\n"
