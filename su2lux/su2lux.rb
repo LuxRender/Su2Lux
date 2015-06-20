@@ -33,8 +33,8 @@ end
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.44"
-    SU2LUX_DATE = "9 May 2015" # to be updated in about.html manually
+    SU2LUX_VERSION = "0.45dev"
+    SU2LUX_DATE = "20 June 2015" # to be updated in about.html manually
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
 	PLUGIN_FOLDER = "su2lux"
@@ -46,8 +46,8 @@ module SU2LUX
     SUFFIX_DISTORTED_TEXTURE = "_SU2LUX_distort"
     PREFIX_DISTORTED_TEXTURE = "SU2LUX_dist_tex_"
     SUFFIX_DATAFOLDER = "_luxdata"
-    GEOMETRYFOLDER = "/geometry/"
-    TEXTUREFOLDER = "/textures/"
+    GEOMETRYFOLDER = "geometry"
+    TEXTUREFOLDER = "textures"
 
 	##
 	# prints a message in the Ruby console only when in debug mode
@@ -166,20 +166,29 @@ module SU2LUX
 	# exporting geometry, lights, materials and settings to a LuxRender file
 	##
 	def SU2LUX.export
+	
+		
+		Sketchup.set_status_text('SU2LUX export: initializing')
+		
 		SU2LUX.reset_variables
 		model = Sketchup.active_model
 		@luxrender_path = SU2LUX.get_luxrender_path # path to LuxRender executable
         scene_id = Sketchup.active_model.definitions.entityID
         @material_editor = SU2LUX.get_editor(scene_id,"material")
         lrs = SU2LUX.get_lrs(scene_id)
-        if File.extname(lrs.export_file_path) != ".lxs"
-            lrs.export_file_path << ".lxs"
-        end
-		
+
         # check if export folder exists, if not, set lrs.export_file_path to provided path
-		if !File.directory?(File.dirname(lrs.export_file_path))
+		if (lrs.export_file_path == nil || !File.directory?(File.dirname(lrs.export_file_path)))
 			lrs.export_file_path = UI.openpanel("Please select output file name", "", Sketchup.active_model.name + ".lxs")			
-		end
+		end 
+
+		# make sure export file path has the right extension
+		if File.extname(lrs.export_file_path) != ".lxs"
+            lrs.export_file_path = lrs.export_file_path + ".lxs"
+        end
+		# fix slash direction
+		lrs.export_file_path = lrs.export_file_path.gsub(/\\\\/, '/') 
+		lrs.export_file_path = lrs.export_file_path.gsub(/\\/, '/') if lrs.export_file_path.include?('\\')
 		
         exportpath = File.join(File.dirname(lrs.export_file_path), SU2LUX.sanitize_path(File.basename(lrs.export_file_path))) #SU2LUX.sanitize_path(lrs.export_file_path)
 
@@ -190,7 +199,7 @@ module SU2LUX
 		file_basename = File.basename(exportpath, SCENE_EXTENSION)
 		file_dirname = File.dirname(exportpath)
 		file_fullname = File.join(file_dirname, file_basename) # was: string + @os_separator + string
-        file_datafolder = file_fullname+SU2LUX::SUFFIX_DATAFOLDER + @os_separator
+        file_datafolder = file_fullname + SU2LUX::SUFFIX_DATAFOLDER + @os_separator
 		filepath_textures = File.join(file_fullname + SU2LUX::SUFFIX_DATAFOLDER, TEXTUREFOLDER)
 		
         # create scene data folder
@@ -199,46 +208,46 @@ module SU2LUX
             Dir.mkdir(filepath_textures)
         end
         
-        # collect image texture paths from all materials (excluding SketchUp textures, those will be exported later by le.write_textures)
-        collectedtextures = []
-        if (lrs.texexport == "all")
-			puts "Exporting all textures"
-			# collect material paths from image textures
-			@material_editor.materials_skp_lux.values.each {|luxmat|
-				for channel in luxmat.texturechannels
-					texturepath = luxmat.send(channel+"_imagemap_filename")
-					if (texturepath != "")
-						collectedtextures << texturepath
-					end
-				end
-			}
-        else
-			puts "Checking texture path validity" 
-			# iterate image paths, save the ones that are invalid; those need to be copied as otherwise LuxRender will not find those images
-			@material_editor.materials_skp_lux.values.each {|luxmat|
-				for channel in luxmat.texturechannels
-					texturepath = luxmat.send(channel+"_imagemap_filename")
-					if (texturepath != "" && texturepath != SU2LUX.sanitize_path(texturepath))
-						collectedtextures << texturepath
-					end
-				end
-			}
-		end
-		# copy collected images to luxdata folder
-		if (collectedtextures.length > 0)
-			puts  "copying " + collectedtextures.length.to_s + " image textures" 
-			for texturepath in collectedtextures.uniq
-				#puts "texture found: " + texturepath
-				destinationfolder = File.join(file_fullname+SU2LUX::SUFFIX_DATAFOLDER, TEXTUREFOLDER, SU2LUX.sanitize_path(File.basename(texturepath)))
-				FileUtils.cp(texturepath,destinationfolder)
-			end
-        end
+        # collect image texture paths from all materials 
+        # collectedtextures = []
+		# puts "exporting textures"
+        # if (lrs.texexport == "all")
+			# # collect material paths from image textures
+			# @material_editor.materials_skp_lux.values.each {|luxmat|
+				# for channel in luxmat.texturechannels
+					# texturepath = luxmat.send(channel + "_imagemap_filename")
+					# if (texturepath != "")
+						# collectedtextures << texturepath
+					# end
+				# end
+			# }
+        # else
+			# # iterate image paths, save the ones that have a path cannot be processed by LuxRender; those need to be copied as otherwise LuxRender will not find them
+			# @material_editor.materials_skp_lux.values.each {|luxmat|
+				# for channel in luxmat.texturechannels
+					# texturepath = luxmat.send(channel + "_imagemap_filename")
+					# if (texturepath != "" && texturepath != SU2LUX.sanitize_path(texturepath))
+						# collectedtextures << texturepath
+					# end
+				# end
+			# }
+		# end
+		# # copy collected images to luxdata folder
+		# if (collectedtextures.length > 0)
+			# puts  "copying " + collectedtextures.length.to_s + " image textures" 
+			# for texturepath in collectedtextures.uniq
+				# #puts "texture found: " + texturepath
+				# destinationfolder = File.join(file_fullname, SU2LUX::SUFFIX_DATAFOLDER, TEXTUREFOLDER, SU2LUX.sanitize_path(File.basename(texturepath)))
+				# FileUtils.cp(texturepath, destinationfolder)
+			# end
+        # end
         
 		# export geometry
 		lxo_file = File.new(file_datafolder + file_basename  + SUFFIX_OBJECT, "w")
 		le.export_mesh(lxo_file, model)
 		lxo_file.close
 
+		Sketchup.set_status_text('SU2LUX export: materials')
 		# prepare lxm file
 		lxm_file = File.new(file_datafolder + file_basename + SUFFIX_MATERIAL, "w")
 		lxm_file << "MakeNamedMaterial \"SU2LUX_helper_null\" \n" # add helper null material
@@ -255,20 +264,26 @@ module SU2LUX
         le.export_distorted_materials(lxm_file, relative_datafolder) # materials created in LuxrenderExport for distorted textures
 		lxm_file.close
         
+		
+		Sketchup.set_status_text('SU2LUX export: settings')
         # write lxs file
-		out = File.new(exportpath,"w")
-		le.export_global_settings(out)
-		le.export_renderer(out)
-		le.export_camera(model.active_view, out)
-		le.export_film(out,file_basename)
-		le.export_render_settings(out)
-		out.puts 'WorldBegin'
-		out.puts "Include \"" + file_basename + SU2LUX::SUFFIX_DATAFOLDER + '/' + file_basename + SUFFIX_MATERIAL + "\"\n\n"
-		out.puts "Include \"" + file_basename + SU2LUX::SUFFIX_DATAFOLDER + '/' + file_basename + SUFFIX_OBJECT + "\"\n\n"
-		le.export_light(out) # sun/environment lights
-		out.puts 'WorldEnd'
-		out.close
+		#@luxrender_path = exportpath
+		puts exportpath
+		lrs.export_file_path = exportpath
+		lxs_file = File.new(exportpath, "w")
+		le.export_global_settings(lxs_file)
+		le.export_renderer(lxs_file)
+		le.export_camera(model.active_view, lxs_file)
+		le.export_film(lxs_file, file_basename)
+		le.export_render_settings(lxs_file)
+		lxs_file.puts 'WorldBegin'
+		lxs_file.puts "Include \"" + file_basename + SU2LUX::SUFFIX_DATAFOLDER + '/' + file_basename + SUFFIX_MATERIAL + "\"\n\n"
+		lxs_file.puts "Include \"" + file_basename + SU2LUX::SUFFIX_DATAFOLDER + '/' + file_basename + SUFFIX_OBJECT + "\"\n\n"
+		le.export_light(lxs_file) # sun/environment lights
+		lxs_file.puts 'WorldEnd'
+		lxs_file.close
         
+		Sketchup.set_status_text('SU2LUX export: textures')
         # write texture files
 		le.export_textures(filepath_textures)
 	end # END export
@@ -276,9 +291,12 @@ module SU2LUX
 	##
 	#	 showing the export dialog box
 	##
-	def SU2LUX.export_dialog(render=true)
+	def SU2LUX.export_dialog(render = true)
         #'render' is a boolean indicating if LuxRender should be run
-        puts "LuxRender export started, running export_dialog function"
+		
+		start_time = Time.new
+		
+        puts "LuxRender export started"
         
 		SU2LUX.remove_observers(Sketchup.active_model)
 		SU2LUX.reset_variables
@@ -303,6 +321,7 @@ module SU2LUX
             SU2LUX.export
             if(render==true)
                 if lrs.runluxrender == "yes"
+					Sketchup.set_status_text('SU2LUX export: starting LuxRender')
                     puts "launching LuxRender"
                     SU2LUX.launch_luxrender
                 elsif lrs.runluxrender == "ask"
@@ -315,6 +334,10 @@ module SU2LUX
                 end
             end
         end
+		elapsed_seconds = (Time.new - start_time).to_int
+		Sketchup.set_status_text('SU2LUX export: export finished in ' + elapsed_seconds.to_s + (elapsed_seconds == 1 ? ' second' : ' seconds'))
+		
+		
         SU2LUX.create_observers(Sketchup.active_model)
 	end # END export_dialog
 	
@@ -539,6 +562,10 @@ module SU2LUX
         return @lrs_hash[Sketchup.active_model.definitions.entityID]
     end
 	
+	def SU2LUX.this_lrs()
+        return @lrs_hash[Sketchup.active_model.definitions.entityID]
+    end
+	
 	def SU2LUX.volumes()
 		return @volumeedit_hash[Sketchup.active_model.definitions.entityID]
 	end
@@ -558,6 +585,7 @@ module SU2LUX
     def SU2LUX.add_lrs(lrs,model_id)
         @lrs_hash[model_id] = lrs
     end
+
 
 	##
 	#
@@ -597,13 +625,15 @@ module SU2LUX
         @luxrender_path = SU2LUX.get_luxrender_path if @luxrender_path.nil?
         lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
 		return if @luxrender_path.nil?
+		puts lrs.export_file_path
 		Dir.chdir(File.dirname(@luxrender_path))
 		export_path = File.join(File.dirname(lrs.export_file_path), SU2LUX.sanitize_path(File.basename(lrs.export_file_path))) # SU2LUX.sanitize_path("#{lrs.export_file_path}")
 		export_path = File.join(export_path.split(@os_separator))
+		puts export_path
 		if (ENV['OS'] =~ /windows/i)
-		 command_line = "start \"max\" \/#{lrs.priority} \"#{@luxrender_path}\" \"#{export_path}\""
-		 puts command_line
-		 system(command_line)
+			command_line = "start \"max\" \/#{lrs.priority} \"#{@luxrender_path}\" \"#{export_path}\""
+			puts command_line
+			system(command_line)
         else
             fullpath = @luxrender_path + @os_specific_vars["file_appendix"]
 			#Thread.new do
@@ -1283,7 +1313,7 @@ if( not file_loaded?(__FILE__))
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderProceduralTexture.rb")
     load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderProceduralTexturesEditor.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderTextureEditor.rb")
-	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderMeshCollector.rb")
+	#load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderMeshCollector.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderExport.rb")
     load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderToolbar.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderFocus.rb")

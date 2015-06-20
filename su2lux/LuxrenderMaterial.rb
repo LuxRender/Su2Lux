@@ -121,7 +121,7 @@ class LuxrenderMaterial
 		'light_temperature' => 6500.0,
 		'light_power' => 100.0,
 		'light_efficacy' => 17.0,
-		'light_gain' => 1.0,
+		'light_gain' => 1000.0,
         'lightbase' => 'invisible',
 		'ies_path' => '',
 
@@ -314,6 +314,8 @@ class LuxrenderMaterial
 		@@settings['texturechannels'].each{|textype|
 			textype_string = textype + '_texturetype'
 			if(self.send(textype_string) == 'sketchup')
+				#puts textype_string
+				#puts self.send(textype_string)
 				skp_texture_used = true
 			end
 		}

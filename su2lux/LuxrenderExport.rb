@@ -6,7 +6,7 @@ class LuxrenderExport
         @scene_id = Sketchup.active_model.definitions.entityID
 		@lrs = lrs
 		@material_editor = mat_editor
-		puts 'exporting to ' + export_file_path.to_s
+		#puts 'exporting to ' + export_file_path.to_s
 		@export_file_path = export_file_path # assume that this is sanitised already
 		@model_name = File.basename(@export_file_path).split(".")[0] # remove folder structure, remove extension
         @instance_name = 0
@@ -91,11 +91,10 @@ class LuxrenderExport
 		camera_scale = 1.0
         
 		tempCamType = 'perspective' # can be environment, perspective or orthographic; @lrs.camera_type can only be 'SketchUp' or 'environment' 
-		if (@lrs.camera_type == 'SketchUp' || @lrs.camera_type == 'perspective') # some old files have the type defined as perspective, hence the second check
-			# check if sketchup view is perspective
-			tempCamType = Sketchup.active_model.active_view.camera.perspective? ? 'perspective' : 'orthographic'
-		else
+		if(@lrs.camera_type == 'environment')
 			tempCamType = 'environment' 
+		else
+			tempCamType = Sketchup.active_model.active_view.camera.perspective? ? 'perspective' : 'orthographic'
 		end
 		
 		out.puts "Camera \"#{tempCamType}\""
@@ -833,26 +832,35 @@ class LuxrenderExport
 
 	def export_mesh(geometry_file, model) # note: "geometry_file" is a file object (.lxo file), to which all relevant data will be added through this method
 		# prepare path
-		ply_folder = File.dirname(@export_file_path) + "/" +  File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER + SU2LUX::GEOMETRYFOLDER
+		#@export_file_path.gsub!(/\\\\/, '/') #fix slashes
+		#@export_file_path.gsub!(/\\/, '/') if @export_file_path.include?('\\')
+		
+		ply_folder = File.join(File.dirname(@export_file_path), File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER, SU2LUX::GEOMETRYFOLDER)
 		
 		#
 		# process_components
 		#
+		Sketchup.set_status_text('SU2LUX export: processing component definitions')
 		processed_components = process_components
-		puts processed_components[0].size.to_s + ' processed component(s)'
+		puts 'processed ' + processed_components[0].size.to_s + ' component' + (processed_components[0].size == 1 ? "s" : "")
 		components = processed_components[0] # sketchup components
 		component_mat_geometry = processed_components[1] # series of [skpmat, skpfaces] for each component
 		component_children = processed_components[2] # child components for each component: [e.guid, e.material, e.local_transformation.to_a]
 		
 		#
-		# sort out distorted textures, write geometry
+		# sort out distorted faces, write geometry
 		#
+		Sketchup.set_status_text('SU2LUX export: writing component geometry to file')
 		sorted_component_mat_geometry = {}
 		components.each{|comp|
-			# proces geometry collections, separating distorted textures (result: list with [skpmat, skpfaces, 0 or exported material index]
-			sorted_component_mat_geometry[comp] = sort_distorted_faces(component_mat_geometry[comp]);
+			# proces geometry collections, separating distorted faces (result: list with [skpmat, skpfaces, 0 or exported material index]
+			if(@lrs.exp_distorted == true)
+				sorted_component_mat_geometry[comp] = sort_distorted_faces(component_mat_geometry[comp]);
+			else
+				sorted_component_mat_geometry[comp] = component_mat_geometry[comp];
+			end
 			# write geometry
-			sorted_component_mat_geometry[comp].each{|skp_mat, faces, dist_index| # note: undistorted geometry has dist_index 0
+			sorted_component_mat_geometry[comp].each{|skp_mat, faces, dist_index = 0| # note: undistorted geometry has dist_index 0
 				if(dist_index != 0)
 					@distorted_faces << [faces, skp_mat, dist_index]
 				end
@@ -860,10 +868,12 @@ class LuxrenderExport
 				if(skp_mat != "SU2LUX_no_material")
 					skp_mat_name = SU2LUX.sanitize_path(skp_mat.name)
 				end
-				ply_name = comp.guid.to_s + '_' + skp_mat_name + (dist_index == 0 ? "" : '_dist' + dist_index.to_s) + '.ply'
+				ply_name = SU2LUX.sanitize_path(comp.guid.to_s + '_' + skp_mat_name + (dist_index == 0 ? "" : '_dist' + dist_index.to_s) + '.ply')
 				ply_path = File.join(ply_folder, ply_name)
 				# write file
-				output_single_ply_file(ply_path, faces, false) # false: write ASCII file, not binary
+				if(faces.count > 0)
+					output_single_ply_file(ply_path, faces, false) # false: write ASCII file, not binary
+				end
 			}
 		}
 		
@@ -889,6 +899,7 @@ class LuxrenderExport
 		}
 		material_geometry["SU2LUX_no_material"] = []
 		
+		Sketchup.set_status_text('SU2LUX export: writing component instances')
 		model.entities.each{|ent| # todo: move to separate method?
 			# check if it is an instance, if so, check if it is visible, if so, write
 			if ent.class == Sketchup::ComponentInstance or ent.class == Sketchup::Group
@@ -913,17 +924,26 @@ class LuxrenderExport
 					end
 				end
 			end
-			# todo: deal with groups - treat them like components? or recursively iterate its geometry?
 		}
 		geometry_file.puts ''
 
 		# export ordinary geometry
 		
+		Sketchup.set_status_text('SU2LUX export: exporting geometry')
 		# export ply files for ordinary geometry
-		sorted_ordinary_geometry = sort_distorted_faces(material_geometry) # separates faces with distorted textures
-		sorted_ordinary_geometry.each{|skp_mat, faces, dist_index| # note: undistorted geometry has dist_index 0
+		
+		
+		if(@lrs.exp_distorted == true)
+			material_geometry = sort_distorted_faces(material_geometry) # separates faces with distorted textures
+		end
+		
+		
+		
+		
+		
+		material_geometry.each{|skp_mat, faces, dist_index = 0| # note: undistorted geometry has dist_index 0  #
 			if(dist_index != 0)
-				@distorted_faces << [faces, skp_mat, dist_index]
+				@distorted_faces << [faces, skp_mat, dist_index = 0]
 			end
 			# create name, for example: material_dist1.ply
 			skp_mat_name = "nomat"
@@ -937,7 +957,7 @@ class LuxrenderExport
 		}		
 		
 		# write ordinary geometry definitions
-		sorted_ordinary_geometry.each{|skp_mat, facelist, dist_index|
+		material_geometry.each{|skp_mat, facelist, dist_index = 0|
 			if facelist.size > 0
 				skp_mat_name = "nomat"
 				if(skp_mat != "SU2LUX_no_material")
@@ -946,7 +966,9 @@ class LuxrenderExport
 				geometry_file.puts 'AttributeBegin'
 				matname = skp_mat_name + (dist_index == 0 ? "" : '_dist' + dist_index.to_s) # @material_editor.materials_skp_lux[skp_mat].name
 				ply_path = File.join(ply_folder, matname + '.ply')
-				geometry_file.puts '  NamedMaterial "' + matname + '"' 			# NamedMaterial "materialname"
+				if(skp_mat != "SU2LUX_no_material")
+					geometry_file.puts '  NamedMaterial "' + matname + '"' 			# NamedMaterial "materialname"
+				end
 				if(skp_mat != "SU2LUX_no_material")
 					lux_mat = @material_editor.materials_skp_lux[skp_mat]
 					if(lux_mat.type == 'light')
@@ -963,9 +985,6 @@ class LuxrenderExport
 				geometry_file.puts ''
 			end
 		}
-
-		# todo: instead of exporting all materials in the scene, check which ones are used (material_geometry.keys that have at least one face)?
-		
 	end # END export_mesh
 	
 	def sort_distorted_faces(skpmat_faces_hash) # contains: {[skpmat, skpfaces]}
@@ -1016,11 +1035,11 @@ class LuxrenderExport
 		compdef_nomat_lines << 'ObjectBegin "' + componentname + '_nomat' + '" # ' + this_component.name
 
 		## write reference to material and geometry for every used material, and export geometry files
-		this_component_mat_geometry.each{|skpmat, facelist, dist_index|
+		this_component_mat_geometry.each{|skpmat, facelist, dist_index = 0|
 			if(facelist != nil and facelist.size > 0)	
 				if skpmat == "SU2LUX_no_material"
 					# note: this is written to a separate component, as otherwise material inheritance will not work
-					puts 'processing component, geometry with no material'
+					#puts 'processing component, geometry with no material'
 					component_ply_name = componentname + '_nomat' + (dist_index == 0 ? "" : '_dist' + dist_index.to_s) + '.ply'
 					ply_path = File.join(ply_folder, component_ply_name)
 					# write definition for component without material
@@ -1030,7 +1049,7 @@ class LuxrenderExport
 					compdef_nomat_lines << '  AttributeEnd'
 				else
 					luxmat = @material_editor.materials_skp_lux[skpmat]
-					component_ply_name = componentname + '_' + luxmat.name + (dist_index == 0 ? "" : '_' + dist_index.to_s) + '.ply'
+					component_ply_name = componentname + '_' + SU2LUX.sanitize_path(luxmat.name) + (dist_index == 0 ? "" : '_dist' + dist_index.to_s) + '.ply'
 					ply_path = File.join(ply_folder, component_ply_name)
 					
 					compdef_lines << '  AttributeBegin'	
@@ -1050,7 +1069,7 @@ class LuxrenderExport
 		}
 		
 		## write references to child components
-		puts "processing child components"
+		#puts "processing child components"
 		this_component_children.each{|child_component| # child component contains [guid, material, local_transformation.to_a]
 			# we have two child components, one with the ordinary materials, one with undefined materials. The latter has "_nomat" appended to its name.
 
@@ -1067,7 +1086,7 @@ class LuxrenderExport
 			if (child_component[1] != nil && child_component[1] != [] && child_component != "") # component has a material, so write it to the normal component definition
 				compdef_lines << 'AttributeBegin'
 				compdef_lines << "\t ConcatTransform " + child_component[2].to_a.to_s.delete(',') 
-				compdef_lines << "\t NamedMaterial \"" + @material_editor.materials_skp_lux[child_component[1]].name + '_nomat"'
+				compdef_lines << "\t NamedMaterial \"" + @material_editor.materials_skp_lux[child_component[1]].name + '"'
 				compdef_lines << "\t ObjectInstance \"" + child_component[0].to_s + '_nomat"'
 				compdef_lines << 'AttributeEnd'
 			else
@@ -1092,16 +1111,17 @@ class LuxrenderExport
 	end
 	
 	def export_textures(texture_folder)
-		# process luxrender materials
+		# get image textures from all LuxRender materials, and store SketchUp materials from which the texture needs to be written
 		skpmat_with_used_texture = []
 		luxmat_file_paths = []
+		puts "gathering textures"
 		@material_editor.materials_skp_lux.each{|skp_mat, lux_mat|	
 			luxmat_file_paths += lux_mat.get_used_image_paths
 			if (lux_mat.uses_skp_texture)
+				#puts "texture found"
 				skpmat_with_used_texture << skp_mat
 			end
 		}
-		
 		puts 'luxmat_file_paths:'
 		puts luxmat_file_paths
 		
@@ -1109,8 +1129,24 @@ class LuxrenderExport
 		if @lrs.texexport == 'all'
 			luxmat_file_paths.uniq.each{|file_path|
 				destination_path = File.join(texture_folder, SU2LUX.sanitize_path(File.basename(file_path)))
-				puts 'trying to write file from ' + file_path.to_s + ' to ' + destination_path.to_s
+				#puts 'trying to write file from ' + file_path.to_s + ' to ' + destination_path.to_s
 				FileUtils.cp(file_path, destination_path) unless File.exists?(destination_path)
+			}
+		else
+			# export only images that have file paths that LuxRender cannot read
+			# iterate image paths, save the ones that have a path cannot be processed by LuxRender; those need to be copied as otherwise LuxRender will not find them
+			@material_editor.materials_skp_lux.values.each {|luxmat|
+				for channel in luxmat.texturechannels
+					# first check if this channels uses image texture, if so, check if the path is a valid LuxRender path; if not, copy
+					if(luxmat.send(channel + "_texturetype") == 'imagemap')
+						texturepath = luxmat.send(channel + "_imagemap_filename")
+						if (texturepath != "" && texturepath != SU2LUX.sanitize_path(texturepath))
+							# get output path, copy file
+							destination_path = File.join(texture_folder, SU2LUX.sanitize_path(File.basename(texturepath)))
+							FileUtils.cp(texturepath, destination_path) unless File.exists?(destination_path)
+						end
+					end
+				end
 			}
 		end
 		
@@ -1118,33 +1154,44 @@ class LuxrenderExport
 		luxmat_group = Sketchup.active_model.entities.add_group
 		luxmat_face = luxmat_group.entities.add_face([-3,-3,-3], [-3, -3, -4], [-3, -4, -3])
 		skpmat_with_used_texture.each{|skp_mat|
+			#puts "exporting bitmap image for sketchup material: " + skp_mat.name 
 			# export texture (assign to temporary triangle first?)
 			luxmat_face.material = skp_mat
 			tw = Sketchup.create_texture_writer
 			tw.load luxmat_face, true
-			destination_path = File.join(texture_folder, SU2LUX.sanitize_path(get_texture_file_name(skp_mat)))
+			destination_path = File.join(texture_folder, SU2LUX.sanitize_path(File.basename(get_texture_file_name(skp_mat))))
+			#puts destination_path
 			tw.write luxmat_face, true, destination_path
 		}
 		Sketchup.active_model.entities.erase_entities luxmat_group
 		
 		# process distorted faces
 		@distorted_faces.each{|face, skp_mat, dist_index|
+			puts 'exporting distorted texture for material '
+			puts skp_mat
 			# if the material has a sketchup texture, export the distorted sketchup texture
 			if(skpmat_with_used_texture.include? skp_mat)
 				tw = Sketchup.create_texture_writer
 				tw.load face[0], true
 				texname = SU2LUX.sanitize_path(get_texture_file_name(skp_mat)) # texturename.jpg
-				destination_path = File.join(texture_folder, texname.split('.')[0] + '_dist' + dist_index.to_s + '.' +File.extname(texname))
+				destination_path = File.join(texture_folder, texname.split('.')[0] + '_dist' + dist_index.to_s + File.extname(texname))
+				puts 'exporting distorted texture to ' + destination_path.to_s
 				tw.write face[0], true, destination_path
 			end			
 			# for all the material's image textures, copy the image with a modified name (todo for later: assign to face, read with texture reader, export distorted image)
+			puts "gathering distorted texture paths"
 			image_file_paths = @material_editor.materials_skp_lux[skp_mat].get_used_image_paths
 			image_file_paths.each{|source_path|
+				puts "copying distorted image texture, source: " + source_path.to_s
+				
 				# todo: create material, assign to temporary triangle, read and write with texturewriter, delete material
 				texname_parts = File.basename(source_path).split('.')
 				target_path = File.join(texture_folder, texname_parts[0] + dist_index.to_s + texname_parts[1])
+				puts target_path
 				FileUtils.cp(source_path, target_path) unless File.exists?(target_path)
 			}
+			puts image_file_paths
+			puts "done copying distorted textures"
 		}
 	end
 
@@ -1187,7 +1234,6 @@ class LuxrenderExport
 		luxmat_face = luxmat_group.entities.add_face(pt1, pt2, pt3)
 		puts "assigning material #{currentmaterial.name} to temporary face"
 		luxmat_face.material = currentmaterial
-		luxmat_group.material = currentmaterial
 		
 		# get SketchUp material texture
 		if (currentmaterial.texture)
@@ -1552,17 +1598,30 @@ class LuxrenderExport
 			end
 		}
 		
+		lxm_data << '' + "\n"
+		lxm_data << '# SU2LUX: the following materials are exported by export_used_materials' + "\n"
+		lxm_data << '# SU2LUX: the following materials are exported by export_used_materials, normal materials' + "\n"
+		lxm_data << '' + "\n"
+		
 		# add material definitions to material file
 		normal_material_definitions.each{|matdef|
 			matdef.each{|line|
 				lxm_data << line
 			}
 		}
+		
+		lxm_data << ''	 + "\n"
+		lxm_data << '# SU2LUX: the following materials are exported by export_used_materials, light materials' + "\n"
+		lxm_data << '' + "\n"
 		light_material_definitions.each{|lightmatdef|
 			lightmatdef.each{|line|
 				lxm_data << line
 			}
 		}
+		
+		lxm_data << ''	 + "\n"
+		lxm_data << '# SU2LUX: the following materials are exported by export_used_materials, mix materials' + "\n"
+		lxm_data << '' + "\n"
 		mix_material_definitions.each{|mixmatdef|
 			mixmatdef.each{|line|
 				lxm_data << line
@@ -1573,13 +1632,16 @@ class LuxrenderExport
 	end
     
 	def export_distorted_materials(lxm_file, datafolder)
+		lxm_file << ''
+		lxm_file << '# SU2LUX: the following materials are exported by export_distorted_materials'
+		lxm_file << ''
 		@distorted_faces.each{|face, skp_mat, dist_index|
 			lux_mat = @material_editor.materials_skp_lux[skp_mat]
 			distorted_name = lux_mat.name + '_dist' + dist_index.to_s
 			material_definition_lines = get_material_definition(lux_mat, distorted_name, true, dist_index)
-			#material_definition_lines.each{|mat_definition_line|
-				lxm_file << material_definition_lines
-			#}
+			material_definition_lines.each{|mat_definition_line|
+				lxm_file << mat_definition_line
+			}
 		}
 	end
 
@@ -1611,7 +1673,7 @@ class LuxrenderExport
 						distorted_file_name = original_file_name_parts[0] + '_dist' + dist_nr.to_s + '.' + original_file_name_parts[1]
 						filename = File.join(@texfolder, distorted_file_name)
 					else (@texexport == "all")
-						filename = File.join(@texfolder, original_tex_name)
+						filename = File.join(@texfolder, File.basename(original_tex_name))
 					end
 					#puts "checking filename: "
 					#puts filename.to_s
@@ -1631,11 +1693,16 @@ class LuxrenderExport
 				if(dist_nr != 0) # texture is distorted, insert number
 					original_file_name_parts = File.basename(SU2LUX.sanitize_path(lux_mat.send(tex_type + "_imagemap_filename"))).split('.')
 					distorted_file_name = original_file_name_parts[0] + '_dist' + dist_nr.to_s + '.' + original_file_name_parts[1]
-                    imagemap_filename = File.join(@texfolder, distorted_file_name)
+                    imagemap_filename = File.join(@texfolder, File.basename(distorted_file_name))
                 elsif (@texexport == "all")
                     imagemap_filename = File.join(@texfolder, File.basename(SU2LUX.sanitize_path(lux_mat.send(tex_type + "_imagemap_filename"))))
                 else
-                    imagemap_filename = SU2LUX.sanitize_path(lux_mat.send(tex_type + "_imagemap_filename"))
+                    imagemap_filename = lux_mat.send(tex_type + "_imagemap_filename")
+					# if the sanitized is not the same as the original path, use texture that we stored in the texture folder
+					if(imagemap_filename != SU2LUX.sanitize_path(imagemap_filename))
+						# otherwise, check the texture folder as we should have copied the texture there
+						imagemap_filename = File.join(@texfolder, File.basename(SU2LUX.sanitize_path(imagemap_filename)))
+					end
                 end
                 preceding << "\t" + "\"string filename\" [\"#{imagemap_filename}\"]" + "\n"
 			when "procedural"
@@ -1770,10 +1837,10 @@ class LuxrenderExport
 		component_data = [] # will contain: guid, transformation, component luxrender material, hash of materials and ply paths, list of (list with child components, child luxrender materials, child transformations)
 		
 		relevant_components = []
+		puts "processing components"
 		Sketchup.active_model.definitions.each{ |comp|
 			# check if the components are geometric components and are used (this_component.count_instances > 0)
 			if(comp.is_a?(Sketchup::ComponentDefinition) or comp.is_a?(Sketchup::Group))
-				puts "processing component"
 				if comp.count_instances > 0
 					relevant_components << comp
 				end
@@ -1799,18 +1866,18 @@ class LuxrenderExport
 			
 			comp.entities.each{|e|
 				if(e.class == Sketchup::Face and e.layer.visible? and e.visible?)
-					# sort faces in lists with [luxrender material, [triangles]] (for now, ignore distorted textures; later: check for distorted textures, create luxrender materials for those)
 					facemat = e.material
 					if(facemat == nil)
 						material_geometry["SU2LUX_no_material"] << e
 					else
-						material_geometry[facemat] << e
+						if material_geometry[facemat] != nil # skip geometry with ghost material
+							material_geometry[facemat] << e 
+						end
 					end
 				elsif((e.class == Sketchup::ComponentInstance or e.class == Sketchup::Group) and e.layer.visible? and e.visible?)
 					# for each child component, store "[component guid, component sketchup material, component transformation]}
 					comp_children << [e.definition.guid, e.material, e.transformation.to_a]
 				end
-				# todo: process groups
 			}
 
 			component_material_geometry[comp] = material_geometry
@@ -1836,7 +1903,7 @@ class LuxrenderExport
 			child_components = []
 			c.entities.each{|e|
 				if e.is_a?(Sketchup::ComponentInstance) or e.is_a?(Sketchup::Group)
-					puts "adding child"
+					#puts "adding child"
 					child_components << e.definition
 				end
 			}
@@ -1945,7 +2012,7 @@ class LuxrenderExport
 					skp_mat = @material_editor.materials_skp_lux.key(lux_mat)
                     if (skp_mat.texture != nil)
                         tex_filename = get_texture_file_name(skpmat)
-                        imagemap_filename = File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER + SU2LUX::TEXTUREFOLDER + tex_filename
+                        imagemap_filename = File.join(File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION), SU2LUX::SUFFIX_DATAFOLDER, SU2LUX::TEXTUREFOLDER, tex_filename)
                     end
                else ## image texture
                     if (@texexport == "all")
@@ -1991,16 +2058,16 @@ class LuxrenderExport
 	##
 	# get the file name of a SketchUp material's texture
 	##
-	def get_texture_file_name(skpmat)
-		texfilename = skpmat.texture.filename
-        basename = texfilename.split("\\").last # fix for textures that have a Windows file path as their name
-		basename = basename[0..(basename.length-5)]
-		extension = texfilename[(texfilename.length-4)..texfilename.length]
-		extension = ".png" if (extension.upcase ==".BMP" or extension.upcase ==".GIF" or extension.upcase ==".PNG") #Texture writer converts BMP,GIF to PNG
-		extension = ".tif" if (extension.upcase=="TIFF" or extension.upcase==".TIF")
-		extension = ".jpg" if extension.upcase==".JPG"
-		extension = ".jpg" if extension.upcase[0]!=46 # 46 = dot; so add .jpg if no extension is found
-		return basename + extension
+	def get_texture_file_name(skpmat) # note: removes folder structure
+		original_tex_name = skpmat.texture.filename # may include full path
+		tex_basename = File.basename(original_tex_name.split("\\").last) # removes the folder structure
+		tex_extension = File.extname(tex_basename)
+		tex_corename = File.basename(tex_basename, tex_extension)
+		tex_extension = ".png" if (tex_extension.upcase ==".BMP" or tex_extension.upcase ==".GIF" or tex_extension.upcase ==".PNG") #Texture writer converts BMP,GIF to PNG
+		tex_extension = ".tif" if (tex_extension.upcase=="TIFF" or tex_extension.upcase==".TIF")
+		tex_extension = ".jpg" if tex_extension.upcase==".JPG"
+		tex_extension = ".jpg" if tex_extension.upcase[0]!=46 # 46 = dot; so add .jpg if no extension is found
+		return tex_corename + tex_extension
 	end 
 
 	def export_diffuse_component(lux_mat, before, after, tex_name, dist_nr = 0)
@@ -2033,7 +2100,7 @@ class LuxrenderExport
 		end
 	end
 
-	def export_sigma(material, before, after, tex_name, dist_nr =0)
+	def export_sigma(material, before, after, tex_name, dist_nr = 0)
 		preceding = ""
 		following = ""
 		if ( ! material.has_texture?("matte_sigma"))
@@ -2044,7 +2111,7 @@ class LuxrenderExport
 		return [before + preceding, after + following]
 	end
 
-	def export_specular_component(material, before, after, tex_name, dist_nr =0)
+	def export_specular_component(material, before, after, tex_name, dist_nr = 0)
 		preceding = ""
 		following = ""
         if (material.specular_scheme == "specular_scheme_preset")
