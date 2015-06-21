@@ -972,7 +972,7 @@ class LuxrenderExport
 				if(skp_mat != "SU2LUX_no_material")
 					lux_mat = @material_editor.materials_skp_lux[skp_mat]
 					if(lux_mat.type == 'light')
-						geometry_file.puts '  LightGroup "mesh_light"'
+						geometry_file.puts '  LightGroup "' + matname + '"'
 						light_def_lines = output_light_definition(lux_mat, matname)
 						light_def_lines.each{|lightdef_line|
 							geometry_file.puts "  " + lightdef_line
@@ -1383,6 +1383,7 @@ class LuxrenderExport
     def output_light_definition (luxrender_mat, matname) # writes light definition (for geometry file)
         #puts "running output_material"
 		light_definition = []
+		light_definition << 'LightGroup "' + matname + '"'	
 		light_definition << "AreaLightSource \"area\""
 		spectrum_lines = export_spectrum_lines(luxrender_mat, matname)
 		spectrum_lines.each{|spectrum_line|

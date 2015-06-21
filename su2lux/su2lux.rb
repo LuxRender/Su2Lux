@@ -208,40 +208,6 @@ module SU2LUX
             Dir.mkdir(filepath_textures)
         end
         
-        # collect image texture paths from all materials 
-        # collectedtextures = []
-		# puts "exporting textures"
-        # if (lrs.texexport == "all")
-			# # collect material paths from image textures
-			# @material_editor.materials_skp_lux.values.each {|luxmat|
-				# for channel in luxmat.texturechannels
-					# texturepath = luxmat.send(channel + "_imagemap_filename")
-					# if (texturepath != "")
-						# collectedtextures << texturepath
-					# end
-				# end
-			# }
-        # else
-			# # iterate image paths, save the ones that have a path cannot be processed by LuxRender; those need to be copied as otherwise LuxRender will not find them
-			# @material_editor.materials_skp_lux.values.each {|luxmat|
-				# for channel in luxmat.texturechannels
-					# texturepath = luxmat.send(channel + "_imagemap_filename")
-					# if (texturepath != "" && texturepath != SU2LUX.sanitize_path(texturepath))
-						# collectedtextures << texturepath
-					# end
-				# end
-			# }
-		# end
-		# # copy collected images to luxdata folder
-		# if (collectedtextures.length > 0)
-			# puts  "copying " + collectedtextures.length.to_s + " image textures" 
-			# for texturepath in collectedtextures.uniq
-				# #puts "texture found: " + texturepath
-				# destinationfolder = File.join(file_fullname, SU2LUX::SUFFIX_DATAFOLDER, TEXTUREFOLDER, SU2LUX.sanitize_path(File.basename(texturepath)))
-				# FileUtils.cp(texturepath, destinationfolder)
-			# end
-        # end
-        
 		# export geometry
 		lxo_file = File.new(file_datafolder + file_basename  + SUFFIX_OBJECT, "w")
 		le.export_mesh(lxo_file, model)
@@ -267,7 +233,6 @@ module SU2LUX
 		
 		Sketchup.set_status_text('SU2LUX export: settings')
         # write lxs file
-		#@luxrender_path = exportpath
 		puts exportpath
 		lrs.export_file_path = exportpath
 		lxs_file = File.new(exportpath, "w")
@@ -381,7 +346,7 @@ module SU2LUX
 			user_input.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
 			user_input.gsub!(/\\/, '/') if user_input.include?('\\')
 			#store file path for quick exports
-			lrs.export_file_path = user_input
+			lrs.export_file_path = File.join(File.dirname(user_input), File.basename(user_input, '.skp'))
 				
 			if lrs.export_file_path == lrs.export_file_path.chomp(SCENE_EXTENSION)
 				lrs.export_file_path << SCENE_EXTENSION
