@@ -2,9 +2,10 @@ class LuxrenderExport
 	attr_reader :count_tri
 	attr_reader :used_materials
     
-	def initialize(export_file_path, os_separator, lrs, mat_editor)
+	def initialize(export_file_path, os_separator, lrs, mat_editor, model)
         @scene_id = Sketchup.active_model.definitions.entityID
 		@lrs = lrs
+		@model = model
 		@material_editor = mat_editor
 		#puts 'exporting to ' + export_file_path.to_s
 		@export_file_path = export_file_path # assume that this is sanitised already
@@ -19,6 +20,9 @@ class LuxrenderExport
         @texfolder = ""
 		@nr_distorted_materials = 0
         @distorted_faces = [] # [face, skp_mat, dist_index]
+		@group_definition_hash = {}
+		@component_material_definitions = []
+		@nr_component_materials = 0
 	end # END initialize
 
 	def reset
@@ -54,22 +58,22 @@ class LuxrenderExport
                 out.puts "Renderer \"sppm\""
             when "luxcore_pathcpu"
                 out.puts "Renderer \"luxcore\""
-                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"renderengine.type = PATHCPU\"]"
+                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"renderengine.type = PATHCPU\"  \"accelerator.type = AUTO\"  \"path.clamping.radiance.maxvalue = 0\"  \"path.clamping.pdf.value = 0\"]"
             when "luxcore_pathocl"
                 out.puts "Renderer \"luxcore\""
-                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"renderengine.type = PATHOCL\"]"
+                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"renderengine.type = PATHOCL\" \"accelerator.type = AUTO\"  \"path.clamping.radiance.maxvalue = 0\"  \"path.clamping.pdf.value = 0\"]"
             when "luxcore_biaspathcpu"
                 out.puts "Renderer \"luxcore\""
-                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"renderengine.type = BIASPATHCPU\" \"tile.multipass.enable = 1\"]"
+                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"renderengine.type = BIASPATHCPU\" \"tile.multipass.enable = 1\" \"accelerator.type = AUTO\"  \"path.clamping.radiance.maxvalue = 0\"  \"path.clamping.pdf.value = 0\"]"
             when "luxcore_biaspathocl"
                 out.puts "Renderer \"luxcore\""
-                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"renderengine.type = BIASPATHOCL\" \"tile.multipass.enable = 1\"]"
+                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"renderengine.type = BIASPATHOCL\" \"tile.multipass.enable = 1\" \"accelerator.type = AUTO\"  \"path.clamping.radiance.maxvalue = 0\"  \"path.clamping.pdf.value = 0\"]"
             when "luxcore_bidircpu"
                 out.puts "Renderer \"luxcore\""
-                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"renderengine.type = BIDIRCPU\"]"
+                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"renderengine.type = BIDIRCPU\" \"accelerator.type = AUTO\"  \"path.clamping.radiance.maxvalue = 0\"  \"path.clamping.pdf.value = 0\"]"
             when "luxcore_bidircpuvm"
                 out.puts "Renderer \"luxcore\""
-                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"opencl.gpu.workgroup.size = 64\" \"opencl.kernelcache = NONE\" \"renderengine.type = PATHCPU\"]"
+                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"opencl.gpu.workgroup.size = 64\" \"opencl.kernelcache = NONE\" \"renderengine.type = PATHCPU\" \"accelerator.type = AUTO\"  \"path.clamping.radiance.maxvalue = 0\"  \"path.clamping.pdf.value = 0\"]"
         end
         out.puts ""
     end
@@ -831,36 +835,39 @@ class LuxrenderExport
 	end # END export_light
 
 	def export_mesh(geometry_file, model) # note: "geometry_file" is a file object (.lxo file), to which all relevant data will be added through this method
-		# prepare path
-		#@export_file_path.gsub!(/\\\\/, '/') #fix slashes
-		#@export_file_path.gsub!(/\\/, '/') if @export_file_path.include?('\\')
-		
+		# note: ply_folder should be relative path, so that projects can be moved more easily
+		exportpath = File.join(File.dirname(@lrs.export_file_path), SU2LUX.sanitize_path(File.basename(@lrs.export_file_path)))
+		file_basename = File.basename(exportpath, SU2LUX::SCENE_EXTENSION)
+		relative_ply_folder = File.join(file_basename + SU2LUX::SUFFIX_DATAFOLDER, SU2LUX::GEOMETRYFOLDER)
 		ply_folder = File.join(File.dirname(@export_file_path), File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER, SU2LUX::GEOMETRYFOLDER)
+		
+		# process component definitions, to get the relevant definition for each group
+		get_group_definitions()
 		
 		#
 		# process_components
 		#
 		Sketchup.set_status_text('SU2LUX export: processing component definitions')
 		processed_components = process_components
-		puts 'processed ' + processed_components[0].size.to_s + ' component' + (processed_components[0].size == 1 ? "s" : "")
-		components = processed_components[0] # sketchup components
+		puts 'processed ' + processed_components[0].size.to_s + (processed_components[0].size == 1 ? ' component' : ' components')
+		components = processed_components[0] # sketchup component definitions
 		component_mat_geometry = processed_components[1] # series of [skpmat, skpfaces] for each component
-		component_children = processed_components[2] # child components for each component: [e.guid, e.material, e.local_transformation.to_a]
+		component_children = processed_components[2] # child components for each component: [e.entityID, e.material, e.local_transformation.to_a]
 		
 		#
 		# sort out distorted faces, write geometry
 		#
 		Sketchup.set_status_text('SU2LUX export: writing component geometry to file')
 		sorted_component_mat_geometry = {}
-		components.each{|comp|
+		components.each{|comp_def|
 			# proces geometry collections, separating distorted faces (result: list with [skpmat, skpfaces, 0 or exported material index]
 			if(@lrs.exp_distorted == true)
-				sorted_component_mat_geometry[comp] = sort_distorted_faces(component_mat_geometry[comp]);
+				sorted_component_mat_geometry[comp_def] = sort_distorted_faces(component_mat_geometry[comp_def]);
 			else
-				sorted_component_mat_geometry[comp] = component_mat_geometry[comp];
+				sorted_component_mat_geometry[comp_def] = component_mat_geometry[comp_def];
 			end
 			# write geometry
-			sorted_component_mat_geometry[comp].each{|skp_mat, faces, dist_index = 0| # note: undistorted geometry has dist_index 0
+			sorted_component_mat_geometry[comp_def].each{|skp_mat, faces, dist_index| # note: undistorted geometry has dist_index 0
 				if(dist_index != 0)
 					@distorted_faces << [faces, skp_mat, dist_index]
 				end
@@ -868,10 +875,17 @@ class LuxrenderExport
 				if(skp_mat != "SU2LUX_no_material")
 					skp_mat_name = SU2LUX.sanitize_path(skp_mat.name)
 				end
-				ply_name = SU2LUX.sanitize_path(comp.guid.to_s + '_' + skp_mat_name + (dist_index == 0 ? "" : '_dist' + dist_index.to_s) + '.ply')
+				# get component definition nr, or group instance nr
+				componentnr = comp_def.entityID.to_s
+				#if comp_def.instances.size > 0
+				#	if comp_def.instances[0].class == Sketchup::Group
+				#		componentnr = comp_def.instances[0].entityID.to_s
+				#	end
+				#end
+				ply_name = SU2LUX.sanitize_path(componentnr + '_' + skp_mat_name + (dist_index == 0 ? "" : '_dist' + dist_index.to_s) + '.ply')
 				ply_path = File.join(ply_folder, ply_name)
 				# write file
-				if(faces.count > 0)
+				if(faces.length > 0)
 					output_single_ply_file(ply_path, faces, false) # false: write ASCII file, not binary
 				end
 			}
@@ -882,7 +896,7 @@ class LuxrenderExport
 		geometry_file.puts "# created by SU2LUX " + SU2LUX::SU2LUX_VERSION + " " + Time.new.to_s
 		geometry_file.puts ''
 		components.each{|comp|
-			write_component(geometry_file, ply_folder, comp, sorted_component_mat_geometry[comp], component_children[comp])
+			write_component(geometry_file, relative_ply_folder, comp, sorted_component_mat_geometry[comp], component_children[comp])
 		}		
 		geometry_file.puts ''
 		
@@ -902,23 +916,36 @@ class LuxrenderExport
 		Sketchup.set_status_text('SU2LUX export: writing component instances')
 		model.entities.each{|ent| # todo: move to separate method?
 			# check if it is an instance, if so, check if it is visible, if so, write
-			if ent.class == Sketchup::ComponentInstance or ent.class == Sketchup::Group
+			if ent.class == Sketchup::ComponentInstance
 				# get transformation, get id, write instance
-				geometry_file.puts 'AttributeBegin'
-				geometry_file.puts "\t ConcatTransform " + ent.transformation.to_a.to_s.delete(',') 
-				geometry_file.puts "\t ObjectInstance \"" + ent.definition.guid + '"'
+				geometry_file.puts 'AttributeBegin' + ' # component name: ' + ent.definition.name + ', instance name: ' + ent.name
+				geometry_file.puts "\t ConcatTransform " + '[' + ent.transformation.to_a.join(" ") + ']'
+				geometry_file.puts "\t ObjectInstance \"" + ent.definition.entityID.to_s + '"'
 				if(ent.material != nil)
 					geometry_file.puts "\t NamedMaterial \"" + SU2LUX.sanitize_path(@material_editor.materials_skp_lux[ent.material].name) + '"'
 				end
-				geometry_file.puts "\t ObjectInstance \"" + ent.definition.guid + '_nomat"'
+				geometry_file.puts "\t ObjectInstance \"" + ent.definition.entityID.to_s + '_nomat"'
+				geometry_file.puts 'AttributeEnd'
+			elsif ent.class == Sketchup::Group
+				# get transformation, get id, write instance
+				geometry_file.puts 'AttributeBegin' + ' # group name: ' + ent.name
+				geometry_file.puts "\t ConcatTransform " + '[' + ent.transformation.to_a.join(" ") + ']'
+				geometry_file.puts "\t ObjectInstance \"" + @group_definition_hash[ent].entityID.to_s + '"'
+				if(ent.material != nil)
+					geometry_file.puts "\t NamedMaterial \"" + SU2LUX.sanitize_path(@material_editor.materials_skp_lux[ent.material].name) + '"'
+				end
+				geometry_file.puts "\t ObjectInstance \"" + @group_definition_hash[ent].entityID.to_s + '_nomat"'
 				geometry_file.puts 'AttributeEnd'
 			elsif ent.class == Sketchup::Face
 				# sort: add face to material_geometry[skpmat] list
 				if(ent.layer.visible? and ent.visible?)
 					# sort faces in lists with [luxrender material, [triangles]] 
 					facemat = ent.material
-					if(facemat == nil)
+					backmat = ent.back_material
+					if(facemat == nil && backmat == nil)
 						material_geometry["SU2LUX_no_material"] << ent
+					elsif facemat == nil	
+						material_geometry[backmat] << ent
 					else
 						material_geometry[facemat] << ent
 					end
@@ -928,20 +955,16 @@ class LuxrenderExport
 		geometry_file.puts ''
 
 		# export ordinary geometry
-		
 		Sketchup.set_status_text('SU2LUX export: exporting geometry')
-		# export ply files for ordinary geometry
 		
-		
+		# export ply files for ordinary geometry		
 		if(@lrs.exp_distorted == true)
 			material_geometry = sort_distorted_faces(material_geometry) # separates faces with distorted textures
+		else
+			material_geometry = mark_undistorted(material_geometry) # restructures content, from material=>faces to [material, faces, 0]
 		end
 		
-		
-		
-		
-		
-		material_geometry.each{|skp_mat, faces, dist_index = 0| # note: undistorted geometry has dist_index 0  #
+		material_geometry.each{|skp_mat, faces, dist_index| # note: undistorted geometry has dist_index 0  #
 			if(dist_index != 0)
 				@distorted_faces << [faces, skp_mat, dist_index = 0]
 			end
@@ -953,11 +976,13 @@ class LuxrenderExport
 			ply_name = skp_mat_name + (dist_index == 0 ? "" : '_dist' + dist_index.to_s) + '.ply'
 			ply_path = File.join(ply_folder, ply_name)
 			# write geometry file
+			#puts 'path:'
+			#puts ply_path
 			output_single_ply_file(ply_path, faces, false) # false: write ASCII file, not binary
 		}		
 		
 		# write ordinary geometry definitions
-		material_geometry.each{|skp_mat, facelist, dist_index = 0|
+		material_geometry.each{|skp_mat, facelist, dist_index|
 			if facelist.size > 0
 				skp_mat_name = "nomat"
 				if(skp_mat != "SU2LUX_no_material")
@@ -965,9 +990,9 @@ class LuxrenderExport
 				end
 				geometry_file.puts 'AttributeBegin'
 				matname = skp_mat_name + (dist_index == 0 ? "" : '_dist' + dist_index.to_s) # @material_editor.materials_skp_lux[skp_mat].name
-				ply_path = File.join(ply_folder, matname + '.ply')
+				ply_path = File.join(relative_ply_folder, matname + '.ply')
 				if(skp_mat != "SU2LUX_no_material")
-					geometry_file.puts '  NamedMaterial "' + matname + '"' 			# NamedMaterial "materialname"
+					geometry_file.puts '  NamedMaterial "' + SU2LUX.sanitize_path(matname) + '"' 			# NamedMaterial "materialname"
 				end
 				if(skp_mat != "SU2LUX_no_material")
 					lux_mat = @material_editor.materials_skp_lux[skp_mat]
@@ -987,7 +1012,7 @@ class LuxrenderExport
 		}
 	end # END export_mesh
 	
-	def sort_distorted_faces(skpmat_faces_hash) # contains: {[skpmat, skpfaces]}
+	def sort_distorted_faces(skpmat_faces_hash) # contains: {skpmat=>skpfaces, skpmat=>skpfaces}
 		sorted_faces_per_material = [] # sketchup material, face list for this material, distorted_face_index (not distorted: 0)
 		# for each material
 		skpmat_faces_hash.each{|skpmat, facelist|
@@ -997,7 +1022,11 @@ class LuxrenderExport
 			
 			# check all faces for distortion, add face to appropriate list
 			facelist.each{|face|
-				is_distorted(face, true) ? distorted_faces << face : undistorted_faces << face
+				if(face.material != nil)
+					is_distorted(face, true) ? distorted_faces << face : undistorted_faces << face
+				else
+					is_distorted(face, false) ? distorted_faces << face : undistorted_faces << face
+				end
 			}
 			
 			# add data to output container, increment number of distorted materials
@@ -1007,7 +1036,16 @@ class LuxrenderExport
 				sorted_faces_per_material << [skpmat, [distorted_face], @nr_distorted_materials]
 			}
 		}		
-		return sorted_faces_per_material
+		return sorted_faces_per_material # contains: {[skpmat, skpfaces, distorted_mat_index]}
+	end
+	
+	def mark_undistorted(skpmat_faces_hash)
+		sorted_faces_per_material = [] # sketchup material, face list for this material, distorted_face_index (not distorted: 0)
+		# for each material
+		skpmat_faces_hash.each{|skpmat, facelist|
+			sorted_faces_per_material << [skpmat, facelist, 0]
+		}		
+		return sorted_faces_per_material # contains: {[skpmat, skpfaces, distorted_mat_index]}
 	end
 	
 	def is_distorted(face, mat_dir)
@@ -1025,23 +1063,31 @@ class LuxrenderExport
 		return false # texture is not distorted
 	end
 
-	def write_component(geometry_file, ply_folder, this_component, this_component_mat_geometry, this_component_children)
+	def write_component(geometry_file, relative_ply_folder, this_component_definition, this_component_mat_geometry, this_component_children)
 		compdef_lines = []
 		compdef_nomat_lines = []
-		componentname = this_component.guid.to_s
+		# todo: check if this definition is used for groups; if so, use group id instead of definition id (as from the group it would be hard to find the definition id)
+		componentname = this_component_definition.entityID.to_s # note: for components, but also for groups, this is the ID of the definition, not the instance
+		#if this_component_definition.instances.size > 0
+		#	if this_component_definition.instances[0].type == Sketchup::Group
+		#		componentname = this_component_definition.instances[0].entityID.to_s
+		#	end
+		#end
 		
 		# store component definition and no-material component definition in separate arrays of strings, then output them to the geometry_file afterwards
-		compdef_lines << 'ObjectBegin "' + componentname + '" # ' + this_component.name
-		compdef_nomat_lines << 'ObjectBegin "' + componentname + '_nomat' + '" # ' + this_component.name
+		
+		
+		compdef_lines << 'ObjectBegin "' + componentname + '" # ' + this_component_definition.name
+		compdef_nomat_lines << 'ObjectBegin "' + componentname + '_nomat' + '" # ' + this_component_definition.name
 
 		## write reference to material and geometry for every used material, and export geometry files
-		this_component_mat_geometry.each{|skpmat, facelist, dist_index = 0|
+		this_component_mat_geometry.each{|skpmat, facelist, dist_index|
 			if(facelist != nil and facelist.size > 0)	
 				if skpmat == "SU2LUX_no_material"
 					# note: this is written to a separate component, as otherwise material inheritance will not work
 					#puts 'processing component, geometry with no material'
 					component_ply_name = componentname + '_nomat' + (dist_index == 0 ? "" : '_dist' + dist_index.to_s) + '.ply'
-					ply_path = File.join(ply_folder, component_ply_name)
+					ply_path = File.join(relative_ply_folder, component_ply_name)
 					# write definition for component without material
 					compdef_nomat_lines << '  AttributeBegin'
 					compdef_nomat_lines << '    Shape "plymesh"'
@@ -1050,7 +1096,7 @@ class LuxrenderExport
 				else
 					luxmat = @material_editor.materials_skp_lux[skpmat]
 					component_ply_name = componentname + '_' + SU2LUX.sanitize_path(luxmat.name) + (dist_index == 0 ? "" : '_dist' + dist_index.to_s) + '.ply'
-					ply_path = File.join(ply_folder, component_ply_name)
+					ply_path = File.join(relative_ply_folder, component_ply_name)
 					
 					compdef_lines << '  AttributeBegin'	
 					if luxmat.type == 'light'
@@ -1060,7 +1106,7 @@ class LuxrenderExport
 							compdef_lines << "  " + lightdef_line
 						}
 					end
-					compdef_lines << '    NamedMaterial "' + luxmat.name + '"'	# NamedMaterial "df9eb8e0-8ac4-4d8f-8fc6-7ab8c3435ef8_materialname"
+					compdef_lines << '    NamedMaterial "' + SU2LUX.sanitize_path(luxmat.name) + '"'	# NamedMaterial "df9eb8e0-8ac4-4d8f-8fc6-7ab8c3435ef8_materialname"
 					compdef_lines << '    Shape "plymesh"'						#   Shape "plymesh"
 					compdef_lines << '    "string filename" ["' +  ply_path + '"]' #	"string filename" ["Untitled_luxdata/geometry/1_boxes.ply"]
 					compdef_lines << '  AttributeEnd'
@@ -1070,28 +1116,28 @@ class LuxrenderExport
 		
 		## write references to child components
 		#puts "processing child components"
-		this_component_children.each{|child_component| # child component contains [guid, material, local_transformation.to_a]
+		this_component_children.each{|child_component| # child component contains [entityID, material, local_transformation.to_a]
 			# we have two child components, one with the ordinary materials, one with undefined materials. The latter has "_nomat" appended to its name.
 
 			# first write the ordinary component
 			compdef_lines << 'AttributeBegin'
-			compdef_lines << "\t ConcatTransform " + child_component[2].to_a.to_s.delete(',') 
-			if (child_component[1] != nil && child_component[1] != [] && child_component != "")
-				compdef_lines << "\t NamedMaterial \"" + @material_editor.materials_skp_lux[child_component[1]].name + '"'
-			end
+			compdef_lines << "\t ConcatTransform [" + child_component[2].join(" ") + ']' # child_component[2].to_a.to_s.delete(',') 
+			#if (child_component[1] != nil && child_component[1] != [] && child_component != "")
+			#	compdef_lines << "\t NamedMaterial \"" + @material_editor.materials_skp_lux[child_component[1]].name + '"'
+			#end
 			compdef_lines << "\t ObjectInstance \"" + child_component[0].to_s + '"'
 			compdef_lines << 'AttributeEnd'
 			
 			# write the _nomat component to either the ordinary material definition, or the one without material (depending on whether this component instance has a material)
 			if (child_component[1] != nil && child_component[1] != [] && child_component != "") # component has a material, so write it to the normal component definition
 				compdef_lines << 'AttributeBegin'
-				compdef_lines << "\t ConcatTransform " + child_component[2].to_a.to_s.delete(',') 
+				compdef_lines << "\t ConcatTransform [" + child_component[2].join(" ") + ']' # + child_component[2].to_a.to_s.delete(',') 
 				compdef_lines << "\t NamedMaterial \"" + @material_editor.materials_skp_lux[child_component[1]].name + '"'
 				compdef_lines << "\t ObjectInstance \"" + child_component[0].to_s + '_nomat"'
 				compdef_lines << 'AttributeEnd'
 			else
 				compdef_nomat_lines << 'AttributeBegin'
-				compdef_nomat_lines << "\t ConcatTransform " + child_component[2].to_a.to_s.delete(',') 
+				compdef_nomat_lines << "\t ConcatTransform [" + child_component[2].join(" ") + ']' # child_component[2].to_a.to_s.delete(',') 
 				compdef_nomat_lines << "\t ObjectInstance \"" + child_component[0].to_s + '_nomat"'
 				compdef_nomat_lines << 'AttributeEnd'
 			end
@@ -1319,10 +1365,14 @@ class LuxrenderExport
 			# get normals and uvs for each point
 			tw = Sketchup.create_texture_writer # create texture writer for this face 
 			tw.load(skp_face, true)
-			for i in 1..polygonmesh.points.count
+			uvHelp = skp_face.get_UVHelper(true, true, tw) # deals with distorted textures
+			for i in 1..polygonmesh.points.length
 				vertexnormallist << polygonmesh.normal_at(i) 
-				uvHelp = skp_face.get_UVHelper(true, false, tw) # deals with distorted textures
-				vertexuvlist << uvHelp.get_front_UVQ(polygonmesh.points[i-1])
+				if(skp_face.material != nil || skp_face.back_material == nil)
+					vertexuvlist << uvHelp.get_front_UVQ(polygonmesh.points[i-1])
+				else
+					vertexuvlist << uvHelp.get_back_UVQ(polygonmesh.points[i-1])
+				end
 			end
 				
 			# get faces (defined as point indices)
@@ -1333,11 +1383,11 @@ class LuxrenderExport
 				}
 				meshfacelist << globalfaceindices
 			}	
-			meshpointcounter += polygonmesh.points.count		
+			meshpointcounter += polygonmesh.points.length		
 		}
 		
 		# write element, vertex count, vertex parameters, face count, face parameters, end of header
-        ply_file.puts "element vertex #{vertexlist.count.to_s}\n"
+        ply_file.puts "element vertex #{vertexlist.length.to_s}\n"
         ply_file.puts "property float x"
         ply_file.puts "property float y"
         ply_file.puts "property float z"
@@ -1346,25 +1396,24 @@ class LuxrenderExport
         ply_file.puts "property float nz"
         ply_file.puts "property float s"
         ply_file.puts "property float t"
-        ply_file.puts "element face #{meshfacelist.count.to_s}"
+        ply_file.puts "element face #{meshfacelist.length.to_s}"
         ply_file.puts "property list uchar uint vertex_indices"
         ply_file.puts "end_header"
 
 		# write vertices
-		for i in 0..vertexlist.count-1
+		for i in 0..vertexlist.length-1
 			if (binary)
 				#ply_file << [vertexlist[i].x.to_f, vertexlist[i].y.to_f, vertexlist[i].z.to_f, vertexnormallist[i].x, vertexnormallist[i].y, vertexnormallist[i].z, vertexuvlist[i].x, 1-vertexuvlist[i].y].pack('e*.')
 			else
 				position_string = vertexlist[i].x.to_f.to_s + " " + vertexlist[i].y.to_f.to_s + " " + vertexlist[i].z.to_f.to_s
-				normal_string = vertexnormallist[i].x.to_s + " " + vertexnormallist[i].y.to_s + " " + vertexnormallist[i].z.to_s
-				#uv_string = (vertexuvlist[i].x/vertexuvlist[i].z).to_f.to_s + " " + (vertexuvlist[i].y/vertexuvlist[i].z).to_f.to_s
-				uv_string = vertexuvlist[i].x.to_f.to_s + " " + (1.0-vertexuvlist[i].y).to_f.to_s
+				normal_string = ("%5.6f" % vertexnormallist[i].x).to_s + " " + ("%5.6f" % vertexnormallist[i].y).to_s + " " + ("%5.6f" % vertexnormallist[i].z).to_s
+				uv_string = ("%5.6f" % (vertexuvlist[i].x.to_f)).to_s + " " + ("%5.6f" % (1.0 - vertexuvlist[i].y)).to_s
 				ply_file.puts position_string + " " + normal_string + " " + uv_string
 			end	
 		end
 		
 		# write faces
-		for f in 0..meshfacelist.count-1
+		for f in 0..meshfacelist.length-1
 			faceindices = meshfacelist[f]
 			facedef = faceindices.size.to_s + ' '
 			faceindices.each{|fi|
@@ -1383,7 +1432,7 @@ class LuxrenderExport
     def output_light_definition (luxrender_mat, matname) # writes light definition (for geometry file)
         #puts "running output_material"
 		light_definition = []
-		light_definition << 'LightGroup "' + matname + '"'	
+		light_definition << 'LightGroup "' + SU2LUX.sanitize_path(matname) + '"'
 		light_definition << "AreaLightSource \"area\""
 		spectrum_lines = export_spectrum_lines(luxrender_mat, matname)
 		spectrum_lines.each{|spectrum_line|
@@ -1645,11 +1694,20 @@ class LuxrenderExport
 			}
 		}
 	end
+	
+	def export_component_materials(lxm_file)
+		lxm_file << ''
+		lxm_file << '# scaled component materials'
+		lxm_file << ''
+	
+		@component_material_definitions.each{|comp_mat_line|
+			lxm_file << comp_mat_line
+		}
+	end
 
 	def export_texture(lux_mat, tex_type, type, before, after, tex_name, dist_nr)
-        #puts "running export_texture, material:"
+        #puts "running export_texture, material:" 
 		#puts lux_mat.name
-		# SU2LUX.dbg_p "exporting additional texture channels"
 		type_str = self.texture_parameters_from_type(tex_type)
 		preceding = ""
 		following = ""
@@ -1666,7 +1724,7 @@ class LuxrenderExport
         end
 		case lux_mat.send(tex_type + "_texturetype")
 			when "sketchup"
-				skp_mat = @material_editor.materials_skp_lux.key(lux_mat)
+				skp_mat = @material_editor.materials_skp_lux.index(lux_mat) # hash.key does not work in Ruby 1.8
                 if (skp_mat.texture != nil)
 					original_tex_name = get_texture_file_name(skp_mat)
 					if(dist_nr != 0) # texture is distorted, insert number
@@ -1835,21 +1893,25 @@ class LuxrenderExport
     end # end export_material_parameters
 
 	def process_components()
-		component_data = [] # will contain: guid, transformation, component luxrender material, hash of materials and ply paths, list of (list with child components, child luxrender materials, child transformations)
+		component_data = [] # will contain: entityID, transformation, component luxrender material, hash of materials and ply paths, list of (list with child components, child luxrender materials, child transformations)
 		
 		relevant_components = []
 		puts "processing components"
-		Sketchup.active_model.definitions.each{ |comp|
+		Sketchup.active_model.definitions.each{ |this_definition|
+			puts "processing definition"
 			# check if the components are geometric components and are used (this_component.count_instances > 0)
-			if(comp.is_a?(Sketchup::ComponentDefinition) or comp.is_a?(Sketchup::Group))
-				if comp.count_instances > 0
-					relevant_components << comp
+			if(this_definition.is_a?(Sketchup::ComponentDefinition) or this_definition.is_a?(Sketchup::Group)) # this check should not be necessary as the list only contains component definitions
+				if this_definition.count_instances > 0
+					puts "definition is used"
+					relevant_components << this_definition
 				end
 			end
 		}
 		
 		# sort components in such a way that a component never depends on any subsequent components
+		puts relevant_components.size
 		relevant_components = sort_components(relevant_components)
+		puts relevant_components.size
 		relevant_component_children = {}
 		component_material_geometry = {}
 		
@@ -1869,15 +1931,25 @@ class LuxrenderExport
 				if(e.class == Sketchup::Face and e.layer.visible? and e.visible?)
 					facemat = e.material
 					if(facemat == nil)
-						material_geometry["SU2LUX_no_material"] << e
+						# if the face has a material on its back side, use that material
+						backmat = e.back_material
+						if backmat != nil
+							material_geometry[backmat] << e
+						else
+							# if not, add face to collection of faces without material 
+							material_geometry["SU2LUX_no_material"] << e
+						end
 					else
 						if material_geometry[facemat] != nil # skip geometry with ghost material
 							material_geometry[facemat] << e 
 						end
 					end
-				elsif((e.class == Sketchup::ComponentInstance or e.class == Sketchup::Group) and e.layer.visible? and e.visible?)
-					# for each child component, store "[component guid, component sketchup material, component transformation]}
-					comp_children << [e.definition.guid, e.material, e.transformation.to_a]
+				elsif(e.class == Sketchup::ComponentInstance and e.layer.visible? and e.visible?)
+					# for each child component, store "[component entityID, component sketchup material, component transformation]}
+					comp_children << [e.entityID.to_s, e.material, e.transformation.to_a]
+				elsif(e.class == Sketchup::Group and e.layer.visible? and e.visible?)
+					# for each child component, store "[component entityID, component sketchup material, component transformation]}
+					comp_children << [@group_definition_hash[e].entityID.to_s, e.material, e.transformation.to_a]
 				end
 			}
 
@@ -1887,56 +1959,78 @@ class LuxrenderExport
 		return [relevant_components, component_material_geometry, relevant_component_children]	
 	end
 	
-	def sort_components(passed_components)
-		#relevant_components = []
-		#passed_components.each{|d|
-		#	if d.is_a?(Sketchup::) or d.is_a?(Sketchup::Group)
-		#		relevant_components << d
-		#	end
-		#}
-		relevant_components = passed_components
-
-		#store components as {component => [childcomponent0, childcomponent5, childcomponent6]}
+	def get_group_definitions()
+		group_definition_hash = {}
+		# for this model, iterate all component definitions
+		# get definition instances; if the instance is a group, add it to the hash
+		# note: for recent versions of SketchUp, we could skip this step and get the definitions through group.definition
+		@model.definitions.each{|comp_def|
+			comp_def.instances.each{|inst|
+				if inst.class == Sketchup::Group
+					group_definition_hash[inst] = comp_def
+				end
+			}
+		}
+		@group_definition_hash = group_definition_hash
+		return group_definition_hash
+	end	
+	
+	
+	
+	def sort_components(passed_component_definitions)
+		relevant_component_definitions = passed_component_definitions
+		
+		#store components as {component => [childcomponentdefinition0, childcomponentdefinition5, childcomponentdefinition6(, group?])}
 		component_hashes = {}
 
 		# process relevant components; get child component definitions
-		relevant_components.each{|c|
-			child_components = []
-			c.entities.each{|e|
-				if e.is_a?(Sketchup::ComponentInstance) or e.is_a?(Sketchup::Group)
-					#puts "adding child"
-					child_components << e.definition
+		relevant_component_definitions.each{|this_definition|
+			collected_child_components = []
+			this_definition.entities.each{|e|
+				if e.is_a?(Sketchup::ComponentInstance) 
+					# adding child (component)
+					collected_child_components << e.definition
+				elsif e.is_a?(Sketchup::Group)
+					# adding child (group)
+					collected_child_components << @group_definition_hash[e]
 				end
 			}
-			component_hashes[c] = child_components
+			component_hashes[this_definition] = collected_child_components
 		}
 
 		sorted_components = []
-		maxtries = 30 # maximum recursion depth - used as a safety net infinite loops
+		maxtries = 30 # maximum recursion depth - used as a safety net to prevent infinite loops
 
-		#go through all definitions
-		while(relevant_components.size > 0 and maxtries > 0)
+		while(relevant_component_definitions.size > 0 and maxtries > 0)
 			maxtries = maxtries - 1
-			unselected_components = []
+			postponed_components = []
 			#check if definition has children; if not, add to list and remove from original; also remove from all child component lists
-			relevant_components.each{|c|
-				if(component_hashes[c] == [])
-					sorted_components << c
+			relevant_component_definitions.each{|comp|
+				puts "processing..."
+				puts comp
+				if(component_hashes[comp] == [])
+					puts 'adding component to sorted_component list'
+					sorted_components << comp
 					# remove from child component lists
-					relevant_components.each{|d|
-						component_hashes[d].delete(c)
+					relevant_component_definitions.each{|d|
+						component_hashes[d].delete(comp)
+					}
+					postponed_components.each{|d|
+						component_hashes[d].delete(comp)
 					}
 				else
-					unselected_components << c
+					postponed_components << comp
 				end
 			}
-			relevant_components = unselected_components
+			relevant_component_definitions = postponed_components
 		end
+		puts "number of components to return:"
+		puts sorted_components.size
 		return sorted_components
 	end
 	
 	
-	def get_material_definition(lux_mat, distortedname = nil, texdistorted = false, distorted_index = 0) # returns material definition as a list of strings (otherwise similar to export_mat)
+	def get_material_definition(lux_mat, distortedname = nil, texdistorted = false, distorted_index = 0, component_mat_index = 0, scale_x = 1.0, scale_y = 1.0) # returns material definition as a list of strings (otherwise similar to export_mat)
 		#puts 'running get_material_definition for ' + lux_mat.name
 		currentmatname = distortedname ? distortedname : lux_mat.name # materialname_dist42 # also used as texture name for SketchUp texture
         
@@ -1965,7 +2059,7 @@ class LuxrenderExport
 		end
         
         matnamecomment = "# Material '" + currentmatname + "'\n"
-		matdeclaration_statement1 = "MakeNamedMaterial \"#{currentmatname}\"\n"
+		matdeclaration_statement1 = "MakeNamedMaterial \"#{SU2LUX.sanitize_path(currentmatname)}\"\n"
 		matdeclaration_statement2 = "\t\"string type\" [\"#{lux_mat.type}\"]\n"
         
 		if (lux_mat.type == "light")
@@ -2010,7 +2104,7 @@ class LuxrenderExport
                 matdefinition <<  'Texture "' + lux_mat.name + '_automix::amount" "float" "imagemap"'
                 imagemap_filename = ""
                 if (lux_mat.aa_texturetype=="sketchupalpha") ## sketchup texture
-					skp_mat = @material_editor.materials_skp_lux.key(lux_mat)
+					skp_mat = @material_editor.materials_skp_lux.index(lux_mat) # hash.key does not work in Ruby 1.8
                     if (skp_mat.texture != nil)
                         tex_filename = get_texture_file_name(skpmat)
                         imagemap_filename = File.join(File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION), SU2LUX::SUFFIX_DATAFOLDER, SU2LUX::TEXTUREFOLDER, tex_filename)
@@ -2080,13 +2174,13 @@ class LuxrenderExport
 		elsif lux_mat.kd_texturetype == "procedural"
 			following << "\t" + "\"texture Kd\" [\"#{lux_mat.kd_imagemap_proctex }\"]" + "\n"
 		else
-			# call export_texture
-			 preceding, following = self.export_texture(lux_mat, "kd", "color", before, after, tex_name, dist_nr)
 			if (lux_mat.send("kd_imagemap_colorize") == true)
                 preceding << "Texture \"#{tex_name}::Kd.scale\" \"color\" \"scale\"" + "\n\t" + "\"texture tex1\" [\"#{tex_name}::Kd\"]" + "\n\t" + "\"color tex2\" [#{lux_mat.channelcolor_tos('kd')}]" + "\n"
 				following << "\t" + "\"texture Kd\" [\"#{tex_name}::Kd.scale\"]" + "\n"
 			else
-				following << "\t" + "\"texture Kd\" [\"#{tex_name}::Kd\"]" + "\n"
+				# call export_texture
+				preceding, following = self.export_texture(lux_mat, "kd", "color", before, after, tex_name, dist_nr) # note: this already writes Texture Kd etc.
+				#following << "\t" + "\"texture Kd\" [\"#{tex_name}::Kd\"]" + "\n"
 			end
 		end
 		return [before + preceding, after + following]

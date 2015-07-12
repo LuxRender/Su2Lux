@@ -207,7 +207,7 @@ class LuxrenderProceduralTexturesEditor
 			
 			puts "getting texture"
 			# get procedural texture object to display: 
-			if (@lrs.proceduralTextureNames.count > 0)
+			if (@lrs.proceduralTextureNames.length > 0)
 				activeTexture = @textureDictionary.returnDictionary(@activeProcTex.name)
 				activeTexType = activeTexture["textureType"]
 				
@@ -319,7 +319,7 @@ class LuxrenderProceduralTexturesEditor
 	
 	def showProcTexDialog
 		@procedural_textures_dialog.show{} # note: code inserted in the show block will run when the dialog is initialized
-		puts "number of textures in model: " + @lrs.proceduralTextureNames.count.to_s
+		puts "number of textures in model: " + @lrs.proceduralTextureNames.length.to_s
 		# note: interface should be updated by code that is called when the procedural texture editor is loaded
 	end
 	

@@ -167,7 +167,6 @@ module SU2LUX
 	##
 	def SU2LUX.export
 	
-		
 		Sketchup.set_status_text('SU2LUX export: initializing')
 		
 		SU2LUX.reset_variables
@@ -181,6 +180,9 @@ module SU2LUX
 		if (lrs.export_file_path == nil || !File.directory?(File.dirname(lrs.export_file_path)))
 			lrs.export_file_path = UI.openpanel("Please select output file name", "", Sketchup.active_model.name + ".lxs")			
 		end 
+		
+		# remove .skp extension from export file path
+		lrs.export_file_path = lrs.export_file_path.split(".skp")[0]
 
 		# make sure export file path has the right extension
 		if File.extname(lrs.export_file_path) != ".lxs"
@@ -193,7 +195,7 @@ module SU2LUX
         exportpath = File.join(File.dirname(lrs.export_file_path), SU2LUX.sanitize_path(File.basename(lrs.export_file_path))) #SU2LUX.sanitize_path(lrs.export_file_path)
 
 		# create LuxrenderExport object
-		le = LuxrenderExport.new(exportpath, @os_separator, lrs, @material_editor)
+		le = LuxrenderExport.new(exportpath, @os_separator, lrs, @material_editor, model)
 		le.reset
 
 		file_basename = File.basename(exportpath, SCENE_EXTENSION)
@@ -228,6 +230,8 @@ module SU2LUX
 		le.export_procedural_textures(lxm_file)
 		le.export_used_materials(model.materials, lxm_file, lrs.texexport, relative_datafolder) # LuxRender materials for all SketchUp materials
         le.export_distorted_materials(lxm_file, relative_datafolder) # materials created in LuxrenderExport for distorted textures
+		le.export_component_materials(lxm_file)
+		
 		lxm_file.close
         
 		
@@ -490,7 +494,7 @@ module SU2LUX
 			end
 			return sanitized_path.delete("[<>]")
 		elsif (ENV['OS'] =~ /windows/i) # ruby 1.8 does not support the 'ord' method
-			return original_path.dump.gsub!(/[^0-9A-Za-z.\-]/, '')
+			return original_path.dump.gsub!(/[^0-9A-Za-z_.\-]/, '')
 		else # on OS X, all seems to be fine
 			return original_path
 		end
