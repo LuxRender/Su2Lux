@@ -34,7 +34,7 @@ module SU2LUX
 
     # Module constants
     SU2LUX_VERSION = "0.45dev"
-    SU2LUX_DATE = "20 June 2015" # to be updated in about.html manually
+    SU2LUX_DATE = "15 July 2015" # to be updated in about.html manually
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
 	PLUGIN_FOLDER = "su2lux"
@@ -166,8 +166,11 @@ module SU2LUX
 	# exporting geometry, lights, materials and settings to a LuxRender file
 	##
 	def SU2LUX.export
-	
+		Sketchup.active_model.start_operation("SU2LUX export", true, false, false)
 		Sketchup.set_status_text('SU2LUX export: initializing')
+		
+		# add undo step
+		#Sketchup.active_model.start_operation("SU2LUX: prepare export", true, false, false)
 		
 		SU2LUX.reset_variables
 		model = Sketchup.active_model
@@ -193,7 +196,7 @@ module SU2LUX
 		lrs.export_file_path = lrs.export_file_path.gsub(/\\/, '/') if lrs.export_file_path.include?('\\')
 		
         exportpath = File.join(File.dirname(lrs.export_file_path), SU2LUX.sanitize_path(File.basename(lrs.export_file_path))) #SU2LUX.sanitize_path(lrs.export_file_path)
-
+		
 		# create LuxrenderExport object
 		le = LuxrenderExport.new(exportpath, @os_separator, lrs, @material_editor, model)
 		le.reset
@@ -211,11 +214,14 @@ module SU2LUX
         end
         
 		# export geometry
+		puts 'exporting geometry'
 		lxo_file = File.new(file_datafolder + file_basename  + SUFFIX_OBJECT, "w")
 		le.export_mesh(lxo_file, model)
 		lxo_file.close
 
-		Sketchup.set_status_text('SU2LUX export: materials')
+		Sketchup.set_status_text('SU2LUX export: materials and volumes')
+		
+		
 		# prepare lxm file
 		lxm_file = File.new(file_datafolder + file_basename + SUFFIX_MATERIAL, "w")
 		lxm_file << "MakeNamedMaterial \"SU2LUX_helper_null\" \n" # add helper null material
@@ -223,9 +229,11 @@ module SU2LUX
 		lxm_file << "\n\n"
 		
 		# add volumes
+		puts 'exporting volumes'
 		le.export_volumes(lxm_file)
 		
-		# export all textures and materials		
+		# export all textures and materials
+		puts 'exporting materials'
         relative_datafolder = file_basename + SU2LUX::SUFFIX_DATAFOLDER
 		le.export_procedural_textures(lxm_file)
 		le.export_used_materials(model.materials, lxm_file, lrs.texexport, relative_datafolder) # LuxRender materials for all SketchUp materials
@@ -233,17 +241,20 @@ module SU2LUX
 		le.export_component_materials(lxm_file)
 		
 		lxm_file.close
-        
 		
 		Sketchup.set_status_text('SU2LUX export: settings')
         # write lxs file
+		puts 'exporting settings'
+		puts 'export path:'
 		puts exportpath
 		lrs.export_file_path = exportpath
 		lxs_file = File.new(exportpath, "w")
 		le.export_global_settings(lxs_file)
 		le.export_renderer(lxs_file)
+		puts 'exporting camera'
 		le.export_camera(model.active_view, lxs_file)
 		le.export_film(lxs_file, file_basename)
+		puts 'exporting render settings'
 		le.export_render_settings(lxs_file)
 		lxs_file.puts 'WorldBegin'
 		lxs_file.puts "Include \"" + file_basename + SU2LUX::SUFFIX_DATAFOLDER + '/' + file_basename + SUFFIX_MATERIAL + "\"\n\n"
@@ -251,10 +262,13 @@ module SU2LUX
 		le.export_light(lxs_file) # sun/environment lights
 		lxs_file.puts 'WorldEnd'
 		lxs_file.close
-        
+		
+		
+		
 		Sketchup.set_status_text('SU2LUX export: textures')
         # write texture files
 		le.export_textures(filepath_textures)
+		Sketchup.active_model.commit_operation()
 	end # END export
 
 	##
@@ -287,8 +301,12 @@ module SU2LUX
         # export and run
         if (file_path_exists==true)
             start_time = Time.new
+			
+			#Sketchup.active_model.start_operation("SU2LUX export", true, false, false)
             SU2LUX.export
-            if(render==true)
+			#Sketchup.active_model.commit_operation()
+            
+			if(render==true)
                 if lrs.runluxrender == "yes"
 					Sketchup.set_status_text('SU2LUX export: starting LuxRender')
                     puts "launching LuxRender"
@@ -560,7 +578,7 @@ module SU2LUX
 	#
 	##
 	def SU2LUX.report_window(start_time, ask_render=true)
-		SU2LUX.dbg_p "SU2LUX.report_window"
+		#SU2LUX.dbg_p "SU2LUX.report_window"
 		end_time = Time.new
 		elapsed = end_time-start_time
 		time = " exported in "
@@ -594,11 +612,11 @@ module SU2LUX
         @luxrender_path = SU2LUX.get_luxrender_path if @luxrender_path.nil?
         lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
 		return if @luxrender_path.nil?
-		puts lrs.export_file_path
+		#puts lrs.export_file_path
 		Dir.chdir(File.dirname(@luxrender_path))
 		export_path = File.join(File.dirname(lrs.export_file_path), SU2LUX.sanitize_path(File.basename(lrs.export_file_path))) # SU2LUX.sanitize_path("#{lrs.export_file_path}")
 		export_path = File.join(export_path.split(@os_separator))
-		puts export_path
+		#puts export_path
 		if (ENV['OS'] =~ /windows/i)
 			command_line = "start \"max\" \/#{lrs.priority} \"#{@luxrender_path}\" \"#{export_path}\""
 			puts command_line
@@ -646,7 +664,7 @@ module SU2LUX
             SU2LUX.dbg_p "using existing material editor"
         else
             SU2LUX.dbg_p "creating new material editor"
-			@matedit_hash[scene_id]=LuxrenderMaterialEditor.new(scene_id)
+			@matedit_hash[scene_id] = LuxrenderMaterialEditor.new(scene_id, SU2LUX.this_lrs, Sketchup.active_model)
 		end
         @matedit_hash[scene_id].set_material_lists
         if @matedit_hash[scene_id].visible?
@@ -671,7 +689,7 @@ module SU2LUX
 	##
 	def SU2LUX.create_material_editor(scene_id, lrs)
 		#if not @matedit_hash[scene_id]
-			@matedit_hash[scene_id]=LuxrenderMaterialEditor.new(scene_id, lrs)
+			@matedit_hash[scene_id] = LuxrenderMaterialEditor.new(scene_id, lrs, Sketchup.active_model)
 		#end
 		return @matedit_hash[scene_id]
 	end # END create_material_editor

@@ -22,9 +22,10 @@ class LuxrenderMaterialEditor
 	attr_accessor :current, :matname_changed, :materials_skp_lux, :material_editor_dialog
     attr_reader :material_editor_dialog
 	
-	def initialize(scene_id, lrs)
+	def initialize(scene_id, lrs, model = Sketchup.active_model)
         puts "initializing material editor"
         @scene_id = scene_id
+		@model = model
 		@lrs = lrs
         @materials_skp_lux = Hash.new
 		@matname_changed = false
@@ -399,7 +400,7 @@ class LuxrenderMaterialEditor
 			
 			texture_subfolder = "LuxRender_luxdata/textures"
 			
-			previewExport = LuxrenderExport.new(preview_path, path_separator, @lrs, self) # preview path should define where preview files will be stored 
+			previewExport = LuxrenderExport.new(preview_path, path_separator, @lrs, self, Sketchup.active_model) # preview path should define where preview files will be stored 
 			previewExport.export_procedural_textures(generated_lxm_file)
 			previewExport.export_volumes(generated_lxm_file)
 			
@@ -739,7 +740,7 @@ class LuxrenderMaterialEditor
        #puts luxmat
         luxmat.color = skpmat.color
         if skpmat.texture
-            puts "setting texture information"
+            # puts "setting texture information"
             texture_name = skpmat.texture.filename
             texture_name.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
             texture_name.gsub!(/\\/, '/') if texture_name.include?('\\')
@@ -748,8 +749,8 @@ class LuxrenderMaterialEditor
             #luxmat.use_diffuse_texture = true
         end
     end
-                           
-                           
+
+
 	##
 	#
 	##
