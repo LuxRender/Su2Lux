@@ -33,8 +33,8 @@ end
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.45dev"
-    SU2LUX_DATE = "15 July 2015" # to be updated in about.html manually
+    SU2LUX_VERSION = "0.45dev3"
+    SU2LUX_DATE = "16 July 2015" # to be updated in about.html manually
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
 	PLUGIN_FOLDER = "su2lux"
@@ -118,11 +118,11 @@ module SU2LUX
 		
         # create folder and files needed for material preview
         Dir.mkdir(@material_preview_path) unless File.exists?(@material_preview_path)
-        required_files = ["preview.lxs01","preview.lxs02","preview.lxs03","ansi.txt"]
+        required_files = ["preview.lxs01", "preview.lxs02", "preview.lxs03", "ansi.txt"]
         for required_file_name in required_files
-            old_path = File.dirname(File.expand_path(__FILE__)) + "\/" + required_file_name
-            new_path = os.get_variables["material_preview_path"] + required_file_name
-            FileUtils.copy_file(old_path,new_path) unless File.exists?(new_path)
+            old_path = File.join(File.dirname(File.expand_path(__FILE__)), required_file_name)
+            new_path = File.join(os.get_variables["material_preview_path"], required_file_name)
+            FileUtils.copy_file(old_path, new_path) unless File.exists?(new_path)
         end
         
         # create folder for settings files, copy settings files

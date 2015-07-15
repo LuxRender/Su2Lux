@@ -387,6 +387,10 @@ class LuxrenderMaterialEditor
             
             active_luxmat = @materials_skp_lux.index(@current)
 			active_material_name = SU2LUX.sanitize_path(active_luxmat.name)
+			
+			# todo: make sure folder exists, path exists
+			
+			
             
 			# generate preview lxm file and export bitmap images
 			lxm_path = File.join(preview_path, SU2LUX.sanitize_path(active_material_name)+".lxm")

@@ -65,10 +65,10 @@ class LuxrenderExport
                 out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"renderengine.type = PATHOCL\" \"accelerator.type = AUTO\"]"
             when "luxcore_biaspathcpu"
                 out.puts "Renderer \"luxcore\""
-                out.puts "\t\"string config\" [\"opencl.gpu.use = 0\" \"opencl.cpu.use = 1\" \"renderengine.type = BIASPATHCPU\" \"tile.multipass.enable = 1\" \"accelerator.type = AUTO\"]"
+                out.puts "\t\"string config\" [\"opencl.gpu.use = 0\" \"opencl.cpu.use = 1\" \"renderengine.type = BIASPATHCPU\" \"tile.multipass.enable = 1\" \"accelerator.type = AUTO\" \"biaspath.clamping.radiance.maxvalue = 0\"  \"biaspath.clamping.pdf.value = 0\"]"
             when "luxcore_biaspathocl"
                 out.puts "Renderer \"luxcore\""
-                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"renderengine.type = BIASPATHOCL\" \"tile.multipass.enable = 1\" \"accelerator.type = AUTO\"]"
+                out.puts "\t\"string config\" [\"opencl.gpu.use = 1\" \"opencl.cpu.use = 1\" \"renderengine.type = BIASPATHOCL\" \"tile.multipass.enable = 1\" \"accelerator.type = AUTO\" \"biaspath.clamping.radiance.maxvalue = 0\"  \"biaspath.clamping.pdf.value = 0\"]"
             when "luxcore_bidircpu"
                 out.puts "Renderer \"luxcore\""
                 out.puts "\t\"string config\" [\"opencl.gpu.use = 0\" \"opencl.cpu.use = 1\" \"renderengine.type = BIDIRCPU\" \"accelerator.type = AUTO\"]"
@@ -1227,20 +1227,23 @@ class LuxrenderExport
 		Sketchup.active_model.commit_operation()
 		
 		# process distorted faces
-		@distorted_faces.each{|face, skp_mat, dist_index|
+		@distorted_faces.each{|face, skp_mat, dist_index| # note: 'face' is a list of faces, but in practice should have only one item
 			#puts 'exporting distorted texture for material '
 			#puts skp_mat
 			# if the material has a sketchup texture, export the distorted sketchup texture
 			if(skpmat_with_used_texture.include? skp_mat)
 				tw = Sketchup.create_texture_writer
-				tw.load face[0], true
 				texname = SU2LUX.sanitize_path(get_texture_file_name(skp_mat)) # texturename.jpg
 				destination_path = File.join(texture_folder, texname.split('.')[0] + '_dist' + dist_index.to_s + File.extname(texname))
-				#puts 'exporting distorted texture to ' + destination_path.to_s
-				tw.write face[0], true, destination_path
+				if(face[0].material == nil)
+					tw.load face[0], false
+					tw.write face[0], false, destination_path
+				else
+					tw.load face[0], true
+					tw.write face[0], true, destination_path
+				end
 			end			
 			# for all the material's image textures, copy the image with a modified name (todo for later: assign to face, read with texture reader, export distorted image)
-			#puts "gathering distorted texture paths"
 			image_file_paths = @material_editor.materials_skp_lux[skp_mat].get_used_image_paths
 			image_file_paths.each{|source_path|
 				#puts "copying distorted image texture, source: " + source_path.to_s
