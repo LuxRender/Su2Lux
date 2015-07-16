@@ -1571,10 +1571,11 @@ class LuxrenderExport
         end
     end
         
-    def export_displacement_textures (skp_mat, out, luxrender_mat, texname) # only used for material preview
+    def export_displacement_textures(skp_mat, out, luxrender_mat, texname) # only used for material preview
         if luxrender_mat.use_displacement
 			puts "exporting displacement"
-            out.puts "\"string subdivscheme\" [\""+luxrender_mat.dm_scheme+"\"]"
+			puts luxrender_mat.dm_texturetype
+            out.puts "\"string subdivscheme\" [\"" + luxrender_mat.dm_scheme + "\"]"
             case luxrender_mat.dm_scheme
                 when "loop"
                     out.puts "\"bool dmnormalsmooth\" [\"#{luxrender_mat.dm_normalsmooth}\"]"
@@ -1585,7 +1586,7 @@ class LuxrenderExport
                     out.puts "\"integer nsubdivlevels\" [#{luxrender_mat.dm_microlevels}]"
             end
 			
-			if (luxrender_mat.dm_texturetype == 'imagemap' || luxrender_mat.bump_texturetype == 'sketchup')
+			if (luxrender_mat.dm_texturetype == 'imagemap' || luxrender_mat.dm_texturetype == 'sketchup')
 				out.puts "\"texture displacementmap\" [\""+ texname +"::displacementmap\"]"
 			else # procedural
 				out.puts "\"texture displacementmap\" [\"#{luxrender_mat.dm_imagemap_proctex}\"]"
@@ -1857,7 +1858,7 @@ class LuxrenderExport
 				foll << "\t" + "\"texture #{type_str}\" [\"" + procTexString + "\"]" + "\n"
 			end
 		elsif (material.send(tex_type + "_imagemap_colorize") == true) 
-			prec << "Texture \"#{tex_name}::#{type_str}.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{tex_name}::#{type_str}\"] \"#{type} tex2\" [#{material.channelcolor_tos(type_str.downcase)}]" + "\n"
+			prec << "Texture \"#{tex_name}::#{type_str}.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{tex_name}::#{type_str}\"] \"#{type} tex2\" [#{material.channelcolor_tos(tex_type)}]" + "\n"
 			foll << "\t" + "\"texture #{type_str}\" [\"#{tex_name}::#{type_str}.scale\"]" + "\n"
 		else # ordinary textures
 			foll << "\t" + "\"texture #{type_str}\" [\"#{tex_name}::#{type_str}\"]" + "\n"
@@ -1886,10 +1887,10 @@ class LuxrenderExport
                 pre, post = self.export_sigma(luxmat, pre, post, texture_name, distortion_index, is_component_mat, scale_x, scale_y)
             when "cloth"
                 pre, post = self.export_cloth_base(luxmat, pre, post)
-                pre, post = self.export_cloth_channel1(luxmat, pre, post, texture_name, distortion_index)
-                pre, post = self.export_cloth_channel2(luxmat, pre, post, texture_name, distortion_index)
-                pre, post = self.export_cloth_channel3(luxmat, pre, post, texture_name, distortion_index)
-                pre, post = self.export_cloth_channel3(luxmat, pre, post, texture_name, distortion_index)
+                pre, post = self.export_cloth_channel1(luxmat, pre, post, texture_name, distortion_index, is_component_mat, scale_x, scale_y)
+                pre, post = self.export_cloth_channel2(luxmat, pre, post, texture_name, distortion_index, is_component_mat, scale_x, scale_y)
+                pre, post = self.export_cloth_channel3(luxmat, pre, post, texture_name, distortion_index, is_component_mat, scale_x, scale_y)
+                pre, post = self.export_cloth_channel4(luxmat, pre, post, texture_name, distortion_index, is_component_mat, scale_x, scale_y)
 			when "glossy"
                 pre, post = self.export_diffuse_component(luxmat, pre, post, texture_name, distortion_index, is_component_mat, scale_x, scale_y) # todo
                 pre, post = self.export_specular_component(luxmat, pre, post, texture_name, distortion_index, is_component_mat, scale_x, scale_y) # todo
@@ -2269,7 +2270,7 @@ class LuxrenderExport
 		return [before + preceding, after + following]
 	end
 
-	def export_specular_component(material, before, after, tex_name, dist_nr, is_component_mat, scale_x, scale_y )
+	def export_specular_component(material, before, after, tex_name, dist_nr, is_component_mat, scale_x, scale_y)
 		preceding = ""
 		following = ""
         if (material.specular_scheme == "specular_scheme_preset")
@@ -2301,10 +2302,10 @@ class LuxrenderExport
         return [before + preceding, after + following]
 	end
     
-    def export_cloth_channel1(material, before, after, tex_name, dist_nr = 0)
+    def export_cloth_channel1(material, before, after, tex_name, dist_nr, is_component_mat, scale_x, scale_y)
         preceding = ""
         following = ""
-        if ( ! material.has_texture?("cl1kd"))
+        if (!material.has_texture?("cl1kd"))
             following << "\t" + "\"color warp_Kd\" [#{material.channelcolor_tos('cl1kd')}]" + "\n"
         else
             preceding, following = self.export_texture(material, "cl1kd", "color", before, after, tex_name, dist_nr, is_component_mat, scale_x, scale_y)
@@ -2312,10 +2313,10 @@ class LuxrenderExport
         return [before + preceding, after + following]
     end
     
-    def export_cloth_channel2(material, before, after, tex_name, dist_nr = 0)
+    def export_cloth_channel2(material, before, after, tex_name, dist_nr, is_component_mat, scale_x, scale_y)
         preceding = ""
         following = ""
-        if ( ! material.has_texture?("cl1ks"))
+        if(!material.has_texture?("cl1ks"))
             following << "\t" + "\"color warp_Ks\" [#{material.channelcolor_tos('cl1ks')}]" + "\n"
         else
             preceding, following = self.export_texture(material, "cl1ks", "color", before, after, tex_name, dist_nr, is_component_mat, scale_x, scale_y)
@@ -2323,11 +2324,10 @@ class LuxrenderExport
         return [before + preceding, after + following]
     end
 
-    def export_cloth_channel3(material, before, after, tex_name, dist_nr = 0)
+    def export_cloth_channel3(material, before, after, tex_name, dist_nr, is_component_mat, scale_x, scale_y)
         preceding = ""
         following = ""
-        
-        if ( ! material.has_texture?("cl2kd"))
+        if(!material.has_texture?("cl2kd"))
             following << "\t" + "\"color weft_Kd\" [#{material.channelcolor_tos('cl2kd')}]" + "\n"
         else
             preceding, following = self.export_texture(material, "cl2kd", "color", before, after, tex_name, dist_nr, is_component_mat, scale_x, scale_y)
@@ -2335,10 +2335,10 @@ class LuxrenderExport
         return [before + preceding, after + following]
     end
 
-    def export_cloth_channel4(material, before, after, tex_name, dist_nr = 0)
+    def export_cloth_channel4(material, before, after, tex_name, dist_nr, is_component_mat, scale_x, scale_y)
         preceding = ""
         following = ""
-        if ( ! material.has_texture?("cl2kd"))
+        if (!material.has_texture?("cl2ks"))
             following << "\t" + "\"color weft_Ks\" [#{material.channelcolor_tos('cl2ks')}]" + "\n"
         else
             preceding, following = self.export_texture(material, "cl2ks", "color", before, after, tex_name, dist_nr, is_component_mat, scale_x, scale_y)

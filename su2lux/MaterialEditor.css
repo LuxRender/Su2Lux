@@ -403,6 +403,11 @@ input#get_diffuse_color {
     height: 6.5em;
 }
 
+.parameter_interface_refraction{
+    position: relative;
+    height: 9.0em;
+}
+
 .parameter_interface_specular{
     position: relative;
     height: 9.5em;

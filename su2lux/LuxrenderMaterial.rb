@@ -391,9 +391,9 @@ class LuxrenderMaterial
 	end
     
     def channelcolor_tos(mattype)
-        redstring = mattype+'_R'
-        greenstring = mattype+'_G'
-        bluestring = mattype+'_B'
+        redstring = mattype + '_R'
+        greenstring = mattype + '_G'
+        bluestring = mattype + '_B'
         returncolor = "#{"%.6f" %(self.send(redstring))} #{"%.6f" %(self.send(greenstring))} #{"%.6f" %(self.send(bluestring))}"
     end
     

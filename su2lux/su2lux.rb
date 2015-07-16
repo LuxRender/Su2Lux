@@ -504,8 +504,9 @@ module SU2LUX
 			#sanitized_path.gsub!(/[^0-9A-Za-z.\-]/, '_')
 			sanitized_path = ''
 			for pos in 0..original_path.length-1
-				if original_path[pos].ord > 255
-					sanitized_path += '&'+ original_path[pos].ord.to_s
+				#if original_path[pos].ord > 255
+				if (original_path[pos] =~ /[a-zA-Z0-9.\\\/_]/) != 0 # character is special character, needs to be replaced
+					sanitized_path += '&'+ original_path[pos].ord.to_s 
 				else
 					sanitized_path += original_path[pos]
 				end
