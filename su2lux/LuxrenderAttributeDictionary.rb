@@ -118,12 +118,11 @@ class LuxrenderAttributeDictionary
 	#end #END save_to_model
     
 	def load_from_model(name)
-        puts "loading material " + name.to_s
+        puts "loading dictionary for " + name.to_s
 		@dictionary = self.choose(name) # self is #<LuxrenderAttributeDictionary:.....>
 		model_dictionary = @model.attribute_dictionary(name)
 		if (model_dictionary)
-            #puts "number of attribute dictionary items:"
-            #puts model_dictionary.length
+            puts "number of attribute dictionary items:" + model_dictionary.length.to_s
 			@model.start_operation("SU2LUX load model data", true, false, true)
 			model_dictionary.each { |key, value|
 				# puts "load_from_model updating attributes"

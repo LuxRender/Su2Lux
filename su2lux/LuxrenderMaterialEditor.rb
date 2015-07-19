@@ -24,6 +24,8 @@ class LuxrenderMaterialEditor
 	
 	def initialize(scene_id, lrs, model = Sketchup.active_model)
         puts "initializing material editor"
+		startTime_material_editor = Time.new
+		
         @scene_id = scene_id
 		@model = model
 		@lrs = lrs
@@ -49,12 +51,16 @@ class LuxrenderMaterialEditor
         
         @numberOfLuxMaterials = 0
         
+		#puts "material editor initialisation processing materials:"
         for mat in Sketchup.active_model.materials
+			#puts mat.name
             luxmat = self.find(mat.name) # adds material to materials_skp_lux
-            get_skp_color(mat,luxmat)
+            get_skp_color(mat, luxmat)
+			get_skp_texture(mat, luxmat)
         end
         
-        puts "done initialising material editor"
+		elapsed_seconds = (Time.new - startTime_material_editor).to_int
+        puts "material editor initialised in " + elapsed_seconds.to_s + ' seconds'
 		
 		@material_editor_dialog.add_action_callback('param_generate') {|dialog, params|
             SU2LUX.dbg_p "callback: param_generate"
@@ -704,16 +710,16 @@ class LuxrenderMaterialEditor
 	##	
 	def find(name)
         mat = Sketchup.active_model.materials[name]
-        if (getluxmatfromskpname(name))
+        if (getluxmatfromskpname(name)) # LuxRender material exists, return existing material
             return getluxmatfromskpname(name)
-        elsif (mat)
+        elsif (mat) # create new LuxRender material
             @numberOfLuxMaterials += 1
-            #puts @numberOfLuxMaterials
             newluxmat = LuxrenderMaterial.new(mat, self)
             @materials_skp_lux[mat] = newluxmat
             return newluxmat
         else
-            puts "no material found for name ", name
+            puts "MaterialEditor.find could not find SketchUp material:"
+			puts name
 			return nil
 		end
 	end 
@@ -737,22 +743,26 @@ class LuxrenderMaterialEditor
     ##
     #
     ##
-    def get_skp_color(skpmat,luxmat)
-       #puts "getting color from sketchup material:"
-       #puts skpmat
-       #puts "assigning to:"
-       #puts luxmat
-        luxmat.color = skpmat.color
-        if skpmat.texture
-            # puts "setting texture information"
-            texture_name = skpmat.texture.filename
-            texture_name.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
-            texture_name.gsub!(/\\/, '/') if texture_name.include?('\\')
-            luxmat.kd_imagemap_Sketchup_filename = texture_name
-            luxmat.kd_texturetype = 'sketchup'
-            #luxmat.use_diffuse_texture = true
-        end
-    end
+    def get_skp_color(skpmat, luxmat)
+		#puts "getting color from sketchup material:"
+		#puts skpmat
+		luxmat.color = skpmat.color
+	end
+	
+	    ##
+    #
+    ##
+    def get_skp_texture(skpmat, luxmat)
+		if skpmat.texture
+			# puts "setting texture information"
+			texture_name = SU2LUX.sanitize_path(skpmat.texture.filename)
+			#texture_name.gsub!(/\\\\/, '/') #bug with SketchUp not allowing \ characters # should be dealt with by SU2LUX.sanitize_path
+			#texture_name.gsub!(/\\/, '/') if texture_name.include?('\\')
+			luxmat.kd_imagemap_Sketchup_filename = texture_name
+			luxmat.kd_texturetype = 'sketchup'
+			#luxmat.use_diffuse_texture = true
+		end
+	end
 
 
 	##
@@ -769,8 +779,9 @@ class LuxrenderMaterialEditor
 				#UI.messagebox(mat)
                 luxmat = find(mat.name) # creates LuxRender material
 				puts "adding material #{mat.name} to material hash, creating LuxRender material"
-                @materials_skp_lux[mat]=luxmat
-                get_skp_color(mat,luxmat)
+                @materials_skp_lux[mat] = luxmat
+                get_skp_color(mat, luxmat)
+                get_skp_texture(mat, luxmat)
             #else
             #    puts "material #{mat.name} found in material hash, skipping LuxRender material creation"
 			end

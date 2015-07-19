@@ -33,8 +33,8 @@ end
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.45dev3"
-    SU2LUX_DATE = "16 July 2015" # to be updated in about.html manually
+    SU2LUX_VERSION = "0.45dev4"
+    SU2LUX_DATE = "19 July 2015" # to be updated in about.html manually
 	DEBUG = true
 	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
 	PLUGIN_FOLDER = "su2lux"
@@ -237,7 +237,9 @@ module SU2LUX
         relative_datafolder = file_basename + SU2LUX::SUFFIX_DATAFOLDER
 		le.export_procedural_textures(lxm_file)
 		le.export_used_materials(model.materials, lxm_file, lrs.texexport, relative_datafolder) # LuxRender materials for all SketchUp materials
-        le.export_distorted_materials(lxm_file, relative_datafolder) # materials created in LuxrenderExport for distorted textures
+		if(lrs.exp_distorted)
+			le.export_distorted_materials(lxm_file, relative_datafolder) # materials created in LuxrenderExport for distorted textures
+		end
 		le.export_component_materials(lxm_file)
 		
 		lxm_file.close
@@ -367,15 +369,16 @@ module SU2LUX
 			puts user_input
 			user_input.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
 			user_input.gsub!(/\\/, '/') if user_input.include?('\\')
-			#store file path for quick exports
+			# set file path in lrs
 			lrs.export_file_path = File.join(File.dirname(user_input), File.basename(user_input, '.skp'))
 				
+			# add extension
 			if lrs.export_file_path == lrs.export_file_path.chomp(SCENE_EXTENSION)
 				lrs.export_file_path << SCENE_EXTENSION
 				@luxrender_path = SU2LUX.get_luxrender_path
 			end
 			
-			# todo: set new value in dialog
+			# todo: set new value in dialog (try to fix using update_UI setting?)
 			
 			
 			return (@luxrender_path ? true : false) # user may have selected a path
@@ -501,19 +504,18 @@ module SU2LUX
 	def SU2LUX.sanitize_path(original_path)
 		if (ENV['OS'] =~ /windows/i && RUBY_VERSION >= "1.9")
 			#sanitized_path = original_path.unpack('U*').pack('C*') # converts string to ISO-8859-1
-			#sanitized_path.gsub!(/[^0-9A-Za-z.\-]/, '_')
 			sanitized_path = ''
 			for pos in 0..original_path.length-1
 				#if original_path[pos].ord > 255
-				if (original_path[pos] =~ /[a-zA-Z0-9.\\\/_]/) != 0 # character is special character, needs to be replaced
-					sanitized_path += '&'+ original_path[pos].ord.to_s 
+				if (original_path[pos] =~ /[a-zA-Z0-9.:\\\/_]/) != 0 # character is special character, needs to be replaced
+					sanitized_path += '_'+ original_path[pos].ord.to_s 
 				else
 					sanitized_path += original_path[pos]
 				end
 			end
 			return sanitized_path.delete("[<>]")
 		elsif (ENV['OS'] =~ /windows/i) # ruby 1.8 does not support the 'ord' method
-			return original_path.dump.gsub!(/[^0-9A-Za-z_.\-]/, '')
+			return original_path.dump.gsub!(/[^0-9A-Za-z_.:\-]/, '')
 		else # on OS X, all seems to be fine
 			return original_path
 		end
@@ -723,7 +725,7 @@ module SU2LUX
     #
     ##
     def SU2LUX.create_render_settings_editor(scene_id, lrs)
-        @renderedit_hash[scene_id]=LuxrenderRenderSettingsEditor.new(scene_id, lrs)
+        @renderedit_hash[scene_id] = LuxrenderRenderSettingsEditor.new(scene_id, lrs)
         return @renderedit_hash[scene_id]
     end
 	
@@ -1090,12 +1092,20 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 		
         material_editor.materials_skp_lux = Hash.new
         material_editor.current = nil
+		
+		matTime_start = Time.new
         for mat in model.materials
+			#puts "processing material " + mat.name
 			luxmat = material_editor.find(mat.name)
+			#puts "loading material"
 			loaded = luxmat.load_from_model
+			# puts "resetting material if loading did not work"
             luxmat.reset unless loaded
+			puts "adding material to materials_skp_lux"
             material_editor.materials_skp_lux[mat] = luxmat
 		end
+		elapsed_seconds = (Time.new - matTime_start).to_int
+		puts "onOpenModel processed model.materials in " + elapsed_seconds.to_s + " seconds"
 		
         puts "onOpenModel creating scene settings editor"
         scene_settings_editor = SU2LUX.create_scene_settings_editor(model_id, lrs)
@@ -1121,8 +1131,10 @@ class SU2LUX_app_observer < Sketchup::AppObserver
         volume_editor = SU2LUX.create_volume_editor(model_id, material_editor, lrs)
 		
 		# refresh material editor only now, as it uses the procedural texture objects
-        puts "onOpenModel refreshing material editor interface"
+		time_refresh = Time.new
         material_editor.refresh
+		elapsed_seconds = (Time.new - time_refresh).to_int
+        puts "onOpenModel refreshed material editor interface in " + elapsed_seconds.to_s + " seconds" 
 		
         puts "finished running onOpenModel"
         SU2LUX.create_observers(model)
@@ -1165,12 +1177,16 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 	end
 	
     def onMaterialAdd(materials, material)
-        puts "onMaterialAdd added material: ", material.name
+        puts "onMaterialAdd added material: " + material.name
+		puts materials.count
+		
 		# adding a material will set it current, onMaterialSetCurrent will take over
-        # except on OS X
-        scene_id = Sketchup.active_model.definitions.entityID
-        if (SU2LUX.get_os == :mac)
-            puts "CREATING NEW MATERIAL"
+        # except on OS X, so we have to take some steps manually:
+		# note: when pasting objects that contain materials that are not yet in the scene, materials get added, but they will not be set current, therefore amongst others, they do not get added to materials_skp_lux
+        
+		scene_id = Sketchup.active_model.definitions.entityID
+        #if (SU2LUX.get_os == :mac || material != Sketchup.active_model.materials.current) # note: setting the material current may not have happened here yet, so this executes for any material
+            puts "onMaterialAdd creating new LuxRender material"
             material_editor = SU2LUX.get_editor(scene_id, "material")
             newmaterial = material_editor.find(material.name)
             newmaterial.color = material.color
@@ -1178,7 +1194,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
                 newmaterial.kd_texturetype = "sketchup"
             end
             material_editor.refresh()
-        end
+        #end
 	end
 
     def onMaterialRemove(materials, material)
@@ -1202,7 +1218,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
             material_editor.matname_changed = true
             material_editor.materials_skp_lux.values.each{|luxmat|
                 # puts luxmat.name_string, material.name, luxmat.name_string==material.name
-                if luxmat.name_string==material.name
+                if luxmat.name_string == material.name
                   material_editor.matname_changed = false
                 end
             }

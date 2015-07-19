@@ -24,6 +24,8 @@ class LuxrenderMaterial
     attr_accessor :name_string
 	alias_method :dictionary_name, :dict
     
+	@@methods_created = false
+	
 	@@settings=
 	{
 		'type' => "glossy",
@@ -215,11 +217,11 @@ class LuxrenderMaterial
             if @model.materials[su_material].class == Sketchup::Material
                 @mat = @model.materials[su_material]
             else
-                puts "could not find material #{su_material}"
+                puts "could not find material #{su_material}, using material 0 instead"
                 @mat = @model.materials[0]
             end
         else
-            @mat=su_material
+            @mat = su_material
         end
 		@uvs = {}
 		
@@ -255,35 +257,42 @@ class LuxrenderMaterial
         # puts "LuxrenderMaterial.rb self object: ", self # returns #<LuxrenderMaterial:........>
         @name_string = su_material.name.to_s
 		singleton_class = (class << self; self; end)
-		@view=@model.active_view
+		@view = @model.active_view
 		@skp_mat_name = mat.name
         @attributeDictionary = LuxrenderAttributeDictionary.new(@model)
         
         # puts "singleton_class inspect ",singleton_class.inspect
-		singleton_class.module_eval do
+		
+		if !@@methods_created
+			#singleton_class.module_eval do
+			LuxrenderMaterial.module_eval do
+				define_method("[]") do |key|  # method [] for <LuxrenderMaterial:........> # allows getting LuxMat[property]
+					value = @@settings[key]
+					return @attributeDictionary.get_attribute(@skp_mat_name, key, value)
+				end
+				
+				@@settings.each do |key, value|
+					######## -- get any attribute -- #######
+					define_method(key){ # allows calling LuxMat(property)
+						@attributeDictionary.get_attribute(@skp_mat_name, key, value)
+					}
 
-			define_method("[]") do |key|  # method [] for <LuxrenderMaterial:........>
-				value = @@settings[key]
-				return @attributeDictionary.get_attribute(@skp_mat_name, key, value)
-            end
-			
-			@@settings.each do |key, value|
-				######## -- get any attribute -- #######
-				define_method(key) { @attributeDictionary.get_attribute(@skp_mat_name, key, value) }
-
-				case key
-					when LuxrenderMaterial::ui_refreshable?(key)# set ui_refreshable
-						define_method("#{key}=") do |new_value|
-                            @attributeDictionary.set_attribute(@skp_mat_name, key, new_value)
-                            @material_editor.updateSettingValue(key) if @material_editor
-                        end
-					else # not ui_refreshable
-						define_method("#{key}=") { |new_value|
-                            @attributeDictionary.set_attribute(@skp_mat_name, key, new_value)
-                        }
-				end #end case
-			end #end settings.each
-		end #end module_eval
+					case key
+						when LuxrenderMaterial::ui_refreshable?(key)# update UI after changing value (todo 2015: does this UI update work?)
+							define_method("#{key}=") do |new_value| # allows setting properties, LuxMat.parameter = some_new_value
+								@attributeDictionary.set_attribute(@skp_mat_name, key, new_value)
+								@material_editor.updateSettingValue(key) if @material_editor
+							end
+						else # not ui_refreshable
+							define_method("#{key}=") { |new_value| # allows setting properties, LuxMat.parameter = some_new_value
+								@attributeDictionary.set_attribute(@skp_mat_name, key, new_value)
+							}
+					end #end case
+				end #end settings.each
+			end #end module_eval
+		end #end @@methods_created
+		
+		@@methods_created = true
 	end #end initialize
 	
 	def get_texture_channels()
@@ -369,7 +378,7 @@ class LuxrenderMaterial
 	def name
         # puts mat.display_name.delete("[<>]")
 		# return mat.display_name.gsub(/[<>]/, '*')  #replaces <> characters with *
-		return mat.display_name #.delete("[<>]")  #replaces <> characters with *
+		return mat.name #.delete("[<>]")  #replaces <> characters with *
 	end
   
 	##
