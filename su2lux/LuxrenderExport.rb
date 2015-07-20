@@ -868,32 +868,29 @@ class LuxrenderExport
 			else
 				sorted_component_mat_geometry[comp_def] = component_mat_geometry[comp_def];
 			end
-			# write geometry
+			# write component geometry to ply
 			sorted_component_mat_geometry[comp_def].each{|skp_mat, faces, dist_index| # note: undistorted geometry has dist_index 0
 				if(dist_index != 0)
-					@distorted_faces << [faces, skp_mat, dist_index]
+					@distorted_faces << [faces, skp_mat, dist_index] # @distorted_faces is used later for texture export
 				end
-				skp_mat_name = "nomat"
-				if(skp_mat != "SU2LUX_no_material")
-					skp_mat_name = SU2LUX.sanitize_path(skp_mat.name)
-				end
-				# get component definition nr
+				# prepare ply file path
+				skp_mat_name = (skp_mat == "SU2LUX_no_material") ? "nomat" : SU2LUX.sanitize_path(skp_mat.name)
 				componentnr = comp_def.entityID.to_s
-				ply_name = SU2LUX.sanitize_path(componentnr + '_' + skp_mat_name + ((dist_index == 0 || dist_index == nil) ? "" : '_dist' + dist_index.to_s) + '.ply')
+				ply_name = SU2LUX.sanitize_path(componentnr + '_' + skp_mat_name + ((dist_index == 0 || dist_index == nil) ? "" : SU2LUX::SUFFIX_DIST + dist_index.to_s) + '.ply')
 				ply_path = File.join(ply_folder, ply_name)
-				# write file
+				# write ply file
 				if(faces.length > 0)
 					output_ply_file(ply_path, faces, false) # false: write ASCII file, not binary
 				end
 			}
 		}
 		
-		# write component definitions
+		# write component object definition
 		puts 'writing component definitions'
 		geometry_file.puts "# created by SU2LUX " + SU2LUX::SU2LUX_VERSION + " " + Time.new.to_s
 		geometry_file.puts ''
 		components.each{|comp|
-			write_component(geometry_file, relative_ply_folder, comp, sorted_component_mat_geometry[comp], component_children[comp])
+			write_component_definition(geometry_file, relative_ply_folder, comp, sorted_component_mat_geometry[comp], component_children[comp])
 		}		
 		geometry_file.puts ''
 		
@@ -911,7 +908,7 @@ class LuxrenderExport
 		material_geometry["SU2LUX_no_material"] = []
 		
 		Sketchup.set_status_text('SU2LUX export: writing component instances')
-		model.entities.each{|ent| # todo: move to separate method?
+		model.entities.each{|ent|
 			# check if it is an instance, if so, check if it is visible, if so, write
 			if ent.class == Sketchup::ComponentInstance
 				# get transformation, get id, write instance
@@ -953,16 +950,19 @@ class LuxrenderExport
 		}
 		geometry_file.puts ''
 		
-		# export ordinary geometry
+		##
+		# start ordinary geometry export
+		##
 		Sketchup.set_status_text('SU2LUX export: exporting geometry')
 		
-		# export ply files for ordinary geometry		
+		# sort out distorted faces for ordinary geometry		
 		if(@lrs.exp_distorted == true)
 			material_geometry = sort_distorted_faces(material_geometry) # separates faces with distorted textures
 		else
 			material_geometry = mark_undistorted(material_geometry) # restructures content, from material=>faces to [material, faces, 0]
 		end
 		
+		# write ordinary geometry to ply files
 		material_geometry.each{|skp_mat, faces, dist_index| # note: undistorted geometry has dist_index 0  #
 			if(dist_index != 0)
 				@distorted_faces << [faces, skp_mat, dist_index = 0]
@@ -972,13 +972,19 @@ class LuxrenderExport
 			if(skp_mat != "SU2LUX_no_material")
 				skp_mat_name = SU2LUX.sanitize_path(skp_mat.name)
 			end
-			ply_name = skp_mat_name + (dist_index == 0 ? "" : '_dist' + dist_index.to_s) + '.ply'
+			ply_name = skp_mat_name + (dist_index == 0 ? "" : SU2LUX::SUFFIX_DIST + dist_index.to_s) + '.ply'
 			ply_path = File.join(ply_folder, ply_name)
 			# write geometry file
 			output_ply_file(ply_path, faces, false) # false: write ASCII file, not binary
 		}		
 		
-		# write ordinary geometry definitions
+		# write ordinary geometry references
+		write_ordinary_geometry(material_geometry, geometry_file, relative_ply_folder)
+		
+
+	end # END export_mesh
+	
+	def write_ordinary_geometry(material_geometry, geometry_file, relative_ply_folder)
 		material_geometry.each{|skp_mat, facelist, dist_index|
 			if facelist.size > 0
 				skp_mat_name = "nomat"
@@ -986,12 +992,10 @@ class LuxrenderExport
 					skp_mat_name = SU2LUX.sanitize_path(skp_mat.name)
 				end
 				geometry_file.puts 'AttributeBegin'
-				matname = skp_mat_name + ((dist_index == 0 || dist_index == nil) ? "" : '_dist' + dist_index.to_s) # @material_editor.materials_skp_lux[skp_mat].name
+				matname = skp_mat_name + ((dist_index == 0 || dist_index == nil) ? "" : SU2LUX::SUFFIX_DIST + dist_index.to_s) # @material_editor.materials_skp_lux[skp_mat].name
 				ply_path = File.join(relative_ply_folder, matname + '.ply')
 				if(skp_mat != "SU2LUX_no_material")
 					geometry_file.puts '  NamedMaterial "' + SU2LUX.sanitize_path(matname) + '"' 			# NamedMaterial "materialname"
-				end
-				if(skp_mat != "SU2LUX_no_material")
 					lux_mat = @material_editor.materials_skp_lux[skp_mat]
 					if(lux_mat.type == 'light')
 						geometry_file.puts '  LightGroup "' + matname + '"'
@@ -1007,7 +1011,8 @@ class LuxrenderExport
 				geometry_file.puts ''
 			end
 		}
-	end # END export_mesh
+	end
+	
 	
 	def sort_distorted_faces(skpmat_faces_hash) # contains: {skpmat=>skpfaces, skpmat=>skpfaces}
 		sorted_faces_per_material = [] # sketchup material, face list for this material, distorted_face_index (not distorted: 0)
@@ -1060,20 +1065,12 @@ class LuxrenderExport
 		return false # texture is not distorted
 	end
 
-	def write_component(geometry_file, relative_ply_folder, this_component_definition, this_component_mat_geometry, this_component_children)
+	def write_component_definition(geometry_file, relative_ply_folder, this_component_definition, this_component_mat_geometry, this_component_children)
 		compdef_lines = []
 		compdef_nomat_lines = []
-		# todo: check if this definition is used for groups; if so, use group id instead of definition id (as from the group it would be hard to find the definition id)
 		componentname = this_component_definition.entityID.to_s # note: for components, but also for groups, this is the ID of the definition, not the instance
-		#if this_component_definition.instances.size > 0
-		#	if this_component_definition.instances[0].type == Sketchup::Group
-		#		componentname = this_component_definition.instances[0].entityID.to_s
-		#	end
-		#end
 		
 		# store component definition and no-material component definition in separate arrays of strings, then output them to the geometry_file afterwards
-		
-		
 		compdef_lines << 'ObjectBegin "' + componentname + '" # ' + this_component_definition.name
 		compdef_nomat_lines << 'ObjectBegin "' + componentname + '_nomat' + '" # ' + this_component_definition.name
 
@@ -1082,7 +1079,7 @@ class LuxrenderExport
 			if(facelist != nil and facelist.size > 0)	
 				if skpmat == "SU2LUX_no_material"
 					# note: this is written to a separate component, as otherwise material inheritance will not work
-					component_ply_name = componentname + '_nomat' + ((dist_index == 0 || dist_index == nil) ? "" : '_dist' + dist_index.to_s) + '.ply'
+					component_ply_name = componentname + '_nomat' + ((dist_index == 0 || dist_index == nil) ? "" : SU2LUX::SUFFIX_DIST + dist_index.to_s) + '.ply'
 					ply_path = File.join(relative_ply_folder, component_ply_name)
 					# write definition for component without material
 					compdef_nomat_lines << '  AttributeBegin'
@@ -1091,7 +1088,7 @@ class LuxrenderExport
 					compdef_nomat_lines << '  AttributeEnd'
 				else
 					luxmat = @material_editor.materials_skp_lux[skpmat]
-					component_ply_name = componentname + '_' + SU2LUX.sanitize_path(luxmat.name) + ((dist_index == 0 || dist_index == nil) ? "" : '_dist' + dist_index.to_s) + '.ply'
+					component_ply_name = componentname + '_' + SU2LUX.sanitize_path(luxmat.name) + ((dist_index == 0 || dist_index == nil) ? "" : SU2LUX::SUFFIX_DIST + dist_index.to_s) + '.ply'
 					ply_path = File.join(relative_ply_folder, component_ply_name)
 					
 					compdef_lines << '  AttributeBegin'	
@@ -1102,18 +1099,15 @@ class LuxrenderExport
 							compdef_lines << "  " + lightdef_line
 						}
 					end
-					compdef_lines << '    NamedMaterial "' + SU2LUX.sanitize_path(luxmat.name) + ((dist_index == 0 || dist_index == nil) ? "" : '_dist' + dist_index.to_s) + '"'
+					compdef_lines << '    NamedMaterial "' + SU2LUX.sanitize_path(luxmat.name) + ((dist_index == 0 || dist_index == nil) ? "" : SU2LUX::SUFFIX_DIST + dist_index.to_s) + '"'
 					compdef_lines << '    Shape "plymesh"'						#   Shape "plymesh"
 					compdef_lines << '    "string filename" ["' +  ply_path + '"]' #	"string filename" ["Untitled_luxdata/geometry/1_boxes.ply"]
 					compdef_lines << '  AttributeEnd'
 				end
 			elsif(skpmat == "SU2LUX_no_material")
 				# write empty definition?
-			
 			end
 		}
-		
-		
 		## write references to child components
 		#puts "processing child components"
 		this_component_children.each{|child_component| # child component contains [child object, entityID, material, local_transformation.to_a]
@@ -1123,7 +1117,7 @@ class LuxrenderExport
 			compdef_lines << 'AttributeBegin'
 			compdef_lines << "\t ConcatTransform [" + child_component[3].join(" ") + ']' # child_component[2].to_a.to_s.delete(',') 
 			
-			# todo: get the child object, not just its entityID, material and transformation
+			# get the group/component definition entityID
 			if child_component[0].class == Sketchup::Group
 				definition_entityID = @group_definition_hash[child_component[0]].entityID.to_s
 			else
@@ -1141,9 +1135,8 @@ class LuxrenderExport
 				# add this material to list of materials that need to be exported with scaling factor
 				@component_skp_materials << child_component[2]
 				
-				# todo: write reference to newly created material instead of ordinary material
+				# write reference to child material
 				compdef_lines << "\t NamedMaterial \"" + SU2LUX.sanitize_path(@material_editor.materials_skp_lux[child_component[2]].name) + '"'
-				
 				compdef_lines << "\t ObjectInstance \"" + definition_entityID + '_nomat"'
 				compdef_lines << 'AttributeEnd'
 			else
@@ -1232,7 +1225,7 @@ class LuxrenderExport
 				if(skpmat_with_used_texture.include? skp_mat)
 					tw = Sketchup.create_texture_writer
 					texname = SU2LUX.sanitize_path(get_texture_file_name(skp_mat)) # texturename.jpg
-					destination_path = File.join(texture_folder, texname.split('.')[0] + '_dist' + dist_index.to_s + File.extname(texname))
+					destination_path = File.join(texture_folder, texname.split('.')[0] + SU2LUX::SUFFIX_DIST + dist_index.to_s + File.extname(texname))
 					if(face[0].material == nil)
 						tw.load face[0], false
 						tw.write face[0], false, destination_path
@@ -1469,7 +1462,7 @@ class LuxrenderExport
     end
 		
 		
-    def output_material (out, luxrender_mat, matname) # writes link to material and volumes, not material itself
+    def output_material (out, luxrender_mat, matname) # writes link to material and volumes, not material itself # only used for material preview
         #puts "running output_material"
         case luxrender_mat.type
         when "light"
@@ -1504,28 +1497,23 @@ class LuxrenderExport
    
 	def export_procedural_textures(out)
 		puts "exporting procedural textures"
-		# from luxrender_settings, get procedural textures: LuxrenderProceduralTexturesEditor.textureCollection
+		out.puts '# procedural textures'
 		
+		# get list of procedural textures from procedural texture editor
 		proctexeditor = SU2LUX.get_editor(@scene_id,"proceduraltexture")
 		textureHash = proctexeditor.getTextureCollection()
 		
+		# write textures
 		textureHash.each do |texName, texObject|
 			puts "exporting procedural texture " + texName
 			texType = texObject.getTexType()
-			texChannelType = texObject.getChannelType()
-			out.puts "Texture \"" + texName + "\" \"" + texChannelType + "\" \"" + texType + "\""
+			out.puts "Texture \"" + texName + "\" \"" + texObject.getChannelType() + "\" \"" + texType + "\""
 			# get and write texture properties
-			propLists = texObject.getFormattedValues()
-			propLists.each {|propList|
-				#puts "getFormattedValues writing item:"
-				#puts propList
+			texObject.getFormattedValues().each {|propList|
 				out.puts "\t" + "\"" + propList[0] + "\" [" + propList[1].to_s + "]"
 			}
 			# get and write texture transformation
-			transLists = texObject.getTransformations()
-			transLists.each{|transformItem|
-				#puts "getFormattedValues writing transformation:"
-				#puts transformItem
+			texObject.getTransformations().each{|transformItem|
 				out.puts "\t" + transformItem
 			}
 			out.puts ""
@@ -1708,7 +1696,7 @@ class LuxrenderExport
 		lxm_file << ''
 		@distorted_faces.each{|face, skp_mat, dist_index|
 			lux_mat = @material_editor.materials_skp_lux[skp_mat]
-			distorted_name = lux_mat.name + '_dist' + dist_index.to_s
+			distorted_name = lux_mat.name + SU2LUX::SUFFIX_DIST + dist_index.to_s
 			material_definition_lines = get_material_definition(lux_mat, distorted_name, true, dist_index)
 			material_definition_lines.each{|mat_definition_line|
 				lxm_file << mat_definition_line
@@ -1758,34 +1746,37 @@ class LuxrenderExport
 		}
 	end
 
-	def export_texture(lux_mat, tex_type, type, before, after, tex_name, dist_nr, is_component_mat, scale_x, scale_y)
+	def export_texture(lux_mat, tex_channel, type, before, after, tex_name, dist_nr, is_component_mat, scale_x, scale_y)
         #puts "running export_texture, material:" 
 		#puts lux_mat.name
-		type_str = self.texture_parameters_from_type(tex_type)
+		type_str = self.texture_parameters_from_type(tex_channel)
+		texture_type = lux_mat.send(tex_channel + "_texturetype")
+		
 		preceding = ""
 		following = ""
 		
-		#tex_name_complete = is_component_mat ? tex_name + "_component_material": tex_name
-        if (tex_type == "normal")
-            preceding << "Texture \"#{tex_name}::#{type_str}\" \"#{type}\" \"normalmap\"" + "\n"
-        elsif (tex_type == "bump")
-            preceding << "Texture \"#{tex_name}::#{type_str}" + "_unscaled" +  "\" \"#{type}\" \"imagemap\"" + "\n"
-		else
-            preceding << "Texture \"#{tex_name}::#{type_str}\" \"#{type}\" \"imagemap\"" + "\n"
+		if(texture_type != "procedural") # procedural textures are written separately
+			if (tex_channel == "normal")
+				preceding << "Texture \"#{tex_name}::#{type_str}\" \"#{type}\" \"normalmap\"" + "\n"
+			elsif (tex_channel == "bump")
+				preceding << "Texture \"#{tex_name}::#{type_str}" + "_unscaled" +  "\" \"#{type}\" \"imagemap\"" + "\n"
+			else
+				preceding << "Texture \"#{tex_name}::#{type_str}\" \"#{type}\" \"imagemap\"" + "\n"
+			end
 		end
 		
-        # preceding << "\t" + "\"string wrap\" [\"#{lux_mat.send(tex_type + "_imagemap_wrap")}\"]" + "\n"
-        if (tex_type=='dm')
-			preceding << "\t" + "\"string channel\" [\"#{lux_mat.send(tex_type + "_imagemap_channel")}\"]" + "\n"
+        # preceding << "\t" + "\"string wrap\" [\"#{lux_mat.send(tex_channel + "_imagemap_wrap")}\"]" + "\n"
+        if (tex_channel=='dm')
+			preceding << "\t" + "\"string channel\" [\"#{lux_mat.send(tex_channel + "_imagemap_channel")}\"]" + "\n"
         end
-		case lux_mat.send(tex_type + "_texturetype")
+		case texture_type
 			when "sketchup"
 				skp_mat = @material_editor.materials_skp_lux.index(lux_mat) # hash.key does not work in Ruby 1.8
                 if (skp_mat.texture != nil)
 					original_tex_name = get_texture_file_name(skp_mat)
 					if(dist_nr != 0) # texture is distorted, insert number
 						original_file_name_parts = File.basename(SU2LUX.sanitize_path(original_tex_name)).split('.')
-						distorted_file_name = original_file_name_parts[0] + '_dist' + dist_nr.to_s + '.' + original_file_name_parts[1]
+						distorted_file_name = original_file_name_parts[0] + SU2LUX::SUFFIX_DIST + dist_nr.to_s + '.' + original_file_name_parts[1]
 						filename = File.join(@texfolder, distorted_file_name)
 					else (@texexport == "all")
 						filename = File.join(@texfolder, SU2LUX.sanitize_path(File.basename(original_tex_name)))
@@ -1794,7 +1785,7 @@ class LuxrenderExport
 					#puts filename.to_s
 				else
                     puts "export_texture: no texture file path found"
-					if(tex_type == "kd")
+					if(tex_channel == "kd")
 						following << "\t" + "\"color Kd\" [#{"%.6f" %(material.kd_R)} #{"%.6f" %(material.kd_G)} #{"%.6f" %(material.kd_B)}]" + "\n"
 						return [before, after + following] # sketchup texture set in LuxRender material, but no texture found in SketchUp material
 					else
@@ -1805,13 +1796,13 @@ class LuxrenderExport
                 preceding << "\t" + "\"string filename\" [\"#{filename}\"]" + "\n"	
 			when "imagemap"
 				if(dist_nr != 0) # texture is distorted, insert number
-					original_file_name_parts = File.basename(SU2LUX.sanitize_path(lux_mat.send(tex_type + "_imagemap_filename"))).split('.')
-					distorted_file_name = original_file_name_parts[0] + '_dist' + dist_nr.to_s + '.' + original_file_name_parts[1]
+					original_file_name_parts = File.basename(SU2LUX.sanitize_path(lux_mat.send(tex_channel + "_imagemap_filename"))).split('.')
+					distorted_file_name = original_file_name_parts[0] + SU2LUX::SUFFIX_DIST + dist_nr.to_s + '.' + original_file_name_parts[1]
                     imagemap_filename = File.join(@texfolder, File.basename(distorted_file_name))
                 elsif (@texexport == "all")
-                    imagemap_filename = File.join(@texfolder, File.basename(SU2LUX.sanitize_path(lux_mat.send(tex_type + "_imagemap_filename"))))
+                    imagemap_filename = File.join(@texfolder, File.basename(SU2LUX.sanitize_path(lux_mat.send(tex_channel + "_imagemap_filename"))))
                 else
-                    imagemap_filename = lux_mat.send(tex_type + "_imagemap_filename")
+                    imagemap_filename = lux_mat.send(tex_channel + "_imagemap_filename")
 					# if the sanitized is not the same as the original path, LuxRender may not be able to read the file, so we use the texture that we copied to the texture folder
 					if(imagemap_filename != SU2LUX.sanitize_path(imagemap_filename))
 						# otherwise, check the texture folder as we should have copied the texture there
@@ -1820,41 +1811,42 @@ class LuxrenderExport
                 end
                 preceding << "\t" + "\"string filename\" [\"#{imagemap_filename}\"]" + "\n"
 			when "procedural"
-				# todo - get from diffuse
-				# note: so far, channels that export procedural texture references do this elsewhere; this can be restructured once this section has been implemented
-				# following << "\t" + "\"texture Kd\" [\"#{material.kd_imagemap_proctex }\"]" + "\n"
+				# all procedural textures are written in advance, so we only need to write a reference.
+				# this is done by write_texture_reference, which is called later
+				## following << "\t" + "\"texture Kd\" [\"#{material.kd_imagemap_proctex }\"]" + "\n"
         end
-		preceding << "\t" + "\"float gamma\" [#{lux_mat.send(tex_type + "_imagemap_gamma")}]" + "\n"
-		preceding << "\t" + "\"float gain\" [#{lux_mat.send(tex_type + "_imagemap_gain")}]" + "\n"
-		preceding << "\t" + "\"string filtertype\" [\"#{lux_mat.send(tex_type + "_imagemap_filtertype")}\"]" + "\n"
-		preceding << "\t" + "\"string mapping\" [\"#{lux_mat.send(tex_type + "_imagemap_mapping")}\"]" + "\n"
-		tex_scale_x = lux_mat.send(tex_type + "_imagemap_uscale").to_f * scale_x
-		tex_scale_y = lux_mat.send(tex_type + "_imagemap_vscale").to_f * scale_y
-		preceding << "\t" + "\"float uscale\" [#{"%.6f" %(tex_scale_x)}]" + "\n"
-		preceding << "\t" + "\"float vscale\" [#{"%.6f" %(tex_scale_y)}]" + "\n"
-		preceding << "\t" + "\"float udelta\" [#{"%.6f" %(lux_mat.send(tex_type + "_imagemap_udelta"))}]" + "\n"
-		vdelta_value = lux_mat.send(tex_type + "_imagemap_vdelta").to_f - scale_y
-		preceding << "\t" + "\"float vdelta\" [#{"%.6f" %(vdelta_value)}]" + "\n"
-
-		preceding, following = write_texture_reference(lux_mat, tex_type, type, preceding, following, tex_name)
+		if(texture_type != "procedural")
+			preceding << "\t" + "\"float gamma\" [#{lux_mat.send(tex_channel + "_imagemap_gamma")}]" + "\n"
+			preceding << "\t" + "\"float gain\" [#{lux_mat.send(tex_channel + "_imagemap_gain")}]" + "\n"
+			preceding << "\t" + "\"string filtertype\" [\"#{lux_mat.send(tex_channel + "_imagemap_filtertype")}\"]" + "\n"
+			preceding << "\t" + "\"string mapping\" [\"#{lux_mat.send(tex_channel + "_imagemap_mapping")}\"]" + "\n"
+			tex_scale_x = lux_mat.send(tex_channel + "_imagemap_uscale").to_f * scale_x
+			tex_scale_y = lux_mat.send(tex_channel + "_imagemap_vscale").to_f * scale_y
+			preceding << "\t" + "\"float uscale\" [#{"%.6f" %(tex_scale_x)}]" + "\n"
+			preceding << "\t" + "\"float vscale\" [#{"%.6f" %(tex_scale_y)}]" + "\n"
+			preceding << "\t" + "\"float udelta\" [#{"%.6f" %(lux_mat.send(tex_channel + "_imagemap_udelta"))}]" + "\n"
+			vdelta_value = lux_mat.send(tex_channel + "_imagemap_vdelta").to_f - scale_y
+			preceding << "\t" + "\"float vdelta\" [#{"%.6f" %(vdelta_value)}]" + "\n"
+		end
+		preceding, following = write_texture_reference(lux_mat, tex_channel, type, preceding, following, tex_name)
    
         return [preceding, following]
 	end
 	
-	def write_texture_reference(material, tex_type, type, prec, foll, tex_name)
+	def write_texture_reference(material, tex_channel, type, prec, foll, tex_name)
 		#puts "WRITING TEXTURE REFERENCE LINE"
-		type_str = self.texture_parameters_from_type(tex_type) # bump, Ks, displacementmap etc. 
+		type_str = self.texture_parameters_from_type(tex_channel) # bump, Ks, displacementmap etc. 
 		
-        if (material.send(tex_type + "_texturetype") == "procedural")
-			procTexString = material.send(tex_type + "_imagemap_proctex")
+        if (material.send(tex_channel + "_texturetype") == "procedural")
+			procTexString = material.send(tex_channel + "_imagemap_proctex")
 			puts procTexString
-			if(tex_type == "bump") # separate entry in order to scale 
+			if(tex_channel == "bump") # separate entry in order to scale 
 				foll << "\t" + "\"texture #{type_str}\" [\"" + procTexString + "_scale\"]" + "\n"
-			elsif
+			else
 				foll << "\t" + "\"texture #{type_str}\" [\"" + procTexString + "\"]" + "\n"
 			end
-		elsif (material.send(tex_type + "_imagemap_colorize") == true) 
-			prec << "Texture \"#{tex_name}::#{type_str}.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{tex_name}::#{type_str}\"] \"#{type} tex2\" [#{material.channelcolor_tos(tex_type)}]" + "\n"
+		elsif (material.send(tex_channel + "_imagemap_colorize") == true) 
+			prec << "Texture \"#{tex_name}::#{type_str}.scale\" \"#{type}\" \"scale\" \"texture tex1\" [\"#{tex_name}::#{type_str}\"] \"#{type} tex2\" [#{material.channelcolor_tos(tex_channel)}]" + "\n"
 			foll << "\t" + "\"texture #{type_str}\" [\"#{tex_name}::#{type_str}.scale\"]" + "\n"
 		else # ordinary textures
 			foll << "\t" + "\"texture #{type_str}\" [\"#{tex_name}::#{type_str}\"]" + "\n"
@@ -2232,15 +2224,13 @@ class LuxrenderExport
 		following = ""
 		if lux_mat.kd_texturetype == "none"
 			following << "\t" + "\"color Kd\" [#{"%.6f" %(lux_mat.kd_R)} #{"%.6f" %(lux_mat.kd_G)} #{"%.6f" %(lux_mat.kd_B)}]" + "\n"
-		elsif lux_mat.kd_texturetype == "procedural"
-			following << "\t" + "\"texture Kd\" [\"#{lux_mat.kd_imagemap_proctex }\"]" + "\n"
 		else
 			if (lux_mat.send("kd_imagemap_colorize") == true)
                 preceding << "Texture \"#{tex_name}::Kd.scale\" \"color\" \"scale\"" + "\n\t" + "\"texture tex1\" [\"#{tex_name}::Kd\"]" + "\n\t" + "\"color tex2\" [#{lux_mat.channelcolor_tos('kd')}]" + "\n"
 				following << "\t" + "\"texture Kd\" [\"#{tex_name}::Kd.scale\"]" + "\n"
 			end
 			# call export_texture
-			preceding, following = self.export_texture(lux_mat, "kd", "color", before, after, tex_name, dist_nr, is_component_mat, scale_x, scale_y) # note: this already writes Texture Kd etc.
+			preceding, following = self.export_texture(lux_mat, "kd", "color", before, after, tex_name, dist_nr, is_component_mat, scale_x, scale_y)
 		end
 		return [before + preceding, after + following]
 	end
@@ -2250,7 +2240,7 @@ class LuxrenderExport
 			return tex_name
 		else
 			# remove extension, add _dist##, add extension 
-			return File.basename(tex_name, '.*') + '_dist' + dist_index.to_s + '.' + File.extname(tex_name)
+			return File.basename(tex_name, '.*') + SU2LUX::SUFFIX_DIST + dist_index.to_s + '.' + File.extname(tex_name)
 		end
 	end
 
@@ -2519,7 +2509,7 @@ class LuxrenderExport
 			preceding << "Texture \"#{tex_name}::bumpmap\" \"float\" \"scale\"" + "\n"
 			preceding << "\t" + "\"float tex1\" [#{material.bumpmap}]" + "\n"
 			preceding << "\t" + "\"texture tex2\" [\"#{tex_name}::bumpmap_unscaled\"]" + "\n"
-		else # procedural
+		else # procedural (needed to scale texture)
 			preceding, following = write_texture_reference(material, "bump", material.type, preceding, following, tex_name)
 			preceding << "Texture \"#{material.bump_imagemap_proctex}_scale\" \"float\" \"scale\"" + "\n"
 			preceding << "\t" + "\"float tex1\" [#{material.bumpmap}]" + "\n"

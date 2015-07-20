@@ -481,7 +481,7 @@ class LuxrenderMaterial
 	##
 	def has_bump?
 		has_bump = false
-		if (self.bump_texturetype != 'none')
+		if (self.bump_texturetype != 'none' && self.use_bump == true)
 			if (self.bump_texturetype == 'sketchup')
                 # do not export if the material does not have a texture
 				has_bump = true if @material_editor.materials_skp_lux.index(self).texture
@@ -499,7 +499,7 @@ class LuxrenderMaterial
 	##
 	def has_normal?
 		has_normal = false
-		if (self.normal_texturetype != 'none')
+		if (self.normal_texturetype != 'none' && self.use_normal == true)
 			if (self.normal_texturetype == 'sketchup')
 				has_normal = true if @material_editor.materials_skp_lux.index(self).texture
             elsif (self.normal_texturetype == 'imagemap')

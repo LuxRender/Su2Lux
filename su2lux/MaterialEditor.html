@@ -914,58 +914,66 @@
 			<div id="bump" class="matte glossy glass glass2 roughglass metal metal2 mirror shinymetal mattetranslucent glossytranslucent velvet cloth">
 				<p class="header2">Bump map</p>
 				<div class="panelcontent collapse">
-                    <div class="parameter_interface">
-                        <label for="bumpmap" class="parameter_label">Scale (m)</label>
-                        <input type='text' id="bumpmap" size="6em" class="parameter_field">
-                            <div class="texture_area">
-                                <!-- <label for="bump_texturetype" class="tex_label">Texture</label> -->
-                                <select id="bump_texturetype" class="tex_dropdown">
-                                    <option value="none">no texture</option>
-                                    <option value="imagemap">image map</option>
-                                    <option value="procedural">procedural texture</option>
-                                    <option value="sketchup">SketchUp texture</option>
-                                </select>
-                                <span class="imagemap">
-                                    <div id="bump_imgmapname" class="tex_path">&nbsp;</div>
-                                    <input type="button" id="bump_browse_map" value="load image" class="tex_loadbutton">
-                                </span>
-								<span class="procedural">
-									<div class="proctextsection">
-										<select id="bump_imagemap_proctex" class="proctex_dropdown proctex_dropdown_float">
-											<option value="noProcText">no textures defined</option>
-										</select>
-									</div>
-								</span>
-                            </div>
-                    </div><!-- end parameter interface -->
-                </div><!-- end panelcontent -->
+					<input type="checkbox" id="use_bump">
+					<label for="use_bump">Use bump</label><br><br>
+					<div class="collapse_check">
+						<div class="parameter_interface">
+							<label for="bumpmap" class="parameter_label">Scale (m)</label>
+							<input type='text' id="bumpmap" size="6em" class="parameter_field">
+								<div class="texture_area">
+									<!-- <label for="bump_texturetype" class="tex_label">Texture</label> -->
+									<select id="bump_texturetype" class="tex_dropdown">
+										<option value="none">no texture</option>
+										<option value="imagemap">image map</option>
+										<option value="procedural">procedural texture</option>
+										<option value="sketchup">SketchUp texture</option>
+									</select>
+									<span class="imagemap">
+										<div id="bump_imgmapname" class="tex_path">&nbsp;</div>
+										<input type="button" id="bump_browse_map" value="load image" class="tex_loadbutton">
+									</span>
+									<span class="procedural">
+										<div class="proctextsection">
+											<select id="bump_imagemap_proctex" class="proctex_dropdown proctex_dropdown_float">
+												<option value="noProcText">no textures defined</option>
+											</select>
+										</div>
+									</span>
+								</div>
+						</div><!-- end parameter interface -->
+					</div><!-- end collapse_check -->
+				</div><!-- end panelcontent_ collapse -->
 			</div> <!-- END Bump -->
             
             <div id="normal" class="matte glossy glass glass2 roughglass metal metal2 mirror shinymetal mattetranslucent glossytranslucent velvet cloth">
 				<p class="header2">Normal map</p>
 				<div class="panelcontent collapse">
-                    <div class="parameter_interface">
-                        Normal map
-                        <div class="texture_area">
-                            <!-- <label for="normal_texturetype" class="tex_label">Texture</label> -->
-                            <select id="normal_texturetype" class="tex_dropdown">
-                                <option value="none">no texture</option>
-                                <option value="imagemap">image map</option>
-                                <option value="sketchup">SketchUp texture</option>
-                            </select>
-                            <span class="imagemap">
-                                <div id="normal_imgmapname" class="tex_path">&nbsp;</div>
-                                <input type="button" id="normal_browse_map" value="load image" class="tex_loadbutton">
-                            </span>
-							<span class="procedural">
-								<div class="proctextsection">
-									<select id="normal_imagemap_proctex" class="proctex_dropdown proctex_dropdown_float">
-										<option value="noProcText">no textures defined</option>
-									</select>
-								</div>
-							</span>
-                        </div>
-                        </div><!-- end parameter interface -->
+					<input type="checkbox" id="use_normal">
+					<label for="use_normal">Use normal map</label><br><br>
+					<div class="collapse_check">
+						<div class="parameter_interface">
+							Normal map
+							<div class="texture_area">
+								<!-- <label for="normal_texturetype" class="tex_label">Texture</label> -->
+								<select id="normal_texturetype" class="tex_dropdown">
+									<option value="none">no texture</option>
+									<option value="imagemap">image map</option>
+									<option value="sketchup">SketchUp texture</option>
+								</select>
+								<span class="imagemap">
+									<div id="normal_imgmapname" class="tex_path">&nbsp;</div>
+									<input type="button" id="normal_browse_map" value="load image" class="tex_loadbutton">
+								</span>
+								<span class="procedural">
+									<div class="proctextsection">
+										<select id="normal_imagemap_proctex" class="proctex_dropdown proctex_dropdown_float">
+											<option value="noProcText">no textures defined</option>
+										</select>
+									</div>
+								</span>
+							</div>
+						</div><!-- end parameter interface -->
+					</div>
                 </div><!-- end panelcontent -->
 			</div> <!-- END normal -->
             

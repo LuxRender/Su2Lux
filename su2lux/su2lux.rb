@@ -33,21 +33,18 @@ end
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.45dev4"
-    SU2LUX_DATE = "19 July 2015" # to be updated in about.html manually
+    SU2LUX_VERSION = "0.45dev5"
+    SU2LUX_DATE = "20 July 2015"
 	DEBUG = true
-	FRONT_FACE_MATERIAL = "SU2LUX Front Face"
 	PLUGIN_FOLDER = "su2lux"
-	SCENE_EXTENSION = ".lxs"
-	SCENE_NAME = "Untitled.lxs"
-	SUFFIX_MATERIAL = "-mat.lxm"
-	SUFFIX_OBJECT = "-geom.lxo"
-	SUFFIX_VOLUME = "-vol.lxv"
-    SUFFIX_DISTORTED_TEXTURE = "_SU2LUX_distort"
-    PREFIX_DISTORTED_TEXTURE = "SU2LUX_dist_tex_"
-    SUFFIX_DATAFOLDER = "_luxdata"
     GEOMETRYFOLDER = "geometry"
     TEXTUREFOLDER = "textures"
+	SCENE_EXTENSION = ".lxs"
+	SUFFIX_MATERIAL = "-materials.lxm"
+	SUFFIX_OBJECT = "-geometry.lxo"
+	SUFFIX_VOLUME = "-volumes.lxv"
+	SUFFIX_DIST = "_dist"
+    SUFFIX_DATAFOLDER = "_luxdata"
 
 	##
 	# prints a message in the Ruby console only when in debug mode
@@ -111,7 +108,6 @@ module SU2LUX
         @matedit_hash = {}
         
 		@luxrender_filename = @os_specific_vars["luxrender_filename"]
-		@luxrender_path = "" # todo: move to LuxrenderSettings.rb?
         @luxconsole_executable = @os_specific_vars["luxconsole_filename"]
 		@os_separator = @os_specific_vars["path_separator"]
         @material_preview_path = @os_specific_vars["material_preview_path"]
@@ -174,14 +170,14 @@ module SU2LUX
 		
 		SU2LUX.reset_variables
 		model = Sketchup.active_model
-		@luxrender_path = SU2LUX.get_luxrender_path # path to LuxRender executable
         scene_id = Sketchup.active_model.definitions.entityID
         @material_editor = SU2LUX.get_editor(scene_id,"material")
         lrs = SU2LUX.get_lrs(scene_id)
+		lrs.export_luxrender_path = SU2LUX.get_luxrender_path(lrs) # path to LuxRender executable
 
         # check if export folder exists, if not, set lrs.export_file_path to provided path
 		if (lrs.export_file_path == nil || !File.directory?(File.dirname(lrs.export_file_path)))
-			lrs.export_file_path = UI.openpanel("Please select output file name", "", Sketchup.active_model.name + ".lxs")			
+			lrs.export_file_path = UI.openpanel("Please select output file name", "", Sketchup.active_model.name.chomp(".skp") + ".lxs")			
 		end 
 		
 		# remove .skp extension from export file path
@@ -350,12 +346,13 @@ module SU2LUX
 	#
 	##
 	def SU2LUX.new_export_file_path # browses for a new export file path and sets it in the lxs settings
+		puts 'running new_export_file_path'
 		model = Sketchup.active_model
 		model_filename = File.basename(model.path)
         lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
-		export_filename = SCENE_NAME
+		export_filename = "Untitled.lxs"
 		if !model_filename.empty?
-			export_filename = File.basename(model_filename)
+			export_filename = (File.basename(model_filename)).chomp(".skp")
 			export_filename << SCENE_EXTENSION
 		end
 
@@ -375,13 +372,10 @@ module SU2LUX
 			# add extension
 			if lrs.export_file_path == lrs.export_file_path.chomp(SCENE_EXTENSION)
 				lrs.export_file_path << SCENE_EXTENSION
-				@luxrender_path = SU2LUX.get_luxrender_path
+				lrs.export_luxrender_path = SU2LUX.get_luxrender_path(lrs)
 			end
 			
-			# todo: set new value in dialog (try to fix using update_UI setting?)
-			
-			
-			return (@luxrender_path ? true : false) # user may have selected a path
+			return (lrs.export_luxrender_path == nil ? false : true) # user may have selected a path
 		end
 		return false #user has not selected a path
 	end # END new_export_file_path
@@ -450,8 +444,13 @@ module SU2LUX
 	##
 	#   get LuxRender path, prompt user if it hasn't been defined
 	##
-	def SU2LUX.get_luxrender_path
-		storedpath = Sketchup.read_default("SU2LUX","luxrenderpath")
+	def SU2LUX.get_luxrender_path(lrs)
+		storedpath = Sketchup.read_default("SU2LUX", "luxrenderpath")
+		# check if we have a path in lrs
+		if(lrs.export_luxrender_path != "" && lrs.export_luxrender_path != nil)
+			return lrs.export_luxrender_path
+		end
+		
 		if (storedpath.nil?)
 			# prompt user for path
 			storedpath = UI.openpanel("Please locate LuxRender", "", "")
@@ -471,6 +470,7 @@ module SU2LUX
 	#
 	##
 	def SU2LUX.change_luxrender_path(passedPath = nil) 
+        lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
 		if(passedPath)
 			providedpath = passedPath
 		else # ask user for path
@@ -481,20 +481,16 @@ module SU2LUX
 		end
 		# provide feedback in popup window
 		if SU2LUX.luxrender_path_valid?(providedpath)
-			@luxrender_path = providedpath
+			lrs.export_luxrender_path = providedpath
 			Sketchup.write_default("SU2LUX", "luxrenderpath", providedpath.dump.tr('"', '').unpack('H*')[0])
-			puts "new path for LuxRender is #{@luxrender_path}"
+			puts "new path for LuxRender is " + lrs.export_luxrender_path.to_s
 		else
-			@luxrender_path = nil
-			UI.messagebox("LuxRender could not be found. SU2LUX can still export LuxRender files, but will not be able to launch LuxRender.",MB_OK)
+			UI.messagebox("LuxRender could not be found. SU2LUX can still export LuxRender files, but will not be able to launch LuxRender.", MB_OK)
 		end	
-		# store settings
-        lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
-		lrs.export_luxrender_path = @luxrender_path
         # update path in settings window
-		if(@luxrender_path && !passedPath)
-			puts "setting LuxRender path to " + @luxrender_path
-			cmd = "document.getElementById('export_luxrender_path').value='" + @luxrender_path + '"'
+		if(lrs.export_luxrender_path && !passedPath)
+			puts "setting LuxRender path to " + lrs.export_luxrender_path
+			cmd = "document.getElementById('export_luxrender_path').value='" + lrs.export_luxrender_path + '"'
 			scenesettingseditor = get_editor(Sketchup.active_model.definitions.entityID,"scenesettings")
 			scenesettingseditor.scene_settings_dialog.execute_script(cmd)
 		end
@@ -612,20 +608,24 @@ module SU2LUX
 	#
 	##
 	def SU2LUX.launch_luxrender
-        @luxrender_path = SU2LUX.get_luxrender_path if @luxrender_path.nil?
-        lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
-		return if @luxrender_path.nil?
-		#puts lrs.export_file_path
-		Dir.chdir(File.dirname(@luxrender_path))
+		lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
+		if(lrs.export_luxrender_path == "" || lrs.export_luxrender_path == nil)
+			lrs.export_luxrender_path = SU2LUX.get_luxrender_path(lrs)
+			if(lrs.export_luxrender_path == "" || lrs.export_luxrender_path == nil)
+				return
+			end
+        end
+
+		Dir.chdir(File.dirname(lrs.export_luxrender_path))
 		export_path = File.join(File.dirname(lrs.export_file_path), SU2LUX.sanitize_path(File.basename(lrs.export_file_path))) # SU2LUX.sanitize_path("#{lrs.export_file_path}")
 		export_path = File.join(export_path.split(@os_separator))
 		#puts export_path
 		if (ENV['OS'] =~ /windows/i)
-			command_line = "start \"max\" \/#{lrs.priority} \"#{@luxrender_path}\" \"#{export_path}\""
+			command_line = "start \"max\" \/#{lrs.priority} \"#{lrs.export_luxrender_path}\" \"#{export_path}\""
 			puts command_line
 			system(command_line)
         else
-            fullpath = @luxrender_path + @os_specific_vars["file_appendix"]
+            fullpath = File.join(lrs.export_luxrender_path, @os_specific_vars["file_appendix"])
 			#Thread.new do
 				system("#{fullpath} \"#{export_path}\"")
 			#end
@@ -636,7 +636,8 @@ module SU2LUX
 	#
 	##
 	def SU2LUX.get_luxrender_console_path
-		path=SU2LUX.get_luxrender_path
+		lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
+		path = SU2LUX.get_luxrender_path(lrs)
         # puts "get_luxrender_path returned:"
         # puts path
 		return nil if not path
@@ -678,7 +679,6 @@ module SU2LUX
 			puts "showing material editor"
 			@matedit_hash[scene_id].show
             @matedit_hash[scene_id].refresh
-            # todo 2014: set active material?
 		end
 		# set preview section height (OS X; for Windows this gets done in refresh function)
 		lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
@@ -687,7 +687,7 @@ module SU2LUX
 		@matedit_hash[scene_id].material_editor_dialog.execute_script(setdivheightcmd)
 	end # END show_material_editor
 
-	get_luxrender_path()	##
+	##
 	#
 	##
 	def SU2LUX.create_material_editor(scene_id, lrs)
@@ -835,15 +835,28 @@ module SU2LUX
     #
     ##
     def SU2LUX.about
-      # open window
-      @about_dialog = UI::WebDialog.new("about SU2LUX", false, "aboutSU2LUX", 450, 546, 300, 100, false)
-      about_dialog_dialog_path = Sketchup.find_support_file("about.html", "Plugins/su2lux")
-      @about_dialog.max_width = 450
-      @about_dialog.set_file(about_dialog_dialog_path)
-      # todo: onload, run function that gets version number
-	  @about_dialog.set_size(450,546)
-      @about_dialog.show
-
+		lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
+		if(!lrs.version_set)
+			# get version number and date from SU2LUX
+			about_path = File.join(Sketchup.find_support_file("Plugins"), "su2lux", "about.html")
+			about_html_lines = File.readlines(about_path)
+			about_html_lines[38] = SU2LUX_VERSION + "\n"
+			about_html_lines[40] = SU2LUX_DATE + "\n"
+			generated_about_file = File.new(about_path, "w")
+			about_html_lines.each{|line|
+				generated_about_file.write(line)
+			}
+			generated_about_file.close
+			lrs.version_set = true
+		end
+	
+		# open window
+		@about_dialog = UI::WebDialog.new("about SU2LUX", false, "aboutSU2LUX", 450, 546, 300, 100, false)
+		about_dialog_dialog_path = Sketchup.find_support_file("about.html", "Plugins/su2lux")
+		@about_dialog.max_width = 450
+		@about_dialog.set_file(about_dialog_dialog_path)
+		@about_dialog.set_size(450,546)
+		@about_dialog.show
     end
 
     ##
@@ -933,20 +946,45 @@ end # END module SU2LUX
                       
 
 class SU2LUX_model_observer < Sketchup::ModelObserver
-    #commented out following lines; attribute dictionaries should be updated instantly when updating settings
 	# note: in order to prevent SketchUp asking to save changes of unmodified models, consider changing attribute saving logic
-    #def onPreSaveModel(model)
-    #scene_id = Sketchup.active_model.definitions.entityID
-    # for all materials, save settings
-    #mateditor = SU2LUX.get_editor(scene_id,"material")
-    #mateditor.materials_skp_lux.each do |skpmat, luxmat|
-    #    luxmat.save_to_model()
-    #end
-    # save settings window settings
-    #scene_id = Sketchup.active_model.definitions.entityID
-    #lrs = SU2LUX.get_lrs(scene_id)
-    #lrs.save_to_model
-    #end
+
+	# add onPreSaveModelSketchUp and onPostSaveModelSketchUp:
+	def onPreSaveModel(model)
+		#puts 'observer catching onPreSaveModel event'
+		lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
+		# before saving, check if the export path equals the file path -> set variable in lrs
+		skp_name = File.basename(model.path).chomp(".skp")
+		lxs_name = File.basename(lrs.export_file_path).chomp(".lxs")
+		#puts skp_name
+		#puts lxs_name
+		#puts skp_name == lxs_name
+		if(skp_name == lxs_name)
+			puts 'lxs name matched skp name'
+			lrs.synchronised_names = true
+		else
+			lrs.synchronised_names = false
+		end
+	end
+	
+	def onPostSaveModel(model)
+		puts 'observer catching onPostSaveModel event'
+		lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
+		# after saving, check variable inf lrs; if true, update file path to reflect model name
+		if(lrs.synchronised_names)
+			# get file name, get export folder
+			puts 'updating lxs path'
+			old_lxs_name = lrs.export_file_path.chomp(".lxs")
+			old_folder_name = File.dirname(old_lxs_name)
+			old_file_name = File.basename(lrs.export_file_path).chomp(".lxs")
+			save_timer = UI.start_timer(0.1, false){ # onPostSaveModel only provides the old file name, so we have to wait and get the name from the active model
+				UI.stop_timer(save_timer)
+				skp_name = File.basename(model.path).chomp(".skp")
+				# combine and store as new export path
+				new_lxs_name = File.join(old_folder_name, skp_name) + '.lxs'
+				lrs.export_file_path = new_lxs_name	
+			}
+		end
+	end
 end
 
 #class SU2LUX_view_observer < Sketchup::ViewObserver
@@ -1142,15 +1180,6 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 	
 end # END class SU2LUX_app_observer
 
-# class SU2LUX_rendering_options_observer < Sketchup::RenderingOptionsObserver
-	# def onRenderingOptionsChanged(renderoptions, type)
-		# if (type == 12)
-			# color = renderoptions["BackgroundColor"]
-			# todo: set the background color radio button in settings editor
-		# end
-	# end
-# end
-
 class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 	def onMaterialSetCurrent(materials, material)
         scene_id = Sketchup.active_model.definitions.entityID
@@ -1257,12 +1286,10 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
                     texture_name.gsub!(/\\/, '/') if texture_name.include?('\\')
                     luxmaterial.kd_imagemap_Sketchup_filename = texture_name
                     luxmaterial.kd_texturetype = 'sketchup' if (luxmaterial.kd_texturetype != 'imagemap')
-                    #luxmaterial.use_diffuse_texture = true
                 else
                     luxmaterial.kd_imagemap_Sketchup_filename = ''
-                    if (luxmaterial.kd_texturetype == 'sketchup') # todo: check if non-sketchup texture is being used
+                    if (luxmaterial.kd_texturetype == 'sketchup')
                         luxmaterial.kd_texturetype = 'none'
-                        #luxmaterial.current.use_diffuse_texture = false
                     end
                 end
                       
@@ -1270,7 +1297,6 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
                       puts "modified material is current"
                       material_editor.updateSettingValue("kd_imagemap_Sketchup_filename")
                       material_editor.updateSettingValue("kd_texturetype")
-                      #material_editor.updateSettingValue("use_diffuse_texture")
                       if (updateswatches == true)
                         material_editor.material_editor_dialog.execute_script("update_RGB('#kt_R','#kt_G','#kt_B','#{colorarray[0]}','#{colorarray[1]}','#{colorarray[2]}')")
                         material_editor.material_editor_dialog.execute_script("update_RGB('#kd_R','#kd_G','#kd_B','#{colorarray[0]}','#{colorarray[1]}','#{colorarray[2]}')")

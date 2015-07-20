@@ -112,6 +112,15 @@ class LuxrenderMaterialEditor
             cmd = "$('#ies_path').val('');"
             @material_editor_dialog.execute_script(cmd)				
 		}
+		
+		@material_editor_dialog.add_action_callback("set_procedural_texture"){|dialog, parameter_name|
+			#puts parameter_name
+			# get first procedural texture, if we have a texture
+			if @lrs.proceduralTextureNames != nil
+				# set this texture for parameter_name
+				@current.send(parameter_name + '=' + @lrs.proceduralTextureNames[0])
+			end
+		}
 	
 		@material_editor_dialog.add_action_callback("select_IES") {|dialog, params|
 			puts "select_IES callback responding"
@@ -430,8 +439,8 @@ class LuxrenderMaterialEditor
 			lxs_path = File.join(preview_path, SU2LUX.sanitize_path(Sketchup.active_model.title) + "_" + active_material_name + ".lxs")
 			
 			base_file_2 = File.join(preview_path, "ansi.txt")
-			FileUtils.copy_file(base_file_2,lxs_path)
-			generated_lxs_file = File.new(lxs_path,"a")
+			FileUtils.copy_file(base_file_2, lxs_path)
+			generated_lxs_file = File.new(lxs_path, "a")
             
 			lxs_section_1 = File.readlines(preview_path + "preview.lxs01")
             lxs_section_2 = File.readlines(preview_path + "preview.lxs02")
@@ -760,7 +769,6 @@ class LuxrenderMaterialEditor
 			#texture_name.gsub!(/\\/, '/') if texture_name.include?('\\')
 			luxmat.kd_imagemap_Sketchup_filename = texture_name
 			luxmat.kd_texturetype = 'sketchup'
-			#luxmat.use_diffuse_texture = true
 		end
 	end
 
@@ -772,6 +780,9 @@ class LuxrenderMaterialEditor
 		SU2LUX.dbg_p "running material editor refresh function"
         #UI.messagebox (Sketchup.active_model.materials.length)
 		materials = Sketchup.active_model.materials
+		if(materials.current == nil)
+			materials.current = materials[0]
+		end
         
 		## check if LuxRender materials exist, if not, create them
 		for mat in materials
@@ -802,6 +813,7 @@ class LuxrenderMaterialEditor
         load_preview_image # material preview image
         set_current(@current.name) # active material in material dropdown
         update_texture_names(@current) # image texture paths
+		
         settexturefields(@current.name)
         showhide_fields()
         
@@ -819,7 +831,21 @@ class LuxrenderMaterialEditor
 				texChannelType = LuxrenderProceduralTexture.getChannelType(texName)
 				@material_editor_dialog.execute_script('addToProcTextList("' + texName + '","' + texChannelType + '")')
 			end   	
-		end		
+		end	
+		
+
+		
+		
+		
+		
+		# set right procedural textures
+		@current.texturechannels.each{|channelname|
+			# get procedural texture field and value
+			proctex_field = channelname + '_imagemap_proctex'
+			proctex_value = @current.send(proctex_field)
+			# call javascript function with dropdown name and value
+			@material_editor_dialog.execute_script('setProcTextList("#' + proctex_field + '","' + proctex_value + '")')
+		}	
 	end
     
     def showhide_fields()

@@ -42,8 +42,9 @@ class LuxrenderSettings
 		'cl2ks_swatch' => ['cl2ks_R','cl2ks_G','cl2ks_B'],
 		'vol_absorption_swatch' => ['vol_abs_R','vol_abs_G','vol_abs_B'],
 		'vol_scattering_swatch' => ['vol_scat_R','vol_scat_G','vol_scat_B'],
+		'synchronised_names' => false,
+		'version_set' => false,
 	}
-	
 		
 	@@settings_render = {
 		'renderer' => 'sampler',
@@ -300,7 +301,7 @@ class LuxrenderSettings
 		'fleximage_tonemapkernel' => 'reinhard',
 		'fleximage_reinhard_prescale' => 1.0,
 		'fleximage_reinhard_postscale' => 1.0,
-		'fleximage_reinhard_burn' => 0.8,
+		'fleximage_reinhard_burn' => 0.5,
 		'fleximage_linear_sensitivity' => 50.0,
 		'fleximage_linear_exposure' => 1.0,
 		'fleximage_linear_fstop' => 2.8,
@@ -378,7 +379,7 @@ class LuxrenderSettings
 						# puts "OBJECT IS REFRESHABLE!"
 						define_method("#{key}=") do |new_value|
 							@attributedictionary.set_attribute("luxrender_settings", key, new_value)
-							# todo: check if the following two lines are used
+							# todo: check if the following two lines do something useful (update interface?)
 							scene_settings_editor = SU2LUX.get_editor(@model_id, "scenesettings")
 							scene_settings_editor.updateSettingValue(key) if scene_settings_editor
 						end

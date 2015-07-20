@@ -34,6 +34,12 @@ function addToProcTextList(newName, channelType){
 	}
 }
 
+function setProcTextList(dropdown, texname){
+	//alert(dropdown);
+	//alert(texname);
+	$(dropdown).val(texname);
+}
+
 function removeFromProcTextList(texName){
 	$("option[value='" + texName + "']").remove();
 }
@@ -209,6 +215,17 @@ $(document).ready(
                 window.location = 'skp:open_color_picker@' + this.id;
             }
         )
+		
+		$("[id$=_texturetype]").change(
+			function(){
+				if(this.value == "procedural"){
+					// first, report dropdown name
+					//alert(this.id);
+					// if that works, call a method that in turn will set the relevant texture
+					window.location = 'skp:set_procedural_texture@' + this.id;
+				}
+			}
+		)
 		
 		$('select[id$="_imagemap_filtertype"]').change(
 			function()
