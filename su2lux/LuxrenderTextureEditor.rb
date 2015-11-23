@@ -72,7 +72,11 @@ class LuxrenderTextureEditor
 			@current = self.find(material_name)
 			SU2LUX.dbg_p "texture editor reports that material has changed: #{materials.current.name}"
 			if (material_name != materials.current.name)
-				materials.current = materials[material_name] if ( ! @current.nil?)
+				if(materials[material_name] == nil)
+					puts "could not find LuxRender material named " + material_name
+				else
+					materials.current = materials[material_name] if ( ! @current.nil?)
+				end
 			end
 		}
 		

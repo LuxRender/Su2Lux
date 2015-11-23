@@ -375,10 +375,21 @@ class LuxrenderMaterial
 	##
 	#
 	##
+
 	def name
-        # puts mat.display_name.delete("[<>]")
-		# return mat.display_name.gsub(/[<>]/, '*')  #replaces <> characters with *
-		return mat.name #.delete("[<>]")  #replaces <> characters with *
+		return mat.name
+	end
+  
+	def html_name
+		mat_string = mat.name
+		# escape < and >
+		mat_string.gsub!('<', '&lt;')
+		mat_string.gsub!('>', '&gt;')
+		# replace space with \;nbsp ?
+		# mat_string.gsub(' ', '&nbsp;')
+		# remove leading and trailing spaces
+		mat_string.strip!
+		return mat_string
 	end
   
 	##

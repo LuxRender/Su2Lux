@@ -1256,9 +1256,9 @@ class LuxrenderExport
 		@texfolder = File.join(preview_path, outputfolder)
         
 		# check for textures folder in temporary location, create if missing
-		luxdata_folder = preview_path + "/LuxRender_luxdata"
+		luxdata_folder = File.join(preview_path, "LuxRender_luxdata")
 		Dir.mkdir(luxdata_folder) unless File.exists?(luxdata_folder)
-		texture_folder = luxdata_folder + "/textures"
+		texture_folder = File.join(luxdata_folder, "textures")
 		Dir.mkdir(texture_folder) unless File.exists?(texture_folder)
 		
 		# copy image textures if paths contain non-supported characters; otherwise, we use absolute paths

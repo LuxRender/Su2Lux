@@ -169,8 +169,8 @@ class LuxrenderMaterialEditor
 				@current = existingluxmat
 			end
 			
-			if (material_name != materials.current.name)
-				materials.current = materials[material_name] if ( ! @current.nil?)
+			if(materials.current == nil || materials.current == false)
+				materials.current = materials[0]
 			end
 			
 			# reload existing material preview image
@@ -410,7 +410,7 @@ class LuxrenderMaterialEditor
 			# generate preview lxm file and export bitmap images
 			lxm_path = File.join(preview_path, SU2LUX.sanitize_path(active_material_name)+".lxm")
 			puts "lxm path is " + lxm_path
-			base_file = preview_path + "ansi.txt"
+			base_file = File.join(preview_path, "ansi.txt")
 			FileUtils.copy_file(base_file,lxm_path)
 			generated_lxm_file = File.new(lxm_path,"a")
 			generated_lxm_file << "MakeNamedMaterial \"SU2LUX_helper_null\" \n"
@@ -442,9 +442,9 @@ class LuxrenderMaterialEditor
 			FileUtils.copy_file(base_file_2, lxs_path)
 			generated_lxs_file = File.new(lxs_path, "a")
             
-			lxs_section_1 = File.readlines(preview_path + "preview.lxs01")
-            lxs_section_2 = File.readlines(preview_path + "preview.lxs02")
-            lxs_section_3 = File.readlines(preview_path + "preview.lxs03")
+			lxs_section_1 = File.readlines(File.join(preview_path, "preview.lxs01"))
+            lxs_section_2 = File.readlines(File.join(preview_path, "preview.lxs02"))
+            lxs_section_3 = File.readlines(File.join(preview_path, "preview.lxs03"))
             generated_lxs_file.puts lxs_section_1
             
             generated_lxs_file.puts("\t\"integer xresolution\" [" + @lrs.preview_size.to_s + "]")
@@ -936,7 +936,8 @@ class LuxrenderMaterialEditor
 			luxrender_mat = @materials_skp_lux[mat]
             #puts luxrender_mat
 			# puts "adding luxrender material to material list: ", luxrender_mat
-			cmd = cmd + "<option value=\"#{luxrender_mat.original_name}\">#{luxrender_mat.name}</option>"
+			#cmd = cmd + "<option value=\"#{luxrender_mat.original_name}\">#{luxrender_mat.name}</option>"
+			cmd = cmd + "<option value=\"#{luxrender_mat.html_name}\">#{luxrender_mat.html_name}</option>"
 		end
 		cmd = cmd + "'));"
 		@material_editor_dialog.execute_script(cmd)

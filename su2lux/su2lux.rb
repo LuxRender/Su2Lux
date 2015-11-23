@@ -33,8 +33,8 @@ end
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.45dev5"
-    SU2LUX_DATE = "20 July 2015"
+    SU2LUX_VERSION = "0.45dev6"
+    SU2LUX_DATE = "22 November 2015"
 	DEBUG = true
 	PLUGIN_FOLDER = "su2lux"
     GEOMETRYFOLDER = "geometry"
@@ -114,9 +114,13 @@ module SU2LUX
 		
         # create folder and files needed for material preview
         Dir.mkdir(@material_preview_path) unless File.exists?(@material_preview_path)
-        required_files = ["preview.lxs01", "preview.lxs02", "preview.lxs03", "ansi.txt"]
+		required_files = ["preview.lxs01", "preview.lxs02", "preview.lxs03", "ansi.txt"]
+		folder_path = File.dirname(File.expand_path(__FILE__))
+		if folder_path.respond_to?(:force_encoding)
+		  folder_path.force_encoding("UTF-8")
+		end  
         for required_file_name in required_files
-            old_path = File.join(File.dirname(File.expand_path(__FILE__)), required_file_name)
+            old_path = File.join(folder_path, required_file_name)
             new_path = File.join(os.get_variables["material_preview_path"], required_file_name)
             FileUtils.copy_file(old_path, new_path) unless File.exists?(new_path)
         end
@@ -500,18 +504,19 @@ module SU2LUX
 	def SU2LUX.sanitize_path(original_path)
 		if (ENV['OS'] =~ /windows/i && RUBY_VERSION >= "1.9")
 			#sanitized_path = original_path.unpack('U*').pack('C*') # converts string to ISO-8859-1
+			#sanitized_path.gsub!(/[^0-9A-Za-z.\-]/, '_')
 			sanitized_path = ''
 			for pos in 0..original_path.length-1
-				#if original_path[pos].ord > 255
-				if (original_path[pos] =~ /[a-zA-Z0-9.:\\\/_]/) != 0 # character is special character, needs to be replaced
-					sanitized_path += '_'+ original_path[pos].ord.to_s 
+				if original_path[pos].ord > 127
+					sanitized_path += '&'+ original_path[pos].ord.to_s
 				else
 					sanitized_path += original_path[pos]
 				end
 			end
 			return sanitized_path.delete("[<>]")
 		elsif (ENV['OS'] =~ /windows/i) # ruby 1.8 does not support the 'ord' method
-			return original_path.dump.gsub!(/[^0-9A-Za-z_.:\-]/, '')
+			original_path = File.join(original_path.split('\\')) # changes backslashes into slashes
+			return original_path.dump.gsub!(/[^0-9A-Za-z.\/\:\-]/, '')
 		else # on OS X, all seems to be fine
 			return original_path
 		end
