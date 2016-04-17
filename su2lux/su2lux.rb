@@ -24,6 +24,7 @@
 # Type         : Exporter
 
 require 'sketchup.rb'
+
 if (Sketchup::version.split(".")[0].to_f >= 14)
     require 'su2lux/fileutils_ruby20.rb'
 else
@@ -102,6 +103,7 @@ module SU2LUX
 		@os_specific_vars = os.get_variables
         @lrs_hash = {}
         @sceneedit_hash = {}
+        @lampedit_hash = {}
         @volumeedit_hash = {}
 		@proctexture_hash = {}
         @renderedit_hash = {}
@@ -557,6 +559,10 @@ module SU2LUX
         return @lrs_hash[Sketchup.active_model.definitions.entityID]
     end
 	
+	def SU2LUX.lamps()
+		return @lampedit_hash[Sketchup.active_model.definitions.entityID]
+	end
+	
 	def SU2LUX.volumes()
 		return @volumeedit_hash[Sketchup.active_model.definitions.entityID]
 	end
@@ -713,6 +719,14 @@ module SU2LUX
 	##
     #
     ##
+    def SU2LUX.create_lamp_editor(model_id, material_editor, lrs)
+        @lampedit_hash[model_id] = LuxrenderLampEditor.new(material_editor, lrs)
+        return @lampedit_hash[model_id]
+    end
+	
+	##
+    #
+    ##
     def SU2LUX.create_volume_editor(model_id, material_editor, lrs)
         @volumeedit_hash[model_id] = LuxrenderVolumeEditor.new(material_editor, lrs)
         return @volumeedit_hash[model_id]
@@ -783,6 +797,22 @@ module SU2LUX
         end
     end # END show_scene_settings_editor
 
+	##
+	#
+	##
+	def SU2LUX.show_lamp_editor(scene_id)
+		if not @lampedit_hash[scene_id]
+			puts "no lamp editor found, aborting"
+		end
+        if @lampedit_hash[scene_id].visible?
+			puts "hiding lamp editor"
+            @lampedit_hash[scene_id].close
+        else
+			puts "showing existing lamp editor: " +  @lampedit_hash[scene_id].to_s
+            @lampedit_hash[scene_id].showLampDialog
+        end
+	end
+	
 	##
 	#
 	##
@@ -903,6 +933,13 @@ module SU2LUX
                     UI.messagebox "SU2LUX.get_editor did not find material editor - please report this issue on the forum"
                     return  nil
                 end
+			when "lamp"
+			    if @lampedit_hash[scene_id]
+                    editor = @lampedit_hash[scene_id]
+                else
+                    UI.messagebox "SU2LUX.get_editor did not find lamp editor - please report this issue on the forum"
+                    return nil
+                end	
 			when "volume"
 			    if @volumeedit_hash[scene_id]
                     editor = @volumeedit_hash[scene_id]
@@ -1185,6 +1222,32 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 	
 end # END class SU2LUX_app_observer
 
+
+class SU2LUX_LightObserver < Sketchup::EntityObserver
+    def onChangeEntity(lampComponent)
+		# check scale, set angle accordingly
+        scene_id = Sketchup.active_model.definitions.entityID
+		lamp_editor = SU2LUX.get_editor(scene_id, "lamp")
+		
+		# from lamp editor, get lamp object (using getLampObject(componentDefinition))
+		lamp_object = lamp_editor.getLampObject(lampComponent.definition)
+		#puts "lamp_object null? " + ((lamp_object == nil) ? "yes" : "no")
+        
+		# calculate spot/projector angle, update angle display
+		angle_degrees = lamp_object.angle_from_scale()
+		puts "calculated angle: " + angle_degrees.to_s + "degrees"
+		
+		# in lamp editor, set current lamp as active lamp
+		lamp_editor.set_active_lamp(lamp_object)
+		lamp_editor.update_GUI_safe(lamp_object)
+		lamp_object.createGeometry(lamp_object.lampType())
+		
+     end
+end # END class 
+
+
+
+
 class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 	def onMaterialSetCurrent(materials, material)
         scene_id = Sketchup.active_model.definitions.entityID
@@ -1341,6 +1404,8 @@ if( not file_loaded?(__FILE__))
     load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderSettings.rb")
     load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderRenderSettingsEditor.rb")
     load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderSceneSettingsEditor.rb")
+	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderLamp.rb")
+	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderLampEditor.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderMaterial.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderMaterialEditor.rb")
 	load File.join(SU2LUX::PLUGIN_FOLDER, "LuxrenderVolume.rb")
@@ -1406,6 +1471,8 @@ if( not file_loaded?(__FILE__))
     SU2LUX.create_procedural_textures_editor(model_id, material_editor, lrs)
     puts "creating volume editor"
     SU2LUX.create_volume_editor(model_id, material_editor, lrs)
+    puts "creating lamp editor"
+    SU2LUX.create_lamp_editor(model_id, material_editor, lrs)
 	
     # dialog may not have fully loaded yet, therefore loading presets should happen later as reaction on DOM loaded
  

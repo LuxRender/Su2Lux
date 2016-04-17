@@ -2,13 +2,14 @@ def create_toolbar
 	main_menu = UI.menu("Plugins").add_submenu("LuxRender")
 	main_menu.add_item("Render") { (SU2LUX.export_dialog)}
 	main_menu.add_item("Material Editor") {(SU2LUX.show_material_editor(Sketchup.active_model.definitions.entityID))}
+	main_menu.add_item("Lamp Editor") {(SU2LUX.show_lamp_editor(Sketchup.active_model.definitions.entityID))}
 	main_menu.add_item("Volume Editor") {(SU2LUX.show_volume_editor(Sketchup.active_model.definitions.entityID))}
 	main_menu.add_item("Scene Settings Editor") { (SU2LUX.show_scene_settings_editor(Sketchup.active_model.definitions.entityID))}
 	main_menu.add_item("Procedural Texture Editor") { (SU2LUX.show_procedural_textures_editor(Sketchup.active_model.definitions.entityID))}
 	main_menu.add_item("Render Engine Settings Editor") { (SU2LUX.show_render_settings_editor(Sketchup.active_model.definitions.entityID))}
 	main_menu.add_item("About SU2LUX") {(SU2LUX.about)}
 	
-	toolbar = UI::Toolbar.new("LuxRender")
+	toolbar = UI::Toolbar.new("SU2LUX")
 
 	cmd_render = UI::Command.new("Render"){(SU2LUX.export_dialog)}
 	cmd_render.small_icon = "icons\\su2lux_render.png"
@@ -26,6 +27,15 @@ def create_toolbar
 	cmd_material.status_bar_text = "Open SU2LUX Material Editor"
     cmd_material.set_validation_proc{MF_UNCHECKED}
 	@materialbutton = toolbar.add_item(cmd_material)
+	
+	cmd_lamp = UI::Command.new("Lamp"){(SU2LUX.show_lamp_editor(Sketchup.active_model.definitions.entityID))}
+	cmd_lamp.small_icon = "icons\\su2lux_lamp.png"
+	cmd_lamp.large_icon = "icons\\su2lux_lamp.png"
+	cmd_lamp.tooltip = "Open SU2LUX Lamp Editor"
+	cmd_lamp.menu_text = "Volume Lamp"
+	cmd_lamp.status_bar_text = "Open SU2LUX lamp Editor"
+    cmd_lamp.set_validation_proc{MF_UNCHECKED}
+	@materialbutton = toolbar.add_item(cmd_lamp)
 	
 	cmd_volume = UI::Command.new("Volume"){(SU2LUX.show_volume_editor(Sketchup.active_model.definitions.entityID))}
 	cmd_volume.small_icon = "icons\\su2lux_volume.png"

@@ -841,15 +841,15 @@ class LuxrenderExport
 		file_basename = File.basename(exportpath, SU2LUX::SCENE_EXTENSION)
 		relative_ply_folder = File.join(file_basename + SU2LUX::SUFFIX_DATAFOLDER, SU2LUX::GEOMETRYFOLDER)
 		ply_folder = File.join(File.dirname(@export_file_path), File.basename(@export_file_path, SU2LUX::SCENE_EXTENSION) + SU2LUX::SUFFIX_DATAFOLDER, SU2LUX::GEOMETRYFOLDER)
-		
-		# process component definitions, to get the relevant definition for each group
-		get_group_definitions()
-		
+	
 		#
 		# process_components
 		#
+		
 		Sketchup.set_status_text('SU2LUX export: processing component definitions')
-		processed_components = process_components
+		@group_definition_hash = get_component_instances() # component_instance => component_definition
+		
+		processed_components = process_components()
 		puts 'processing ' + processed_components[0].size.to_s + (processed_components[0].size == 1 ? ' component' : ' components')
 		components = processed_components[0] # sketchup component definitions
 		component_mat_geometry = processed_components[1] # series of [skpmat, skpfaces] for each component
@@ -890,6 +890,7 @@ class LuxrenderExport
 		geometry_file.puts "# created by SU2LUX " + SU2LUX::SU2LUX_VERSION + " " + Time.new.to_s
 		geometry_file.puts ''
 		components.each{|comp|
+			# todo: only do this if component is not a lamp definition?
 			write_component_definition(geometry_file, relative_ply_folder, comp, sorted_component_mat_geometry[comp], component_children[comp])
 		}		
 		geometry_file.puts ''
@@ -907,20 +908,38 @@ class LuxrenderExport
 		}
 		material_geometry["SU2LUX_no_material"] = []
 		
+		# writing component instances
 		Sketchup.set_status_text('SU2LUX export: writing component instances')
+		lamp_editor = SU2LUX.get_editor(@scene_id, "lamp")
 		model.entities.each{|ent|
 			# check if it is an instance, if so, check if it is visible, if so, write
 			if ent.class == Sketchup::ComponentInstance
-				# get transformation, get id, write instance
-				geometry_file.puts 'AttributeBegin' + ' # component name: ' + ent.definition.name + ', instance name: ' + ent.name
-				geometry_file.puts "\t ConcatTransform " + '[' + ent.transformation.to_a.join(" ") + ']'
-				geometry_file.puts "\t ObjectInstance \"" + ent.definition.entityID.to_s + '"'
-				if(ent.material != nil)
-					geometry_file.puts "\t NamedMaterial \"" + SU2LUX.sanitize_path(@material_editor.materials_skp_lux[ent.material].name) + '_component_material"'
-					@component_skp_materials << ent.material
+				# check if it is a lamp 
+				if (ent.definition.attribute_dictionaries["LuxRender"] != nil) # lamp
+					# write lamp		
+					puts "lamp editor valid?" + (lamp_editor == nil ? "no" : "yes")
+					lamp_object = lamp_editor.getLampObject(ent.definition)
+						if(lamp_object != nil)
+						lamp_definition = lamp_object.get_description(ent)
+						lamp_definition.each do|text_line|
+							geometry_file.puts text_line
+						end
+					end
+
+				else # ordinary component instance			
+					# get transformation, get id, write instance
+					geometry_file.puts 'AttributeBegin' + ' # component name: ' + ent.definition.name + ', instance name: ' + ent.name
+					geometry_file.puts "\t ConcatTransform " + '[' + ent.transformation.to_a.join(" ") + ']'
+					geometry_file.puts "\t ObjectInstance \"" + ent.definition.entityID.to_s + '"'
+					if(ent.material != nil)
+						geometry_file.puts "\t NamedMaterial \"" + SU2LUX.sanitize_path(@material_editor.materials_skp_lux[ent.material].name) + '_component_material"'
+						@component_skp_materials << ent.material
+					end
+					geometry_file.puts "\t ObjectInstance \"" + ent.definition.entityID.to_s + '_nomat"'
+					geometry_file.puts 'AttributeEnd'
 				end
-				geometry_file.puts "\t ObjectInstance \"" + ent.definition.entityID.to_s + '_nomat"'
-				geometry_file.puts 'AttributeEnd'
+				
+				
 			elsif ent.class == Sketchup::Group
 				# get transformation, get id, write instance
 				geometry_file.puts 'AttributeBegin' + ' # group name: ' + ent.name
@@ -1500,7 +1519,7 @@ class LuxrenderExport
 		out.puts '# procedural textures'
 		
 		# get list of procedural textures from procedural texture editor
-		proctexeditor = SU2LUX.get_editor(@scene_id,"proceduraltexture")
+		proctexeditor = SU2LUX.get_editor(@scene_id, "proceduraltexture")
 		textureHash = proctexeditor.getTextureCollection()
 		
 		# write textures
@@ -1632,7 +1651,7 @@ class LuxrenderExport
 	end
 	
 	def export_used_materials(materials, lxm_data, texexport, datafolder)
-        mateditor = SU2LUX.get_editor(@scene_id,"material")
+        mateditor = SU2LUX.get_editor(@scene_id, "material")
         #puts "@texexport: " + texexport
         @texexport = texexport
         @texfolder = File.join(datafolder, SU2LUX::TEXTUREFOLDER)
@@ -1948,20 +1967,16 @@ class LuxrenderExport
 		relevant_components = []
 		#puts "processing components"
 		Sketchup.active_model.definitions.each{ |this_definition|
-			#puts "processing definition"
 			# check if the components are geometric components and are used (this_component.count_instances > 0)
 			if(this_definition.is_a?(Sketchup::ComponentDefinition) or this_definition.is_a?(Sketchup::Group)) # this check should not be necessary as the list only contains component definitions
 				if this_definition.count_instances > 0
-					#puts "definition is used"
 					relevant_components << this_definition
 				end
 			end
 		}
 		
 		# sort components in such a way that a component never depends on any subsequent components
-		#puts relevant_components.size
 		relevant_components = sort_components(relevant_components)
-		#puts relevant_components.size
 		relevant_component_children = {}
 		component_material_geometry = {}
 		
@@ -2009,7 +2024,7 @@ class LuxrenderExport
 		return [relevant_components, component_material_geometry, relevant_component_children]	
 	end
 	
-	def get_group_definitions()
+	def get_component_instances()
 		group_definition_hash = {}
 		# for this model, iterate all component definitions
 		# get definition instances; if the instance is a group, add it to the hash
@@ -2021,7 +2036,7 @@ class LuxrenderExport
 				end
 			}
 		}
-		@group_definition_hash = group_definition_hash
+		#@group_definition_hash = group_definition_hash
 		return group_definition_hash
 	end	
 	
