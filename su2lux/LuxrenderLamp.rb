@@ -24,26 +24,29 @@ class LuxRenderLamp
 	{
 		# texture types, data format: [texture parameter name, parameter type, default value]
 		# note: only stores default values; actual values are stored in the SketchUp component definition attribute dictionary
-		'point' => {"importance"=>["float",1.0],"gain"=>["float",1.0],"L"=>["color",[1.0,1.0,1.0]],"iesname"=>["string",""]},
-		'spot' => {"importance"=>["float",1.0],"gain"=>["float",1.0],"L"=>["color",[1.0,1.0,1.0]],"coneangle"=>["float",53.1],"conedeltaangle"=>["float",5.0]},
-		'projection' => {"importance"=>["float",1.0],"gain"=>["float",1.0],"fov"=>["float",45],"L"=>["color",[1.0,1.0,1.0]],"mapname"=>["string",""]},	
-	}
+		'point' => {"light_group"=>["string",""],"importance"=>["float",1.0],"gain"=>["float",1.0],"color_r"=>["float",1.0],"color_g"=>["float",1.0],"color_b"=>["float",1.0],"iesname"=>["string",""]}, 
+		'spot' => {"light_group"=>["string",""],"importance"=>["float",1.0],"gain"=>["float",1.0],"color_r"=>["float",1.0],"color_g"=>["float",1.0],"color_b"=>["float",1.0],"L"=>["color",[1.0,1.0,1.0]],"coneangle"=>["float",53.1],"conedeltaangle"=>["float",5.0]},
+		'projection' => {"light_group"=>["string",""],"importance"=>["float",1.0],"gain"=>["float",1.0],"color_r"=>["float",1.0],"color_g"=>["float",1.0],"color_b"=>["float",1.0],"fov"=>["float",45],"mapname"=>["string",""]},	
+	}			# "L"=>["color",[1.0,1.0,1.0]]
 		
-	def initialize(createNew, lampEditor, lrs, passedName, lampComponentInstance, passedParameter = "") # passedParameter is lamp type: point, spot, projection
+	def initialize(createNew, lampEditor, lrs, passedName, lampComponentInstance) # passedParameter is lamp type: point, spot, projection
 		# store name, get SketchUp component instance, add observer
 		@name = passedName
+		@model = Sketchup.active_model
 		@component = lampComponentInstance
 		
 		# get lamp editor, add this lamp
 		@lampEditor = lampEditor
 		@lampEditor.addLamp(lampComponentInstance.definition, self)
+		@color_picker = UI::WebDialog.new("Color Picker - lamp", false, "ColorPicker", 410, 200, 200, 350, true)
 		
 		# create geometry
-		createGeometry(lampType())
-		
-		# set this lamp as active lamp
-		@lampEditor.set_active_lamp(self)
-		
+		if(createNew)
+			createGeometry(lampType())
+			setValue("name", @name)
+			# set this lamp as active lamp
+			@lampEditor.set_active_lamp(self)
+		end
 		
 		# add observer
 		@component.add_observer(SU2LUX_LightObserver.new)
@@ -59,11 +62,11 @@ class LuxRenderLamp
 	end
 	
 	def setValue(property, value)	
-		packed_value = value.gsub('/', '//')
+		packed_value = value.to_s.gsub('/', '//')
 		packed_value = [packed_value].pack("m")
 		puts "setting property #{property} to value #{packed_value} (#{value})"
 		
-		if(property != "coneangle") # this should always be calculated from the component instance scale
+		if(property != "coneangle") # cone angle should always be calculated from the component instance scale
 			@component.definition.set_attribute "LuxRender", property, packed_value
 		end
 		
@@ -168,6 +171,9 @@ class LuxRenderLamp
 	
 	
 	def createGeometry(lampType)
+		# start undo operation
+		@model.start_operation("Lamp Geometry")
+		
 		# remove current geometry
 		@component.definition.entities.clear!
 	
@@ -179,6 +185,9 @@ class LuxRenderLamp
 		elsif(lampType = "projection")
 			createProjectionGeometry
 		end		
+		
+		# end undo operation
+		@model.commit_operation()
 	end
 	
 	def createSpotGeometry()
@@ -299,8 +308,13 @@ class LuxRenderLamp
 	def get_description(inst) # inst is a passed component instance
 		description_lines = []
 		pos = inst.transformation::origin.to_a
-		color = getValue("L").to_a
+		#color = getValue("L").to_a
 
+		light_group_string = getValue("light_group")
+		if(light_group_string != "")
+			description_lines << 'LightGroup "' + light_group_string + '"'
+		end
+		
 		if(lampType == "spot")
 			# get data
 			look_at = (inst.transformation::origin - inst.transformation::zaxis).to_a
@@ -312,7 +326,7 @@ class LuxRenderLamp
 			description_lines << '  "float coneangle" [' + getValue("coneangle").to_s  + ']' 
 			description_lines << '  "float conedeltaangle" [' + getValue("conedeltaangle").to_s  + ']' 
 			description_lines << '  "float gain" [' + getValue("gain").to_s  + ']' 
-			description_lines << '  "color L" [' + color[0].to_s + " " + color[1].to_s + " "  + color[2].to_s + ']' 
+			description_lines << '  "color L" [' + getValue("color_r").to_s + " " + getValue("color_g").to_s + " "  + getValue("color_b").to_s + ']' 
 			
 		elsif(lampType == "projection")
 			mapname = getValue("mapname")
@@ -361,7 +375,7 @@ class LuxRenderLamp
 				description_lines << '    "float fov" [' + getValue("fov").to_s  + ']'
 				description_lines << '    "float gain" [' + getValue("gain").to_s  + ']' 
 				description_lines << '    "string mapname" ["' + mapname  + '"]' 
-				description_lines << '    "color L" [' + color[0].to_s + " " + color[1].to_s + " "  + color[2].to_s + ']' 
+				description_lines << '  "color L" [' + getValue("color_r").to_s + " " + getValue("color_g").to_s + " "  + getValue("color_b").to_s + ']' 
 				
 				# end transform
 				description_lines << 'TransformEnd'
@@ -378,7 +392,7 @@ class LuxRenderLamp
 			description_lines << '  "float gain" [' + getValue("gain").to_s  + ']' 
 			description_lines << '  "float power" [0]' 
 			description_lines << '  "float efficacy" [0]' 
-			description_lines << '  "color L" [' + color[0].to_s + " " + color[1].to_s + " "  + color[2].to_s + ']' 
+			description_lines << '  "color L" [' + getValue("color_r").to_s + " " + getValue("color_g").to_s + " "  + getValue("color_b").to_s + ']'
 			if(iespath != "")
 				description_lines << '  "string iesname" ["' + iespath  + '"]' 
 			end

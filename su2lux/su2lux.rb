@@ -67,6 +67,8 @@ module SU2LUX
 		#model.active_view.add_observer($SU2LUX_view_observer)
 		#$SU2LUX_rendering_options_observer = SU2LUX_rendering_options_observer.new
 		#model.rendering_options.add_observer($SU2LUX_rendering_options_observer)
+		$SU2LUX_selection_observer = SU2LUX_selection_observer.new
+		model.selection.add_observer($SU2LUX_selection_observer)		
 		$SU2LUX_materials_observer = SU2LUX_materials_observer.new
 		model.materials.add_observer($SU2LUX_materials_observer)
         $SU2LUX_model_observer = SU2LUX_model_observer.new
@@ -79,6 +81,7 @@ module SU2LUX
 	def SU2LUX.remove_observers(model)
 		model.active_view.remove_observer $SU2LUX_view_observer
 		#model.rendering_options.remove_observer $SU2LUX_rendering_options_observer
+		model.selection.remove_observer($SU2LUX_selection_observer)
 		model.materials.remove_observer $SU2LUX_materials_observer
 		model.remove_observer $SU2LUX_model_observer
 	end
@@ -719,8 +722,8 @@ module SU2LUX
 	##
     #
     ##
-    def SU2LUX.create_lamp_editor(model_id, material_editor, lrs)
-        @lampedit_hash[model_id] = LuxrenderLampEditor.new(material_editor, lrs)
+    def SU2LUX.create_lamp_editor(model_id, lrs)
+        @lampedit_hash[model_id] = LuxrenderLampEditor.new(lrs, Sketchup.active_model)
         return @lampedit_hash[model_id]
     end
 	
@@ -1076,6 +1079,7 @@ class SU2LUX_app_observer < Sketchup::AppObserver
             oldrendersettingseditor = SU2LUX.get_editor(model_id,"rendersettings")
             oldscenesettingseditor = SU2LUX.get_editor(model_id,"scenesettings")
 			oldproceduraltextureeditor = SU2LUX.get_editor(model_id,"proceduraltexture")
+			oldlampeditor = SU2LUX.get_editor(model_id,"lamp")
 			oldvolumeeditor = SU2LUX.get_editor(model_id,"volume")
 			if oldmateditor.visible?
 				oldmateditor.closeColorPicker
@@ -1086,6 +1090,10 @@ class SU2LUX_app_observer < Sketchup::AppObserver
             end
 			if oldscenesettingseditor.visible?
 				oldscenesettingseditor.close
+			end			
+			if oldlampeditor.visible?
+				oldlampeditor.closeColorPicker
+				oldlampeditor.close
 			end
 			if oldproceduraltextureeditor.visible?
 				oldproceduraltextureeditor.close
@@ -1116,6 +1124,9 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 		puts "onNewModel creating procedural textures editor"
 		procEditor = SU2LUX.create_procedural_textures_editor(model_id, material_editor, lrs)
 		
+		puts "onNewModel creating lamp editor"
+		volEditor = SU2LUX.create_lamp_editor(model_id, lrs)
+		
 		puts "onNewModel creating volume editor"
 		volEditor = SU2LUX.create_volume_editor(model_id, material_editor, lrs)
 		
@@ -1137,6 +1148,7 @@ class SU2LUX_app_observer < Sketchup::AppObserver
             oldrendersettingseditor = SU2LUX.get_editor(model_id,"rendersettings")
             oldscenesettingseditor = SU2LUX.get_editor(model_id,"scenesettings")
 			oldproceduraltextureeditor = SU2LUX.get_editor(model_id,"proceduraltexture")
+			oldlampeditor = SU2LUX.get_editor(model_id,"lamp")
 			oldvolumeeditor = SU2LUX.get_editor(model_id,"volume")
 			if oldmateditor.visible?
 				oldmateditor.closeColorPicker
@@ -1150,6 +1162,10 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 			end
 			if oldproceduraltextureeditor.visible?
 				oldproceduraltextureeditor.close
+			end
+			if oldlampeditor.visible?
+				oldlampeditor.closeColorPicker
+				oldlampeditor.close
 			end
 			if oldvolumeeditor.visible?
 				oldvolumeeditor.closeColorPicker
@@ -1189,6 +1205,10 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 		
         puts "onOpenModel creating scene settings editor"
         scene_settings_editor = SU2LUX.create_scene_settings_editor(model_id, lrs)
+		
+		puts "onOpenModel creating lamp editor"
+		lampEditor = SU2LUX.create_lamp_editor(model_id, lrs)
+		lampEditor.load_lamps_from_file()
 		
 		puts "onOpenModel creating procedural textures editor"
 		procEditor = SU2LUX.create_procedural_textures_editor(model_id, material_editor, lrs)
@@ -1245,6 +1265,29 @@ class SU2LUX_LightObserver < Sketchup::EntityObserver
      end
 end # END class 
 
+class SU2LUX_selection_observer < Sketchup::SelectionObserver
+	def onSelectionBulkChange(selection)
+		# check if the lamp editor is visible
+		model = Sketchup.active_model
+        scene_id = model.definitions.entityID
+		lamp_editor = SU2LUX.get_editor(scene_id, "lamp")
+		if(lamp_editor.visible?)
+			# if it is, check if the selection contains a lamp object
+			model.selection.each do |selected_item|
+				if(selected_item.is_a?(Sketchup::ComponentInstance) && selected_item.definition.attribute_dictionary("LuxRender") != nil)
+					# show this lamp object in the lamp editor
+					lamp_object = lamp_editor.getLampObject(selected_item.definition)
+					puts "selection observer triggered, lamp editor is visible, lamp found: " + lamp_object.name
+					lamp_editor.set_active_lamp(lamp_object)
+					lamp_editor.update_GUI(lamp_object)
+					#lamp_editor.
+					break
+				end
+			end
+		end
+		
+	end
+end
 
 
 
@@ -1460,6 +1503,8 @@ if( not file_loaded?(__FILE__))
     puts "creating observers"
     $SU2LUX_app_observer = SU2LUX_app_observer.new
     Sketchup.add_observer($SU2LUX_app_observer)
+	
+	
     SU2LUX.create_observers(Sketchup.active_model)
 
     # create scene settings editor and render settings editor
@@ -1472,7 +1517,7 @@ if( not file_loaded?(__FILE__))
     puts "creating volume editor"
     SU2LUX.create_volume_editor(model_id, material_editor, lrs)
     puts "creating lamp editor"
-    SU2LUX.create_lamp_editor(model_id, material_editor, lrs)
+    SU2LUX.create_lamp_editor(model_id, lrs)
 	
     # dialog may not have fully loaded yet, therefore loading presets should happen later as reaction on DOM loaded
  

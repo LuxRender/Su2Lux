@@ -23,17 +23,16 @@ class LuxrenderLampEditor
 	##
 	#
 	##
-	def initialize(mat_editor, lrs)
-		@lampDictionary = LuxrenderAttributeDictionary.new(Sketchup.active_model)
-		@lampCollection = {} # hash containing lamp names and objects # componentDefinition => SU2LUX_LampObject
-		@lampsByName = {}
+	def initialize(lrs, model)
+		@lampCollection = {} # hash containing lamp component definitions and SU2LUX lamp objects # componentDefinition => SU2LUX_LampObject
+		@lampsByName = {} # hash containing lamp names and objects
 		@lampNames = []
 		@activeLamp = nil
         @lrs = lrs
-		@material_editor = mat_editor
+		@model = model
 		
         puts "initializing lamp editor"
-        filename = File.basename(Sketchup.active_model.path)
+        filename = File.basename(model.path)
         if (filename == "")
             windowname = "LuxRender Lamp Editor"
         else
@@ -50,6 +49,9 @@ class LuxrenderLampEditor
         @color_picker.set_file(color_picker_path)
 		
         puts "finished initializing lamp editor"
+		
+		@definitions_containing_lamps = []
+		@definitions_not_containing_lamps = []
 
 	   # callbacks for javascript functions
 
@@ -86,7 +88,7 @@ class LuxrenderLampEditor
 					
 					# create a lamp component
 					# create component definition
-					lamp_component_definition = Sketchup.active_model.definitions.add("SU2LUX_lamp")
+					lamp_component_definition = @model.definitions.add("SU2LUX_lamp")
 					
 					#
 					#
@@ -94,26 +96,31 @@ class LuxrenderLampEditor
 					
 					# create component instance with provided name (SU2LUX_lamp_#lampName
 					lamp_default_transformation = Geom::Transformation.new
-					lamp_instance = Sketchup.active_model.active_entities.add_instance(lamp_component_definition, lamp_default_transformation)
+					lamp_instance = @model.active_entities.add_instance(lamp_component_definition, lamp_default_transformation)
 					lamp_instance.name = "SU2LUX_" + lampName[0]
 					
 					# add initial lamp parameters to lamp component's attribute dictionary
 					lamp_component_definition.set_attribute "LuxRender", "lamp_type", ["spot"].pack("m")
 					
 					# create a lamp object
-					lampObject = LuxRenderLamp.new(true, self, @lrs, lampName[0], lamp_instance, "spot")
+					lampObject = LuxRenderLamp.new(true, self, @lrs, lampName[0], lamp_instance)
+					@activeLamp = lampObject
 								
 					# add lamp to dropdown 
-					addToListCommand = 'addToLampList("' + lampName[0] + '")'
+					addToListCommand = 'addToLampListAndSet("' + lampName[0] + '")'
+					
 					#puts addToListCommand
-					@lamp_dialog.execute_script(addToListCommand)\
+					@lamp_dialog.execute_script(addToListCommand)
 					
 					# show lamp type chooser in interface
 					@lamp_dialog.execute_script('$("#lamp_type_area").show()')			
 				
 					# show relevant parameters in interface
+					@lamp_dialog.execute_script('$("#lamp_type").val("spot")')	
 					@lamp_dialog.execute_script('showParameterSections("spot")')
-				
+					updateSwatch("ffffff")
+					@lamp_dialog.execute_script("$('#light_group').val('');")	
+					
 					# get parameter values from object and show in interface
 					updateParams(lampObject)
 					
@@ -194,12 +201,6 @@ class LuxrenderLampEditor
             @lamp_dialog.execute_script(cmd)				
 		}
 		
-		
-		
-		
-		
-		
-		
 		##
 		#	show information in GUI after opening it
 		##
@@ -264,14 +265,14 @@ class LuxrenderLampEditor
 		
 		@lamp_dialog.add_action_callback('open_color_picker') { |dialog, param|
             SU2LUX.dbg_p "opening color picker window for lamp editor"
-            @lrs.colorpicker_lamp = param
+            # @colorpicker_lamp = param
 			updateColorPicker() # for OS X
             @color_picker.show
         }
 		
 		@color_picker.add_action_callback('provide_color') { |dialog, passedcolor|
 			puts "lamp editor callback passing colour to colour picker init_color command"		
-			if(@activelamp)
+			if(@activeLamp)
 				updateColorPicker() # for Windows
 			end
 		}
@@ -290,53 +291,98 @@ class LuxrenderLampEditor
             bvalue = (passedColor[5, 2].to_i(16).to_f*1000000/255.0).round/1000000.0
 			
 			# update value in lamp object
-			@activelamp.setValue(@lrs.colorpicker_lamp, [rvalue,gvalue,bvalue])
+			@activeLamp.setValue("color_r", rvalue)
+			@activeLamp.setValue("color_g", gvalue)
+			@activeLamp.setValue("color_b", bvalue)
+			
         }
 		
 		@color_picker.add_action_callback('colorfield_red_update') { |dialog, colorValue|
 			puts "lamp editor callback: updating red channel"
-			# get value from object, then reconstruct
-			channelColor = @activelamp.getValue(@lrs.colorpicker_lamp)
-			channelColor[0] = colorValue.to_f
+			@activeLamp.setValue("color_r", colorValue.to_f)
+			channelColor = [@activeLamp.getValue("color_r").to_f, @activeLamp.getValue("color_g").to_f, @activeLamp.getValue("color_b").to_f] 
 			updateSwatch(toHex(channelColor))
-			@activelamp.setValue(@lrs.colorpicker_lamp, channelColor)
 		}
 		
 		@color_picker.add_action_callback('colorfield_green_update') { |dialog, colorValue|
 			puts "lamp editor callback: updating green channel"
-			# get value from object, then reconstruct
-			channelColor = @activelamp.getValue(@lrs.colorpicker_lamp)
-			channelColor[1] = colorValue.to_f
+			@activeLamp.setValue("color_g", colorValue.to_f)
+			channelColor = [@activeLamp.getValue("color_r").to_f, @activeLamp.getValue("color_g").to_f, @activeLamp.getValue("color_b").to_f] 
 			updateSwatch(toHex(channelColor))
-			@activelamp.setValue(@lrs.colorpicker_lamp, channelColor)
 		}	
 		
 		@color_picker.add_action_callback('colorfield_blue_update') { |dialog, colorValue|
 			puts "lamp editor callback: updating blue channel"
-			# get value from object, then reconstruct
-			channelColor = @activelamp.getValue(@lrs.colorpicker_lamp)
-			channelColor[2] = colorValue.to_f
+			@activeLamp.setValue("color_b", colorValue.to_f)
+			channelColor = [@activeLamp.getValue("color_r").to_f, @activeLamp.getValue("color_g").to_f, @activeLamp.getValue("color_b").to_f] 
 			updateSwatch(toHex(channelColor))
-			@activelamp.setValue(@lrs.colorpicker_lamp, channelColor)
 		}
 
 	end # END initialize
 
-
+	
+	def load_lamps_from_file()
+		# first, collect all component definitions that are a lamp
+		lamp_definitions = []
+		@model.definitions.each do |comp_def|
+			if (comp_def.attribute_dictionary("LuxRender") != nil)
+				lamp_definitions << comp_def
+			end
+		end
+		
+		# for all collected definitions, get all instances and create lamp objects for them
+		lamp_definitions.each do |lamp_def|
+			lamp_def.instances.each do |lamp_def_instance|
+				# create object
+				name = lamp_def.attribute_dictionaries["LuxRender"]["name"].unpack("m")[0]
+				lampObject = LuxRenderLamp.new(false, self, @lrs, name, lamp_def_instance)
+				
+				# add to drop down? no, this happens in update_GUI anyway
+				#cmd = "$('#lamps_in_model').append($('<option></option>').val('" + name + "').html('" + name + "'))"
+				#cmd = '$("#lamps_in_model").append($("<option></option>").val("test").html("test"))'
+				#cmd = "$('#lamps_in_model').append($(' <option> </option> ').val('" + name + "').html('" + name + "'))"
+				
+				#puts "editor: " + self.to_s
+				#puts "dialog: " + @lamp_dialog.to_s
+				#puts "current lamp dialog exists? " + (@lamp_dialog == nil ? "no" : "yes")
+				#puts "adding to dropdown, cmd: " + cmd
+				#@lamp_dialog.execute_script(cmd);
+			
+			end
+		end
+		
+		# set an active lamp
+		if(@lampCollection.count > 0)
+			@activeLamp = @lampCollection.values[0]
+			update_GUI(@activeLamp)
+		end
+	end
+	
+		
+	
 	def update_GUI(lampObject = nil)
-		for lampObject in @lampCollection.values
-			puts "adding " + lampObject.name
-			@lamp_dialog.execute_script('addTolampList("' + lampObject.name + '")')
+		puts 'running update_GUI'
+		puts 'valid lamp object provided? ' + (lampObject == nil ?  "no" : ("yes, : " + lampObject.name)) 
+		
+		@lamp_dialog.execute_script('clearLampList()')
+		
+		for existingLampObject in @lampCollection.values
+			puts "adding " + existingLampObject.name + " to lamp editor's lamp list"
+			cmd = 'addToLampList("' + existingLampObject.name + '")'
+			@lamp_dialog.execute_script(cmd)
 		end
 		
 		if(@lampCollection.values.count > 0)
-			puts 'updating lamp editor interface'
-			# pick a lamp object
-			
+			# make sure we have a lamp object; if it wasn't provided, pick the first one		
 			if(lampObject == nil)
-				lampObject = @lampCollection.values[0]
+				if(@activeLamp == nil)
+					@activeLamp = @lampCollection.values[0]
+				end
+				lampObject = @activeLamp
 			end
-						
+			
+			puts 'updating lamp editor interface for ' + lampObject.name
+			
 			# set object name in dropdown
 			@lamp_dialog.execute_script('$("#lamps_in_model").val("' + lampObject.name + '");')
 			
@@ -352,6 +398,9 @@ class LuxrenderLampEditor
 			
 			# get parameter values from object and show in interface
 			updateParams(lampObject)
+			
+			#update colour swatch
+			updateSwatch()
 		end
 	end
 	
@@ -377,8 +426,12 @@ class LuxrenderLampEditor
 		end		
 	end
 
-	def updateSwatch(hexColor)
-		updateSwatchCmd = "$('#" + @lrs.colorpicker_lamp + "').css('background-color', '" + hexColor + "');"			
+	def updateSwatch(hexColor = nil)
+		if(hexColor == nil)
+			hexColor = toHex([@activeLamp.getValue("color_r").to_f, @activeLamp.getValue("color_g").to_f, @activeLamp.getValue("color_b").to_f])
+		end
+	
+		updateSwatchCmd = "$('#lamp_color_swatch').css('background-color', '" + hexColor + "');"			
 		@lamp_dialog.execute_script(updateSwatchCmd)
 	end
 	
@@ -418,18 +471,15 @@ class LuxrenderLampEditor
 			@lamp_dialog.execute_script(cmd)
 		end
 		
-		# set color swatch
-		#@lrs.colorpicker_lamp = "lamp_absorption_swatch"
-		#swatchColor = varValues["lamp_absorption_swatch"][1]
-		#updateSwatch(toHex(swatchColor))
-			
+		# set colour swatch
+		updateSwatch(toHex([@activeLamp.getValue("color_r").to_f, @activeLamp.getValue("color_g").to_f, @activeLamp.getValue("color_b").to_f]))			
 	end
 	
 	def updateColorPicker()
-		# get r, g, b values from current swatch
-		swatchColor = @activeLamp.getValue(@lrs.colorpicker_lamp)
+		# get r, g, b values from current lamp object
+		swatchColor = [@activeLamp.getValue("color_r").to_f, @activeLamp.getValue("color_g").to_f, @activeLamp.getValue("color_b").to_f] 
 		swatchRRGGBB = toHex(swatchColor)			
-			
+						
 		# set values in colorpicker RGB fields
 		cmd1 = "init_rgb_fields(\"#{swatchColor[0]}\",\"#{swatchColor[1]}\",\"#{swatchColor[2]}\")"
         @color_picker.execute_script(cmd1)
@@ -441,10 +491,6 @@ class LuxrenderLampEditor
 
 	def set_active_lamp(passedLamp)
 		@activeLamp = passedLamp
-	end
-	
-	def getLampDictionary()
-		return @lampDictionary
 	end
 
 	def getLampCollection()
