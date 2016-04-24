@@ -76,6 +76,20 @@ $(document).ready(
 			}
 		)
 		
+		$(".parameter_field_wide").change(
+			function()
+			{
+				var lampName = $("#lamps_in_model").val();
+				// call ruby function that deals with change
+				window.location = 'skp:set_param@' + lampName + "|" + this.id + "|" + this.value; // passes lampName|parameterName|parameterValue
+			}
+		)
+		
+		
+		
+		
+		
+		
 		$("#iesname_button").click(
 			function()
 			{

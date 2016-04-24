@@ -890,8 +890,10 @@ class LuxrenderExport
 		geometry_file.puts "# created by SU2LUX " + SU2LUX::SU2LUX_VERSION + " " + Time.new.to_s
 		geometry_file.puts ''
 		components.each{|comp|
-			# todo: only do this if component is not a lamp definition?
-			write_component_definition(geometry_file, relative_ply_folder, comp, sorted_component_mat_geometry[comp], component_children[comp])
+			# only write component if it is not a lamp definition
+			if(comp.attribute_dictionary("LuxRender") == nil)
+				write_component_definition(geometry_file, relative_ply_folder, comp, sorted_component_mat_geometry[comp], component_children[comp])
+			end
 		}		
 		geometry_file.puts ''
 		
