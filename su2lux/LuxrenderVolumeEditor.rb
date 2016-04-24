@@ -47,7 +47,7 @@ class LuxrenderVolumeEditor
 		
 		@volume_dialog = UI::WebDialog.new(windowname, true, "LuxrenderVolumeEditor", 450, 600, 10, 10, true)
         @volume_dialog.max_width = 700
-		setting_html_path = Sketchup.find_support_file("VolumeEditor.html" , "Plugins/"+SU2LUX::PLUGIN_FOLDER)
+		setting_html_path = Sketchup.find_support_file("VolumeEditor.html", File.join("Plugins", SU2LUX::PLUGIN_FOLDER))
 		@volume_dialog.set_file(setting_html_path)
 		
 		puts "adding volumes to GUI"
@@ -58,7 +58,7 @@ class LuxrenderVolumeEditor
 		
 
 		@color_picker = UI::WebDialog.new("Color Picker - volume", false, "ColorPicker", 410, 200, 200, 350, true)
-        color_picker_path = Sketchup.find_support_file("colorpicker.html", "Plugins/su2lux")
+        color_picker_path = Sketchup.find_support_file("colorpicker.html", File.join("Plugins", "su2lux"))
         @color_picker.set_file(color_picker_path)
 		
         puts "finished initializing volume editor"

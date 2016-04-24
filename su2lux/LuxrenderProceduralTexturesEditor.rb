@@ -36,7 +36,7 @@ class LuxrenderProceduralTexturesEditor
 		
 		@procedural_textures_dialog = UI::WebDialog.new(windowname, true, "LuxrenderProceduralTexturesEditor", 450, 600, 10, 10, true)
         @procedural_textures_dialog.max_width = 700
-		setting_html_path = Sketchup.find_support_file("procedural_textures_dialog.html" , "Plugins/"+SU2LUX::PLUGIN_FOLDER)
+		setting_html_path = Sketchup.find_support_file("procedural_textures_dialog.html" , File.join("Plugins", SU2LUX::PLUGIN_FOLDER))
 		@procedural_textures_dialog.set_file(setting_html_path)
         @lrs = lrs
 		@material_editor = matEditor

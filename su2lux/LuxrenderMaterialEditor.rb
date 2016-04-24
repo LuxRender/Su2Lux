@@ -38,14 +38,14 @@ class LuxrenderMaterialEditor
             windowname = "LuxRender Material Editor - " + filename
         end
 		@material_editor_dialog = UI::WebDialog.new(windowname, true, "LuxrenderMaterialEditor", 424, 700, 960, 10, true)
-		material_editor_dialog_path = Sketchup.find_support_file("materialeditor.html", "Plugins/su2lux")
+		material_editor_dialog_path = Sketchup.find_support_file("materialeditor.html", File.join("Plugins", "su2lux"))
 		@material_editor_dialog.max_width = 800
 		@material_editor_dialog.set_file(material_editor_dialog_path)
 	    @collectedmixmaterials = []
         @collectedmixmaterials_i = 0
         
         @color_picker = UI::WebDialog.new("Color Picker - material", false, "ColorPicker", 410, 200, 200, 350, true)
-        color_picker_path = Sketchup.find_support_file("colorpicker.html", "Plugins/su2lux")
+        color_picker_path = Sketchup.find_support_file("colorpicker.html", File.join("Plugins", "su2lux"))
         @color_picker.set_file(color_picker_path)
 		@texture_editor_data = {}
         

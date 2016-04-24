@@ -890,7 +890,7 @@ module SU2LUX
 	
 		# open window
 		@about_dialog = UI::WebDialog.new("about SU2LUX", false, "aboutSU2LUX", 450, 546, 300, 100, false)
-		about_dialog_dialog_path = Sketchup.find_support_file("about.html", "Plugins/su2lux")
+		about_dialog_dialog_path = Sketchup.find_support_file("about.html", File.join("Plugins", "su2lux"))
 		@about_dialog.max_width = 450
 		@about_dialog.set_file(about_dialog_dialog_path)
 		@about_dialog.set_size(450,546)
@@ -1012,7 +1012,7 @@ class SU2LUX_model_observer < Sketchup::ModelObserver
 	end
 	
 	def onPostSaveModel(model)
-		puts 'observer catching onPostSaveModel event'
+		puts 'SU2LUX observer catching onPostSaveModel event'
 		lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
 		# after saving, check variable inf lrs; if true, update file path to reflect model name
 		if(lrs.synchronised_names)
@@ -1346,7 +1346,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 	end
 	
 	def onMaterialChange(materials, material)
-        puts "observer catching SketchUp material change"
+        puts "SU2LUX material observer catching SketchUp material change"
 		
 		# undo
 		Sketchup.active_model.start_operation("SU2LUX material observer", true, false, true)

@@ -2181,7 +2181,7 @@ class LuxrenderExport
                     end
                else ## image texture
                     if (@texexport == "all")
-                        imagemap_filename = @texfolder + "/" + File.basename(SU2LUX.sanitize_path(lux_mat.send("aa_imagemap_filename")))
+                        imagemap_filename = File.join(@texfolder, File.basename(SU2LUX.sanitize_path(lux_mat.send("aa_imagemap_filename"))))
                     else
                         imagemap_filename = SU2LUX.sanitize_path(lux_mat.send("aa_imagemap_filename"))
                     end

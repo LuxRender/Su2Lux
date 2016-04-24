@@ -41,11 +41,11 @@ class LuxrenderLampEditor
 		
 		@lamp_dialog = UI::WebDialog.new(windowname, true, "LuxrenderLampEditor", 450, 600, 10, 10, true)
         @lamp_dialog.max_width = 700
-		setting_html_path = Sketchup.find_support_file("LampEditor.html" , "Plugins/"+SU2LUX::PLUGIN_FOLDER)
+		setting_html_path = Sketchup.find_support_file("LampEditor.html" , File.join("Plugins", SU2LUX::PLUGIN_FOLDER))
 		@lamp_dialog.set_file(setting_html_path)
 		
 		@color_picker = UI::WebDialog.new("Color Picker - lamp", false, "ColorPicker", 410, 200, 200, 350, true)
-        color_picker_path = Sketchup.find_support_file("colorpicker.html", "Plugins/su2lux")
+        color_picker_path = Sketchup.find_support_file("colorpicker.html", File.join("Plugins", "su2lux"))
         @color_picker.set_file(color_picker_path)
 		
         puts "finished initializing lamp editor"
