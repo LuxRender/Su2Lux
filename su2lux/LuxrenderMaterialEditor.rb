@@ -33,9 +33,9 @@ class LuxrenderMaterialEditor
 		@matname_changed = false
         filename = File.basename(Sketchup.active_model.path)
         if (filename == "")
-            windowname = "LuxRender Material Editor"
+            windowname = "SU2LUX Material Editor"
         else
-            windowname = "LuxRender Material Editor - " + filename
+            windowname = "SU2LUX Material Editor - " + filename
         end
 		@material_editor_dialog = UI::WebDialog.new(windowname, true, "LuxrenderMaterialEditor", 424, 700, 960, 10, true)
 		material_editor_dialog_path = Sketchup.find_support_file("materialeditor.html", File.join("Plugins", "su2lux"))

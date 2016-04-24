@@ -30,9 +30,9 @@ class LuxrenderRenderSettingsEditor
         puts "initializing render settings editor"
         filename = File.basename(Sketchup.active_model.path)
         if (filename == "")
-            windowname = "LuxRender Render Settings Editor"
+            windowname = "SU2LUX Render Settings Editor"
             else
-            windowname = "LuxRender Render Settings Editor - " + filename
+            windowname = "SU2LUX Render Settings Editor - " + filename
         end
 		@render_settings_dialog = UI::WebDialog.new(windowname, true, "LuxrenderEngineSettingsEditor", 450, 600, 480, 10, true)
         @render_settings_dialog.max_width = 800

@@ -34,9 +34,9 @@ class LuxrenderLampEditor
         puts "initializing lamp editor"
         filename = File.basename(model.path)
         if (filename == "")
-            windowname = "LuxRender Lamp Editor"
+            windowname = "SU2LUX Lamp Editor"
         else
-            windowname = "LuxRender Lamp - " + filename
+            windowname = "SU2LUX Lamp - " + filename
         end
 		
 		@lamp_dialog = UI::WebDialog.new(windowname, true, "LuxrenderLampEditor", 450, 600, 10, 10, true)

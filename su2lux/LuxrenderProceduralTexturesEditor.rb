@@ -29,9 +29,9 @@ class LuxrenderProceduralTexturesEditor
         filename = File.basename(Sketchup.active_model.path)
 		@activeProcTex = nil
         if (filename == "")
-            windowname = "LuxRender Procedural Textures Editor"
+            windowname = "SU2LUX Procedural Textures Editor"
         else
-            windowname = "LuxRender Procedural Textures - " + filename
+            windowname = "SU2LUX Procedural Textures - " + filename
         end
 		
 		@procedural_textures_dialog = UI::WebDialog.new(windowname, true, "LuxrenderProceduralTexturesEditor", 450, 600, 10, 10, true)

@@ -30,9 +30,9 @@ class LuxrenderSceneSettingsEditor
         @scene_id = scene_id
         filename = File.basename(Sketchup.active_model.path)
         if (filename == "")
-            windowname = "LuxRender Scene Settings Editor"
+            windowname = "SU2LUX Scene Settings Editor"
             else
-            windowname = "LuxRender Scene Settings Editor - " + filename
+            windowname = "SU2LUX Scene Settings Editor - " + filename
         end
 		@scene_settings_dialog = UI::WebDialog.new(windowname, true, "LuxrenderSceneSettingsEditor", 450, 600, 10, 10, true)
         @scene_settings_dialog.max_width = 700
