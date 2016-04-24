@@ -337,17 +337,7 @@ class LuxrenderLampEditor
 				name = lamp_def.attribute_dictionaries["LuxRender"]["name"].unpack("m")[0]
 				lampObject = LuxRenderLamp.new(false, self, @lrs, name, lamp_def_instance)
 				
-				# add to drop down? no, this happens in update_GUI anyway
-				#cmd = "$('#lamps_in_model').append($('<option></option>').val('" + name + "').html('" + name + "'))"
-				#cmd = '$("#lamps_in_model").append($("<option></option>").val("test").html("test"))'
-				#cmd = "$('#lamps_in_model').append($(' <option> </option> ').val('" + name + "').html('" + name + "'))"
-				
-				#puts "editor: " + self.to_s
-				#puts "dialog: " + @lamp_dialog.to_s
-				#puts "current lamp dialog exists? " + (@lamp_dialog == nil ? "no" : "yes")
-				#puts "adding to dropdown, cmd: " + cmd
-				#@lamp_dialog.execute_script(cmd);
-			
+				# note: lamp will be addded to drop down menu in update_GUI method
 			end
 		end
 		
@@ -498,7 +488,7 @@ class LuxrenderLampEditor
 	end
 	
 	def getLampObject(componentDefinition)
-		# todo: make method also accept instances
+		# todo: make method also accept instances?
 		# if componentDefinition.is_a? Sketchup::ComponentInstance
 		#	componentDefinition = componentDefinition.definition
 		# end

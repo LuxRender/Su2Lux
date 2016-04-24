@@ -100,43 +100,11 @@ class LuxRenderLamp
 	end
 	
 	def getValueHash()
-		# note: this returns hash with values, not actual values
+		# note: this returns hash with default values, not actual values
 		# note: this only returns values for which default parameters are provided in @@lampParamDicts, so if a pair is removed there, it will not be shown
 		return @@lampParamDicts[lampType()]
 	end
-	
-	def getFormattedValues()
-		unformattedValues = getValues()
-		formattedValuesHash = Hash.new
-		unformattedValues.each do |paramSet|
-		# deal with vector parameters
-			formattedString = ""
-			texParamName = paramSet[0]
-			if (texParamName[0..6] == "vector_")
-				texParamName.slice! "vector_"
-			end
-			typeString = paramSet[1].to_s + " " + texParamName
-			# deal with square brackets: if first character is '[', remove first and last character and replace ', ' with ' '
-			if paramSet[2].to_s[0] == '['
-				paramSet[2] = paramSet[2].to_s
-				paramSet[2] = paramSet[2][1, paramSet[2].length - 2]
-				paramSet[2] = paramSet[2].gsub!(', ' , ' ')
-			end
-
-			# add formatted strings to array
-			if (paramSet[1] == "string" || paramSet[1] == "bool")
-				formattedString = typeString +  " \"" + paramSet[2].to_s + "\""
-			else
-				formattedString = typeString + " " + paramSet[2].to_s
-			end
-			formattedValuesHash[paramSet[0]] = formattedString
-			
-		end
-		#puts "returning values in hash:"
-		#puts formattedValuesHash
-		return formattedValuesHash
-	end
-	
+		
 	def angle_from_scale()		
 		# get scale factors
 		scale_xy = [@component.transformation.xscale, @component.transformation.yscale].max
@@ -167,8 +135,6 @@ class LuxRenderLamp
 		
 		puts "scale: " + @component.transformation.xscale.to_s + ", " + @component.transformation.yscale.to_s + ", " + @component.transformation.zscale.to_s 
 	end
-	
-	
 	
 	def createGeometry(lampType)
 		# start undo operation
@@ -304,7 +270,6 @@ class LuxRenderLamp
 	end
 	
 	
-	
 	def get_description(inst) # inst is a passed component instance
 		description_lines = []
 		pos = inst.transformation::origin.to_a
@@ -334,32 +299,7 @@ class LuxRenderLamp
 				# get data
 				look_at = (inst.transformation::origin - inst.transformation::zaxis).to_a
 				
-				# create transformation definition
-				#xax = inst.transformation::xaxis
-				#yax = inst.transformation::yaxis
-				#ax = inst.transformation::zaxis
-				#transformation_string = ""
-				#transformation_string += xax[0].to_s + " "
-				#transformation_string += yax[0].to_s + " "
-				#transformation_string += (-0.0254 * zax[0]).to_s + " "
-				#transformation_string += "0 "
-				#transformation_string += xax[1].to_s + " "
-				#transformation_string += yax[1].to_s + " "
-				#transformation_string += (-0.0254 * zax[1]).to_s + " "
-				#transformation_string += "0 "
-				#transformation_string += xax[2].to_s + " "
-				#transformation_string += yax[2].to_s + " "
-				#transformation_string += (-0.0254 * zax[2]).to_s + " "
-				#transformation_string += "0 "
-				#transformation_string += pos[0].to_s + " "
-				#transformation_string += pos[1].to_s + " "
-				#transformation_string += pos[2].to_s + " "
-				#transformation_string += "1"
-				
-				#transformation_array.each do |t|
-				#	transformation_string += " " + t.to_s
-				#end				
-				
+				# create transformation definition				
 				pos_metric = [pos[0] * 0.0254, pos[1] * 0.0254, pos[2] * 0.0254]
 				look_at_metric = [look_at[0] * 0.0254, look_at[1] * 0.0254, look_at[2] * 0.0254]
 				
@@ -379,7 +319,6 @@ class LuxRenderLamp
 				
 				# end transform
 				description_lines << 'TransformEnd'
-				
 			end
 		
 		elsif(lampType == "point")
@@ -400,6 +339,7 @@ class LuxRenderLamp
 		
 		return description_lines
 	end
+	
 	
 	def look_at_transform(cam, target, up) # PBRT look-at transformation
 		transform_string = ""
@@ -443,7 +383,6 @@ class LuxRenderLamp
 		z = va[0] * vb[1] - va[1] * vb[0]	
 		return [x,y,z]
 	end
-	
 end
 
 

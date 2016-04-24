@@ -295,7 +295,7 @@ class LuxrenderMaterialEditor
 			rvalue = (passedcolor[1, 2].to_i(16).to_f*1000000/255.0).round/1000000.0 # ruby 1.8 doesn't support round(6)
             gvalue = (passedcolor[3, 2].to_i(16).to_f*1000000/255.0).round/1000000.0
             bvalue = (passedcolor[5, 2].to_i(16).to_f*1000000/255.0).round/1000000.0
-            if ((@lrs.colorpicker=="diffuse_swatch" or @lrs.colorpicker=="transmission_swatch")  and !Sketchup.active_model.materials.current.texture)
+            if ((@lrs.colorpicker=="diffuse_swatch" or (@current.type == "glass" and  @lrs.colorpicker=="transmission_swatch")) and !Sketchup.active_model.materials.current.texture)
                 Sketchup.active_model.materials.current.color = [rvalue,gvalue,bvalue] # material observer will update kd_R,G,B values
             end
 			
