@@ -258,7 +258,7 @@ module SU2LUX
 		lxs_file = File.new(exportpath, "w")
 		le.export_global_settings(lxs_file)
 		le.export_renderer(lxs_file)
-		puts 'exporting camera'
+		puts 'SU2LUX exporting camera'
 		le.export_camera(model.active_view, lxs_file)
 		le.export_film(lxs_file, file_basename)
 		puts 'exporting render settings'
@@ -1309,7 +1309,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 			material_editor.sendDataFromSketchup
 			material_editor.fire_event("#type", "change", "")
 			material_editor.load_preview_image()
-            material_editor.settexturefields(current_mat.name)
+            material_editor.set_texturefields(current_mat.name)
             material_editor.showhide_fields()
 		else
 			puts "current material is not used"

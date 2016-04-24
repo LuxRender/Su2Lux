@@ -202,7 +202,7 @@ class LuxrenderExport
                 fov = calculated_angle.radians
             end
         else # not two point perspective
-            puts "exporting camera"
+            puts "exporting ordinary camera"
             if (skp_ratio != 0.0) # sketchup aspect ratio fixed
                 if (skp_ratio > 1.0) # landscape
                     puts "fixed aspect ratio, landscape"

@@ -153,6 +153,7 @@ class LuxrenderMaterialEditor
             materials = Sketchup.active_model.materials
             puts ("callback: material_changed, changing from material " + materials.current.name + " to " + material_name)
 			
+			# find material object for selected material
 			existingluxmat = "none"
 			@materials_skp_lux.values.each {|value| 
 				# puts "checking material name ", value.name
@@ -161,6 +162,7 @@ class LuxrenderMaterialEditor
 				end
 			}
 			
+			# set current material to found material, or if no material object was found, to a new material object
 			if existingluxmat == "none"
 				puts "LuxRender material not found, creating new material"
 				@current = self.find(material_name) ### use only this line if testing fails
@@ -169,6 +171,8 @@ class LuxrenderMaterialEditor
 				@current = existingluxmat
 			end
 			
+			# if no material is selected in SketchUp, set a material as the active material 
+			# note: should this be set to the selected material instead of the first material in the list?
 			if(materials.current == nil || materials.current == false)
 				materials.current = materials[0]
 			end
@@ -177,10 +181,20 @@ class LuxrenderMaterialEditor
 			puts "attempting to reload material preview image"
 			load_preview_image()
             puts @current.name
-            settexturefields(@current.name)
+			
+			# update material parameters
+			sendDataFromSketchup() # updates parameter values
+			# get material type, set relevant fields through javascript
+            @material_editor_dialog.execute_script('show_fields("' + @current.type + '")')
+			# update swatches, texture names
+			update_swatches()
+			showhide_fields
+            set_texturefields(@current.name)
+			update_texture_names(@current)
+			
 		}
         
-        def settexturefields(skpmatname) # shows and hides texture load buttons, based on material properties
+        def set_texturefields(skpmatname) # shows and hides texture load buttons, based on material properties
             puts "updating texture fields"
             luxmat = getluxmatfromskpname(skpmatname)
             channels = luxmat.texturechannels
@@ -324,7 +338,7 @@ class LuxrenderMaterialEditor
             SU2LUX.dbg_p "callback: type changed"
 			print "current material: ", material_type, "\n"
             update_texture_names(@current)
-            if (material_type=="mix") # check if mix materials have been set
+            if (material_type == "mix") # check if mix materials have been set
                 if (@current.material_list1 == '')
                     matname0 = Sketchup.active_model.materials[0].name #.delete("[<>]")
                     puts "COMPARING NAMES:"
@@ -577,11 +591,11 @@ class LuxrenderMaterialEditor
         return nil
     end
 	
-	def load_preview_image()
-		puts "running load_preview_image function"			
+	def load_preview_image()		
 		os = OSSpecific.new
-		filename = os.get_variables["material_preview_path"] + Sketchup.active_model.title + "_" + @current.name + ".png" #.delete("[<>]")
+		filename = File.join(os.get_variables["material_preview_path"], Sketchup.active_model.title + "_" + @current.name + ".png") #.delete("[<>]")
 		filename = filename.gsub('\\', '/')
+		puts "running load_preview_image function, looking for file " + filename	
 		if (File.exists?(filename))
 			puts "preview image exists, loading " + filename
             filename.gsub!(/\#/, '	%23')
@@ -665,9 +679,8 @@ class LuxrenderMaterialEditor
        @material_editor_dialog.execute_script(cmd2)
        @material_editor_dialog.execute_script(cmd3)
     end
-                           
-                           
-                           
+
+
 	def sanitize_path(original_path)
 		if (ENV['OS'] =~ /windows/i)
 			sanitized_path = original_path.unpack('U*').pack('C*') # converts string to ISO-8859-1
@@ -702,7 +715,7 @@ class LuxrenderMaterialEditor
 	end
     
 	##
-	# Takes a string like "key1=value1,key2=value2" and creates an hash.
+	# Takes a string like "key1=value1,key2=value2" and creates a hash.
 	##
 	def string_to_hash(string)
 		hash = {}
@@ -808,19 +821,16 @@ class LuxrenderMaterialEditor
 		end
 		
 		## update material editor contents
-        set_material_lists # dropdowns for materials + mix submaterials
+        set_material_lists # dropdowns for materials, mix submaterials and volumes
         sendDataFromSketchup() # material values
         load_preview_image # material preview image
         set_current(@current.name) # active material in material dropdown
         update_texture_names(@current) # image texture paths
-		
-        settexturefields(@current.name)
-        showhide_fields()
+        set_texturefields(@current.name) # shows and hides texture load buttons
+        showhide_fields() # show/hide specularIOR, displacement, emission spectrum, carpaint custom channel, specular IOR preset
         
         # set preview section height
         setdivheightcmd = 'setpreviewheight(' + @lrs.preview_size.to_s + ',' + @lrs.preview_time.to_s + ')'
-        puts setdivheightcmd
-		
         @material_editor_dialog.execute_script(setdivheightcmd)
 		
 		# add procedural textures to dropdown
@@ -832,11 +842,6 @@ class LuxrenderMaterialEditor
 				@material_editor_dialog.execute_script('addToProcTextList("' + texName + '","' + texChannelType + '")')
 			end   	
 		end	
-		
-
-		
-		
-		
 		
 		# set right procedural textures
 		@current.texturechannels.each{|channelname|
@@ -855,15 +860,14 @@ class LuxrenderMaterialEditor
         showhide_carpaint # carpaint custom channel
         update_spec_IOR() # specular IOR preset
     end
-                           
-                           
+
     ##
     #
     ##
     
     def update_texture_names(luxmat)
         for textype in luxmat.texturechannels
-            update_texture_name(luxmat,textype)
+            update_texture_name(luxmat, textype)
         end
     end
     
@@ -981,14 +985,17 @@ class LuxrenderMaterialEditor
 	#
 	##
 	def setValue(id, value) #extend to encompass different types (textbox, anchor, slider)
-		new_value=value.to_s
+		new_value = value.to_s
+		
+		# update boolean values
 		if(@current[id] == true or @current[id] == false)
 			self.fire_event("##{id}", "attr", "checked=#{value}")
-			cmd="checkbox_expander('#{id}');"
+			cmd = "checkbox_expander('#{id}');"
 			@material_editor_dialog.execute_script(cmd)
 			cmd = "$('##{id}').next('div.collapse').find('select').change();"
 			@material_editor_dialog.execute_script(cmd)
-		######### -- other -- #############
+			
+		# update all other parameter values
 		else
 			self.fire_event("##{id}", "val", new_value)
 			# cmd="$('##{id}').val('#{new_value}');"

@@ -89,7 +89,11 @@ function show_load_buttons(textype,filename){
     } else{
         $(".metal2_custom").hide();
     }
-    
+}
+
+function show_fields(material_type){
+	$("#type").nextAll().hide();
+	$("#type").nextAll("." + material_type).show();
 }
 
 $(document).ready(
@@ -106,7 +110,14 @@ $(document).ready(
 			function()
 			{
                 //alert ("detected!")
-				window.location = 'skp:param_generate@' + this.id+'='+this.value
+				
+				if(this.id == "material_name"){     
+					//alert("different material selected: " + this.value);
+					window.location = 'skp:material_changed@' + this.value;
+				}else{
+					//alert("dropdown parameter changed");
+					window.location = 'skp:param_generate@' + this.id+'='+this.value
+				}
 			}
 		)
 		
@@ -169,12 +180,7 @@ $(document).ready(
 			}
 		)
         
-        $("#material_name").change(
-            function() {
-                //alert (this);
-                window.location = 'skp:material_changed@' + this.value;
-            }
-        )
+
 		
 		$("#settings_panel p.header").click(
 			function()
