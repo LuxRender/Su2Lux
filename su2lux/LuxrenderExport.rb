@@ -917,7 +917,7 @@ class LuxrenderExport
 			# check if it is an instance, if so, check if it is visible, if so, write
 			if ent.class == Sketchup::ComponentInstance
 				# check if it is a lamp 
-				if (ent.definition.attribute_dictionaries["LuxRender"] != nil) # lamp
+				if (ent.definition.attribute_dictionaries != nil && ent.definition.attribute_dictionaries["LuxRender"] != nil) # lamp
 					# write lamp		
 					puts "lamp editor valid?" + (lamp_editor == nil ? "no" : "yes")
 					lamp_object = lamp_editor.getLampObject(ent.definition)
