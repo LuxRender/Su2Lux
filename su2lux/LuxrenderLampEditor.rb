@@ -342,7 +342,7 @@ class LuxrenderLampEditor
 		end
 		
 		# set an active lamp
-		if(@lampCollection.count > 0)
+		if(@lampCollection.size > 0)
 			@activeLamp = @lampCollection.values[0]
 			update_GUI(@activeLamp)
 		end
@@ -362,7 +362,7 @@ class LuxrenderLampEditor
 			@lamp_dialog.execute_script(cmd)
 		end
 		
-		if(@lampCollection.values.count > 0)
+		if(@lampCollection.values.size > 0)
 			# make sure we have a lamp object; if it wasn't provided, pick the first one		
 			if(lampObject == nil)
 				if(@activeLamp == nil)

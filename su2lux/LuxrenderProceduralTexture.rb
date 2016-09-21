@@ -104,7 +104,7 @@ class LuxrenderProceduralTexture
 		'blender_voronoi' => [["distmetric","string","actual_distance"],["minkowsky_exp","float",2.5],["noisesize","float",0.25],["nabla","float",0.025],["w1","float",1.0],["w2","float",0.0],["w3","float",0.0],["w4","float",0.0],["bright","float",1.0],["contrast","float",1.0]]
 	}
 	
-	@@transformationParameters = # parameter, default
+	@@transformationParameters = # parameter => default value
 	{
 		'vectortranslateX' => 0.0,
 		'vectortranslateY' => 0.0,
@@ -127,8 +127,8 @@ class LuxrenderProceduralTexture
 		@procTexEditor = procEditor
 		@name = texName
 		
-		# create attribute dictionary
-		@attributeDictionary = @procTexEditor.getTextureDictionary()
+		# get attribute dictionary from texture editor (this dictionary contains subdictionaries for each texture)
+		@textureDictionary = @procTexEditor.getTextureDictionary()
 		
 		if createNew == true # create new object from scratch
 			textureType = passedParam
@@ -138,32 +138,22 @@ class LuxrenderProceduralTexture
 			namesArray << name
 			@lrs.proceduralTextureNames = namesArray
 
-			# write texture type and name to attribute dictionary # marble, checkerboard, ...
-			@attributeDictionary.set_attribute(@name, "textureType", textureType)
-			@attributeDictionary.set_attribute(@name, "name", @name)
+			# write texture name, texture type and channel type to attribute dictionary
+			@textureDictionary.set_attribute(@name, "name", @name) # any name, for example ProcTex_1
+			@textureDictionary.set_attribute(@name, "textureType", textureType) # marble, noise, fbm etc.			
+			@textureDictionary.set_attribute(@name, "procTexChannel", @@textureTypes[textureType][0]) # color, float or fresnel
 			
-			# write texture type (by default first type in the list) # color, float, fresnel
-			@attributeDictionary.set_attribute(@name, "procTexChannel", @@textureTypes[textureType][0])
-			
-			# for all textureType parameters, write values to attribute dictionary
-			#propertyList = @@textureParameters[textureType]
-			#propertyList.each do |propertySet| 
-			#	@attributeDictionary.set_attribute(@name, propertySet[0], propertySet[2])
-			#end
-		
 		else # create object based on existing data in attribute dictionary
-			# set @name and @attributeDictionary
-			@attributeDictionary.set_attribute(@name, "name", @name)
-			puts "getting dictionary object"
-			@attributeDictionary.load_from_model(@name)
+			#@textureDictionary.set_attribute(@name, "name", @name) # commented out: name should be loaded from attribute dictionary
+			@textureDictionary.load_from_model(@name) # loads values stored in SketchUp file into AttributeDictionary dictionary
 		end
 		
-		@procTexEditor.addTexture(name, self) # add texture to collection in current texture editor
-		@procTexEditor.setActiveTexture(self)
+		@procTexEditor.addTexture(@name, self) # add texture to collection in current texture editor
+		@procTexEditor.setActiveTexture(self) # mark this texture as the active texture
 	end
 
 	def setValue(property, value)
-		@attributeDictionary.set_attribute(@name, property, value)
+		@textureDictionary.set_attribute(@name, property, value)
 	end
 	
 	def printValues()
@@ -178,7 +168,7 @@ class LuxrenderProceduralTexture
 		@@textureParameters[texType].each do |propertySet|
 			#puts propertySet
 			# get value from dictionary, or use default value if no value has been stored
-			varValue = @attributeDictionary.get_attribute(name, propertySet[0].to_s, propertySet[2])
+			varValue = @textureDictionary.get_attribute(name, propertySet[0].to_s, propertySet[2])
 			passedVariableLists << [propertySet[0],propertySet[1],varValue]
 		end
 		return passedVariableLists
@@ -188,7 +178,7 @@ class LuxrenderProceduralTexture
 		passedVariableLists = []
 		texType = getTexType()
 		@@transformationParameters.each do |key, value|
-			varValue = @attributeDictionary.get_attribute(name, key, value)
+			varValue = @textureDictionary.get_attribute(name, key, value)
 			passedVariableLists << [key, varValue]
 		end
 		return passedVariableLists
@@ -231,46 +221,41 @@ class LuxrenderProceduralTexture
 		# check if item has transformation
 		if @@hasTransformation.include? getTexType()
 			# if so, combine properties into nice strings
-			co = @attributeDictionary.get_attribute(name, "coordinates", "global")
+			co = @textureDictionary.get_attribute(name, "coordinates", "global")
 			transformList << '"string coordinates" ["' + co + '"]'     
-			tX = @attributeDictionary.get_attribute(name, "vectortranslateX", 0.0).to_s
-			tY = @attributeDictionary.get_attribute(name, "vectortranslateY", 0.0).to_s
-			tZ = @attributeDictionary.get_attribute(name, "vectortranslateZ", 0.0).to_s
+			tX = @textureDictionary.get_attribute(name, "vectortranslateX", 0.0).to_s
+			tY = @textureDictionary.get_attribute(name, "vectortranslateY", 0.0).to_s
+			tZ = @textureDictionary.get_attribute(name, "vectortranslateZ", 0.0).to_s
 			transformList << '"vector translate" [' + tX + ' ' + tY + ' ' + tX + ']'
-			rX = @attributeDictionary.get_attribute(name, "vectorrotateX", 0.0).to_s
-			rY = @attributeDictionary.get_attribute(name, "vectorrotateY", 0.0).to_s
-			rZ = @attributeDictionary.get_attribute(name, "vectorrotateZ", 0.0).to_s
+			rX = @textureDictionary.get_attribute(name, "vectorrotateX", 0.0).to_s
+			rY = @textureDictionary.get_attribute(name, "vectorrotateY", 0.0).to_s
+			rZ = @textureDictionary.get_attribute(name, "vectorrotateZ", 0.0).to_s
 			transformList << '"vector rotate" [' + rX + ' ' + rY + ' ' + rZ + ']'
-			sX = @attributeDictionary.get_attribute(name, "vectorscaleX", 1.0).to_s
-			sY = @attributeDictionary.get_attribute(name, "vectorscaleY", 1.0).to_s
-			sZ = @attributeDictionary.get_attribute(name, "vectorscaleZ", 1.0).to_s
+			sX = @textureDictionary.get_attribute(name, "vectorscaleX", 1.0).to_s
+			sY = @textureDictionary.get_attribute(name, "vectorscaleY", 1.0).to_s
+			sZ = @textureDictionary.get_attribute(name, "vectorscaleZ", 1.0).to_s
 			transformList << '"vector scale" [' + sX + ' ' + sY + ' ' + sZ + ']'
 		end
 		return transformList
 	end
 	
-	def self.getTexChannels(texType)
-		return @@textureTypes[texType]
-	end
-	
 	def self.getChannelType(texName)
 		thisDict = LuxrenderAttributeDictionary.returnDictionary(texName)
 		thisTexType = thisDict["procTexChannel"]
+		puts "self.getChannelType found texture type " + thisTexType + " for material with name " + texName
 		return thisTexType
 	end
 	
-	def self.setTexChannel(texName) # returns float, fresnel or color
-		thisDict = LuxrenderAttributeDictionary.returnDictionary(texName) # gets dictionary for this texture object
-		thisTexName = thisDict["textureType"] # gets the texture type of this texture
-		thisDict["procTexChannel"] = @@textureTypes[thisTexName][0]  # sets the texture channel to the first one that is listed
-		puts "running setTexChannel, returning " + thisDict["procTexChannel"] # returns the texture channel
-		return thisDict["procTexChannel"]
-	end
+
 	
 	def setTexChannel()
-		thisDict = LuxrenderAttributeDictionary.returnDictionary(name)
-		thisTexName = thisDict["textureType"]
-		thisDict["procTexChannel"] = @@textureTypes[thisTexName][0] 
+		#thisDict = LuxrenderAttributeDictionary.returnDictionary(name)
+		#thisTexName = thisDict["textureType"]
+		thisTexName = self.get_attribute(name, "textureType")
+		#thisDict["procTexChannel"] = @@textureTypes[thisTexName][0] 
+		self.setValue("procTexChannel", @@textureTypes[thisTexName][0])
+		
+		puts "running setTexChannel, returning " + thisDict["procTexChannel"] # returns the texture channel
 		return thisDict["procTexChannel"]
 	end
 	
@@ -284,6 +269,7 @@ class LuxrenderProceduralTexture
 	def getChannelType()
 		thisDict = LuxrenderAttributeDictionary.returnDictionary(name)
 		thisTexType = thisDict["procTexChannel"]
+		puts "getChannelType found texture type " + thisTexType + " for texture " + self.name
 		return thisTexType
 	end
 	

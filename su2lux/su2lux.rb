@@ -34,8 +34,8 @@ end
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.45rc1"
-    SU2LUX_DATE = "24 April 2016"
+    SU2LUX_VERSION = "0.45rc3"
+    SU2LUX_DATE = "22 September 2016"
 	DEBUG = true
 	PLUGIN_FOLDER = "su2lux"
     GEOMETRYFOLDER = "geometry"
@@ -521,7 +521,7 @@ module SU2LUX
 			return sanitized_path.delete("[<>]")
 		elsif (ENV['OS'] =~ /windows/i) # ruby 1.8 does not support the 'ord' method
 			original_path = File.join(original_path.split('\\')) # changes backslashes into slashes
-			return original_path.dump.gsub!(/[^0-9A-Za-z.\/\:\-]/, '')
+			return original_path.dump.gsub!(/[^0-9A-Za-z.\/\:\-\_]/, '')
 		else # on OS X, all seems to be fine
 			return original_path
 		end
@@ -640,9 +640,9 @@ module SU2LUX
 			system(command_line)
         else
             fullpath = File.join(lrs.export_luxrender_path, @os_specific_vars["file_appendix"])
-			#Thread.new do
+			Thread.new do
 				system("#{fullpath} \"#{export_path}\"")
-			#end
+			end
 		end
 	end # END launch_luxrender
 
@@ -968,6 +968,11 @@ module SU2LUX
 		return editor
 	end # END get_editor
     
+	
+	def SU2LUX.get_current_editor(editor_name)
+		return get_editor(Sketchup.active_model.definitions.entityID, editor_name)
+	end
+	
 	##
 	#
 	##
@@ -1111,6 +1116,7 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 		#lrs.reset # on Windows, try to make sure we don't use parameters from the previous model
 		#lrs.load_from_model
         lrs.reset_viewparams
+		lrs.reset_volumes_and_textures()
         
 		puts "about to create material editor"
         material_editor = SU2LUX.create_material_editor(model_id, lrs)
@@ -1219,7 +1225,8 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 		puts "recreating procedural texture objects"
 		if(procTextureNames != nil)
 			for texName in procTextureNames
-				newTex = LuxrenderProceduralTexture.new(false, procEditor, lrs, nil, texName)
+				newTex = LuxrenderProceduralTexture.new(false, procEditor, lrs, nil, texName) # false: don't create from scratch; instead,
+				                                               # use existing texture data that is stored in dictionary
 			end
 		end
 		if(procEditor.activeProcTex)
@@ -1318,7 +1325,7 @@ class SU2LUX_materials_observer < Sketchup::MaterialsObserver
 	
     def onMaterialAdd(materials, material)
         puts "onMaterialAdd added material: " + material.name
-		puts materials.count
+		#puts materials.size
 		
 		# adding a material will set it current, onMaterialSetCurrent will take over
         # except on OS X, so we have to take some steps manually:

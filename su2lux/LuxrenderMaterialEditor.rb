@@ -114,11 +114,21 @@ class LuxrenderMaterialEditor
 		}
 		
 		@material_editor_dialog.add_action_callback("set_procedural_texture"){|dialog, parameter_name|
-			#puts parameter_name
-			# get first procedural texture, if we have a texture
-			if @lrs.proceduralTextureNames != nil
-				# set this texture for parameter_name
-				@current.send(parameter_name + '=' + @lrs.proceduralTextureNames[0])
+			# note: parameter_name contains name of "parent" dialog, e.g. "set_procedural_texture"
+			# if we have procedural textures, set dropdown to the right one
+			puts "set_procedural_texture callback"
+			if (@lrs.proceduralTextureNames != nil && @lrs.proceduralTextureNames.size > 0)
+				puts "set_procedural_texture: setting procedural texture"
+				# check material's procedural texture; if it doesn't have one, set it to the first texture in the list
+				procedural_texture_dropdown_name = parameter_name.sub("_texturetype", "") + "_imagemap_proctex"
+				if(@current[procedural_texture_dropdown_name] == nil || @current[procedural_texture_dropdown_name] == "")		
+					puts "set_procedural_texture: no previous texture set"
+					@current.send(procedural_texture_dropdown_name + "=", @lrs.proceduralTextureNames[0])
+				end
+				
+				# set right procedural texture in dropdown for active channel in material editor
+                cmd = "$('#procedural_texture_dropdown_name').val('" + @current[procedural_texture_dropdown_name] + "');"
+                @material_editor_dialog.execute_script(cmd)		
 			end
 		}
 	
@@ -471,7 +481,7 @@ class LuxrenderMaterialEditor
             generated_lxs_file.puts(lxs_section_2)
             previewExport.output_material(generated_lxs_file, @current, active_material_name) # writes "NamedMaterial #active_material_name.." or light definition
             generated_lxs_file.puts(lxs_section_3)
-            previewExport.export_displacement_textures(active_luxmat, generated_lxs_file, @current, active_material_name)
+            previewExport.export_displacement_textures(generated_lxs_file, @current, active_material_name)
             generated_lxs_file.puts("AttributeEnd")
             generated_lxs_file.puts("WorldEnd")
 			generated_lxs_file.close
@@ -849,7 +859,9 @@ class LuxrenderMaterialEditor
 			proctex_field = channelname + '_imagemap_proctex'
 			proctex_value = @current.send(proctex_field)
 			# call javascript function with dropdown name and value
-			@material_editor_dialog.execute_script('setProcTextList("#' + proctex_field + '","' + proctex_value + '")')
+			if(proctex_value != nil && proctex_value != "")
+				@material_editor_dialog.execute_script('setProcTextList("#' + proctex_field + '","' + proctex_value + '")')
+			end
 		}	
 	end
     

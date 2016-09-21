@@ -22,9 +22,11 @@ class LuxrenderSettings
 
 	attr_reader :dict
 	alias_method :dictionary_name, :dict
+	
+	# global lists contain default values; these are cloned to any particular instance of LuxrenderSettings
 		
-	@@settings_global = {
-		#### render settings preset; saving it in @@settings_render causes it to be saved in preset files, causing confusion ###
+	@@default_settings_global = {
+		#### render settings preset; saving it in @@default_settings_render causes it to be saved in preset files, causing confusion ###
 		'renderpreset' => 'interior',
 		############   Color Swatches   ############
 		'swatch_list' => ['diffuse_swatch','specular_swatch','reflection_swatch','metal2_swatch','em_swatch','transmission_swatch','absorption_swatch','cl1kd_swatch','cl1ks_swatch','cl2kd_swatch','cl2ks_swatch'],
@@ -46,7 +48,7 @@ class LuxrenderSettings
 		'version_set' => false,
 	}
 		
-	@@settings_render = {
+	@@default_settings_render = {
 		'renderer' => 'sampler',
 		############  Pixel filter  ############
 		'pixelfilter_type' => 'blackmanharris',
@@ -181,16 +183,15 @@ class LuxrenderSettings
 		'grid_refineimmediately' => false,
 	}
 	
-	@@settings_texture_and_volume = {
+	@@default_settings_texture_and_volume = {
 		### helper value for procedural materials ###
 		'proceduralTextureNames' => [],
-		#'nrProceduralTextures' => 0,
 		'volumeNames' => [],
 		'colorpicker' => "diffuse_swatch",
 		'colorpicker_volume' => "vol_absorption_swatch",
 	}
 	
-	@@settings_scene = {
+	@@default_settings_scene = {
 		############    Camera   ############
 		'camera_type' => 'SketchUp',
 		'hither'=> 0.1,
@@ -340,7 +341,7 @@ class LuxrenderSettings
 		'preview_size' => 140,
 		'preview_time' => 2,
 	}
-	@@allSettings = @@settings_render.merge(@@settings_texture_and_volume).merge(@@settings_global).merge(@@settings_scene)	
+	@@allDefaultSettings = @@default_settings_render.merge(@@default_settings_texture_and_volume).merge(@@default_settings_global).merge(@@default_settings_scene)	
 		
 	##
 	#
@@ -349,28 +350,28 @@ class LuxrenderSettings
 	    puts "initializing LuxRender settings"
         @model_id = modelID
 		singleton_class = (class << self; self; end)
-		@model=Sketchup.active_model
+		@model = Sketchup.active_model
         @attributedictionary = LuxrenderAttributeDictionary.new(@model)
-		@view=@model.active_view
+		@view = @model.active_view
 		
 		# clone settings to this object's settings
-		@settings_render = @@settings_render.clone
-		@settings_scene = @@settings_scene.clone
-		@settings_texture_and_volume = @@settings_texture_and_volume.clone
-		@settings_global = @@settings_global.clone
+		@settings_render = @@default_settings_render.clone
+		@settings_scene = @@default_settings_scene.clone
+		@settings_texture_and_volume = @@default_settings_texture_and_volume.clone
+		@settings_global = @@default_settings_global.clone
 		
 		@settings_interface = @settings_render.merge(@settings_scene).merge(@settings_texture_and_volume)
-		@settings = @settings_interface.merge(@@settings_global.clone)
+		@settings = @settings_interface.merge(@@default_settings_global.clone)
 		
 		singleton_class.module_eval do			
 			define_method("[]") do |key| 
-				defaultValue = @@allSettings[key]
+				defaultValue = @@allDefaultSettings[key]
 				return @attributedictionary.get_attribute("luxrender_settings", key, defaultValue)
 			end
 				
 			puts "creating methods to access and modify LuxRender settings"
 			   			
-			@@allSettings.each do |key, defaultValue|
+			@@allDefaultSettings.each do |key, defaultValue|
 				# create getter methods to access any parameter; calling @lrs.someattribute will actually call @attributedictionary.get_attribute("luxrender_settings", someattribute, someattributesdefaultvalue)
 				define_method(key) {@attributedictionary.get_attribute("luxrender_settings", key, defaultValue) }
 				# create setter methods for all parameters
@@ -404,6 +405,19 @@ class LuxrenderSettings
 			@attributedictionary.set_attribute("luxrender_settings", 'fleximage_xresolution', @model.active_view.vpwidth)
 			@attributedictionary.set_attribute("luxrender_settings", 'fleximage_yresolution', @model.active_view.vpheight)
 	end #END reset
+	
+	def reset_volumes_and_textures
+		@settings_texture_and_volume = @@default_settings_texture_and_volume
+		
+		# set values in attribute dictionary
+		@attributedictionary.set_attribute("luxrender_settings", 'proceduralTextureNames', [])
+        @attributedictionary.set_attribute("luxrender_settings", 'volumeNames', [])
+		@attributedictionary.set_attribute("luxrender_settings", 'colorpicker', "diffuse_swatch")
+        @attributedictionary.set_attribute("luxrender_settings", 'colorpicker_volume', "vol_absorption_swatch")
+		
+	end
+	
+	
 
     ##
     #   return render setting keys

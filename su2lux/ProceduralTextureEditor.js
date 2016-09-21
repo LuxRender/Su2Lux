@@ -63,7 +63,7 @@ $(document).ready(
 			{
 				$('.parameter_container').hide(); // hide all texture fields
 				$("."+this.value).show(); // show selected field
-				paramString = $('#textures_in_model').val() + '|textureType|' + $('#texture_types').val() + '|' + $('#procTexChannel').val();
+				paramString = $('#textures_in_model').val() + '|' + $('#texture_types').val(); // + '|' + $('#procTexChannel').val();
 				//alert(paramString);
 				window.location = 'skp:update_texType@' + paramString;
 			}

@@ -166,7 +166,7 @@ class LuxrenderMaterial
 		@@settings[key + "vscale"] = 1.0
 		@@settings[key + "udelta"] = 0.0
 		@@settings[key + "vdelta"] = 0.0
-		@@settings[key + "proctex"] = "procTex_1"
+		@@settings[key + "proctex"] = ""
 		@@settings[key + "maxanisotropy"] = 8.0
 		@@settings[key + "discardmipmaps"] = 0
 		# @@settings[key + "uvset"] = 0
@@ -296,6 +296,10 @@ class LuxrenderMaterial
 	end #end initialize
 	
 	def get_texture_channels()
+		return @@settings['texturechannels']
+	end
+	
+	def self.get_texture_channels()
 		return @@settings['texturechannels']
 	end
 	

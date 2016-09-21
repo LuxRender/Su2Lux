@@ -244,7 +244,7 @@ class LuxrenderVolumeEditor
 			@volume_dialog.execute_script('addToVolumeList("' + volumeName + '")')
 		end
 		
-		if(@volumeCollection.keys.count > 0)
+		if(@volumeCollection.keys.size > 0)
 			puts 'updating volume editor interface'
 			# pick a volume object
 			displayVolumeName = @volumeCollection.keys[0]

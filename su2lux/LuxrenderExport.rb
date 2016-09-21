@@ -1015,6 +1015,7 @@ class LuxrenderExport
 				geometry_file.puts 'AttributeBegin'
 				matname = skp_mat_name + ((dist_index == 0 || dist_index == nil) ? "" : SU2LUX::SUFFIX_DIST + dist_index.to_s) # @material_editor.materials_skp_lux[skp_mat].name
 				ply_path = File.join(relative_ply_folder, matname + '.ply')
+				lux_mat = nil
 				if(skp_mat != "SU2LUX_no_material")
 					geometry_file.puts '  NamedMaterial "' + SU2LUX.sanitize_path(matname) + '"' 			# NamedMaterial "materialname"
 					lux_mat = @material_editor.materials_skp_lux[skp_mat]
@@ -1028,6 +1029,12 @@ class LuxrenderExport
 				end
 				geometry_file.puts '  Shape "plymesh"' 							#   Shape "plymesh"
 				geometry_file.puts '  "string filename" ["' +  ply_path + '"]'	#	"string filename" ["Untitled_luxdata/geometry/1_boxes.ply"]
+				
+				# write displacement
+				if(lux_mat != nil)
+					self.export_displacement_textures(geometry_file, lux_mat, matname)
+				end
+				
 				geometry_file.puts 'AttributeEnd'
 				geometry_file.puts ''
 			end
@@ -1120,9 +1127,14 @@ class LuxrenderExport
 							compdef_lines << "  " + lightdef_line
 						}
 					end
-					compdef_lines << '    NamedMaterial "' + SU2LUX.sanitize_path(luxmat.name) + ((dist_index == 0 || dist_index == nil) ? "" : SU2LUX::SUFFIX_DIST + dist_index.to_s) + '"'
+					this_mat_name = SU2LUX.sanitize_path(luxmat.name) + ((dist_index == 0 || dist_index == nil) ? "" : SU2LUX::SUFFIX_DIST + dist_index.to_s)
+					compdef_lines << '    NamedMaterial "' + this_mat_name + '"'
 					compdef_lines << '    Shape "plymesh"'						#   Shape "plymesh"
 					compdef_lines << '    "string filename" ["' +  ply_path + '"]' #	"string filename" ["Untitled_luxdata/geometry/1_boxes.ply"]
+									# write displacement
+					if(luxmat != nil)
+						self.export_displacement_definition(compdef_lines, luxmat, this_mat_name)
+					end
 					compdef_lines << '  AttributeEnd'
 				end
 			elsif(skpmat == "SU2LUX_no_material")
@@ -1577,10 +1589,10 @@ class LuxrenderExport
         end
     end
         
-    def export_displacement_textures(skp_mat, out, luxrender_mat, texname) # only used for material preview
+    def export_displacement_textures(out, luxrender_mat, texname) # writes to a file that is passed as an argument
         if luxrender_mat.use_displacement
-			puts "exporting displacement"
-			puts luxrender_mat.dm_texturetype
+			# puts "exporting displacement"
+			# puts luxrender_mat.dm_texturetype
             out.puts "\"string subdivscheme\" [\"" + luxrender_mat.dm_scheme + "\"]"
             case luxrender_mat.dm_scheme
                 when "loop"
@@ -1600,6 +1612,32 @@ class LuxrenderExport
 			
 			out.puts "\"float dmscale\" [#{"%.6f" %(luxrender_mat.dm_scale)}]"
             out.puts "\"float dmoffset\" [#{"%.6f" %(luxrender_mat.dm_offset)}]"
+        end
+    end
+	
+	def export_displacement_definition(definition_array, luxrender_mat, texname) # writes to an array that is passed as an argument
+        if luxrender_mat.use_displacement
+			# puts "exporting displacement"
+			# puts luxrender_mat.dm_texturetype
+            definition_array << "\"string subdivscheme\" [\"" + luxrender_mat.dm_scheme + "\"]"
+            case luxrender_mat.dm_scheme
+                when "loop"
+                    definition_array << "\"bool dmnormalsmooth\" [\"#{luxrender_mat.dm_normalsmooth}\"]"
+                    definition_array << "\"bool dmnormalsplit\" [\"#{luxrender_mat.dm_normalsplit}\"]"
+                    definition_array << "\"bool dmsharpboundary\" [\"#{luxrender_mat.dm_sharpboundary}\"]"
+                    definition_array << "\"integer nsubdivlevels\" [#{luxrender_mat.dm_subdivl}]"
+                when "microdisplacement"
+                    definition_array << "\"integer nsubdivlevels\" [#{luxrender_mat.dm_microlevels}]"
+            end
+			
+			if (luxrender_mat.dm_texturetype == 'imagemap' || luxrender_mat.dm_texturetype == 'sketchup')
+				definition_array << "\"texture displacementmap\" [\""+ texname +"::displacementmap\"]"
+			else # procedural
+				definition_array << "\"texture displacementmap\" [\"#{luxrender_mat.dm_imagemap_proctex}\"]"
+            end
+			
+			definition_array << "\"float dmscale\" [#{"%.6f" %(luxrender_mat.dm_scale)}]"
+            definition_array << "\"float dmoffset\" [#{"%.6f" %(luxrender_mat.dm_offset)}]"
         end
     end
 	
