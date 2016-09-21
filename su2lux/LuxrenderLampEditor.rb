@@ -206,7 +206,7 @@ class LuxrenderLampEditor
 		##
 		
 		@lamp_dialog.add_action_callback('update_GUI') {|dialog, paramString|
-			puts "update_GUI callback"
+			#puts "update_GUI callback"
 			update_GUI()
 		}
 
@@ -214,8 +214,8 @@ class LuxrenderLampEditor
 		#	pass on changed parameter from interface to dictionary
 		##
 		@lamp_dialog.add_action_callback('set_param') {|dialog, paramString|
-            SU2LUX.dbg_p "callback: set_param"
-			puts paramString # lampName|parameterName|parameterValue
+            #SU2LUX.dbg_p "callback: set_param"
+			#puts paramString # lampName|parameterName|parameterValue
 			params = paramString.split('|')
 			lampObject = @lampsByName[params[0]]
 			lampObject.setValue(params[1],params[2])
@@ -226,7 +226,7 @@ class LuxrenderLampEditor
 		##
 		@lamp_dialog.add_action_callback('update_lamp_type') {|dialog, paramString|
             SU2LUX.dbg_p "callback: update lamp type"
-			puts paramString # homogeneous|lamp01
+			#puts paramString # homogeneous|lamp01
 			
 			params = paramString.split('|')
 			lampObject = @lampsByName[params[1]]
@@ -243,7 +243,7 @@ class LuxrenderLampEditor
 		}
 
 		@lamp_dialog.add_action_callback('display_lamp') {|dialog, paramString|
-			puts "lamp selected, displaying interface for #{paramString}"
+			#puts "lamp selected, displaying interface for #{paramString}"
 			# get lamp object
 			lampObject = @lampsByName[paramString]
 			# set as active lamp
@@ -271,7 +271,7 @@ class LuxrenderLampEditor
         }
 		
 		@color_picker.add_action_callback('provide_color') { |dialog, passedcolor|
-			puts "lamp editor callback passing colour to colour picker init_color command"		
+			#puts "lamp editor callback passing colour to colour picker init_color command"		
 			if(@activeLamp)
 				updateColorPicker() # for Windows
 			end
@@ -298,21 +298,21 @@ class LuxrenderLampEditor
         }
 		
 		@color_picker.add_action_callback('colorfield_red_update') { |dialog, colorValue|
-			puts "lamp editor callback: updating red channel"
+			#puts "lamp editor callback: updating red channel"
 			@activeLamp.setValue("color_r", colorValue.to_f)
 			channelColor = [@activeLamp.getValue("color_r").to_f, @activeLamp.getValue("color_g").to_f, @activeLamp.getValue("color_b").to_f] 
 			updateSwatch(toHex(channelColor))
 		}
 		
 		@color_picker.add_action_callback('colorfield_green_update') { |dialog, colorValue|
-			puts "lamp editor callback: updating green channel"
+			#puts "lamp editor callback: updating green channel"
 			@activeLamp.setValue("color_g", colorValue.to_f)
 			channelColor = [@activeLamp.getValue("color_r").to_f, @activeLamp.getValue("color_g").to_f, @activeLamp.getValue("color_b").to_f] 
 			updateSwatch(toHex(channelColor))
 		}	
 		
 		@color_picker.add_action_callback('colorfield_blue_update') { |dialog, colorValue|
-			puts "lamp editor callback: updating blue channel"
+			#puts "lamp editor callback: updating blue channel"
 			@activeLamp.setValue("color_b", colorValue.to_f)
 			channelColor = [@activeLamp.getValue("color_r").to_f, @activeLamp.getValue("color_g").to_f, @activeLamp.getValue("color_b").to_f] 
 			updateSwatch(toHex(channelColor))

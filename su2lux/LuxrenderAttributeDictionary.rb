@@ -23,27 +23,27 @@ class LuxrenderAttributeDictionary
 	def self.returnDictionary(name)
 		@@allDictionaryCollections.each{ |dictCollection|
 			if dictCollection.dictionaries.key?(name)
-				puts "self.returnDictionary found dictionary " + dictCollection.dictionaries[name].__id__.to_s + " containing key " + name
+				#puts "self.returnDictionary found dictionary " + dictCollection.dictionaries[name].__id__.to_s + " containing key " + name
 				return dictCollection.dictionaries[name]
 			end
 		}
-		puts "self.returnDictionary: no dictionary found with name " + name + ", returning nil"
+		#puts "self.returnDictionary: no dictionary found with name " + name + ", returning nil"
 		return nil
 	end
 	
 	def returnDictionary(name)
 		if @dictionaries.key?(name)
-			puts "returnDictionary found dictionary " + @dictionaries[name].__id__.to_s + " containing key " + name
+			#puts "returnDictionary found dictionary " + @dictionaries[name].__id__.to_s + " containing key " + name
 			return @dictionaries[name]
 		end
-		puts "returnDictionary found no dictionary with name " + name + ", returning nil"
+		#puts "returnDictionary found no dictionary with name " + name + ", returning nil"
 		return nil	
 	end
 		
 	def self.returnDictionaryCollection(name)
 		@@allDictionaryCollections.each{ |dictCollection|
 			if dictCollection.dictionaries.key?(name)
-				puts "self.returnDictionaryCollection: found dictionary collection containing key " + name
+				#puts "self.returnDictionaryCollection: found dictionary collection containing key " + name
 				return dictCollection
 			end
 		}
@@ -92,7 +92,7 @@ class LuxrenderAttributeDictionary
 	##
 	def choose(name)
 		if (name.nil? or name.strip.empty?)
-			puts "returning @dictionary"
+			#puts "returning @dictionary"
 			return @dictionary
 		end
 		if ( !@dictionaries.key? name)
@@ -118,16 +118,16 @@ class LuxrenderAttributeDictionary
 	#end #END save_to_model
     
 	def load_from_model(name)
-        puts "loading dictionary for " + name.to_s
+        #puts "loading dictionary for " + name.to_s
 		@dictionary = self.choose(name) # self is #<LuxrenderAttributeDictionary:.....>
 		model_dictionary = @model.attribute_dictionary(name)
-		puts "load from model opening dictionary " + model_dictionary.__id__.to_s
+		#puts "load from model opening dictionary " + model_dictionary.__id__.to_s
 		if (model_dictionary)
-            puts "number of attribute dictionary items:" + model_dictionary.length.to_s
+            #puts "number of attribute dictionary items:" + model_dictionary.length.to_s
 			@model.start_operation("SU2LUX load model data", true, false, true)
 			model_dictionary.each { |key, value|
 				# puts "load_from_model updating attributes"
-				puts "dictionary value: " + key.to_s + ": " + value.to_s
+				#puts "dictionary value: " + key.to_s + ": " + value.to_s
 				self.set_attribute(name, key, value) # set, because we're taking values from the model's attribute dictionary
                                                      # and setting them in the (temporary) LuxRender attribute dictionary
 													 # TODO 2014: prevent running this function on loading model; parameters that are not loaded in the attribute dictionary should be retrieved from the SketchUp file directly
@@ -136,7 +136,7 @@ class LuxrenderAttributeDictionary
 			
 			return true
 		else
-            puts "dictionary does not exist"
+            #puts "dictionary does not exist"
 			return false
 		end
 	end #END load_from_model
@@ -169,7 +169,7 @@ class LuxrenderAttributeDictionary
 		@dictionary = self.choose(name)
 		@dictionary.each { |key, value|
 			if (@model.get_attribute(name, key) != value)
-                puts key.to_s + " has changed"
+                #puts key.to_s + " has changed"
 				return true;
 			end
 		}

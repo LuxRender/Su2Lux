@@ -136,13 +136,13 @@ module SU2LUX
         settings_source_folder = File.join(SU2LUX::PLUGIN_FOLDER, "presets_render_settings")
         puts "copying preset files"
         settingsfilesstring = File.join(Sketchup.find_support_file("Plugins"),settings_source_folder,"/*.lxp")
-        puts settingsfilesstring
+        #puts settingsfilesstring
         Dir.glob(settingsfilesstring) do |presetfile|
             settings_target_file = File.join(os.get_variables["settings_path"], File.basename(presetfile))
             puts settings_target_file
             FileUtils.copy_file(presetfile,settings_target_file) unless File.exists?(settings_target_file)
         end
-        puts "finished copying preset files"
+        #puts "finished copying preset files"
         
 	end # END initialize_variables
 
@@ -164,7 +164,7 @@ module SU2LUX
 		focusTest = FocusTool.new(Sketchup.active_model.definitions.entityID)
 		Sketchup.active_model.select_tool(focusTest)
 		#focusTest.activate()
-		puts "done running focus tool"
+		#puts "done running focus tool"
 	end
   
 	##
@@ -252,8 +252,8 @@ module SU2LUX
 		Sketchup.set_status_text('SU2LUX export: settings')
         # write lxs file
 		puts 'exporting settings'
-		puts 'export path:'
-		puts exportpath
+		#puts 'export path:'
+		#puts exportpath
 		lrs.export_file_path = exportpath
 		lxs_file = File.new(exportpath, "w")
 		le.export_global_settings(lxs_file)
@@ -372,7 +372,7 @@ module SU2LUX
 		user_input = UI.savepanel("Save lxs file", export_folder, export_filename)
 		#check whether user has pressed cancel
 		if user_input
-			puts user_input
+			#puts user_input
 			user_input.gsub!(/\\\\/, '/') #bug with sketchup not allowing \ characters
 			user_input.gsub!(/\\/, '/') if user_input.include?('\\')
 			# set file path in lrs
@@ -686,7 +686,7 @@ module SU2LUX
 		end
         @matedit_hash[scene_id].set_material_lists
         if @matedit_hash[scene_id].visible?
-			puts "hiding material editor"
+			#puts "hiding material editor"
 			@matedit_hash[scene_id].hide
             #@material_editor_dialog.close
 		else

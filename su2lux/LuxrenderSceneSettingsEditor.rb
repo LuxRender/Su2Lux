@@ -39,7 +39,7 @@ class LuxrenderSceneSettingsEditor
 		setting_html_path = Sketchup.find_support_file("scene_settings.html", File.join("Plugins", SU2LUX::PLUGIN_FOLDER))
 		@scene_settings_dialog.set_file(setting_html_path)
         @lrs = lrs
-        puts "finished initializing scene settings editor"
+        #puts "finished initializing scene settings editor"
         
 		##
 		#
@@ -49,8 +49,8 @@ class LuxrenderSceneSettingsEditor
 				pair = params.split("=")
 				key = pair[0]		   
 				value = pair[1]
-                puts key
-                puts value
+                #puts key
+                #puts value
 				case key
 					#when "fov"
 					#	Sketchup.active_model.active_view.camera.fov = value.to_f
@@ -91,7 +91,7 @@ class LuxrenderSceneSettingsEditor
 		#   RESOLUTION LOGIC
 		##
 		@scene_settings_dialog.add_action_callback("resolution_update_skp") { |dialog, params|
-            puts "updating resolution values"
+            #puts "updating resolution values"
             @lrs.aspectratio_type = "aspectratio_sketchup_view"
             cam = Sketchup.active_model.active_view.camera
             view = Sketchup.active_model.active_view
@@ -178,8 +178,8 @@ class LuxrenderSceneSettingsEditor
 		#   RESOLUTION LOGIC
 		##
 		@scene_settings_dialog.add_action_callback("resolution_update_fixed") { |dialog, params|
-            puts "updating resolution values, fixed"
-            puts params
+            #puts "updating resolution values, fixed"
+            #puts params
             @lrs.aspectratio_type = "aspectratio_fixed"
             @lrs.aspectratio_fixed_ratio = params.to_f
             cam = Sketchup.active_model.active_view.camera
@@ -209,7 +209,7 @@ class LuxrenderSceneSettingsEditor
 		#
 		##
 		@scene_settings_dialog.add_action_callback("resolution_update_custom") { |dialog, params|
-            puts "updating resolution values, custom"
+            #puts "updating resolution values, custom"
             @lrs.aspectratio_type = "aspectratio_custom"
             cam = Sketchup.active_model.active_view.camera
             view = Sketchup.active_model.active_view
@@ -258,7 +258,7 @@ class LuxrenderSceneSettingsEditor
 
 
         @scene_settings_dialog.add_action_callback("set_runtype") {|dialog, params|
-            puts params
+            #puts params
             @lrs.runluxrender = params
             Sketchup.write_default("SU2LUX", "runluxrender", params.unpack('H*')[0])
         }
@@ -274,7 +274,7 @@ class LuxrenderSceneSettingsEditor
 			puts "running focus tool from scene settings editor"
 			focusTest = FocusTool.new(@scene_id, @lrs)
 			Sketchup.active_model.select_tool(focusTest)
-			puts "done running focus tool"
+			#puts "done running focus tool"
 		}
         
         @scene_settings_dialog.add_action_callback("scene_setting_loaded"){|dialog,params|
@@ -293,7 +293,7 @@ class LuxrenderSceneSettingsEditor
         dialog = @scene_settings_dialog
         case @lrs.aspectratio_type
             when "aspectratio_sketchup_view"
-                puts "aspectratio sketchup view"
+                #puts "aspectratio sketchup view"
                 aspectratio = view.vpwidth.to_f/view.vpheight.to_f # get view proportion
                 if givenresolution=="fleximage_xresolution"
                     yres = (@lrs.fleximage_xresolution.to_i / aspectratio).round
@@ -309,7 +309,7 @@ class LuxrenderSceneSettingsEditor
                     dialog.execute_script(setxfield)
                 end
             when "aspectratio_custom"
-                puts "custom aspect ratio"
+                #puts "custom aspect ratio"
                 aspectratio = @lrs.aspectratio_numerator.to_f/@lrs.aspectratio_denominator.to_f
                 if givenresolution=="fleximage_xresolution"
                     yres = (@lrs.fleximage_xresolution.to_i * aspectratio).round
@@ -325,7 +325,7 @@ class LuxrenderSceneSettingsEditor
                     dialog.execute_script(setxfield)
                 end
             when "aspectratio_fixed"
-                puts "fixed aspect ratio"
+                #puts "fixed aspect ratio"
                 # get proportion
                 aspectratio = 1.0
                 if @lrs.aspectratio_fixed_orientation=="ratio_portrait"
@@ -349,9 +349,8 @@ class LuxrenderSceneSettingsEditor
                     dialog.execute_script(setxfield)
                 end
             when "aspectratio_free"
-                puts "free aspect ratio"
+                #puts "free aspect ratio"
                 cam.aspect_ratio = @lrs.fleximage_xresolution/@lrs.fleximage_yresolution
-            
         end
     end
 
@@ -415,13 +414,13 @@ class LuxrenderSceneSettingsEditor
             show_resolution_field = '$("#aspectratio_fixed").show();'
             @scene_settings_dialog.execute_script(show_resolution_field)
         end
-        puts "finished running sendDataFromSketchup (from settings editor)"
+        #puts "finished running sendDataFromSketchup (from settings editor)"
     end
     
     def setFixedResValue(proportion)
-        puts "UPDATING SETTINGS WINDOW RESOLUTION ASPECT RATIO TYPE"
+        #puts "UPDATING SETTINGS WINDOW RESOLUTION ASPECT RATIO TYPE"
         set_dropdown = '$("#aspectratio_type").val("' + proportion.to_s + '");'
-        puts set_dropdown
+        #puts set_dropdown
         @scene_settings_dialog.execute_script(set_dropdown)
     end
     

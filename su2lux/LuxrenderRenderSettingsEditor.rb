@@ -51,8 +51,8 @@ class LuxrenderRenderSettingsEditor
 				pair = params.split("=")
 				key = pair[0]		   
 				value = pair[1]
-                puts key
-                puts value
+                #puts key
+                #puts value
 				case key
                     when "renderpreset"
                         puts "render preset selected from dropdown"

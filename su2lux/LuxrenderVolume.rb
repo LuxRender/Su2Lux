@@ -56,7 +56,7 @@ class LuxrenderVolume
 		
 		else # create object based on existing data in attribute dictionary
 			@volumeEditor.addVolume(passedName, self) # add texture to collection in current texture editor
-			puts "getting dictionary object"
+			#puts "getting dictionary object"
 			@attributeDictionary.load_from_model(@name)
 			@volumeType = @attributeDictionary.get_attribute(@name, "volume_type")
 		end
@@ -82,8 +82,8 @@ class LuxrenderVolume
 	##
 
 	def addToGUI()
-		puts "adding volume to GUI:"
-		puts @name
+		#puts "adding volume to GUI:"
+		#puts @name
 		dropdown_add_interior = "$('#volume_interior').append( $('<option></option>').val('" + @name + "').html('" + @name + "'))"
 		dropdown_add_exterior = "$('#volume_exterior').append( $('<option></option>').val('" + @name + "').html('" + @name + "'))"
 		@materialEditor.material_editor_dialog.execute_script(dropdown_add_interior)
@@ -137,8 +137,8 @@ class LuxrenderVolume
 			formattedValuesHash[paramSet[0]] = formattedString
 			
 		end
-		puts "returning values in hash:"
-		puts formattedValuesHash
+		#puts "returning values in hash:"
+		#puts formattedValuesHash
 		return formattedValuesHash
 	end
 	

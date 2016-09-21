@@ -70,8 +70,7 @@ class LuxrenderMaterialEditor
 			lux_material = @current
 			parameters.each{ |k, v|
 				if (lux_material.respond_to?(k))
-					puts k # temp 2014
-                    puts "setting " + k.to_s + " to " + v.to_s + " for " + @current.to_s
+                    #puts "setting " + k.to_s + " to " + v.to_s + " for " + @current.to_s
 					method_name = k + "="
 					if (v.to_s.downcase == "true")
 						v = true
@@ -82,7 +81,7 @@ class LuxrenderMaterialEditor
 					lux_material.send(method_name, v) # updates values in material
 					case
 						when (k.match(/^kd_.$/) and !material.texture) # changing diffuse color, updating SketchUp material colour accordingly
-                            puts "updating diffuse color"
+                            #puts "updating diffuse color"
                             # puts "lux_material.color: ", lux_material.color # debugging
 							red = (lux_material['kd_R'].to_f * 255.0).to_i
                             green = (lux_material['kd_G'].to_f * 255.0).to_i
@@ -188,9 +187,9 @@ class LuxrenderMaterialEditor
 			end
 			
 			# reload existing material preview image
-			puts "attempting to reload material preview image"
+			#puts "attempting to reload material preview image"
 			load_preview_image()
-            puts @current.name
+            #puts @current.name
 			
 			# update material parameters
 			sendDataFromSketchup() # updates parameter values
@@ -237,7 +236,7 @@ class LuxrenderMaterialEditor
             
             # show proper auto alpha values
             if (@current.aa_texturetype=="imagealpha" || @current.aa_texturetype=="imagecolor")
-                puts "SHOWING AUTO ALPHA BUTTONS"
+                #puts "SHOWING AUTO ALPHA BUTTONS"
                 cmd = '$("#autoalpha_image_field").show()';
                 @material_editor_dialog.execute_script(cmd)
 #           else # sketchup texture
@@ -275,22 +274,22 @@ class LuxrenderMaterialEditor
 		}
 		
 		@color_picker.add_action_callback('colorfield_red_update') { |dialog, colorvalue|
-			puts "updating red for"
-			puts @lrs.colorpicker
+			#puts "updating red for"
+			#puts @lrs.colorpicker
 			@current.send(@lrs.send(@lrs.colorpicker)[0]+"=",colorvalue)
             update_swatches()
 		}
 		
 		@color_picker.add_action_callback('colorfield_green_update') { |dialog, colorvalue|
-			puts "updating green for"
-			puts @lrs.colorpicker
+			#puts "updating green for"
+			#puts @lrs.colorpicker
 			@current.send(@lrs.send(@lrs.colorpicker)[1]+"=",colorvalue)
             update_swatches()
 		}	
 		
 		@color_picker.add_action_callback('colorfield_blue_update') { |dialog, colorvalue|
-			puts "updating blue for"
-			puts @lrs.colorpicker
+			#puts "updating blue for"
+			#puts @lrs.colorpicker
 			@current.send(@lrs.send(@lrs.colorpicker)[2]+"=",colorvalue)
             update_swatches()
 		}
@@ -300,7 +299,7 @@ class LuxrenderMaterialEditor
             passedcolor="#000000" if passedcolor.length != 7 # color picker may return NaN when mouse is dragged outside window
             SU2LUX.dbg_p "passed color received"
 			@colorpicker_triggered = true
-            puts "picked color is ", passedcolor
+            #puts "picked color is ", passedcolor
             colorswatch = @lrs.colorpicker
 			rvalue = (passedcolor[1, 2].to_i(16).to_f*1000000/255.0).round/1000000.0 # ruby 1.8 doesn't support round(6)
             gvalue = (passedcolor[3, 2].to_i(16).to_f*1000000/255.0).round/1000000.0

@@ -38,9 +38,9 @@ class LuxrenderVolumeEditor
         end
 		
 		if(@lrs.volumeNames != nil)
-			puts "processing " + @lrs.volumeNames.size.to_s + " volumes"
+			#puts "processing " + @lrs.volumeNames.size.to_s + " volumes"
 			for volumeName in @lrs.volumeNames
-				puts "volume found in @lrs: " + volumeName
+				#puts "volume found in @lrs: " + volumeName
 				volume = LuxrenderVolume.new(false, self, @material_editor, @lrs, volumeName)
 			end	
 		end		
@@ -50,7 +50,7 @@ class LuxrenderVolumeEditor
 		setting_html_path = Sketchup.find_support_file("VolumeEditor.html", File.join("Plugins", SU2LUX::PLUGIN_FOLDER))
 		@volume_dialog.set_file(setting_html_path)
 		
-		puts "adding volumes to GUI"
+		#puts "adding volumes to GUI"
 		for volume in @volumeCollection.values
 			volume.addToGUI()
 		end		
@@ -61,7 +61,7 @@ class LuxrenderVolumeEditor
         color_picker_path = Sketchup.find_support_file("colorpicker.html", File.join("Plugins", "su2lux"))
         @color_picker.set_file(color_picker_path)
 		
-        puts "finished initializing volume editor"
+        #puts "finished initializing volume editor"
 
 	   # callbacks for javascript functions
 
@@ -122,7 +122,7 @@ class LuxrenderVolumeEditor
 		##
 		
 		@volume_dialog.add_action_callback('update_GUI') {|dialog, paramString|
-			puts "update_GUI callback"
+			#puts "update_GUI callback"
 			update_GUI()
 		}
 
@@ -131,7 +131,7 @@ class LuxrenderVolumeEditor
 		##
 		@volume_dialog.add_action_callback('set_param') {|dialog, paramString|
             SU2LUX.dbg_p "callback: set_param"
-			puts paramString # volumeName|parameterName|parameterValue
+			#puts paramString # volumeName|parameterName|parameterValue
 			params = paramString.split('|')
 			volObject = @volumeCollection[params[0]]
 			volObject.setValue(params[1],params[2])
@@ -142,11 +142,11 @@ class LuxrenderVolumeEditor
 		##
 		@volume_dialog.add_action_callback('update_volume_type') {|dialog, paramString|
             SU2LUX.dbg_p "callback: update volume type"
-			puts paramString # homogeneous|volume01
+			#puts paramString # homogeneous|volume01
 			
 			params = paramString.split('|')
 			volumeObject = @volumeCollection[params[1]]
-			puts "volumeObject is " + volumeObject.to_s
+			#puts "volumeObject is " + volumeObject.to_s
 			
 			# store texture type in material
 			puts "storing volume type"
@@ -159,7 +159,7 @@ class LuxrenderVolumeEditor
 		}
 
 		@volume_dialog.add_action_callback('display_volume') {|dialog, paramString|
-			puts "volume selected, displaying interface"
+			#puts "volume selected, displaying interface"
 			# get volume object
 			volumeObject = @volumeCollection[paramString]
 			# set as active volume
@@ -185,7 +185,7 @@ class LuxrenderVolumeEditor
         }
 		
 		@color_picker.add_action_callback('provide_color') { |dialog, passedcolor|
-			puts "volume editor callback passing colour to colour picker init_color command"		
+			#puts "volume editor callback passing colour to colour picker init_color command"		
 			if(@activeVolume)
 				updateColorPicker() # for Windows
 			end
@@ -195,7 +195,7 @@ class LuxrenderVolumeEditor
 		#	react to colour picker colour changes		
         ##
         @color_picker.add_action_callback('pass_color') { |dialog, passedColor| # passedcolor is in #ffffff form
-			puts "volume editor color picker callback: pass_color"
+			#puts "volume editor color picker callback: pass_color"
             passedColor="#000000" if passedColor.length != 7 # color picker may return NaN when mouse is dragged outside window
 			updateSwatch(passedColor)
 			
@@ -209,7 +209,7 @@ class LuxrenderVolumeEditor
         }
 		
 		@color_picker.add_action_callback('colorfield_red_update') { |dialog, colorValue|
-			puts "volume editor callback: updating red channel"
+			#puts "volume editor callback: updating red channel"
 			# get value from object, then reconstruct
 			channelColor = @activeVolume.getValue(@lrs.colorpicker_volume)
 			channelColor[0] = colorValue.to_f
@@ -218,7 +218,7 @@ class LuxrenderVolumeEditor
 		}
 		
 		@color_picker.add_action_callback('colorfield_green_update') { |dialog, colorValue|
-			puts "volume editor callback: updating green channel"
+			#puts "volume editor callback: updating green channel"
 			# get value from object, then reconstruct
 			channelColor = @activeVolume.getValue(@lrs.colorpicker_volume)
 			channelColor[1] = colorValue.to_f
@@ -227,7 +227,7 @@ class LuxrenderVolumeEditor
 		}	
 		
 		@color_picker.add_action_callback('colorfield_blue_update') { |dialog, colorValue|
-			puts "volume editor callback: updating blue channel"
+			#puts "volume editor callback: updating blue channel"
 			# get value from object, then reconstruct
 			channelColor = @activeVolume.getValue(@lrs.colorpicker_volume)
 			channelColor[2] = colorValue.to_f
@@ -240,18 +240,18 @@ class LuxrenderVolumeEditor
 
 	def update_GUI()
 		for volumeName in @volumeCollection.keys
-			puts "adding " + volumeName
+			#puts "adding " + volumeName
 			@volume_dialog.execute_script('addToVolumeList("' + volumeName + '")')
 		end
 		
 		if(@volumeCollection.keys.size > 0)
-			puts 'updating volume editor interface'
+			#puts 'updating volume editor interface'
 			# pick a volume object
 			displayVolumeName = @volumeCollection.keys[0]
 			displayVolumeObject = @volumeCollection[displayVolumeName]
 			displayVolumeType = displayVolumeObject.getValue("volume_type")
 			
-			puts displayVolumeType
+			#puts displayVolumeType
 			
 			# set object name in dropdown
 			@volume_dialog.execute_script('$("#volumes_in_model").val("' + displayVolumeName + '");')
@@ -279,8 +279,8 @@ class LuxrenderVolumeEditor
 	
 	
 	def toHex(listRGB)
-		puts "toHex in:"
-		puts listRGB
+		#puts "toHex in:"
+		#puts listRGB
 		rval = (listRGB[0]*255).to_i.to_s(16)
 		gval = (listRGB[1]*255).to_i.to_s(16)
 		bval = (listRGB[2]*255).to_i.to_s(16)
@@ -293,8 +293,8 @@ class LuxrenderVolumeEditor
 		if (bval.length == 1)
 			bval = "0" + bval
 		end
-		puts "toHex out:"
-		puts ("#" + rval + gval + bval)
+		#puts "toHex out:"
+		#puts ("#" + rval + gval + bval)
 		return ("#" + rval + gval + bval)
 	end
 
@@ -308,14 +308,14 @@ class LuxrenderVolumeEditor
 		varValues.each do |key, value|
 			# update parameter in interface using jQuery command
 			cmd = '$("#' + key + '").val("' + value[1].to_s + '")'
-			puts cmd
+			#puts cmd
 			@volume_dialog.execute_script(cmd)
 		end
 		
 		if(varValues["volume_type"][1] != "clear")
 			# set scattering swatch
 			@lrs.colorpicker_volume = "vol_scattering_swatch"
-			puts varValues
+			#puts varValues
 			swatchColor = varValues["vol_scattering_swatch"][1]
 			updateSwatch(toHex(swatchColor))
 		end
@@ -358,16 +358,16 @@ class LuxrenderVolumeEditor
 	end
 
 	def showVolumeDialog
-		puts "number of volumes in model: " + @volumeCollection.length.to_s
+		#puts "number of volumes in model: " + @volumeCollection.length.to_s
 		@volume_dialog.show{} # note: code inserted in the show block will run when the dialog is initialized
-		puts "number of volumes in model: " + @volumeCollection.length.to_s
+		#puts "number of volumes in model: " + @volumeCollection.length.to_s
 		# note: interface will be updated by code that is called when the volume editor html is loaded
 	end
 
 	def addVolume(name, volumeObject)
-		puts "ADDING VOLUME TO volumeCollection"
-		puts name
-		puts volumeObject
+		#puts "ADDING VOLUME TO volumeCollection"
+		#puts name
+		#puts volumeObject
 		@volumeCollection[name] = volumeObject
 	end
 	

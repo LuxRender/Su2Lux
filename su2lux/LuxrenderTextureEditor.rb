@@ -54,9 +54,9 @@ class LuxrenderTextureEditor
 			material = Sketchup.active_model.materials.current
 			lux_material = @current
 			SU2LUX.load_image("Open image", lux_material, data, @lux_parameter)
-			puts "compound name:"
-			puts @lux_parameter
-			puts data
+			#puts "compound name:"
+			#puts @lux_parameter
+			#puts data
 			@texture_data[data] = lux_material.send(@lux_parameter + '_' +  data)
 			updateSettingValue(data, @lux_parameter) # removed  + '_'
 			# UI.messagebox @texture_data[data]
@@ -70,7 +70,7 @@ class LuxrenderTextureEditor
 			puts "material_changed triggered"
             materials = Sketchup.active_model.materials
 			@current = self.find(material_name)
-			SU2LUX.dbg_p "texture editor reports that material has changed: #{materials.current.name}"
+			#SU2LUX.dbg_p "texture editor reports that material has changed: #{materials.current.name}"
 			if (material_name != materials.current.name)
 				if(materials[material_name] == nil)
 					puts "could not find LuxRender material named " + material_name

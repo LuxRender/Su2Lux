@@ -369,7 +369,7 @@ class LuxrenderSettings
 				return @attributedictionary.get_attribute("luxrender_settings", key, defaultValue)
 			end
 				
-			puts "creating methods to access and modify LuxRender settings"
+			#puts "creating methods to access and modify LuxRender settings"
 			   			
 			@@allDefaultSettings.each do |key, defaultValue|
 				# create getter methods to access any parameter; calling @lrs.someattribute will actually call @attributedictionary.get_attribute("luxrender_settings", someattribute, someattributesdefaultvalue)
@@ -392,7 +392,7 @@ class LuxrenderSettings
 		
 		#puts "intitialized settings, volumes:"
 		#puts self.volumeNames
-        puts "done initializing LuxRender settings"
+        #puts "done initializing LuxRender settings"
 	end #end initialize
 
 	def reset
