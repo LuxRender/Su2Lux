@@ -246,7 +246,9 @@ class LuxrenderProceduralTexture
 		return thisTexType
 	end
 	
-
+	def self.getTexChannels(texType)
+		return @@textureTypes[texType]
+	end
 	
 	def setTexChannel()
 		#thisDict = LuxrenderAttributeDictionary.returnDictionary(name)

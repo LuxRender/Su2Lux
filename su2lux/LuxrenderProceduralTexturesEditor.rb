@@ -286,7 +286,7 @@ class LuxrenderProceduralTexturesEditor
 		# remove all items from dropdown
 		@procedural_textures_dialog.execute_script('$("#procTexChannel").empty()');
 		# get available channel types for new type
-		availableChannels = @@textureTypes[texType]
+		availableChannels = LuxrenderProceduralTexture.getTexChannels(texType)
 		# add these channel types
 		availableChannels.each do |channelName|
 			cmd = '$("#procTexChannel").append( $("<option></option>").val("' + channelName + '").html("' + channelName + '"))'
