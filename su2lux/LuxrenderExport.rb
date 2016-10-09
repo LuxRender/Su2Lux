@@ -1200,8 +1200,8 @@ class LuxrenderExport
 		puts "gathering textures"
 		@material_editor.materials_skp_lux.each{|skp_mat, lux_mat|	
 			luxmat_file_paths += lux_mat.get_used_image_paths
-			if (lux_mat.uses_skp_texture)
-				#puts "texture found"
+			if (lux_mat.uses_skp_texture && skp_mat.texture != nil)
+				#puts "texture found"	
 				skpmat_with_used_texture << skp_mat
 			end
 		}
