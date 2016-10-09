@@ -97,12 +97,25 @@ class LuxrenderMaterialEditor
                     textype = k.dup
                     textype.slice!("_texturetype")
                     update_texture_name(lux_material, textype)
-                end
-                
-                
+                end 
 			}
-		}
+                
+			parameter_name = params.split('=')[0]
+			if(parameter_name.include? "_texturetype")
+				if (@lrs.proceduralTextureNames != nil && @lrs.proceduralTextureNames.size > 0)
+					# check material's procedural texture; if it doesn't have one, set it to the first texture in the list
+					procedural_texture_dropdown_name = parameter_name.sub("_texturetype", "") + "_imagemap_proctex"
+					if(@current[procedural_texture_dropdown_name] == nil || @current[procedural_texture_dropdown_name] == "")		
+					@current.send(procedural_texture_dropdown_name + "=", @lrs.proceduralTextureNames[0])
+				end
 				
+				# set right procedural texture in dropdown for active channel in material editor
+				cmd = "$('#procedural_texture_dropdown_name').val('" + @current[procedural_texture_dropdown_name] + "');"
+				@material_editor_dialog.execute_script(cmd)		
+				end
+			end
+		}
+		
 		@material_editor_dialog.add_action_callback("clear_IES") {|dialog, params|
 			puts "clear callback responding"
 			# set IES value 	
@@ -112,24 +125,24 @@ class LuxrenderMaterialEditor
             @material_editor_dialog.execute_script(cmd)				
 		}
 		
-		@material_editor_dialog.add_action_callback("set_procedural_texture"){|dialog, parameter_name|
-			# note: parameter_name contains name of "parent" dialog, e.g. "set_procedural_texture"
-			# if we have procedural textures, set dropdown to the right one
-			puts "set_procedural_texture callback"
-			if (@lrs.proceduralTextureNames != nil && @lrs.proceduralTextureNames.size > 0)
-				puts "set_procedural_texture: setting procedural texture"
-				# check material's procedural texture; if it doesn't have one, set it to the first texture in the list
-				procedural_texture_dropdown_name = parameter_name.sub("_texturetype", "") + "_imagemap_proctex"
-				if(@current[procedural_texture_dropdown_name] == nil || @current[procedural_texture_dropdown_name] == "")		
-					puts "set_procedural_texture: no previous texture set"
-					@current.send(procedural_texture_dropdown_name + "=", @lrs.proceduralTextureNames[0])
-				end
-				
-				# set right procedural texture in dropdown for active channel in material editor
-                cmd = "$('#procedural_texture_dropdown_name').val('" + @current[procedural_texture_dropdown_name] + "');"
-                @material_editor_dialog.execute_script(cmd)		
-			end
-		}
+		#@material_editor_dialog.add_action_callback("set_procedural_texture"){|dialog, parameter_name|
+		#	# note: parameter_name contains name of "parent" dialog, e.g. "set_procedural_texture"
+		#	# if we have procedural textures, set dropdown to the right one
+		#	puts "set_procedural_texture callback"
+		#	if (@lrs.proceduralTextureNames != nil && @lrs.proceduralTextureNames.size > 0)
+		#		puts "set_procedural_texture: setting procedural texture"
+		#		# check material's procedural texture; if it doesn't have one, set it to the first texture in the list
+		#		procedural_texture_dropdown_name = parameter_name.sub("_texturetype", "") + "_imagemap_proctex"
+		#		if(@current[procedural_texture_dropdown_name] == nil || @current[procedural_texture_dropdown_name] == "")		
+		#			puts "set_procedural_texture: no previous texture set"
+		#			@current.send(procedural_texture_dropdown_name + "=", @lrs.proceduralTextureNames[0])
+		#		end
+		#		
+		#		# set right procedural texture in dropdown for active channel in material editor
+        #	     cmd = "$('#procedural_texture_dropdown_name').val('" + @current[procedural_texture_dropdown_name] + "');"
+        #	     @material_editor_dialog.execute_script(cmd)		
+		#	end
+		#}
 	
 		@material_editor_dialog.add_action_callback("select_IES") {|dialog, params|
 			puts "select_IES callback responding"

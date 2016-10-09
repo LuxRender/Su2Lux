@@ -250,15 +250,12 @@ class LuxrenderProceduralTexture
 		return @@textureTypes[texType]
 	end
 	
+
+	
 	def setTexChannel()
-		#thisDict = LuxrenderAttributeDictionary.returnDictionary(name)
-		#thisTexName = thisDict["textureType"]
-		thisTexName = self.get_attribute(name, "textureType")
-		#thisDict["procTexChannel"] = @@textureTypes[thisTexName][0] 
+		thisTexName = @textureDictionary.get_attribute(name, "textureType")
 		self.setValue("procTexChannel", @@textureTypes[thisTexName][0])
-		
-		#puts "running setTexChannel, returning " + thisDict["procTexChannel"] # returns the texture channel
-		return thisDict["procTexChannel"]
+		return @@textureTypes[thisTexName][0]
 	end
 	
 

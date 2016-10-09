@@ -1845,7 +1845,7 @@ class LuxrenderExport
 				else
                     puts "export_texture: no texture file path found"
 					if(tex_channel == "kd")
-						following << "\t" + "\"color Kd\" [#{"%.6f" %(material.kd_R)} #{"%.6f" %(material.kd_G)} #{"%.6f" %(material.kd_B)}]" + "\n"
+						following << "\t" + "\"color Kd\" [#{"%.6f" %(lux_mat.kd_R)} #{"%.6f" %(lux_mat.kd_G)} #{"%.6f" %(lux_mat.kd_B)}]" + "\n"
 						return [before, after + following] # sketchup texture set in LuxRender material, but no texture found in SketchUp material
 					else
 						return [preceding, following]
@@ -2416,7 +2416,7 @@ class LuxrenderExport
                 following << "\t" + "\"string namedmaterial1\" [\"#{mixmat1}\"]" + "\n"
                 following << "\t" + "\"string namedmaterial2\" [\"#{mixmat2}\"]" + "\n"
 			when "procedural"
-				preceding, following = self.write_texture_reference(material, 'mx', 'float', "", "")
+				preceding, following = self.write_texture_reference(material, 'mx', 'float', "", "", tex_name)
                 following << "\t" + "\"string namedmaterial1\" [\"#{mixmat1}\"]" + "\n"
                 following << "\t" + "\"string namedmaterial2\" [\"#{mixmat2}\"]" + "\n"
 

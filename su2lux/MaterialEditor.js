@@ -25,12 +25,19 @@ function startactivemattype(){ // loaded on opening SketchUp on OS X, on showing
 
 function addToProcTextList(newName, channelType){
 	$("option[value='noProcText']").remove();
-	if(channelType == 'color'){
-		$('.proctex_dropdown_color').append( $('<option></option>').val(newName).html(newName));
-	} else if(channelType == 'float'){
-		$('.proctex_dropdown_float').append( $('<option></option>').val(newName).html(newName));
-	} else if(channelType == 'fresnel'){
-		$('.proctex_dropdown_fresnel').append( $('<option></option>').val(newName).html(newName));
+		// note: values are only added if they are not already present
+	if(channelType == 'color'){		
+		if ($(".proctex_dropdown_color option[value=" + newName + "]").length<1){
+			$('.proctex_dropdown_color').append( $('<option></option>').val(newName).html(newName));
+		}
+	}else if(channelType == 'float'){
+		if ($(".proctex_dropdown_float option[value=" + newName + "]").length<1){
+			$('.proctex_dropdown_float').append( $('<option></option>').val(newName).html(newName));
+		}
+	}else if(channelType == 'fresnel'){
+		if ($(".proctex_dropdown_fresnel option[value=" + newName + "]").length<1){
+			$('.proctex_dropdown_fresnel').append( $('<option></option>').val(newName).html(newName));
+		}
 	}
 }
 
@@ -222,16 +229,16 @@ $(document).ready(
             }
         )
 		
-		$("[id$=_texturetype]").change(
-			function(){
-				if(this.value == "procedural"){
-					// first, report dropdown name
-					//alert(this.id);
-					// if that works, call a method that in turn will set the relevant texture
-					window.location = 'skp:set_procedural_texture@' + this.id;
-				}
-			}
-		)
+		//$("[id$=_texturetype]").change(
+		//	function(){
+		//		if(this.value == "procedural"){
+		//			// first, report dropdown name
+		//			//alert(this.id);
+		//			// if that works, call a method that in turn will set the relevant texture
+		//			window.location = 'skp:set_procedural_texture@' + this.id;
+		//		}
+		//	}
+		//)
 		
 		$('select[id$="_imagemap_filtertype"]').change(
 			function()

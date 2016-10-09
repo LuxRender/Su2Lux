@@ -34,8 +34,8 @@ end
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.45rc3"
-    SU2LUX_DATE = "22 September 2016"
+    SU2LUX_VERSION = "0.45rc4"
+    SU2LUX_DATE = "2 October 2016"
 	DEBUG = true
 	PLUGIN_FOLDER = "su2lux"
     GEOMETRYFOLDER = "geometry"
@@ -1020,20 +1020,20 @@ class SU2LUX_model_observer < Sketchup::ModelObserver
 		puts 'SU2LUX observer catching onPostSaveModel event'
 		lrs = SU2LUX.get_lrs(Sketchup.active_model.definitions.entityID)
 		# after saving, check variable inf lrs; if true, update file path to reflect model name
-		if(lrs.synchronised_names)
-			# get file name, get export folder
-			puts 'updating lxs path'
-			old_lxs_name = lrs.export_file_path.chomp(".lxs")
-			old_folder_name = File.dirname(old_lxs_name)
-			old_file_name = File.basename(lrs.export_file_path).chomp(".lxs")
-			save_timer = UI.start_timer(0.1, false){ # onPostSaveModel only provides the old file name, so we have to wait and get the name from the active model
-				UI.stop_timer(save_timer)
-				skp_name = File.basename(model.path).chomp(".skp")
-				# combine and store as new export path
-				new_lxs_name = File.join(old_folder_name, skp_name) + '.lxs'
-				lrs.export_file_path = new_lxs_name	
-			}
-		end
+		#if(lrs.synchronised_names) # note: commented out, as it caused crashes on OS X
+		#	# get file name, get export folder
+		#	puts 'updating lxs path'
+		#	old_lxs_name = lrs.export_file_path.chomp(".lxs")
+		#	old_folder_name = File.dirname(old_lxs_name)
+		#	old_file_name = File.basename(lrs.export_file_path).chomp(".lxs")
+		#	save_timer = UI.start_timer(0.1, false){ # onPostSaveModel only provides the old file name, so we have to wait and get the name from the active model
+		#		UI.stop_timer(save_timer)
+		#		skp_name = File.basename(model.path).chomp(".skp")
+		#		# combine and store as new export path
+		#		new_lxs_name = File.join(old_folder_name, skp_name) + '.lxs'
+		#		lrs.export_file_path = new_lxs_name	
+		#	}
+		#end
 	end
 end
 
