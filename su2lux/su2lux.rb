@@ -34,8 +34,8 @@ end
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.45rc5"
-    SU2LUX_DATE = "9 October 2016"
+    SU2LUX_VERSION = "0.45rc6"
+    SU2LUX_DATE = "2 November 2016"
 	DEBUG = true
 	PLUGIN_FOLDER = "su2lux"
     GEOMETRYFOLDER = "geometry"
@@ -1218,17 +1218,7 @@ class SU2LUX_app_observer < Sketchup::AppObserver
 		
 		puts "onOpenModel creating procedural textures editor"
 		procEditor = SU2LUX.create_procedural_textures_editor(model_id, material_editor, lrs)
-		
-		# recreate procedural textures: for each of the textures, create procedural texture object
-        puts "onOpenModel processing procedural textures"
-		procTextureNames = lrs.proceduralTextureNames
-		puts "recreating procedural texture objects"
-		if(procTextureNames != nil)
-			for texName in procTextureNames
-				newTex = LuxrenderProceduralTexture.new(false, procEditor, lrs, nil, texName) # false: don't create from scratch; instead,
-				                                               # use existing texture data that is stored in dictionary
-			end
-		end
+		procEditor.load_textures_from_file()
 		if(procEditor.activeProcTex)
 			procEditor.updateGUI()
 		end
@@ -1503,6 +1493,24 @@ if( not file_loaded?(__FILE__))
         #luxmat.reset unless loaded
         material_editor.materials_skp_lux[mat] = luxmat
     end
+    
+    # todo: load procedural textures
+    
+    puts "creating procedural textures editor"
+    procEditor = SU2LUX.create_procedural_textures_editor(model_id, material_editor, lrs)
+    procEditor.load_textures_from_file()
+    if(procEditor.activeProcTex)
+		procEditor.updateGUI()
+	end
+    
+    
+    puts "creating volume editor"
+    SU2LUX.create_volume_editor(model_id, material_editor, lrs)
+    puts "creating lamp editor"
+    SU2LUX.create_lamp_editor(model_id, lrs)
+    
+    
+    
     material_editor.refresh
     puts "finished loading material settings"
 
@@ -1519,12 +1527,6 @@ if( not file_loaded?(__FILE__))
     SU2LUX.create_scene_settings_editor(model_id, lrs)
     puts "creating render settings editor"
     SU2LUX.create_render_settings_editor(model_id, lrs)
-    puts "creating procedural textures editor"
-    SU2LUX.create_procedural_textures_editor(model_id, material_editor, lrs)
-    puts "creating volume editor"
-    SU2LUX.create_volume_editor(model_id, material_editor, lrs)
-    puts "creating lamp editor"
-    SU2LUX.create_lamp_editor(model_id, lrs)
 	
     # dialog may not have fully loaded yet, therefore loading presets should happen later as reaction on DOM loaded
  

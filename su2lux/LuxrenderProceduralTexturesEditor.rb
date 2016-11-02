@@ -253,6 +253,19 @@ class LuxrenderProceduralTexturesEditor
     
 	end # END initialize
 
+
+
+	def load_textures_from_file()
+		puts "loading procedural textures from file"
+		procTextureNames = @lrs.proceduralTextureNames
+		if(@lrs.proceduralTextureNames != nil)
+			for texName in @lrs.proceduralTextureNames
+				newTex = LuxrenderProceduralTexture.new(false, self, @lrs, nil, texName)
+				 # first parameter (false): don't create from scratch; instead, use existing texture data that is stored in dictionary
+			end
+		end
+	end
+
 	def updateGUI()
 		puts "updating procedural texture interface"
 		puts @activeProcTex.name
