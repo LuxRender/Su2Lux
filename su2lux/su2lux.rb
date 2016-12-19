@@ -34,8 +34,8 @@ end
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.45rc6"
-    SU2LUX_DATE = "2 November 2016"
+    SU2LUX_VERSION = "0.45"
+    SU2LUX_DATE = "19 December 2016"
 	DEBUG = true
 	PLUGIN_FOLDER = "su2lux"
     GEOMETRYFOLDER = "geometry"
@@ -525,6 +525,16 @@ module SU2LUX
 		else # on OS X, all seems to be fine
 			return original_path
 		end
+	end
+	
+	##
+	#  convert single and double quotes to their equivalent html characters, so that strings can be safely passed to jQuery
+	##
+	
+	def SU2LUX.html_friendly(string)
+		convertedString = string.gsub(/'/, '&#39;') # single quote to &#39;
+		convertedString.gsub!(/"/, '&quot;')
+		return convertedString
 	end
 	
 	##

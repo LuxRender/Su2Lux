@@ -3,7 +3,7 @@
      require 'extensions.rb'
 
      su2lux_extension = SketchupExtension.new('SU2LUX', 'su2lux/su2lux.rb')
-     su2lux_extension.version = '0.45rc6'
+     su2lux_extension.version = '0.45'
      su2lux_extension.description = 'Exporter to LuxRender'
 	 su2lux_extension.copyright = 'GPL2, free software'
 	 su2lux_extension.creator = 'the LuxRender team'

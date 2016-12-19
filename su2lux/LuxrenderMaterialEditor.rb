@@ -956,16 +956,10 @@ class LuxrenderMaterialEditor
         end
                            
 		cmd = "$('#" + dropdownname +"').append( $('"
-		# puts "material list command: ", cmd
 		materials = Sketchup.active_model.materials.sort
 		for mat in materials
-            #puts "set_material_list running"
-            #puts mat.name
 			luxrender_mat = @materials_skp_lux[mat]
-            #puts luxrender_mat
-			# puts "adding luxrender material to material list: ", luxrender_mat
-			#cmd = cmd + "<option value=\"#{luxrender_mat.original_name}\">#{luxrender_mat.name}</option>"
-			cmd = cmd + "<option value=\"#{luxrender_mat.html_name}\">#{luxrender_mat.html_name}</option>"
+			cmd = cmd + "<option value=\"" + SU2LUX.html_friendly(mat.name) + "\">" + SU2LUX.html_friendly(mat.name) + "</option>" # <option value="matname">matname</option>
 		end
 		cmd = cmd + "'));"
 		@material_editor_dialog.execute_script(cmd)
