@@ -34,8 +34,8 @@ end
 module SU2LUX
 
     # Module constants
-    SU2LUX_VERSION = "0.45"
-    SU2LUX_DATE = "19 December 2016"
+    SU2LUX_VERSION = "0.45a"
+    SU2LUX_DATE = "6 January 2016"
 	DEBUG = true
 	PLUGIN_FOLDER = "su2lux"
     GEOMETRYFOLDER = "geometry"

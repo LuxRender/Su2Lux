@@ -1016,7 +1016,7 @@ class LuxrenderExport
 				matname = skp_mat_name + ((dist_index == 0 || dist_index == nil) ? "" : SU2LUX::SUFFIX_DIST + dist_index.to_s) # @material_editor.materials_skp_lux[skp_mat].name
 				ply_path = File.join(relative_ply_folder, matname + '.ply')
 				lux_mat = nil
-				if(skp_mat != "SU2LUX_no_material")
+				if(skp_mat != "SU2LUX_no_material" && lux_mat.type != 'portal')
 					geometry_file.puts '  NamedMaterial "' + SU2LUX.sanitize_path(matname) + '"' 			# NamedMaterial "materialname"
 					lux_mat = @material_editor.materials_skp_lux[skp_mat]
 					if(lux_mat.type == 'light')
@@ -1027,7 +1027,13 @@ class LuxrenderExport
 						}					
 					end
 				end
-				geometry_file.puts '  Shape "plymesh"' 							#   Shape "plymesh"
+				
+				if(lux_mat != nil && lux_mat.type == 'portal')
+					geometry_file.puts '  PortalShape "plymesh"' 					#   PortalShape "plymesh"
+				else
+					geometry_file.puts '  Shape "plymesh"' 							#   Shape "plymesh"
+				end
+				
 				geometry_file.puts '  "string filename" ["' +  ply_path + '"]'	#	"string filename" ["Untitled_luxdata/geometry/1_boxes.ply"]
 				
 				# write displacement
@@ -1128,8 +1134,14 @@ class LuxrenderExport
 						}
 					end
 					this_mat_name = SU2LUX.sanitize_path(luxmat.name) + ((dist_index == 0 || dist_index == nil) ? "" : SU2LUX::SUFFIX_DIST + dist_index.to_s)
-					compdef_lines << '    NamedMaterial "' + this_mat_name + '"'
-					compdef_lines << '    Shape "plymesh"'						#   Shape "plymesh"
+					
+					if(luxmat.type == 'portal')
+						compdef_lines << '    PortalShape "plymesh"'						#   PortalShape "plymesh"
+					else
+						compdef_lines << '    NamedMaterial "' + this_mat_name + '"'
+						compdef_lines << '    Shape "plymesh"'						#   Shape "plymesh"
+					end
+					
 					compdef_lines << '    "string filename" ["' +  ply_path + '"]' #	"string filename" ["Untitled_luxdata/geometry/1_boxes.ply"]
 									# write displacement
 					if(luxmat != nil)
