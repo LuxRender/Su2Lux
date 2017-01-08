@@ -1016,9 +1016,11 @@ class LuxrenderExport
 				matname = skp_mat_name + ((dist_index == 0 || dist_index == nil) ? "" : SU2LUX::SUFFIX_DIST + dist_index.to_s) # @material_editor.materials_skp_lux[skp_mat].name
 				ply_path = File.join(relative_ply_folder, matname + '.ply')
 				lux_mat = nil
-				if(skp_mat != "SU2LUX_no_material" && lux_mat.type != 'portal')
-					geometry_file.puts '  NamedMaterial "' + SU2LUX.sanitize_path(matname) + '"' 			# NamedMaterial "materialname"
+				if(skp_mat != "SU2LUX_no_material")
 					lux_mat = @material_editor.materials_skp_lux[skp_mat]
+					if(lux_mat.type != 'portal')
+						geometry_file.puts '  NamedMaterial "' + SU2LUX.sanitize_path(matname) + '"' 			# NamedMaterial "materialname"
+					end
 					if(lux_mat.type == 'light')
 						geometry_file.puts '  LightGroup "' + matname + '"'
 						light_def_lines = output_light_definition(lux_mat, matname)
