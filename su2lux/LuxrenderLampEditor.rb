@@ -41,6 +41,7 @@ class LuxrenderLampEditor
 		
 		@lamp_dialog = UI::WebDialog.new(windowname, true, "LuxrenderLampEditor", 450, 600, 10, 10, true)
         @lamp_dialog.max_width = 700
+        @lamp_dialog.max_height = 3000
 		setting_html_path = Sketchup.find_support_file("LampEditor.html" , File.join("Plugins", SU2LUX::PLUGIN_FOLDER))
 		@lamp_dialog.set_file(setting_html_path)
 		

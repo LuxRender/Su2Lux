@@ -47,6 +47,7 @@ class LuxrenderVolumeEditor
 		
 		@volume_dialog = UI::WebDialog.new(windowname, true, "LuxrenderVolumeEditor", 450, 600, 10, 10, true)
         @volume_dialog.max_width = 700
+        @volume_dialog.max_height = 3000
 		setting_html_path = Sketchup.find_support_file("VolumeEditor.html", File.join("Plugins", SU2LUX::PLUGIN_FOLDER))
 		@volume_dialog.set_file(setting_html_path)
 		

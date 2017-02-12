@@ -40,6 +40,7 @@ class LuxrenderMaterialEditor
 		@material_editor_dialog = UI::WebDialog.new(windowname, true, "LuxrenderMaterialEditor", 424, 700, 960, 10, true)
 		material_editor_dialog_path = Sketchup.find_support_file("materialeditor.html", File.join("Plugins", "su2lux"))
 		@material_editor_dialog.max_width = 800
+        @material_editor_dialog.max_height = 3000
 		@material_editor_dialog.set_file(material_editor_dialog_path)
 	    @collectedmixmaterials = []
         @collectedmixmaterials_i = 0
